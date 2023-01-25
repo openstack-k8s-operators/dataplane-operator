@@ -1,0 +1,22 @@
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackDataPlaneRole
+metadata:
+  name: openstackdataplanerole-sample
+spec:
+  dataPlaneNodes:
+    - name: openstackdataplanenode-sample
+      node:
+        hostName: openstackdataplanenode-sample.localdomain
+        networks:
+          - network: ctlplane
+            fixedIP: 192.168.122.18
+        ansibleHost: 192.168.122.18
+    - name: openstackdataplanenode-sample-from
+      nodeFrom: openstackdataplanenode-sample-from
+  nodeTemplate:
+    networkConfig:
+      template: templates/net_config_bridge.j2
+    managed: false
+    managementNetwork: ctlplane
+    ansibleUser: root
+    ansiblePort: 22

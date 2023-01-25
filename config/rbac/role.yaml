@@ -1,0 +1,85 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplanenodes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplanenodes/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplanenodes/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplaneroles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplaneroles/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplaneroles/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplanes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplanes/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplanes/status
+  verbs:
+  - get
+  - patch
+  - update

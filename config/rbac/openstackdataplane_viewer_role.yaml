@@ -1,0 +1,20 @@
+# permissions for end users to view openstackdataplanes.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: openstackdataplane-viewer-role
+rules:
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplanes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackdataplanes/status
+  verbs:
+  - get
