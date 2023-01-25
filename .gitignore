@@ -8,6 +8,10 @@
 bin
 testbin/*
 
+bundle/*
+bundle.Dockerfile
+custom-bundle.Dockerfile.pinned
+
 # Test binary, build with `go test -c`
 *.test
 
@@ -23,3 +27,10 @@ testbin/*
 *.swp
 *.swo
 *~
+
+# Common CI tools repository
+CI_TOOLS_REPO
+
+# generated workspace file
+go.work
+go.work.sum
