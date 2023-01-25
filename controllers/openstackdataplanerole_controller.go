@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -49,7 +50,21 @@ type OpenStackDataPlaneRoleReconciler struct {
 func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	// Fetch the OpenStackDataPlaneRole instance
+	instance := &corev1beta1.OpenStackDataPlaneRole{}
+	err := r.Client.Get(ctx, req.NamespacedName, instance)
+	if err != nil {
+		if k8s_errors.IsNotFound(err) {
+			// Request object not found, could have been deleted after reconcile request.
+			// Owned objects are automatically garbage collected.
+			// For additional cleanup logic use finalizers. Return and don't requeue.
+			return ctrl.Result{}, nil
+		}
+		// Error reading the object - requeue the request.
+		return ctrl.Result{}, err
+	}
+
+	r.ReconcileNodes(ctx, instance)
 
 	return ctrl.Result{}, nil
 }
@@ -59,4 +74,12 @@ func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) er
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&corev1beta1.OpenStackDataPlaneRole{}).
 		Complete(r)
+}
+
+func (r *OpenStackDataPlaneRoleReconciler) ReconcileNodes(ctx context.Context, instance *corev1beta1.OpenStackDataPlaneRole) error {
+	// loop over r.Spec.DataPlaneNodes:
+	//   for each node:
+	//     (1) complete node.Spec based r.Spec.nodeTemplate, and values set on the
+	//         node (values on the node take precedence over those from the template)
+	//     (2) Create a CR of OpenStackDataPlaneNode from the node
 }
