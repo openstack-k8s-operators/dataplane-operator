@@ -82,4 +82,6 @@ func (r *OpenStackDataPlaneRoleReconciler) ReconcileNodes(ctx context.Context, i
 	//     (1) complete node.Spec based r.Spec.nodeTemplate, and values set on the
 	//         node (values on the node take precedence over those from the template)
 	//     (2) Create a CR of OpenStackDataPlaneNode from the node
+
+	return nil
 }
