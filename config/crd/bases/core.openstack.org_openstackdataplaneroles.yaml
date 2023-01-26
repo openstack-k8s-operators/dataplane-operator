@@ -39,6 +39,8 @@ spec:
               dataPlaneNodes:
                 description: DataPlaneNodes - List of nodes
                 items:
+                  description: DataPlaneNodeSection is a specification of the data
+                    plane node attributes
                   properties:
                     node:
                       description: Node - node attributes specific to this node
@@ -76,6 +78,8 @@ spec:
                         networks:
                           description: Networks - Instance networks
                           items:
+                            description: NetworksSection is a specification of the
+                              network attributes
                             properties:
                               fixedIP:
                                 description: FixedIP - Specific IP address to use
@@ -129,6 +133,8 @@ spec:
                   networks:
                     description: Networks - Instance networks
                     items:
+                      description: NetworksSection is a specification of the network
+                        attributes
                       properties:
                         fixedIP:
                           description: FixedIP - Specific IP address to use for this

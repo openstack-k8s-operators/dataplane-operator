@@ -32,6 +32,7 @@ type OpenStackDataPlaneNodeSpec struct {
 	Role string `json:"templateRef,omitempty"`
 }
 
+// NodeSection is a specification of the node attributes
 type NodeSection struct {
 
 	// +kubebuilder:validation:Optional
@@ -69,6 +70,7 @@ type NodeSection struct {
 	AnsiblePort int `json:"ansiblePort,omitempty"`
 }
 
+// NetworkConfigSection is a specification of the Network configuration details
 type NetworkConfigSection struct {
 
 	// +kubebuilder:validation:Optional
@@ -78,6 +80,7 @@ type NetworkConfigSection struct {
 	Template string `json:"template,omitempty"`
 }
 
+// NetworksSection is a specification of the network attributes
 type NetworksSection struct {
 
 	// +kubebuilder:validation:Optional

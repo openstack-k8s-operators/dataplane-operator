@@ -86,7 +86,11 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
-	r.ConfigureNetwork(ctx, instance)
+	err = r.ConfigureNetwork(ctx, instance)
+	if err != nil {
+		r.Log.Error(err, fmt.Sprintf("Unable to configure network for %s", instance.Name))
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }
@@ -98,33 +102,39 @@ func (r *OpenStackDataPlaneNodeReconciler) SetupWithManager(mgr ctrl.Manager) er
 		Complete(r)
 }
 
+// Provision the data plane node
 func (r *OpenStackDataPlaneNodeReconciler) Provision(ctx context.Context, instance *corev1beta1.OpenStackDataPlaneNode) error {
 	return nil
 }
 
+// Inventory struct
+// TODO: make use of the struct below
+//
+//nolint:unused
 type Inventory struct {
 	all struct {
 		hosts struct {
 			host struct {
-				host_var struct {
-					host_var_value string
+				hostVar struct {
+					hostVarValue string
 				}
 			}
 		}
 	}
 }
 
+// GenerateInventory yields a parsed Inventory
 func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context, instance *corev1beta1.OpenStackDataPlaneNode) error {
 	var err error
 
 	inventory := make(map[string]map[string]map[string]map[string]string)
 	all := make(map[string]map[string]map[string]string)
 	host := make(map[string]map[string]string)
-	host_vars := make(map[string]string)
-	host_vars["ansible_host"] = instance.Spec.Node.HostName
-	host_vars["ansible_user"] = instance.Spec.Node.AnsibleUser
-	host_vars["ansible_port"] = strconv.Itoa(instance.Spec.Node.AnsiblePort)
-	host[instance.Name] = host_vars
+	hostVars := make(map[string]string)
+	hostVars["ansible_host"] = instance.Spec.Node.HostName
+	hostVars["ansible_user"] = instance.Spec.Node.AnsibleUser
+	hostVars["ansible_port"] = strconv.Itoa(instance.Spec.Node.AnsiblePort)
+	host[instance.Name] = hostVars
 	all["hosts"] = host
 	inventory["all"] = all
 
@@ -161,6 +171,7 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 	return nil
 }
 
+// ConfigureNetwork ensures the node network config
 func (r *OpenStackDataPlaneNodeReconciler) ConfigureNetwork(ctx context.Context, instance *corev1beta1.OpenStackDataPlaneNode) error {
 
 	return nil

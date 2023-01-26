@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -25,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/go-logr/logr"
 	corev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 )
 
@@ -32,6 +34,7 @@ import (
 type OpenStackDataPlaneRoleReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
+	Log    logr.Logger
 }
 
 //+kubebuilder:rbac:groups=core.openstack.org,resources=openstackdataplaneroles,verbs=get;list;watch;create;update;patch;delete
@@ -64,7 +67,11 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
-	r.ReconcileNodes(ctx, instance)
+	err = r.ReconcileNodes(ctx, instance)
+	if err != nil {
+		r.Log.Error(err, fmt.Sprintf("Unable to reconcile nodes for %s", instance.Name))
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }
@@ -76,6 +83,7 @@ func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) er
 		Complete(r)
 }
 
+// ReconcileNodes ensure the desired state for the nodes
 func (r *OpenStackDataPlaneRoleReconciler) ReconcileNodes(ctx context.Context, instance *corev1beta1.OpenStackDataPlaneRole) error {
 	// loop over r.Spec.DataPlaneNodes:
 	//   for each node:
