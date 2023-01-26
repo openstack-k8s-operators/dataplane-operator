@@ -11,7 +11,7 @@
 
 #### DataPlaneNodeSection
 
-
+DataPlaneNodeSection is a specification of the data plane node attributes
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |

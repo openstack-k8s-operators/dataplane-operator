@@ -72,6 +72,8 @@ spec:
                   networks:
                     description: Networks - Instance networks
                     items:
+                      description: NetworksSection is a specification of the network
+                        attributes
                       properties:
                         fixedIP:
                           description: FixedIP - Specific IP address to use for this

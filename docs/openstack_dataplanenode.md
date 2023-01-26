@@ -13,7 +13,7 @@
 
 #### NetworkConfigSection
 
-
+NetworkConfigSection is a specification of the Network configuration details
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
@@ -23,7 +23,7 @@
 
 #### NetworksSection
 
-
+NetworksSection is a specification of the network attributes
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
@@ -34,7 +34,7 @@
 
 #### NodeSection
 
-
+NodeSection is a specification of the node attributes
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |

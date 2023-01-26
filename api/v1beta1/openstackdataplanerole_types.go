@@ -34,6 +34,7 @@ type OpenStackDataPlaneRoleSpec struct {
 	NodeTemplate NodeSection `json:"nodeTemplate,omitempty"`
 }
 
+// DataPlaneNodeSection is a specification of the data plane node attributes
 type DataPlaneNodeSection struct {
 	// +kubebuilder:validation:Optional
 	// Node - node attributes specific to this node
