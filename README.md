@@ -1,5 +1,45 @@
 # dataplane-operator
-// TODO(user): Add simple overview of use/purpose
+The dataplane-operator automates the deployment of an OpenStack dataplane.
+
+---
+**NOTE**
+
+The OpenStackDataPlane CRD/controller will eventually be moved to
+[openstack-operator](https://github.com/openstack-k8s-operator/openstack-operator).
+The move is so that openstack-operator, as the umbrella operator, remains the
+single managing operator and UX for a complete OpenStack deployment
+(control plane and data plane).
+
+---
+
+The dataplane-operator exposes the concepts of data plane role and nodes. These
+are represented as CRD's within the operator:
+
+* [OpenStackDataPlaneRole](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/core.openstack.org_openstackdataplaneroles.yaml)
+* [OpenStackDataPlaneNode](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/core.openstack.org_openstackdataplanenodes.yaml)
+
+The OpenStackDataPlaneRole CRD provides for a logical grouping of nodes of a
+similar type within a role.  Similarities within a role are defined by the
+user, and could be of a small scope (ansible port), or a large scope (same
+network config, nova config, provisioning config, etc).
+
+A role also provides for an inheritance model of node attributes. Attributes on
+the role will automatically be inherited by the nodes on that role. Nodes can
+also set their own attributes, which will override the inherited values from
+the role.
+
+The OpenStackDataPlaneRole controller creates and updates a node CR for each
+node in that role. It also provides synchronization points as its nodes are
+deployed.
+
+The OpenStackDataPlaneNode CRD and controller encapsulates all the provisioning
+and deployment logic for a single node. The OpenStackDataPlaneNode controller
+operates on a single node CR, and manages that node in isolation, performing
+all the necessary baremetal provisioning and software deployment/configuration
+on that node.
+
+The OpenStackDataPlane CRD and controller orchestrates deploying roles, and
+provides synchronization points between role deployment.
 
 ## Description
 // TODO(user): An in-depth paragraph about your project and overview of use
