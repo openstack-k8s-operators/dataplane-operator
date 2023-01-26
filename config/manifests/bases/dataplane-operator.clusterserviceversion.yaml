@@ -1,0 +1,60 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: dataplane-operator.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: OpenStackDataPlaneNode is the Schema for the openstackdataplanenodes
+        API
+      displayName: Open Stack Data Plane Node
+      kind: OpenStackDataPlaneNode
+      name: openstackdataplanenodes.core.openstack.org
+      version: v1beta1
+    - description: OpenStackDataPlaneRole is the Schema for the openstackdataplaneroles
+        API
+      displayName: Open Stack Data Plane Role
+      kind: OpenStackDataPlaneRole
+      name: openstackdataplaneroles.core.openstack.org
+      version: v1beta1
+    - description: OpenStackDataPlane is the Schema for the openstackdataplanes API
+      displayName: Open Stack Data Plane
+      kind: OpenStackDataPlane
+      name: openstackdataplanes.core.openstack.org
+      version: v1beta1
+  description: The OpenStack DataPlane Operator
+  displayName: OpenStack DataPlane Operator
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - openstack
+  - dataplane
+  links:
+  - name: Dataplane Operator
+    url: https://openstack-k8s-operators.github.io/dataplane-operator
+  maintainers:
+  - email: rhos-upgrades@redhat.com
+    name: RHOS Uprades
+  maturity: alpha
+  provider:
+    name: rhosp
+  version: 0.0.0
