@@ -14,18 +14,18 @@ spec:
         API
       displayName: Open Stack Data Plane Node
       kind: OpenStackDataPlaneNode
-      name: openstackdataplanenodes.core.openstack.org
+      name: openstackdataplanenodes.dataplane.openstack.org
       version: v1beta1
     - description: OpenStackDataPlaneRole is the Schema for the openstackdataplaneroles
         API
       displayName: Open Stack Data Plane Role
       kind: OpenStackDataPlaneRole
-      name: openstackdataplaneroles.core.openstack.org
+      name: openstackdataplaneroles.dataplane.openstack.org
       version: v1beta1
     - description: OpenStackDataPlane is the Schema for the openstackdataplanes API
       displayName: Open Stack Data Plane
       kind: OpenStackDataPlane
-      name: openstackdataplanes.core.openstack.org
+      name: openstackdataplanes.dataplane.openstack.org
       version: v1beta1
   description: The OpenStack DataPlane Operator
   displayName: OpenStack DataPlane Operator

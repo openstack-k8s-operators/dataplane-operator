@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	corev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 )
 
 // OpenStackDataPlaneNodeReconciler reconciles a OpenStackDataPlaneNode object
@@ -42,9 +42,9 @@ type OpenStackDataPlaneNodeReconciler struct {
 	Log    logr.Logger
 }
 
-//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackdataplanenodes,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackdataplanenodes/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackdataplanenodes/finalizers,verbs=update
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodes,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodes/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodes/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -59,7 +59,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	_ = log.FromContext(ctx)
 
 	// Fetch the OpenStackDataPlaneNode instance
-	instance := &corev1beta1.OpenStackDataPlaneNode{}
+	instance := &dataplanev1beta1.OpenStackDataPlaneNode{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
@@ -98,12 +98,12 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneNodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&corev1beta1.OpenStackDataPlaneNode{}).
+		For(&dataplanev1beta1.OpenStackDataPlaneNode{}).
 		Complete(r)
 }
 
 // Provision the data plane node
-func (r *OpenStackDataPlaneNodeReconciler) Provision(ctx context.Context, instance *corev1beta1.OpenStackDataPlaneNode) error {
+func (r *OpenStackDataPlaneNodeReconciler) Provision(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode) error {
 	return nil
 }
 
@@ -124,7 +124,7 @@ type Inventory struct {
 }
 
 // GenerateInventory yields a parsed Inventory
-func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context, instance *corev1beta1.OpenStackDataPlaneNode) error {
+func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode) error {
 	var err error
 
 	inventory := make(map[string]map[string]map[string]map[string]string)
@@ -172,7 +172,7 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 }
 
 // ConfigureNetwork ensures the node network config
-func (r *OpenStackDataPlaneNodeReconciler) ConfigureNetwork(ctx context.Context, instance *corev1beta1.OpenStackDataPlaneNode) error {
+func (r *OpenStackDataPlaneNodeReconciler) ConfigureNetwork(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode) error {
 
 	return nil
 }

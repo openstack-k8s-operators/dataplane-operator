@@ -5,9 +5,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
-  name: openstackdataplanenodes.core.openstack.org
+  name: openstackdataplanenodes.dataplane.openstack.org
 spec:
-  group: core.openstack.org
+  group: dataplane.openstack.org
   names:
     kind: OpenStackDataPlaneNode
     listKind: OpenStackDataPlaneNodeList

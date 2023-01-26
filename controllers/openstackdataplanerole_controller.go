@@ -27,7 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
-	corev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 )
 
 // OpenStackDataPlaneRoleReconciler reconciles a OpenStackDataPlaneRole object
@@ -37,9 +37,9 @@ type OpenStackDataPlaneRoleReconciler struct {
 	Log    logr.Logger
 }
 
-//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackdataplaneroles,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackdataplaneroles/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackdataplaneroles/finalizers,verbs=update
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneroles,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneroles/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneroles/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -54,7 +54,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	_ = log.FromContext(ctx)
 
 	// Fetch the OpenStackDataPlaneRole instance
-	instance := &corev1beta1.OpenStackDataPlaneRole{}
+	instance := &dataplanev1beta1.OpenStackDataPlaneRole{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
@@ -79,12 +79,12 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&corev1beta1.OpenStackDataPlaneRole{}).
+		For(&dataplanev1beta1.OpenStackDataPlaneRole{}).
 		Complete(r)
 }
 
 // ReconcileNodes ensure the desired state for the nodes
-func (r *OpenStackDataPlaneRoleReconciler) ReconcileNodes(ctx context.Context, instance *corev1beta1.OpenStackDataPlaneRole) error {
+func (r *OpenStackDataPlaneRoleReconciler) ReconcileNodes(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneRole) error {
 	// loop over r.Spec.DataPlaneNodes:
 	//   for each node:
 	//     (1) complete node.Spec based r.Spec.nodeTemplate, and values set on the

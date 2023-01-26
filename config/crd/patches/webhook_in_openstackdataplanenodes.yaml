@@ -2,7 +2,7 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: openstackdataplanenodes.core.openstack.org
+  name: openstackdataplanenodes.dataplane.openstack.org
 spec:
   conversion:
     strategy: Webhook

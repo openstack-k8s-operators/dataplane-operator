@@ -1,4 +1,4 @@
-apiVersion: core.openstack.org/v1beta1
+apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneRole
 metadata:
   name: openstackdataplanerole-sample

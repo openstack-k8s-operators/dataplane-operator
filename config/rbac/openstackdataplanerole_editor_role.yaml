@@ -5,7 +5,7 @@ metadata:
   name: openstackdataplanerole-editor-role
 rules:
 - apiGroups:
-  - core.openstack.org
+  - dataplane.openstack.org
   resources:
   - openstackdataplaneroles
   verbs:
@@ -17,7 +17,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - core.openstack.org
+  - dataplane.openstack.org
   resources:
   - openstackdataplaneroles/status
   verbs:

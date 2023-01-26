@@ -5,7 +5,7 @@ metadata:
   name: openstackdataplanerole-viewer-role
 rules:
 - apiGroups:
-  - core.openstack.org
+  - dataplane.openstack.org
   resources:
   - openstackdataplaneroles
   verbs:
@@ -13,7 +13,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - core.openstack.org
+  - dataplane.openstack.org
   resources:
   - openstackdataplaneroles/status
   verbs:

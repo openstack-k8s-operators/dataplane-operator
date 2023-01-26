@@ -6,7 +6,7 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - core.openstack.org
+  - dataplane.openstack.org
   resources:
   - openstackdataplanenodes
   verbs:
@@ -18,13 +18,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - core.openstack.org
+  - dataplane.openstack.org
   resources:
   - openstackdataplanenodes/finalizers
   verbs:
   - update
 - apiGroups:
-  - core.openstack.org
+  - dataplane.openstack.org
   resources:
   - openstackdataplanenodes/status
   verbs:
@@ -32,7 +32,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - core.openstack.org
+  - dataplane.openstack.org
   resources:
   - openstackdataplaneroles
   verbs:
@@ -44,13 +44,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - core.openstack.org
+  - dataplane.openstack.org
   resources:
   - openstackdataplaneroles/finalizers
   verbs:
   - update
 - apiGroups:
-  - core.openstack.org
+  - dataplane.openstack.org
   resources:
   - openstackdataplaneroles/status
   verbs:
@@ -58,7 +58,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - core.openstack.org
+  - dataplane.openstack.org
   resources:
   - openstackdataplanes
   verbs:
@@ -70,13 +70,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - core.openstack.org
+  - dataplane.openstack.org
   resources:
   - openstackdataplanes/finalizers
   verbs:
   - update
 - apiGroups:
-  - core.openstack.org
+  - dataplane.openstack.org
   resources:
   - openstackdataplanes/status
   verbs:
