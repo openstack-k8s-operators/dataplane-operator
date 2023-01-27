@@ -199,31 +199,3 @@ jobs:
         registry:  ${{ env.imageregistry }}/${{ env.imagenamespace }}
         username: ${{ secrets.QUAY_USERNAME }}
         password: ${{ secrets.QUAY_PASSWORD }}
-
-
-  build-dataplane-runner:
-    name: Build dataplane-runner image using buildah
-    runs-on: ubuntu-latest
-    needs: [check-secrets]
-    if: needs.check-secrets.outputs.have-secrets == 'true'
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Get branch name
-      id: branch-name
-      uses: tj-actions/branch-names@v5
-
-    - name: Set latest tag for non main branch
-      if: "${{ steps.branch-name.outputs.current_branch != 'main' }}"
-      run: |
-        echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
-
-    - name: Push dataplane-runner To ${{ env.imageregistry }}
-      uses: redhat-actions/push-to-registry@v2
-      with:
-        image: ${{ steps.build-dataplane-runner.outputs.image }}
-        tags: ${{ steps.build-dataplane-runner.outputs.tags }}
-        registry: ${{ env.imageregistry }}/${{ env.imagenamespace }}
-        username: ${{ secrets.QUAY_USERNAME }}
-        password: ${{ secrets.QUAY_PASSWORD }}
