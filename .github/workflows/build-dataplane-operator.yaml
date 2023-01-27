@@ -1,6 +1,7 @@
 name: OpenStackDataPlane Operator image builder
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - '*'
