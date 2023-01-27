@@ -18,80 +18,53 @@ spec:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: OpenStackDataPlaneNode is the Schema for the openstackdataplanenodes
-          API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
           spec:
-            description: OpenStackDataPlaneNodeSpec defines the desired state of OpenStackDataPlaneNode
             properties:
               node:
-                description: Node - node attributes specific to this node
                 properties:
                   ansibleHost:
-                    description: AnsibleHost SSH host for Ansible connection
                     type: string
                   ansiblePort:
-                    description: AnsiblePort SSH port for Ansible connection
                     type: integer
                   ansibleUser:
-                    description: AnsibleUser SSH user for Ansible connection
                     type: string
+                  ansibleVars:
+                    additionalProperties:
+                      type: string
+                    type: object
                   hostName:
-                    description: HostName - node name
                     type: string
                   managed:
-                    description: Managed - Whether the node is actually provisioned
-                      (True) or should be treated as preprovisioned (False)
                     type: boolean
                   managementNetwork:
-                    description: ManagementNetwork - Name of network to use for management
-                      (SSH/Ansible)
                     type: string
                   networkConfig:
-                    description: NetworkConfig - Network configuration details. Contains
-                      os-net-config related properties.
                     properties:
                       template:
                         default: templates/net_config_bridge.j2
-                        description: Template - ansible j2 nic config template to
-                          use when applying node network configuration
                         type: string
                     type: object
                   networks:
-                    description: Networks - Instance networks
                     items:
-                      description: NetworksSection is a specification of the network
-                        attributes
                       properties:
                         fixedIP:
-                          description: FixedIP - Specific IP address to use for this
-                            network
                           type: string
                         template:
-                          description: Network - Network name to configure
                           type: string
                       type: object
                     type: array
                 type: object
               templateRef:
-                description: Role - role name for this node
                 type: string
             type: object
           status:
-            description: OpenStackDataPlaneNodeStatus defines the observed state of
-              OpenStackDataPlaneNode
             type: object
         type: object
     served: true

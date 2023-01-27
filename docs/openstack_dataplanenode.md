@@ -46,6 +46,7 @@ NodeSection is a specification of the node attributes
 | ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
 | ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
 | ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
+| ansibleVars | AnsibleVars for configuring ansible | map[string]string | false |
 
 [Back to Custom Resources](#custom-resources)
 

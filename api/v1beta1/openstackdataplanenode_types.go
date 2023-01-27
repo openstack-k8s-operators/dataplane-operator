@@ -68,6 +68,10 @@ type NodeSection struct {
 	// +kubebuilder:validation:Optional
 	// AnsiblePort SSH port for Ansible connection
 	AnsiblePort int `json:"ansiblePort,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// AnsibleVars for configuring ansible
+	AnsibleVars map[string]string `json:"ansibleVars,omitempty"`
 }
 
 // NetworkConfigSection is a specification of the Network configuration details
