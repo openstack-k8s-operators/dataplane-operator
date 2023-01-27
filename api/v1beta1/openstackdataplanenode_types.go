@@ -100,6 +100,7 @@ type OpenStackDataPlaneNodeStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane Node"
 
 // OpenStackDataPlaneNode is the Schema for the openstackdataplanenodes API
 type OpenStackDataPlaneNode struct {
