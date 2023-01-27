@@ -54,6 +54,7 @@ type OpenStackDataPlaneRoleStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane Role"
 
 // OpenStackDataPlaneRole is the Schema for the openstackdataplaneroles API
 type OpenStackDataPlaneRole struct {

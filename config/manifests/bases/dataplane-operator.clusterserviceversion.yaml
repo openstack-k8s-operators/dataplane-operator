@@ -12,18 +12,18 @@ spec:
     owned:
     - description: OpenStackDataPlaneNode is the Schema for the openstackdataplanenodes
         API
-      displayName: Open Stack Data Plane Node
+      displayName: OpenStack Data Plane Node
       kind: OpenStackDataPlaneNode
       name: openstackdataplanenodes.dataplane.openstack.org
       version: v1beta1
     - description: OpenStackDataPlaneRole is the Schema for the openstackdataplaneroles
         API
-      displayName: Open Stack Data Plane Role
+      displayName: OpenStack Data Plane Role
       kind: OpenStackDataPlaneRole
       name: openstackdataplaneroles.dataplane.openstack.org
       version: v1beta1
     - description: OpenStackDataPlane is the Schema for the openstackdataplanes API
-      displayName: Open Stack Data Plane
+      displayName: OpenStack Data Plane
       kind: OpenStackDataPlane
       name: openstackdataplanes.dataplane.openstack.org
       version: v1beta1
