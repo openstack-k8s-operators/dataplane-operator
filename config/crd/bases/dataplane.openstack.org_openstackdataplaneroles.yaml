@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.9.2
+    controller-gen.kubebuilder.io/version: v0.10.0
   creationTimestamp: null
   name: openstackdataplaneroles.dataplane.openstack.org
 spec:
@@ -18,92 +18,148 @@ spec:
   - name: v1beta1
     schema:
       openAPIV3Schema:
+        description: OpenStackDataPlaneRole is the Schema for the openstackdataplaneroles
+          API
         properties:
           apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
           spec:
+            description: OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
             properties:
               dataPlaneNodes:
+                description: DataPlaneNodes - List of nodes
                 items:
+                  description: DataPlaneNodeSection is a specification of the data
+                    plane node attributes
                   properties:
                     node:
+                      description: Node - node attributes specific to this node
                       properties:
                         ansibleHost:
+                          description: AnsibleHost SSH host for Ansible connection
                           type: string
                         ansiblePort:
+                          description: AnsiblePort SSH port for Ansible connection
                           type: integer
                         ansibleUser:
+                          description: AnsibleUser SSH user for Ansible connection
                           type: string
                         ansibleVars:
                           additionalProperties:
                             type: string
+                          description: AnsibleVars for configuring ansible
                           type: object
                         hostName:
+                          description: HostName - node name
                           type: string
                         managed:
+                          description: Managed - Whether the node is actually provisioned
+                            (True) or should be treated as preprovisioned (False)
                           type: boolean
                         managementNetwork:
+                          description: ManagementNetwork - Name of network to use
+                            for management (SSH/Ansible)
                           type: string
                         networkConfig:
+                          description: NetworkConfig - Network configuration details.
+                            Contains os-net-config related properties.
                           properties:
                             template:
                               default: templates/net_config_bridge.j2
+                              description: Template - ansible j2 nic config template
+                                to use when applying node network configuration
                               type: string
                           type: object
                         networks:
+                          description: Networks - Instance networks
                           items:
+                            description: NetworksSection is a specification of the
+                              network attributes
                             properties:
                               fixedIP:
+                                description: FixedIP - Specific IP address to use
+                                  for this network
                                 type: string
                               template:
+                                description: Network - Network name to configure
                                 type: string
                             type: object
                           type: array
                       type: object
                     nodeFrom:
+                      description: NodeFrom - Existing node name to reference. Can
+                        only be used if Node is empty.
                       type: string
                   type: object
                 type: array
               nodeTemplate:
+                description: NodeTemplate - node attributes specific to this roles
                 properties:
                   ansibleHost:
+                    description: AnsibleHost SSH host for Ansible connection
                     type: string
                   ansiblePort:
+                    description: AnsiblePort SSH port for Ansible connection
                     type: integer
                   ansibleUser:
+                    description: AnsibleUser SSH user for Ansible connection
                     type: string
                   ansibleVars:
                     additionalProperties:
                       type: string
+                    description: AnsibleVars for configuring ansible
                     type: object
                   hostName:
+                    description: HostName - node name
                     type: string
                   managed:
+                    description: Managed - Whether the node is actually provisioned
+                      (True) or should be treated as preprovisioned (False)
                     type: boolean
                   managementNetwork:
+                    description: ManagementNetwork - Name of network to use for management
+                      (SSH/Ansible)
                     type: string
                   networkConfig:
+                    description: NetworkConfig - Network configuration details. Contains
+                      os-net-config related properties.
                     properties:
                       template:
                         default: templates/net_config_bridge.j2
+                        description: Template - ansible j2 nic config template to
+                          use when applying node network configuration
                         type: string
                     type: object
                   networks:
+                    description: Networks - Instance networks
                     items:
+                      description: NetworksSection is a specification of the network
+                        attributes
                       properties:
                         fixedIP:
+                          description: FixedIP - Specific IP address to use for this
+                            network
                           type: string
                         template:
+                          description: Network - Network name to configure
                           type: string
                       type: object
                     type: array
                 type: object
             type: object
           status:
+            description: OpenStackDataPlaneRoleStatus defines the observed state of
+              OpenStackDataPlaneRole
             type: object
         type: object
     served: true
