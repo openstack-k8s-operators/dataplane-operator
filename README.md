@@ -15,8 +15,8 @@ single managing operator and UX for a complete OpenStack deployment
 The dataplane-operator exposes the concepts of data plane role and nodes. These
 are represented as CRD's within the operator:
 
-* [OpenStackDataPlaneRole](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/core.openstack.org_openstackdataplaneroles.yaml)
-* [OpenStackDataPlaneNode](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/core.openstack.org_openstackdataplanenodes.yaml)
+* [OpenStackDataPlaneRole](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplaneroles.yaml)
+* [OpenStackDataPlaneNode](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplanenodes.yaml)
 
 The OpenStackDataPlaneRole CRD provides for a logical grouping of nodes of a
 similar type within a role.  Similarities within a role are defined by the
