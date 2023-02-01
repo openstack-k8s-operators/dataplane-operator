@@ -30,6 +30,7 @@ nav:
       - OpenStackDataPlane: openstack_dataplane.md
       - OpenStackDataPlaneNode: openstack_dataplanenode.md
       - OpenStackDataPlaneRole: openstack_dataplanerole.md
+      - Inheritance: inheritance.md
   - Contributing: contributing.md
 markdown_extensions:
   - toc:
