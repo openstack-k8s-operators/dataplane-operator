@@ -19,10 +19,9 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/go-logr/logr"
-	"gopkg.in/yaml.v2"
+	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/ansible"
 	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -118,39 +117,16 @@ func (r *OpenStackDataPlaneNodeReconciler) Provision(ctx context.Context, instan
 	return nil
 }
 
-// Host represents ansible host
-type Host struct {
-	Vars map[string]string `yaml:"vars,omitempty"`
-}
-
-// Group represents ansible group
-type Group struct {
-	Vars  map[string]string `yaml:"vars,omitempty"`
-	Hosts map[string]*Host  `yaml:"hosts,omitempty"`
-}
-
-// Inventory contains parsed inventory representation
-type Inventory struct {
-	Groups map[string]*Group
-}
-
 // GenerateInventory yields a parsed Inventory
 func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode) error {
 	var err error
 
-	host := Host{}
-	host.Vars = make(map[string]string)
+	inventory := ansible.MakeInventory()
+	all := inventory.AddGroup("all")
+	host := all.AddHost(instance.Name)
 	host.Vars["ansible_host"] = instance.Spec.Node.HostName
 	host.Vars["ansible_user"] = instance.Spec.Node.AnsibleUser
-	host.Vars["ansible_port"] = strconv.Itoa(instance.Spec.Node.AnsiblePort)
-
-	group := Group{}
-	group.Hosts = make(map[string]*Host)
-	group.Hosts[instance.Name] = &host
-
-	inventory := Inventory{}
-	inventory.Groups = make(map[string]*Group)
-	inventory.Groups["all"] = &group
+	host.Vars["ansible_port"] = instance.Spec.Node.AnsiblePort
 
 	configMapName := fmt.Sprintf("dataplanenode-%s-inventory", instance.Name)
 	cm := &corev1.ConfigMap{
@@ -169,7 +145,7 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 			Name:      configMapName,
 			Namespace: instance.Namespace,
 		}
-		invData, err := yaml.Marshal(inventory)
+		invData, err := inventory.MarshalYAML()
 		if err != nil {
 			return err
 		}
