@@ -27,19 +27,23 @@ import (
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 )
 
 // OpenStackDataPlaneNodeReconciler reconciles a OpenStackDataPlaneNode object
 type OpenStackDataPlaneNodeReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
-	Log    logr.Logger
+	Kclient kubernetes.Interface
+	Scheme  *runtime.Scheme
+	Log     logr.Logger
 }
 
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodes,verbs=get;list;watch;create;update;patch;delete
@@ -60,6 +64,13 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 	// Fetch the OpenStackDataPlaneNode instance
 	instance := &dataplanev1beta1.OpenStackDataPlaneNode{}
+	helper, _ := helper.NewHelper(
+		instance,
+		r.Client,
+		r.Kclient,
+		r.Scheme,
+		r.Log,
+	)
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
@@ -75,20 +86,20 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	if instance.Spec.Node.Managed {
 		err = r.Provision(ctx, instance)
 		if err != nil {
-			r.Log.Error(err, fmt.Sprintf("Unable to OpenStackDataPlaneNode %s", instance.Name))
+			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to OpenStackDataPlaneNode %s", instance.Name), instance)
 			return ctrl.Result{}, err
 		}
 	}
 
 	err = r.GenerateInventory(ctx, instance)
 	if err != nil {
-		r.Log.Error(err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name))
+		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
 		return ctrl.Result{}, err
 	}
 
 	err = r.ConfigureNetwork(ctx, instance)
 	if err != nil {
-		r.Log.Error(err, fmt.Sprintf("Unable to configure network for %s", instance.Name))
+		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to configure network for %s", instance.Name), instance)
 		return ctrl.Result{}, err
 	}
 
