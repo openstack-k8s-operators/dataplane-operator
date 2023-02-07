@@ -20,8 +20,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -33,8 +36,9 @@ import (
 // OpenStackDataPlaneRoleReconciler reconciles a OpenStackDataPlaneRole object
 type OpenStackDataPlaneRoleReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
-	Log    logr.Logger
+	Kclient kubernetes.Interface
+	Scheme  *runtime.Scheme
+	Log     logr.Logger
 }
 
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneroles,verbs=get;list;watch;create;update;patch;delete
@@ -55,6 +59,13 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 
 	// Fetch the OpenStackDataPlaneRole instance
 	instance := &dataplanev1beta1.OpenStackDataPlaneRole{}
+	helper, _ := helper.NewHelper(
+		instance,
+		r.Client,
+		r.Kclient,
+		r.Scheme,
+		r.Log,
+	)
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
@@ -69,7 +80,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 
 	err = r.ReconcileNodes(ctx, instance)
 	if err != nil {
-		r.Log.Error(err, fmt.Sprintf("Unable to reconcile nodes for %s", instance.Name))
+		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to reconcile nodes for %s", instance.Name), instance)
 		return ctrl.Result{}, err
 	}
 
