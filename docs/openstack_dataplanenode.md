@@ -38,13 +38,11 @@ NodeSection is a specification of the node attributes
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| hostName | HostName - node name | string | false |
 | networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | false |
 | networks | Networks - Instance networks | [][NetworksSection](#networkssection) | false |
 | managed | Managed - Whether the node is actually provisioned (True) or should be treated as preprovisioned (False) | bool | false |
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
 | ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
-| ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
 | ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
 | ansibleVars | AnsibleVars for configuring ansible | map[string]string | false |
 
@@ -79,7 +77,9 @@ OpenStackDataPlaneNodeSpec defines the desired state of OpenStackDataPlaneNode
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
+| hostName | HostName - node name | string | false |
 | node | Node - node attributes specific to this node | [NodeSection](#nodesection) | false |
 | role | Role - role name for this node | string | false |
+| ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
 
 [Back to Custom Resources](#custom-resources)

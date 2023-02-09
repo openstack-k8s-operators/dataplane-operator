@@ -1,0 +1,13 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNode
+metadata:
+  name: openstackdataplanenode-sample-deployment
+spec:
+  role: openstackdataplanerole-sample
+  hostName: edpm-compute-0
+  node:
+    networks:
+      - network: ctlplane
+        fixedIP: 192.168.122.228
+    ansibleHost: 192.168.122.228
+    ansibleUser: root

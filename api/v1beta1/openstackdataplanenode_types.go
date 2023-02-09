@@ -24,20 +24,24 @@ import (
 type OpenStackDataPlaneNodeSpec struct {
 
 	// +kubebuilder:validation:Optional
+	// HostName - node name
+	HostName string `json:"hostName,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// Node - node attributes specific to this node
 	Node NodeSection `json:"node,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// Role - role name for this node
 	Role string `json:"role,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// AnsibleHost SSH host for Ansible connection
+	AnsibleHost string `json:"ansibleHost,omitempty"`
 }
 
 // NodeSection is a specification of the node attributes
 type NodeSection struct {
-
-	// +kubebuilder:validation:Optional
-	// HostName - node name
-	HostName string `json:"hostName,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// NetworkConfig - Network configuration details. Contains os-net-config
@@ -60,10 +64,6 @@ type NodeSection struct {
 	// +kubebuilder:validation:Optional
 	// AnsibleUser SSH user for Ansible connection
 	AnsibleUser string `json:"ansibleUser,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// AnsibleHost SSH host for Ansible connection
-	AnsibleHost string `json:"ansibleHost,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// AnsiblePort SSH port for Ansible connection
