@@ -118,39 +118,36 @@ func (r *OpenStackDataPlaneNodeReconciler) Provision(ctx context.Context, instan
 	return nil
 }
 
-// Host represents ansible host
-type Host struct {
-	Vars map[string]string `yaml:"vars,omitempty"`
-}
-
-// Group represents ansible group
-type Group struct {
-	Vars  map[string]string `yaml:"vars,omitempty"`
-	Hosts map[string]*Host  `yaml:"hosts,omitempty"`
-}
-
-// Inventory contains parsed inventory representation
+// Inventory struct
+// TODO: make use of the struct below
+//
+//nolint:unused
 type Inventory struct {
-	Groups map[string]*Group
+	all struct {
+		hosts struct {
+			host struct {
+				hostVar struct {
+					hostVarValue string
+				}
+			}
+		}
+	}
 }
 
 // GenerateInventory yields a parsed Inventory
 func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode) error {
 	var err error
 
-	host := Host{}
-	host.Vars = make(map[string]string)
-	host.Vars["ansible_host"] = instance.Spec.Node.HostName
-	host.Vars["ansible_user"] = instance.Spec.Node.AnsibleUser
-	host.Vars["ansible_port"] = strconv.Itoa(instance.Spec.Node.AnsiblePort)
-
-	group := Group{}
-	group.Hosts = make(map[string]*Host)
-	group.Hosts[instance.Name] = &host
-
-	inventory := Inventory{}
-	inventory.Groups = make(map[string]*Group)
-	inventory.Groups["all"] = &group
+	inventory := make(map[string]map[string]map[string]map[string]string)
+	all := make(map[string]map[string]map[string]string)
+	host := make(map[string]map[string]string)
+	hostVars := make(map[string]string)
+	hostVars["ansible_host"] = instance.Spec.Node.HostName
+	hostVars["ansible_user"] = instance.Spec.Node.AnsibleUser
+	hostVars["ansible_port"] = strconv.Itoa(instance.Spec.Node.AnsiblePort)
+	host[instance.Name] = hostVars
+	all["hosts"] = host
+	inventory["all"] = all
 
 	configMapName := fmt.Sprintf("dataplanenode-%s-inventory", instance.Name)
 	cm := &corev1.ConfigMap{
