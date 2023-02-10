@@ -29,7 +29,7 @@ type OpenStackDataPlaneNodeSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// Role - role name for this node
-	Role string `json:"templateRef,omitempty"`
+	Role string `json:"role,omitempty"`
 }
 
 // NodeSection is a specification of the node attributes

@@ -80,6 +80,6 @@ OpenStackDataPlaneNodeSpec defines the desired state of OpenStackDataPlaneNode
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | node | Node - node attributes specific to this node | [NodeSection](#nodesection) | false |
-| templateRef | Role - role name for this node | string | false |
+| role | Role - role name for this node | string | false |
 
 [Back to Custom Resources](#custom-resources)

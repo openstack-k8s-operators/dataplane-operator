@@ -90,7 +90,7 @@ spec:
                       type: object
                     type: array
                 type: object
-              templateRef:
+              role:
                 description: Role - role name for this node
                 type: string
             type: object
