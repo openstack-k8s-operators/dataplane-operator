@@ -44,7 +44,7 @@ NodeSection is a specification of the node attributes
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
 | ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
 | ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
-| ansibleVars | AnsibleVars for configuring ansible | map[string]string | false |
+| ansibleVars | AnsibleVars for configuring ansible | string | false |
 
 [Back to Custom Resources](#custom-resources)
 

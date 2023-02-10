@@ -71,7 +71,7 @@ type NodeSection struct {
 
 	// +kubebuilder:validation:Optional
 	// AnsibleVars for configuring ansible
-	AnsibleVars map[string]string `json:"ansibleVars,omitempty"`
+	AnsibleVars string `json:"ansibleVars,omitempty"`
 }
 
 // NetworkConfigSection is a specification of the Network configuration details

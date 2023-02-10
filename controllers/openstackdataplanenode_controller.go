@@ -22,6 +22,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/ansible"
+	yaml "gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -146,6 +147,15 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 		hostName = instance.Spec.AnsibleHost
 	}
 	host.Vars["ansible_host"] = hostName
+
+	ansibleVarsData := make(map[string]interface{})
+	err = yaml.Unmarshal([]byte(instance.Spec.Node.AnsibleVars), ansibleVarsData)
+	if err != nil {
+		return "", err
+	}
+	for key, value := range ansibleVarsData {
+		host.Vars[key] = value
+	}
 
 	configMapName := fmt.Sprintf("dataplanenode-%s-inventory", instance.Name)
 	cm := &corev1.ConfigMap{

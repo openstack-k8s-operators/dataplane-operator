@@ -52,10 +52,8 @@ spec:
                           description: AnsibleUser SSH user for Ansible connection
                           type: string
                         ansibleVars:
-                          additionalProperties:
-                            type: string
                           description: AnsibleVars for configuring ansible
-                          type: object
+                          type: string
                         managed:
                           description: Managed - Whether the node is actually provisioned
                             (True) or should be treated as preprovisioned (False)
@@ -106,10 +104,8 @@ spec:
                     description: AnsibleUser SSH user for Ansible connection
                     type: string
                   ansibleVars:
-                    additionalProperties:
-                      type: string
                     description: AnsibleVars for configuring ansible
-                    type: object
+                    type: string
                   managed:
                     description: Managed - Whether the node is actually provisioned
                       (True) or should be treated as preprovisioned (False)
