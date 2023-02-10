@@ -84,7 +84,7 @@ spec:
                           description: FixedIP - Specific IP address to use for this
                             network
                           type: string
-                        template:
+                        network:
                           description: Network - Network name to configure
                           type: string
                       type: object

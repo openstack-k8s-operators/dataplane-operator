@@ -89,7 +89,7 @@ type NetworksSection struct {
 
 	// +kubebuilder:validation:Optional
 	// Network - Network name to configure
-	Network string `json:"template,omitempty"`
+	Network string `json:"network,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// FixedIP - Specific IP address to use for this network

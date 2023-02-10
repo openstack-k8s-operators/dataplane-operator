@@ -27,7 +27,7 @@ NetworksSection is a specification of the network attributes
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| template | Network - Network name to configure | string | false |
+| network | Network - Network name to configure | string | false |
 | fixedIP | FixedIP - Specific IP address to use for this network | string | false |
 
 [Back to Custom Resources](#custom-resources)
