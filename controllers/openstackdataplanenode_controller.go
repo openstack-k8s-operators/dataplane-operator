@@ -19,10 +19,9 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/go-logr/logr"
-	"gopkg.in/yaml.v2"
+	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/ansible"
 	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -118,36 +117,16 @@ func (r *OpenStackDataPlaneNodeReconciler) Provision(ctx context.Context, instan
 	return nil
 }
 
-// Inventory struct
-// TODO: make use of the struct below
-//
-//nolint:unused
-type Inventory struct {
-	all struct {
-		hosts struct {
-			host struct {
-				hostVar struct {
-					hostVarValue string
-				}
-			}
-		}
-	}
-}
-
 // GenerateInventory yields a parsed Inventory
 func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode) error {
 	var err error
 
-	inventory := make(map[string]map[string]map[string]map[string]string)
-	all := make(map[string]map[string]map[string]string)
-	host := make(map[string]map[string]string)
-	hostVars := make(map[string]string)
-	hostVars["ansible_host"] = instance.Spec.Node.HostName
-	hostVars["ansible_user"] = instance.Spec.Node.AnsibleUser
-	hostVars["ansible_port"] = strconv.Itoa(instance.Spec.Node.AnsiblePort)
-	host[instance.Name] = hostVars
-	all["hosts"] = host
-	inventory["all"] = all
+	inventory := ansible.MakeInventory()
+	all := inventory.AddGroup("all")
+	host := all.AddHost(instance.Name)
+	host.Vars["ansible_host"] = instance.Spec.Node.HostName
+	host.Vars["ansible_user"] = instance.Spec.Node.AnsibleUser
+	host.Vars["ansible_port"] = instance.Spec.Node.AnsiblePort
 
 	configMapName := fmt.Sprintf("dataplanenode-%s-inventory", instance.Name)
 	cm := &corev1.ConfigMap{
@@ -166,7 +145,7 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 			Name:      configMapName,
 			Namespace: instance.Namespace,
 		}
-		invData, err := yaml.Marshal(inventory)
+		invData, err := inventory.MarshalYAML()
 		if err != nil {
 			return err
 		}
