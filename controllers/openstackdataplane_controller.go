@@ -20,17 +20,21 @@ import (
 	"context"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/go-logr/logr"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 )
 
 // OpenStackDataPlaneReconciler reconciles a OpenStackDataPlane object
 type OpenStackDataPlaneReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Kclient kubernetes.Interface
+	Scheme  *runtime.Scheme
+	Log     logr.Logger
 }
 
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanes,verbs=get;list;watch;create;update;patch;delete
