@@ -36,12 +36,15 @@ spec:
           spec:
             description: OpenStackDataPlaneNodeSpec defines the desired state of OpenStackDataPlaneNode
             properties:
+              ansibleHost:
+                description: AnsibleHost SSH host for Ansible connection
+                type: string
+              hostName:
+                description: HostName - node name
+                type: string
               node:
                 description: Node - node attributes specific to this node
                 properties:
-                  ansibleHost:
-                    description: AnsibleHost SSH host for Ansible connection
-                    type: string
                   ansiblePort:
                     description: AnsiblePort SSH port for Ansible connection
                     type: integer
@@ -49,12 +52,7 @@ spec:
                     description: AnsibleUser SSH user for Ansible connection
                     type: string
                   ansibleVars:
-                    additionalProperties:
-                      type: string
                     description: AnsibleVars for configuring ansible
-                    type: object
-                  hostName:
-                    description: HostName - node name
                     type: string
                   managed:
                     description: Managed - Whether the node is actually provisioned

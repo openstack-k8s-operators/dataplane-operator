@@ -1,0 +1,21 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNode
+metadata:
+  name: openstackdataplanenode-sample-deployment
+spec:
+  role: openstackdataplanerole-sample
+  hostName: edpm-compute-0
+  node:
+    networks:
+      - network: ctlplane
+        fixedIP: 192.168.122.228
+    ansibleHost: 192.168.122.228
+    ansibleUser: root
+    ansibleVars: |
+      edpm_network_config_template: templates/net_config_bridge.j2
+      edpm_network_config_hide_sensitive_logs: false
+      neutron_physical_bridge_name: br-ex
+      neutron_public_interface_name: eth0
+      ctlplane_dns_nameservers:
+      - 192.168.122.1
+      dns_search_domains: []

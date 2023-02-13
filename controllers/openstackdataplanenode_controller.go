@@ -22,6 +22,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/ansible"
+	yaml "gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,8 +34,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/dataplane-operator/pkg/dataplane/deployment"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
 // OpenStackDataPlaneNodeReconciler reconciles a OpenStackDataPlaneNode object
@@ -48,6 +51,7 @@ type OpenStackDataPlaneNodeReconciler struct {
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodes,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodes/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodes/finalizers,verbs=update
+//+kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -59,7 +63,7 @@ type OpenStackDataPlaneNodeReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	r.Log = log.FromContext(ctx)
 
 	// Fetch the OpenStackDataPlaneNode instance
 	instance := &dataplanev1beta1.OpenStackDataPlaneNode{}
@@ -90,13 +94,15 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		}
 	}
 
-	err = r.GenerateInventory(ctx, instance)
+	inventoryConfigMap, err := r.GenerateInventory(ctx, instance)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
 		return ctrl.Result{}, err
 	}
 
-	err = r.ConfigureNetwork(ctx, instance)
+	// TODO(slagle): fix hardcoded secret name
+	sshKeySecret := "ansibleee-ssh-key-secret"
+	err = deployment.ConfigureNetwork(ctx, helper, instance.Namespace, sshKeySecret, inventoryConfigMap)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to configure network for %s", instance.Name), instance)
 		return ctrl.Result{}, err
@@ -109,6 +115,8 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 func (r *OpenStackDataPlaneNodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1beta1.OpenStackDataPlaneNode{}).
+		Owns(&v1alpha1.OpenStackAnsibleEE{}).
+		Owns(&corev1.ConfigMap{}).
 		Complete(r)
 }
 
@@ -118,15 +126,36 @@ func (r *OpenStackDataPlaneNodeReconciler) Provision(ctx context.Context, instan
 }
 
 // GenerateInventory yields a parsed Inventory
-func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode) error {
-	var err error
+func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode) (string, error) {
+	var (
+		err      error
+		hostName string
+	)
 
 	inventory := ansible.MakeInventory()
 	all := inventory.AddGroup("all")
 	host := all.AddHost(instance.Name)
-	host.Vars["ansible_host"] = instance.Spec.Node.HostName
 	host.Vars["ansible_user"] = instance.Spec.Node.AnsibleUser
-	host.Vars["ansible_port"] = instance.Spec.Node.AnsiblePort
+
+	if instance.Spec.Node.AnsiblePort != 0 {
+		host.Vars["ansible_port"] = instance.Spec.Node.AnsiblePort
+	}
+
+	if instance.Spec.AnsibleHost == "" {
+		hostName = instance.Spec.HostName
+	} else {
+		hostName = instance.Spec.AnsibleHost
+	}
+	host.Vars["ansible_host"] = hostName
+
+	ansibleVarsData := make(map[string]interface{})
+	err = yaml.Unmarshal([]byte(instance.Spec.Node.AnsibleVars), ansibleVarsData)
+	if err != nil {
+		return "", err
+	}
+	for key, value := range ansibleVarsData {
+		host.Vars[key] = value
+	}
 
 	configMapName := fmt.Sprintf("dataplanenode-%s-inventory", instance.Name)
 	cm := &corev1.ConfigMap{
@@ -155,14 +184,8 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 		return nil
 	})
 	if err != nil {
-		return err
+		return configMapName, err
 	}
 
-	return nil
-}
-
-// ConfigureNetwork ensures the node network config
-func (r *OpenStackDataPlaneNodeReconciler) ConfigureNetwork(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode) error {
-
-	return nil
+	return configMapName, nil
 }
