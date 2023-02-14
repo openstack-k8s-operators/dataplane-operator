@@ -62,14 +62,6 @@ func AnsibleExecution(ctx context.Context, helper *helper.Helper, obj client.Obj
 		ansibleEE.Spec.Image = "quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
 		// TODO(slagle): Handle either play or role being specified
 		ansibleEE.Spec.Role = role
-		// 	ansibleEE.Spec.Play = `
-		// - name: Play
-		//   hosts: localhost
-		//   gather_facts: no
-		//   tasks:
-		//     - name: sleep
-		//       shell: sleep infinity
-		// `
 
 		ansibleEEMounts := storage.VolMounts{}
 		sshKeyVolume := corev1.Volume{
@@ -79,7 +71,7 @@ func AnsibleExecution(ctx context.Context, helper *helper.Helper, obj client.Obj
 					SecretName: sshKeySecret,
 					Items: []corev1.KeyToPath{
 						{
-							Key:  "private_ssh_key",
+							Key:  "ssh_private_key",
 							Path: "ssh_key",
 						},
 					},

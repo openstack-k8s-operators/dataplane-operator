@@ -77,6 +77,12 @@ type NodeSection struct {
 	// +kubebuilder:validation:Optional
 	// AnsibleVars for configuring ansible
 	AnsibleVars string `json:"ansibleVars,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH
+	// key for connecting to node. Must be of the form:
+	// Secret.data.ssh_private_key: <base64 encoded private key contents>
+	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret"`
 }
 
 // NetworkConfigSection is a specification of the Network configuration details

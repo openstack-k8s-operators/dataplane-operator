@@ -20,3 +20,4 @@ spec:
       - 192.168.122.1
       dns_search_domains: []
     deploy: true
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
