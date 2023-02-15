@@ -39,6 +39,10 @@ spec:
               ansibleHost:
                 description: AnsibleHost SSH host for Ansible connection
                 type: string
+              deploy:
+                default: true
+                description: Deploy boolean to trigger ansible execution
+                type: boolean
               hostName:
                 description: HostName - node name
                 type: string
@@ -91,6 +95,8 @@ spec:
               role:
                 description: Role - role name for this node
                 type: string
+            required:
+            - deploy
             type: object
           status:
             description: OpenStackDataPlaneNodeStatus defines the observed state of

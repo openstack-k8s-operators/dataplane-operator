@@ -38,6 +38,10 @@ type OpenStackDataPlaneNodeSpec struct {
 	// +kubebuilder:validation:Optional
 	// AnsibleHost SSH host for Ansible connection
 	AnsibleHost string `json:"ansibleHost,omitempty"`
+
+	// +kubebuilder:default=true
+	// Deploy boolean to trigger ansible execution
+	Deploy bool `json:"deploy"`
 }
 
 // NodeSection is a specification of the node attributes
