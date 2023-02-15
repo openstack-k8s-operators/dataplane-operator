@@ -19,7 +19,7 @@ package deployment
 import (
 	"context"
 
-	"k8s.io/apiserver/pkg/storage/names"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -27,7 +27,7 @@ import (
 )
 
 // ConfigureNetwork ensures the node network config
-func ConfigureNetwork(ctx context.Context, helper *helper.Helper, namespace string, sshKeySecret string, inventoryConfigMap string) error {
+func ConfigureNetwork(instance client.Object, ctx context.Context, helper *helper.Helper, sshKeySecret string, inventoryConfigMap string) error {
 
 	role := ansibleeev1alpha1.Role{
 		Name:     "edpm_network_config",
@@ -44,7 +44,8 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, namespace stri
 		},
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, names.SimpleNameGenerator.GenerateName("dataplane-deployment-configure-network"), namespace, sshKeySecret, inventoryConfigMap, "", role)
+	label := "dataplane-deployment-configure-network"
+	err := dataplaneutil.AnsibleExecution(instance, ctx, helper, label, sshKeySecret, inventoryConfigMap, "", role)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for ConfigureNetwork")
 		return err
