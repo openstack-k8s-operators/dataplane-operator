@@ -10,6 +10,7 @@
 * [NodeSection](#nodesection)
 * [OpenStackDataPlaneNodeList](#openstackdataplanenodelist)
 * [OpenStackDataPlaneNodeSpec](#openstackdataplanenodespec)
+* [OpenStackDataPlaneNodeStatus](#openstackdataplanenodestatus)
 
 #### NetworkConfigSection
 
@@ -82,5 +83,16 @@ OpenStackDataPlaneNodeSpec defines the desired state of OpenStackDataPlaneNode
 | role | Role - role name for this node | string | false |
 | ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
 | deploy | Deploy boolean to trigger ansible execution | bool | true |
+
+[Back to Custom Resources](#custom-resources)
+
+#### OpenStackDataPlaneNodeStatus
+
+OpenStackDataPlaneNodeStatus defines the observed state of OpenStackDataPlaneNode
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| conditions | Conditions | condition.Conditions | false |
+| deployed | Deployed | bool | false |
 
 [Back to Custom Resources](#custom-resources)

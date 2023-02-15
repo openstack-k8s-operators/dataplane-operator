@@ -33,8 +33,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
-	"github.com/openstack-k8s-operators/dataplane-operator/pkg/dataplane/deployment"
+	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
 	"github.com/openstack-k8s-operators/lib-common/modules/ansible"
+	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
@@ -63,18 +64,12 @@ type OpenStackDataPlaneNodeReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
-func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
 	r.Log = log.FromContext(ctx)
+	r.Log.Info("Reconciling")
 
 	// Fetch the OpenStackDataPlaneNode instance
 	instance := &dataplanev1beta1.OpenStackDataPlaneNode{}
-	helper, _ := helper.NewHelper(
-		instance,
-		r.Client,
-		r.Kclient,
-		r.Scheme,
-		r.Log,
-	)
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
@@ -85,6 +80,46 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		}
 		// Error reading the object - requeue the request.
 		return ctrl.Result{}, err
+	}
+
+	helper, _ := helper.NewHelper(
+		instance,
+		r.Client,
+		r.Kclient,
+		r.Scheme,
+		r.Log,
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// Always patch the instance status when exiting this function so we can
+	// persist any changes.
+	defer func() {
+		err := helper.PatchInstance(ctx, instance)
+		if err != nil {
+			r.Log.Error(_err, "PatchInstance error")
+			_err = err
+			return
+		}
+	}()
+
+	// Initialize Status
+	if instance.Status.Conditions == nil {
+		instance.Status.Conditions = condition.Conditions{}
+
+		cl := condition.CreateList(
+			condition.UnknownCondition(dataplanev1beta1.ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
+		)
+
+		instance.Status.Conditions.Init(&cl)
+
+		instance.Status.Deployed = false
+
+		// Register overall status immediately to have an early feedback e.g.
+		// in the cli
+		return ctrl.Result{}, nil
+
 	}
 
 	if instance.Spec.Node.Managed {
@@ -105,14 +140,15 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	sshKeySecret := "ansibleee-ssh-key-secret"
 
 	if instance.Spec.Deploy {
-		err = deployment.Deploy(instance, ctx, helper, sshKeySecret, inventoryConfigMap)
+		result, err = deployment.Deploy(ctx, helper, instance, sshKeySecret, inventoryConfigMap, &instance.Status)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			return ctrl.Result{}, err
 		}
+
 	}
 
-	return ctrl.Result{}, nil
+	return result, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

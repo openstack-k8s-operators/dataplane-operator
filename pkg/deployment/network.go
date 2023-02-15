@@ -26,8 +26,8 @@ import (
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
-// ConfigureNetwork ensures the node network config
-func ConfigureNetwork(instance client.Object, ctx context.Context, helper *helper.Helper, sshKeySecret string, inventoryConfigMap string) error {
+// ConfigureNetwork ensures the network config
+func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string) error {
 
 	role := ansibleeev1alpha1.Role{
 		Name:     "edpm_network_config",
@@ -44,8 +44,7 @@ func ConfigureNetwork(instance client.Object, ctx context.Context, helper *helpe
 		},
 	}
 
-	label := "dataplane-deployment-configure-network"
-	err := dataplaneutil.AnsibleExecution(instance, ctx, helper, label, sshKeySecret, inventoryConfigMap, "", role)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureNetworkLabel, sshKeySecret, inventoryConfigMap, "", role)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for ConfigureNetwork")
 		return err
