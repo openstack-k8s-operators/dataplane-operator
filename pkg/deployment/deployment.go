@@ -78,7 +78,47 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 		log.Info("ConfigureNetworkReadyCondition already ready")
 	}
 
-	Status.Deployed = true
+	// ValidateNetwork
+	if status.Conditions.IsUnknown(dataplanev1beta1.ValidateNetworkReadyCondition) {
+		log.Info("ValidateNetworkReadyCondition Unknown, starting ValidateNetwork")
+		err = ValidateNetwork(ctx, helper, obj, sshKeySecret, inventoryConfigMap)
+		if err != nil {
+			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to configure network for %s", obj.GetName()), obj)
+			return ctrl.Result{}, err
+		}
+
+		status.Conditions.Set(condition.FalseCondition(
+			dataplanev1beta1.ValidateNetworkReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			dataplanev1beta1.ValidateNetworkReadyWaitingMessage))
+
+		log.Info("ValidateNetworkReadyCondition not yet ready, requeueing")
+		return ctrl.Result{RequeueAfter: time.Second * 2}, nil
+
+	} else if status.Conditions.IsFalse(dataplanev1beta1.ValidateNetworkReadyCondition) {
+		ansibleEEJob, err := dataplaneutil.GetAnsibleExecutionJob(ctx, helper, obj, ValidateNetworkLabel)
+		if err != nil && k8s_errors.IsNotFound(err) {
+			log.Info("ValidateNetworkReadyCondition not yet ready, requeueing")
+			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
+		} else if err != nil {
+			log.Error(err, "Error getting ansibleEE job for ValidateNetwork")
+			return ctrl.Result{}, err
+		} else if ansibleEEJob.Status.Succeeded > 0 {
+			log.Info("ValidateNetworkReadyCondition ready")
+			status.Conditions.Set(condition.TrueCondition(
+				dataplanev1beta1.ValidateNetworkReadyCondition,
+				dataplanev1beta1.ValidateNetworkReadyMessage))
+		} else {
+			log.Info("ValidateNetworkReadyCondition not yet ready, requeueing")
+			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
+		}
+
+	} else if status.Conditions.IsTrue(dataplanev1beta1.ValidateNetworkReadyCondition) {
+		log.Info("ValidateNetworkReadyCondition already ready")
+	}
+
+	status.Deployed = true
 	return ctrl.Result{}, nil
 
 }

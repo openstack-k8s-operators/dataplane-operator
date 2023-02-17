@@ -53,3 +53,31 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Obj
 	return nil
 
 }
+
+// ValidateNetwork ensures the node network config
+func ValidateNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string) error {
+
+	role := ansibleeev1alpha1.Role{
+		Name:     "edpm_nodes_validation",
+		Hosts:    "all",
+		Strategy: "linear",
+		Tasks: []ansibleeev1alpha1.Task{
+			{
+				Name: "import edpm_nodes_validation",
+				ImportRole: ansibleeev1alpha1.ImportRole{
+					Name:      "edpm_nodes_validation",
+					TasksFrom: "main.yml",
+				},
+			},
+		},
+	}
+
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ValidateNetworkLabel, sshKeySecret, inventoryConfigMap, "", role)
+	if err != nil {
+		helper.GetLogger().Error(err, "Unable to execute Ansible for ValidateNetwork")
+		return err
+	}
+
+	return nil
+
+}
