@@ -313,7 +313,7 @@ func (in *OpenStackDataPlaneRoleSpec) DeepCopyInto(out *OpenStackDataPlaneRoleSp
 	*out = *in
 	if in.DataPlaneNodes != nil {
 		in, out := &in.DataPlaneNodes, &out.DataPlaneNodes
-		*out = make([]DataPlaneNodeSection, len(*in))
+		*out = make([]OpenStackDataPlaneNodeSpec, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}

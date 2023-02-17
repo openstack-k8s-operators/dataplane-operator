@@ -27,7 +27,7 @@ import (
 type OpenStackDataPlaneRoleSpec struct {
 	// +kubebuilder:validation:Optional
 	// DataPlaneNodes - List of nodes
-	DataPlaneNodes []DataPlaneNodeSection `json:"dataPlaneNodes,omitempty"`
+	DataPlaneNodes []OpenStackDataPlaneNodeSpec `json:"dataPlaneNodes,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// NodeTemplate - node attributes specific to this roles

@@ -43,6 +43,11 @@ type OpenStackDataPlaneNodeSpec struct {
 	// +kubebuilder:default=true
 	// Deploy boolean to trigger ansible execution
 	Deploy bool `json:"deploy"`
+
+	// +kubebuilder:validation:Optional
+	// NodeFrom - Existing node name to reference. Can only be used if Node is
+	// empty.
+	NodeFrom string `json:"nodeFrom,omitempty"`
 }
 
 // NodeSection is a specification of the node attributes

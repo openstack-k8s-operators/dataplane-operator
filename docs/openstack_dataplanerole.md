@@ -49,7 +49,7 @@ OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| dataPlaneNodes | DataPlaneNodes - List of nodes | [][DataPlaneNodeSection](#dataplanenodesection) | false |
+| dataPlaneNodes | DataPlaneNodes - List of nodes | []OpenStackDataPlaneNodeSpec | false |
 | nodeTemplate | NodeTemplate - node attributes specific to this roles | NodeSection | false |
 
 [Back to Custom Resources](#custom-resources)

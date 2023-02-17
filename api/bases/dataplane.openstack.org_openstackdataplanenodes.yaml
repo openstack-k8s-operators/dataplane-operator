@@ -101,6 +101,10 @@ spec:
                       type: object
                     type: array
                 type: object
+              nodeFrom:
+                description: NodeFrom - Existing node name to reference. Can only
+                  be used if Node is empty.
+                type: string
               role:
                 description: Role - role name for this node
                 type: string
