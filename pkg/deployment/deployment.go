@@ -32,93 +32,94 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// deployFuncDef so we can pass a function to ConditionalDeploy
+type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string) error
+
 // Deploy function encapsulating primary deloyment handling
 func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneNodeStatus) (ctrl.Result, error) {
 
+	var result ctrl.Result
 	var err error
-	log := helper.GetLogger()
+	var readyCondition condition.Type
+	var readyWaitingMessage string
+	var deployFunc deployFuncDef
+	var deployName string
+	var deployLabel string
 
 	// ConfigureNetwork
-	if status.Conditions.IsUnknown(dataplanev1beta1.ConfigureNetworkReadyCondition) {
-		log.Info("ConfigureNetworkReadyCondition Unknown, starting ConfigureNetwork")
-		err = ConfigureNetwork(ctx, helper, obj, sshKeySecret, inventoryConfigMap)
-		if err != nil {
-			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to configure network for %s", obj.GetName()), obj)
-			return ctrl.Result{}, err
-		}
-
-		status.Conditions.Set(condition.FalseCondition(
-			dataplanev1beta1.ConfigureNetworkReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			dataplanev1beta1.ConfigureNetworkReadyWaitingMessage))
-
-		log.Info("ConfigureNetworkReadyCondition not yet ready, requeueing")
-		return ctrl.Result{RequeueAfter: time.Second * 2}, nil
-
-	} else if status.Conditions.IsFalse(dataplanev1beta1.ConfigureNetworkReadyCondition) {
-		ansibleEEJob, err := dataplaneutil.GetAnsibleExecutionJob(ctx, helper, obj, ConfigureNetworkLabel)
-		if err != nil && k8s_errors.IsNotFound(err) {
-			log.Info("ConfigureNetworkReadyCondition not yet ready, requeueing")
-			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
-		} else if err != nil {
-			log.Error(err, "Error getting ansibleEE job for ConfigureNetwork")
-			return ctrl.Result{}, err
-		} else if ansibleEEJob.Status.Succeeded > 0 {
-			log.Info("ConfigureNetworkReadyCondition ready")
-			status.Conditions.Set(condition.TrueCondition(
-				dataplanev1beta1.ConfigureNetworkReadyCondition,
-				dataplanev1beta1.ConfigureNetworkReadyMessage))
-		} else {
-			log.Info("ConfigureNetworkReadyCondition not yet ready, requeueing")
-			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
-		}
-
-	} else if status.Conditions.IsTrue(dataplanev1beta1.ConfigureNetworkReadyCondition) {
-		log.Info("ConfigureNetworkReadyCondition already ready")
+	readyCondition = dataplanev1beta1.ConfigureNetworkReadyCondition
+	readyWaitingMessage = dataplanev1beta1.ConfigureNetworkReadyWaitingMessage
+	deployFunc = ConfigureNetwork
+	deployName = "ConfigureNetwork"
+	deployLabel = ConfigureNetworkLabel
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	if err != nil || result.RequeueAfter > 0 {
+		return result, err
 	}
 
 	// ValidateNetwork
-	if status.Conditions.IsUnknown(dataplanev1beta1.ValidateNetworkReadyCondition) {
-		log.Info("ValidateNetworkReadyCondition Unknown, starting ValidateNetwork")
-		err = ValidateNetwork(ctx, helper, obj, sshKeySecret, inventoryConfigMap)
-		if err != nil {
-			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to configure network for %s", obj.GetName()), obj)
-			return ctrl.Result{}, err
-		}
-
-		status.Conditions.Set(condition.FalseCondition(
-			dataplanev1beta1.ValidateNetworkReadyCondition,
-			condition.RequestedReason,
-			condition.SeverityInfo,
-			dataplanev1beta1.ValidateNetworkReadyWaitingMessage))
-
-		log.Info("ValidateNetworkReadyCondition not yet ready, requeueing")
-		return ctrl.Result{RequeueAfter: time.Second * 2}, nil
-
-	} else if status.Conditions.IsFalse(dataplanev1beta1.ValidateNetworkReadyCondition) {
-		ansibleEEJob, err := dataplaneutil.GetAnsibleExecutionJob(ctx, helper, obj, ValidateNetworkLabel)
-		if err != nil && k8s_errors.IsNotFound(err) {
-			log.Info("ValidateNetworkReadyCondition not yet ready, requeueing")
-			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
-		} else if err != nil {
-			log.Error(err, "Error getting ansibleEE job for ValidateNetwork")
-			return ctrl.Result{}, err
-		} else if ansibleEEJob.Status.Succeeded > 0 {
-			log.Info("ValidateNetworkReadyCondition ready")
-			status.Conditions.Set(condition.TrueCondition(
-				dataplanev1beta1.ValidateNetworkReadyCondition,
-				dataplanev1beta1.ValidateNetworkReadyMessage))
-		} else {
-			log.Info("ValidateNetworkReadyCondition not yet ready, requeueing")
-			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
-		}
-
-	} else if status.Conditions.IsTrue(dataplanev1beta1.ValidateNetworkReadyCondition) {
-		log.Info("ValidateNetworkReadyCondition already ready")
+	readyCondition = dataplanev1beta1.ValidateNetworkReadyCondition
+	readyWaitingMessage = dataplanev1beta1.ValidateNetworkReadyWaitingMessage
+	deployFunc = ValidateNetwork
+	deployName = "ValidateNetwork"
+	deployLabel = ValidateNetworkLabel
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	if err != nil || result.RequeueAfter > 0 {
+		return result, err
 	}
 
 	status.Deployed = true
 	return ctrl.Result{}, nil
+
+}
+
+// ConditionalDeploy function encapsulating primary deloyment handling with
+// conditions.
+func ConditionalDeploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneNodeStatus, readyCondition condition.Type, readyWaitingMessage string, deployFunc deployFuncDef, deployName string, deployLabel string) (ctrl.Result, error) {
+
+	var err error
+
+	log := helper.GetLogger()
+
+	if status.Conditions.IsUnknown(readyCondition) {
+		log.Info(fmt.Sprintf("%s Unknown, starting %s", readyCondition, deployName))
+		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap)
+		if err != nil {
+			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to %s for %s", deployName, obj.GetName()), obj)
+			return ctrl.Result{}, err
+		}
+
+		status.Conditions.Set(condition.FalseCondition(
+			readyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			readyWaitingMessage))
+
+		log.Info(fmt.Sprintf("%s not yet ready, requeueing", readyCondition))
+		return ctrl.Result{RequeueAfter: time.Second * 2}, nil
+
+	} else if status.Conditions.IsFalse(readyCondition) {
+		ansibleEEJob, err := dataplaneutil.GetAnsibleExecutionJob(ctx, helper, obj, deployLabel)
+		if err != nil && k8s_errors.IsNotFound(err) {
+			log.Info(fmt.Sprintf("%s not yet ready, requeueing", readyCondition))
+			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
+		} else if err != nil {
+			log.Error(err, fmt.Sprintf("Error getting ansibleEE job for %s", deployName))
+			return ctrl.Result{}, err
+		} else if ansibleEEJob.Status.Succeeded > 0 {
+			log.Info(fmt.Sprintf("%s ready", readyCondition))
+			status.Conditions.Set(condition.TrueCondition(
+				readyCondition,
+				readyWaitingMessage))
+		} else {
+			log.Info(fmt.Sprintf("%s not yet ready, requeueing", readyCondition))
+			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
+		}
+
+	} else if status.Conditions.IsTrue(readyCondition) {
+		log.Info(fmt.Sprintf("%s already ready", readyCondition))
+	}
+
+	return ctrl.Result{}, err
 
 }
