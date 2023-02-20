@@ -9,9 +9,9 @@ require (
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.26.0
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-00010101000000-000000000000
+	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.0.0-20230220181542-93a9b32e5ec9
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230203100003-04e7eeb4995d
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230208113903-f7b52e2a2ccb
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator v0.0.0-20230210112259-1dd004e41140
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230203151233-f50e041703da
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.25.4
