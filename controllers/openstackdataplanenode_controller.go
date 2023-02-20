@@ -109,6 +109,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		instance.Status.Conditions = condition.Conditions{}
 
 		cl := condition.CreateList(
+			condition.UnknownCondition(dataplanev1beta1.DataPlaneNodeReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
 		)
@@ -146,8 +147,13 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			return ctrl.Result{}, err
 		}
-
+		if result.RequeueAfter > 0 {
+			return result, nil
+		}
 	}
+
+	r.Log.Info("Set DataPlaneNodeReadyCondition true")
+	instance.Status.Conditions.Set(condition.TrueCondition(dataplanev1beta1.DataPlaneNodeReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage))
 
 	return result, nil
 }

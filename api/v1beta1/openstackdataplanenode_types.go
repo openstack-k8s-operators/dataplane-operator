@@ -138,3 +138,7 @@ type OpenStackDataPlaneNodeList struct {
 func init() {
 	SchemeBuilder.Register(&OpenStackDataPlaneNode{}, &OpenStackDataPlaneNodeList{})
 }
+
+func (instance OpenStackDataPlaneNode) isReady() bool {
+	return instance.Status.Conditions.IsTrue(DataPlaneNodeReadyCondition)
+}

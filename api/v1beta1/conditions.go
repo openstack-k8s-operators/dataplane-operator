@@ -21,6 +21,13 @@ import (
 )
 
 const (
+	// DataPlaneNodeReadyCondition Status=True condition indicates
+	// DataPlaneNode is ready.
+	DataPlaneNodeReadyCondition condition.Type = "DataPlaneNodeReady"
+
+	// DataPlaneNodeReadyMessage ready
+	DataPlaneNodeReadyMessage = "DataPlaneNode ready"
+
 	// ConfigureNetworkReadyCondition Status=True condition indicates if the
 	// network configuration is finished and successful.
 	ConfigureNetworkReadyCondition condition.Type = "ConfigureNetworkReady"
