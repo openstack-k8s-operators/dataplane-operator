@@ -19,15 +19,15 @@ package deployment
 import (
 	"context"
 
-	"k8s.io/apiserver/pkg/storage/names"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
-// ConfigureNetwork ensures the node network config
-func ConfigureNetwork(ctx context.Context, helper *helper.Helper, namespace string, sshKeySecret string, inventoryConfigMap string) error {
+// ConfigureNetwork ensures the network config
+func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string) error {
 
 	role := ansibleeev1alpha1.Role{
 		Name:     "edpm_network_config",
@@ -44,9 +44,37 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, namespace stri
 		},
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, names.SimpleNameGenerator.GenerateName("dataplane-deployment-configure-network"), namespace, sshKeySecret, inventoryConfigMap, "", role)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureNetworkLabel, sshKeySecret, inventoryConfigMap, "", role)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for ConfigureNetwork")
+		return err
+	}
+
+	return nil
+
+}
+
+// ValidateNetwork ensures the node network config
+func ValidateNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string) error {
+
+	role := ansibleeev1alpha1.Role{
+		Name:     "edpm_nodes_validation",
+		Hosts:    "all",
+		Strategy: "linear",
+		Tasks: []ansibleeev1alpha1.Task{
+			{
+				Name: "import edpm_nodes_validation",
+				ImportRole: ansibleeev1alpha1.ImportRole{
+					Name:      "edpm_nodes_validation",
+					TasksFrom: "main.yml",
+				},
+			},
+		},
+	}
+
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ValidateNetworkLabel, sshKeySecret, inventoryConfigMap, "", role)
+	if err != nil {
+		helper.GetLogger().Error(err, "Unable to execute Ansible for ValidateNetwork")
 		return err
 	}
 

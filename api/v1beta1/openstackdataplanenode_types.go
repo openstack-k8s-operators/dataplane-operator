@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -38,6 +39,10 @@ type OpenStackDataPlaneNodeSpec struct {
 	// +kubebuilder:validation:Optional
 	// AnsibleHost SSH host for Ansible connection
 	AnsibleHost string `json:"ansibleHost,omitempty"`
+
+	// +kubebuilder:default=true
+	// Deploy boolean to trigger ansible execution
+	Deploy bool `json:"deploy"`
 }
 
 // NodeSection is a specification of the node attributes
@@ -98,13 +103,19 @@ type NetworksSection struct {
 
 // OpenStackDataPlaneNodeStatus defines the observed state of OpenStackDataPlaneNode
 type OpenStackDataPlaneNodeStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+
+	// Conditions
+	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
+
+	// Deployed
+	Deployed bool `json:"deployed,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane Node"
+//+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
+//+kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
 
 // OpenStackDataPlaneNode is the Schema for the openstackdataplanenodes API
 type OpenStackDataPlaneNode struct {
@@ -126,4 +137,9 @@ type OpenStackDataPlaneNodeList struct {
 
 func init() {
 	SchemeBuilder.Register(&OpenStackDataPlaneNode{}, &OpenStackDataPlaneNodeList{})
+}
+
+// IsReady - returns true if the DataPlane is ready
+func (instance OpenStackDataPlaneNode) IsReady() bool {
+	return instance.Status.Conditions.IsTrue(DataPlaneNodeReadyCondition)
 }
