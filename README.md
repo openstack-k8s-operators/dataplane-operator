@@ -1,5 +1,5 @@
 # dataplane-operator
-The dataplane-operator automates the deployment of an OpenStack dataplane.
+The dataplane-operator automates the deployment of an OpenStack dataplane
 
 ---
 **NOTE**
