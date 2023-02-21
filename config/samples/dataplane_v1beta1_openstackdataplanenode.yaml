@@ -4,9 +4,9 @@ metadata:
   name: openstackdataplanenode-sample
 spec:
   role: openstackdataplanerole-sample
+  hostName: openstackdataplanenode-sample.localdomain
+  ansibleHost: 192.168.122.18
   node:
-    hostName: openstackdataplanenode-sample.localdomain
     networks:
       - network: ctlplane
         fixedIP: 192.168.122.18
-    ansibleHost: 192.168.122.18

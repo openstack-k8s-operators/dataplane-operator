@@ -16,16 +16,16 @@ metadata:
 spec:
   dataPlaneNodes:
   - name: openstackdataplanenode-sample-1
+    ansibleHost: 192.168.122.18
+    hostName: openstackdataplanenode-sample-1.localdomain
     node:
-      ansibleHost: 192.168.122.18
-      hostName: openstackdataplanenode-sample-1.localdomain
       networks:
       - fixedIP: 192.168.122.18
         network: ctlplane
   - name: openstackdataplanenode-sample-2
+    ansibleHost: 192.168.122.19
+    hostName: openstackdataplanenode-sample-2.localdomain
     node:
-      ansibleHost: 192.168.122.19
-      hostName: openstackdataplanenode-sample-2.localdomain
       networks:
       - fixedIP: 192.168.122.19
         network: ctlplane
@@ -49,9 +49,9 @@ kind: OpenStackDataPlaneNode
 metadata:
   name: openstackdataplanenode-sample-1
 spec:
+  ansibleHost: 192.168.122.18
+  hostName: openstackdataplanenode-sample-1.localdomain
   node:
-    ansibleHost: 192.168.122.18
-    hostName: openstackdataplanenode-sample-1.localdomain
     networks:
     - fixedIP: 192.168.122.18
       network: ctlplane
@@ -65,10 +65,10 @@ kind: OpenStackDataPlaneNode
 metadata:
   name: openstackdataplanenode-sample-2
 spec:
+  hostName: openstackdataplanenode-sample-2.localdomain
+  networks:
   node:
     ansibleHost: 192.168.122.19
-    hostName: openstackdataplanenode-sample-2.localdomain
-    networks:
     - fixedIP: 192.168.122.19
       network: ctlplane
   role: openstackdataplanerole-sample

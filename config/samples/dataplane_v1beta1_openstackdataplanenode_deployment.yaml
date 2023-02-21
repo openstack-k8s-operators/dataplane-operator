@@ -5,11 +5,11 @@ metadata:
 spec:
   role: openstackdataplanerole-sample
   hostName: edpm-compute-0
+  ansibleHost: 192.168.122.228
   node:
     networks:
       - network: ctlplane
         fixedIP: 192.168.122.228
-    ansibleHost: 192.168.122.228
     ansibleUser: root
     ansibleVars: |
       edpm_network_config_template: templates/net_config_bridge.j2

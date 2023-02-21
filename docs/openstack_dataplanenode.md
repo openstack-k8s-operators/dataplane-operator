@@ -83,6 +83,7 @@ OpenStackDataPlaneNodeSpec defines the desired state of OpenStackDataPlaneNode
 | role | Role - role name for this node | string | false |
 | ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
 | deploy | Deploy boolean to trigger ansible execution | bool | true |
+| nodeFrom | NodeFrom - Existing node name to reference. Can only be used if Node is empty. | string | false |
 
 [Back to Custom Resources](#custom-resources)
 
