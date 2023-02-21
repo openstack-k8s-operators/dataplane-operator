@@ -30,9 +30,10 @@ import (
 func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string) error {
 
 	role := ansibleeev1alpha1.Role{
-		Name:     "edpm_network_config",
-		Hosts:    "all",
-		Strategy: "linear",
+		Name:        "edpm_network_config",
+		Hosts:       "all",
+		Strategy:    "linear",
+		GatherFacts: false,
 		Tasks: []ansibleeev1alpha1.Task{
 			{
 				Name: "import edpm_network_config",
@@ -40,6 +41,8 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Obj
 					Name:      "edpm_network_config",
 					TasksFrom: "main.yml",
 				},
+				Vars: "  edpm_network_config_with_ansible: true",
+				Tags: []string{"edpm_network_config"},
 			},
 		},
 	}
