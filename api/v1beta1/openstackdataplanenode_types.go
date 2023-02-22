@@ -41,6 +41,7 @@ type OpenStackDataPlaneNodeSpec struct {
 	AnsibleHost string `json:"ansibleHost,omitempty"`
 
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Deploy boolean to trigger ansible execution
 	Deploy bool `json:"deploy"`
 
@@ -63,6 +64,7 @@ type NodeSection struct {
 	Networks []NetworksSection `json:"networks,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Managed - Whether the node is actually provisioned (True) or should be
 	// treated as preprovisioned (False)
 	Managed bool `json:"managed,omitempty"`
@@ -76,6 +78,7 @@ type NodeSection struct {
 	AnsibleUser string `json:"ansibleUser,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
 	// AnsiblePort SSH port for Ansible connection
 	AnsiblePort int `json:"ansiblePort,omitempty"`
 
@@ -84,6 +87,7 @@ type NodeSection struct {
 	AnsibleVars string `json:"ansibleVars,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
 	// AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH
 	// key for connecting to node. Must be of the form:
 	// Secret.data.ssh_private_key: <base64 encoded private key contents>
@@ -115,9 +119,11 @@ type NetworksSection struct {
 // OpenStackDataPlaneNodeStatus defines the observed state of OpenStackDataPlaneNode
 type OpenStackDataPlaneNodeStatus struct {
 
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
 	// Conditions
 	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
 
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Deployed
 	Deployed bool `json:"deployed,omitempty" optional:"true"`
 }
