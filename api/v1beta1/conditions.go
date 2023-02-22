@@ -50,4 +50,14 @@ const (
 
 	// ValidateNetworkReadyWaitingMessage not yet ready
 	ValidateNetworkReadyWaitingMessage = "ValidateNetwork not yet ready"
+
+	// ConfigureOSReadyCondition Status=True condition indicates if the
+	// OS configuration is finished and successful.
+	ConfigureOSReadyCondition condition.Type = "ConfigureOSReady"
+
+	// ConfigureOSReadyMessage ready
+	ConfigureOSReadyMessage = "ConfigureOS ready"
+
+	// ConfigureOSReadyWaitingMessage not yet ready
+	ConfigureOSReadyWaitingMessage = "ConfigureOS not yet ready"
 )

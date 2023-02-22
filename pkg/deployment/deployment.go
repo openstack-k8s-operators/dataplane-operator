@@ -78,6 +78,18 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 		return result, err
 	}
 
+	// ConfigureOS
+	readyCondition = dataplanev1beta1.ConfigureOSReadyCondition
+	readyWaitingMessage = dataplanev1beta1.ConfigureOSReadyWaitingMessage
+	readyMessage = dataplanev1beta1.ConfigureOSReadyMessage
+	deployFunc = ConfigureOS
+	deployName = "ConfigureOS"
+	deployLabel = ConfigureOSLabel
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	if err != nil || result.RequeueAfter > 0 {
+		return result, err
+	}
+
 	status.Deployed = true
 	return ctrl.Result{}, nil
 
