@@ -29,4 +29,7 @@ const (
 
 	// ConfigureOSLabel for ConfigureOS OpenStackAnsibleEE
 	ConfigureOSLabel = "dataplane-deployment-configure-os"
+
+	// RunOSLabel for RunOS OpenStackAnsibleEE
+	RunOSLabel = "dataplane-deployment-run-os"
 )

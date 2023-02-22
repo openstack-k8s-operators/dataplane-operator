@@ -70,4 +70,14 @@ const (
 
 	// ConfigureOSReadyWaitingMessage not yet ready
 	ConfigureOSReadyWaitingMessage = "ConfigureOS not yet ready"
+
+	// RunOSReadyCondition Status=True condition indicates if the
+	// OS configuration is finished and successful.
+	RunOSReadyCondition condition.Type = "RunOSReady"
+
+	// RunOSReadyMessage ready
+	RunOSReadyMessage = "RunOS ready"
+
+	// RunOSReadyWaitingMessage not yet ready
+	RunOSReadyWaitingMessage = "RunOS not yet ready"
 )

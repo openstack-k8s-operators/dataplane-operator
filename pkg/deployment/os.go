@@ -152,3 +152,64 @@ func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, 
 	return nil
 
 }
+
+// RunOS ensures the node Operating System is running
+func RunOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string) error {
+
+	tasks := []dataplaneutil.Task{
+		{
+			Name:          "Run edpm_sshd",
+			RoleName:      "edpm_sshd",
+			RoleTasksFrom: "run.yml",
+			Tags:          []string{"edpm_sshd"},
+		},
+		{
+			Name:          "Run chrony",
+			RoleName:      "chrony",
+			RoleTasksFrom: "run.yml",
+			Tags:          []string{"chrony"},
+		},
+		{
+			Name:          "Run chrony (online)",
+			RoleName:      "chrony",
+			RoleTasksFrom: "online.yml",
+			Tags:          []string{"chrony"},
+		},
+		{
+			Name:          "Run chrony (sync)",
+			RoleName:      "chrony",
+			RoleTasksFrom: "sync.yml",
+			Tags:          []string{"chrony"},
+		},
+		{
+			Name:          "Run edpm_timezone",
+			RoleName:      "edpm_timezone",
+			RoleTasksFrom: "run.yml",
+			Tags:          []string{"edpm_timezone"},
+		},
+		{
+			Name:          "Run edpm_ovn",
+			RoleName:      "edpm_ovn",
+			RoleTasksFrom: "run.yml",
+			Tags:          []string{"edpm_ovn"},
+		},
+	}
+	role := ansibleeev1alpha1.Role{
+		Name:           "Deploy EDPM Operating System Run",
+		Hosts:          "all",
+		Strategy:       "linear",
+		GatherFacts:    false,
+		Become:         true,
+		AnyErrorsFatal: true,
+		Tasks:          dataplaneutil.PopulateTasks(tasks),
+	}
+
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, RunOSLabel, sshKeySecret, inventoryConfigMap, "", role)
+	if err != nil {
+		helper.GetLogger().Error(err, "Unable to execute Ansible for RunOS")
+		return err
+	}
+
+	return nil
+
+}
