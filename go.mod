@@ -12,7 +12,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.0.0-20230220181542-93a9b32e5ec9
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230220181542-93a9b32e5ec9
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230208113903-f7b52e2a2ccb
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230203151233-f50e041703da
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230222135334-953811b64fb2
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.25.4
 	k8s.io/apimachinery v0.25.4

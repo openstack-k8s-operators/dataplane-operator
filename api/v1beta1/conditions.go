@@ -50,4 +50,34 @@ const (
 
 	// ValidateNetworkReadyWaitingMessage not yet ready
 	ValidateNetworkReadyWaitingMessage = "ValidateNetwork not yet ready"
+
+	// InstallOSReadyCondition Status=True condition indicates if the
+	// OS configuration is finished and successful.
+	InstallOSReadyCondition condition.Type = "InstallOSReady"
+
+	// InstallOSReadyMessage ready
+	InstallOSReadyMessage = "InstallOS ready"
+
+	// InstallOSReadyWaitingMessage not yet ready
+	InstallOSReadyWaitingMessage = "InstallOS not yet ready"
+
+	// ConfigureOSReadyCondition Status=True condition indicates if the
+	// OS configuration is finished and successful.
+	ConfigureOSReadyCondition condition.Type = "ConfigureOSReady"
+
+	// ConfigureOSReadyMessage ready
+	ConfigureOSReadyMessage = "ConfigureOS ready"
+
+	// ConfigureOSReadyWaitingMessage not yet ready
+	ConfigureOSReadyWaitingMessage = "ConfigureOS not yet ready"
+
+	// RunOSReadyCondition Status=True condition indicates if the
+	// OS configuration is finished and successful.
+	RunOSReadyCondition condition.Type = "RunOSReady"
+
+	// RunOSReadyMessage ready
+	RunOSReadyMessage = "RunOS ready"
+
+	// RunOSReadyWaitingMessage not yet ready
+	RunOSReadyWaitingMessage = "RunOS not yet ready"
 )
