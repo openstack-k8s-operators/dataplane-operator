@@ -41,18 +41,27 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 	var result ctrl.Result
 	var err error
 	var readyCondition condition.Type
+	var readyMessage string
 	var readyWaitingMessage string
 	var deployFunc deployFuncDef
 	var deployName string
 	var deployLabel string
 
+	// Set DataPlaneNodeReadyCondition to requested
+	status.Conditions.Set(condition.FalseCondition(
+		dataplanev1beta1.DataPlaneNodeReadyCondition,
+		condition.RequestedReason,
+		condition.SeverityInfo,
+		dataplanev1beta1.DataPlaneNodeReadyWaitingMessage))
+
 	// ConfigureNetwork
 	readyCondition = dataplanev1beta1.ConfigureNetworkReadyCondition
 	readyWaitingMessage = dataplanev1beta1.ConfigureNetworkReadyWaitingMessage
+	readyMessage = dataplanev1beta1.ConfigureNetworkReadyMessage
 	deployFunc = ConfigureNetwork
 	deployName = "ConfigureNetwork"
 	deployLabel = ConfigureNetworkLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -60,10 +69,11 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 	// ValidateNetwork
 	readyCondition = dataplanev1beta1.ValidateNetworkReadyCondition
 	readyWaitingMessage = dataplanev1beta1.ValidateNetworkReadyWaitingMessage
+	readyMessage = dataplanev1beta1.ValidateNetworkReadyMessage
 	deployFunc = ValidateNetwork
 	deployName = "ValidateNetwork"
 	deployLabel = ValidateNetworkLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -75,7 +85,7 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 
 // ConditionalDeploy function encapsulating primary deloyment handling with
 // conditions.
-func ConditionalDeploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneNodeStatus, readyCondition condition.Type, readyWaitingMessage string, deployFunc deployFuncDef, deployName string, deployLabel string) (ctrl.Result, error) {
+func ConditionalDeploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneNodeStatus, readyCondition condition.Type, readyMessage string, readyWaitingMessage string, deployFunc deployFuncDef, deployName string, deployLabel string) (ctrl.Result, error) {
 
 	var err error
 
@@ -110,7 +120,7 @@ func ConditionalDeploy(ctx context.Context, helper *helper.Helper, obj client.Ob
 			log.Info(fmt.Sprintf("%s ready", readyCondition))
 			status.Conditions.Set(condition.TrueCondition(
 				readyCondition,
-				readyWaitingMessage))
+				readyMessage))
 		} else {
 			log.Info(fmt.Sprintf("%s not yet ready, requeueing", readyCondition))
 			return ctrl.Result{RequeueAfter: time.Second * 2}, nil

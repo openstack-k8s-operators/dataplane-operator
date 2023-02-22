@@ -28,6 +28,9 @@ const (
 	// DataPlaneNodeReadyMessage ready
 	DataPlaneNodeReadyMessage = "DataPlaneNode ready"
 
+	// DataPlaneNodeReadyWaitingMessage ready
+	DataPlaneNodeReadyWaitingMessage = "DataPlaneNode not yet ready"
+
 	// ConfigureNetworkReadyCondition Status=True condition indicates if the
 	// network configuration is finished and successful.
 	ConfigureNetworkReadyCondition condition.Type = "ConfigureNetworkReady"
