@@ -24,6 +24,9 @@ const (
 	// ValidateNetworkLabel for ValidateNetwork OpenStackAnsibleEE
 	ValidateNetworkLabel = "dataplane-deployment-validate-network"
 
+	// InstallOSLabel for InstallOS OpenStackAnsibleEE
+	InstallOSLabel = "dataplane-deployment-install-os"
+
 	// ConfigureOSLabel for ConfigureOS OpenStackAnsibleEE
 	ConfigureOSLabel = "dataplane-deployment-configure-os"
 )

@@ -25,6 +25,67 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// InstallOS ensures the node Operating System is installed
+func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string) error {
+
+	tasks := []dataplaneutil.Task{
+		{
+			Name:          "Install edpm_bootstrap",
+			RoleName:      "edpm_bootstrap",
+			RoleTasksFrom: "bootstrap.yml",
+			Tags:          []string{"edpm_bootstrap"},
+		},
+		{
+			Name:          "Install edpm_kernel",
+			RoleName:      "edpm_kernel",
+			RoleTasksFrom: "main.yml",
+			Tags:          []string{"edpm_kernel"},
+		},
+		{
+			Name:          "Install edpm_podman",
+			RoleName:      "edpm_podman",
+			RoleTasksFrom: "install.yml",
+			Tags:          []string{"edpm_podman"},
+		},
+		{
+			Name:          "Install edpm_sshd",
+			RoleName:      "edpm_sshd",
+			RoleTasksFrom: "install.yml",
+			Tags:          []string{"edpm_sshd"},
+		},
+		{
+			Name:          "Install chrony",
+			RoleName:      "chrony",
+			RoleTasksFrom: "install.yml",
+			Tags:          []string{"chrony"},
+		},
+		{
+			Name:          "Install edpm_ovn",
+			RoleName:      "edpm_ovn",
+			RoleTasksFrom: "install.yml",
+			Tags:          []string{"edpm_ovn"},
+		},
+	}
+	role := ansibleeev1alpha1.Role{
+		Name:           "Deploy EDPM Operating System Install",
+		Hosts:          "all",
+		Strategy:       "linear",
+		GatherFacts:    false,
+		Become:         true,
+		AnyErrorsFatal: true,
+		Tasks:          dataplaneutil.PopulateTasks(tasks),
+	}
+
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, InstallOSLabel, sshKeySecret, inventoryConfigMap, "", role)
+	if err != nil {
+		helper.GetLogger().Error(err, "Unable to execute Ansible for InstallOS")
+		return err
+	}
+
+	return nil
+
+}
+
 // ConfigureOS ensures the node Operating System config
 func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string) error {
 
