@@ -58,6 +58,12 @@ spec:
                         ansiblePort:
                           description: AnsiblePort SSH port for Ansible connection
                           type: integer
+                        ansibleSSHPrivateKeySecret:
+                          description: 'AnsibleSSHPrivateKeySecret Private SSH Key
+                            secret containing private SSH key for connecting to node.
+                            Must be of the form: Secret.data.ssh_private_key: <base64
+                            encoded private key contents>'
+                          type: string
                         ansibleUser:
                           description: AnsibleUser SSH user for Ansible connection
                           type: string
@@ -115,6 +121,12 @@ spec:
                   ansiblePort:
                     description: AnsiblePort SSH port for Ansible connection
                     type: integer
+                  ansibleSSHPrivateKeySecret:
+                    description: 'AnsibleSSHPrivateKeySecret Private SSH Key secret
+                      containing private SSH key for connecting to node. Must be of
+                      the form: Secret.data.ssh_private_key: <base64 encoded private
+                      key contents>'
+                    type: string
                   ansibleUser:
                     description: AnsibleUser SSH user for Ansible connection
                     type: string

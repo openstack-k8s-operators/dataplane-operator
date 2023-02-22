@@ -46,6 +46,7 @@ NodeSection is a specification of the node attributes
 | ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
 | ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
 | ansibleVars | AnsibleVars for configuring ansible | string | false |
+| ansibleSSHPrivateKeySecret | AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH key for connecting to node. Must be of the form: Secret.data.ssh_private_key: <base64 encoded private key contents> | string | true |
 
 [Back to Custom Resources](#custom-resources)
 

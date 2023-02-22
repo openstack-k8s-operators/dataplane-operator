@@ -138,11 +138,8 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
-	// TODO(slagle): fix hardcoded secret name
-	sshKeySecret := "ansibleee-ssh-key-secret"
-
 	if instance.Spec.Deploy {
-		result, err = deployment.Deploy(ctx, helper, instance, sshKeySecret, inventoryConfigMap, &instance.Status)
+		result, err = deployment.Deploy(ctx, helper, instance, instance.Spec.Node.AnsibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			return ctrl.Result{}, err
