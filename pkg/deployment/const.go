@@ -32,4 +32,7 @@ const (
 
 	// RunOSLabel for RunOS OpenStackAnsibleEE
 	RunOSLabel = "dataplane-deployment-run-os"
+
+	// InstallOpenStackLabel for InstallOpenStack OpenStackAnsibleEE
+	InstallOpenStackLabel = "dataplane-deployment-install-openstack"
 )

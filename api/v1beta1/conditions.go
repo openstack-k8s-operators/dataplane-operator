@@ -80,4 +80,14 @@ const (
 
 	// RunOSReadyWaitingMessage not yet ready
 	RunOSReadyWaitingMessage = "RunOS not yet ready"
+
+	// InstallOpenStackReadyCondition Status=True condition indicates if the
+	// OpenStack configuration is finished and successful.
+	InstallOpenStackReadyCondition condition.Type = "InstallOpenStackReady"
+
+	// InstallOpenStackReadyMessage ready
+	InstallOpenStackReadyMessage = "InstallOpenStack ready"
+
+	// InstallOpenStackReadyWaitingMessage not yet ready
+	InstallOpenStackReadyWaitingMessage = "InstallOpenStack not yet ready"
 )

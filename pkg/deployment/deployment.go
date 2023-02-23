@@ -114,6 +114,18 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 		return result, err
 	}
 
+	// InstallOpenStack
+	readyCondition = dataplanev1beta1.InstallOpenStackReadyCondition
+	readyWaitingMessage = dataplanev1beta1.InstallOpenStackReadyWaitingMessage
+	readyMessage = dataplanev1beta1.InstallOpenStackReadyMessage
+	deployFunc = InstallOpenStack
+	deployName = "InstallOpenStack"
+	deployLabel = InstallOpenStackLabel
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	if err != nil || result.RequeueAfter > 0 {
+		return result, err
+	}
+
 	status.Deployed = true
 	return ctrl.Result{}, nil
 
