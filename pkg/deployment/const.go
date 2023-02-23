@@ -38,4 +38,7 @@ const (
 
 	// ConfigureOpenStackLabel for ConfigureOpenStack OpenStackAnsibleEE
 	ConfigureOpenStackLabel = "dataplane-deployment-configure-openstack"
+
+	// RunOpenStackLabel for RunOpenStack OpenStackAnsibleEE
+	RunOpenStackLabel = "dataplane-deployment-run-openstack"
 )

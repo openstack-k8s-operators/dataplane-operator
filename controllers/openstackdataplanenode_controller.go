@@ -117,6 +117,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 			condition.UnknownCondition(dataplanev1beta1.RunOSReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.InstallOpenStackReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.ConfigureOpenStackReadyCondition, condition.InitReason, condition.InitReason),
+			condition.UnknownCondition(dataplanev1beta1.RunOpenStackReadyCondition, condition.InitReason, condition.InitReason),
 		)
 
 		instance.Status.Conditions.Init(&cl)

@@ -108,3 +108,46 @@ func ConfigureOpenStack(ctx context.Context, helper *helper.Helper, obj client.O
 	return nil
 
 }
+
+// RunOpenStack ensures the node OpenStack is running
+func RunOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string) error {
+
+	tasks := []dataplaneutil.Task{
+		{
+			Name:          "Apply nftables configuration",
+			RoleName:      "edpm_nftables",
+			RoleTasksFrom: "run.yml",
+			When:          "deploy_edpm_openstack_run_firewall|default(true)|bool",
+			Tags:          []string{"edpm_firewall"},
+		},
+		{
+			Name:          "Run edpm_logrotate_crond",
+			RoleName:      "edpm_logrotate_crond",
+			RoleTasksFrom: "run.yml",
+			Tags:          []string{"edpm_logrotate_crond"},
+		},
+		{
+			Name:          "Run edpm_iscsid",
+			RoleName:      "edpm_iscsid",
+			RoleTasksFrom: "run.yml",
+			Tags:          []string{"edpm_iscsid"},
+		},
+	}
+	role := ansibleeev1alpha1.Role{
+		Name:           "Deploy EDPM OpenStack Run",
+		Hosts:          "all",
+		Strategy:       "linear",
+		GatherFacts:    false,
+		AnyErrorsFatal: true,
+		Tasks:          dataplaneutil.PopulateTasks(tasks),
+	}
+
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, RunOpenStackLabel, sshKeySecret, inventoryConfigMap, "", role)
+	if err != nil {
+		helper.GetLogger().Error(err, "Unable to execute Ansible for RunOpenStack")
+		return err
+	}
+
+	return nil
+
+}
