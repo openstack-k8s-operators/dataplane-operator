@@ -90,4 +90,14 @@ const (
 
 	// InstallOpenStackReadyWaitingMessage not yet ready
 	InstallOpenStackReadyWaitingMessage = "InstallOpenStack not yet ready"
+
+	// ConfigureOpenStackReadyCondition Status=True condition indicates if the
+	// OpenStack configuration is finished and successful.
+	ConfigureOpenStackReadyCondition condition.Type = "ConfigureOpenStackReady"
+
+	// ConfigureOpenStackReadyMessage ready
+	ConfigureOpenStackReadyMessage = "ConfigureOpenStack ready"
+
+	// ConfigureOpenStackReadyWaitingMessage not yet ready
+	ConfigureOpenStackReadyWaitingMessage = "ConfigureOpenStack not yet ready"
 )

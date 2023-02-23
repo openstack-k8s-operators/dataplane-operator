@@ -60,3 +60,51 @@ func InstallOpenStack(ctx context.Context, helper *helper.Helper, obj client.Obj
 	return nil
 
 }
+
+// ConfigureOpenStack ensures the node OpenStack config
+func ConfigureOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string) error {
+
+	tasks := []dataplaneutil.Task{
+		{
+			Name:          "Configure edpm_ssh_known_hosts",
+			RoleName:      "edpm_ssh_known_hosts",
+			RoleTasksFrom: "main.yml",
+			Tags:          []string{"edpm_ssh_known_hosts"},
+		},
+		{
+			Name:          "Configure edpm_logrotate_crond",
+			RoleName:      "edpm_logrotate_crond",
+			RoleTasksFrom: "configure.yml",
+			Tags:          []string{"edpm_logrotate_crond"},
+		},
+		{
+			Name:          "Configure edpm_iscsid",
+			RoleName:      "edpm_iscsid",
+			RoleTasksFrom: "configure.yml",
+			Tags:          []string{"edpm_iscsid"},
+		},
+		{
+			Name:          "Configure nftables",
+			RoleName:      "edpm_nftables",
+			RoleTasksFrom: "configure.yml",
+			Tags:          []string{"edpm_firewall"},
+		},
+	}
+	role := ansibleeev1alpha1.Role{
+		Name:           "Deploy EDPM OpenStack Configure",
+		Hosts:          "all",
+		Strategy:       "linear",
+		GatherFacts:    false,
+		AnyErrorsFatal: true,
+		Tasks:          dataplaneutil.PopulateTasks(tasks),
+	}
+
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureOpenStackLabel, sshKeySecret, inventoryConfigMap, "", role)
+	if err != nil {
+		helper.GetLogger().Error(err, "Unable to execute Ansible for ConfigureOpenStack")
+		return err
+	}
+
+	return nil
+
+}

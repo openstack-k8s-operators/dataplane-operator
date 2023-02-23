@@ -35,4 +35,7 @@ const (
 
 	// InstallOpenStackLabel for InstallOpenStack OpenStackAnsibleEE
 	InstallOpenStackLabel = "dataplane-deployment-install-openstack"
+
+	// ConfigureOpenStackLabel for ConfigureOpenStack OpenStackAnsibleEE
+	ConfigureOpenStackLabel = "dataplane-deployment-configure-openstack"
 )
