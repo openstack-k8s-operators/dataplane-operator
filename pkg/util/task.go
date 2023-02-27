@@ -25,6 +25,7 @@ type Task struct {
 	Name          string
 	RoleName      string
 	RoleTasksFrom string
+	When          string
 	Tags          []string
 }
 
@@ -35,10 +36,15 @@ func PopulateTasks(tasks []Task) []ansibleeev1alpha1.Task {
 		aeeTask := ansibleeev1alpha1.Task{
 			Name: task.Name,
 			ImportRole: ansibleeev1alpha1.ImportRole{
-				Name:      task.RoleName,
-				TasksFrom: task.RoleTasksFrom,
+				Name: task.RoleName,
 			},
 			Tags: task.Tags,
+		}
+		if len(task.RoleTasksFrom) > 0 {
+			aeeTask.ImportRole.TasksFrom = task.RoleTasksFrom
+		}
+		if len(task.When) > 0 {
+			aeeTask.When = task.When
 		}
 		populated = append(populated, aeeTask)
 	}

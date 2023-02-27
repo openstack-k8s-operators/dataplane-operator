@@ -114,6 +114,42 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 		return result, err
 	}
 
+	// InstallOpenStack
+	readyCondition = dataplanev1beta1.InstallOpenStackReadyCondition
+	readyWaitingMessage = dataplanev1beta1.InstallOpenStackReadyWaitingMessage
+	readyMessage = dataplanev1beta1.InstallOpenStackReadyMessage
+	deployFunc = InstallOpenStack
+	deployName = "InstallOpenStack"
+	deployLabel = InstallOpenStackLabel
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	if err != nil || result.RequeueAfter > 0 {
+		return result, err
+	}
+
+	// ConfigureOpenStack
+	readyCondition = dataplanev1beta1.ConfigureOpenStackReadyCondition
+	readyWaitingMessage = dataplanev1beta1.ConfigureOpenStackReadyWaitingMessage
+	readyMessage = dataplanev1beta1.ConfigureOpenStackReadyMessage
+	deployFunc = ConfigureOpenStack
+	deployName = "ConfigureOpenStack"
+	deployLabel = ConfigureOpenStackLabel
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	if err != nil || result.RequeueAfter > 0 {
+		return result, err
+	}
+
+	// RunOpenStack
+	readyCondition = dataplanev1beta1.RunOpenStackReadyCondition
+	readyWaitingMessage = dataplanev1beta1.RunOpenStackReadyWaitingMessage
+	readyMessage = dataplanev1beta1.RunOpenStackReadyMessage
+	deployFunc = RunOpenStack
+	deployName = "RunOpenStack"
+	deployLabel = RunOpenStackLabel
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	if err != nil || result.RequeueAfter > 0 {
+		return result, err
+	}
+
 	status.Deployed = true
 	return ctrl.Result{}, nil
 
