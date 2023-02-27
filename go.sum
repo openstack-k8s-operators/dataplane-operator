@@ -248,6 +248,8 @@ github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
 github.com/julienschmidt/httprouter v1.3.0/go.mod h1:JR6WtHb+2LUe8TCKY3cZOxFyyO8IZAc4RVcycCCAKdM=
+github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0 h1:VzM3TYHDgqPkettiP6I6q2jOeQFL4nrJM+UcAc4f6Fs=
+github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0/go.mod h1:nqCI7aelBJU61wiBeeZWJ6oi4bJy5nrjkM6lWIMA4j0=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
@@ -297,8 +299,8 @@ github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-202302201815
 github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230220181542-93a9b32e5ec9/go.mod h1:wDUzrnAhtC0O99PYR8qQWQoGJzVQwGnfGepKzExCVk8=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230208113903-f7b52e2a2ccb h1:ryKoUXxe7kfpfCJoYd0wj9JkYcO6HmLgM+d3+L4AStM=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230208113903-f7b52e2a2ccb/go.mod h1:I8t9nOD+GpfOakInGk9C47aIrI0ZvKTKiuhz9G3tehU=
-github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230222135334-953811b64fb2 h1:i/9FEFGXfteEZgI9KDPSwRsdMPE6XLiL7z7zXTyoJGw=
-github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230222135334-953811b64fb2/go.mod h1:E8kMTFI2Baxfzehs77WUF6ZJ3VcElO9ZJagyTNtHBRI=
+github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230227162821-9b918c2f2da5 h1:lC6Map9XCeQwItw2QbaJJ4Eh19NBUNifDDm6+FecEtE=
+github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230227162821-9b918c2f2da5/go.mod h1:NI3NHazp637VOmH/hWgnH50uE5gj+YXF2aIFNh5z/28=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

@@ -52,6 +52,13 @@ spec:
                     hostName:
                       description: HostName - node name
                       type: string
+                    networkAttachments:
+                      description: NetworkAttachments is a list of NetworkAttachment
+                        resource names to pass to the ansibleee resource which allows
+                        to connect the ansibleee runner to the given network
+                      items:
+                        type: string
+                      type: array
                     node:
                       description: Node - node attributes specific to this node
                       properties:

@@ -6,13 +6,14 @@ replace github.com/openstack-k8s-operators/dataplane-operator/api => ./api
 
 require (
 	github.com/go-logr/logr v1.2.3
+	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.26.0
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.0.0-20230220181542-93a9b32e5ec9
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230220181542-93a9b32e5ec9
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230208113903-f7b52e2a2ccb
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230222135334-953811b64fb2
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230227162821-9b918c2f2da5
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.25.4
 	k8s.io/apimachinery v0.25.4

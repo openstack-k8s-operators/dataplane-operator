@@ -37,7 +37,17 @@ import (
 )
 
 // AnsibleExecution creates a OpenStackAnsiblEE CR
-func AnsibleExecution(ctx context.Context, helper *helper.Helper, obj client.Object, label string, sshKeySecret string, inventoryConfigMap string, play string, role ansibleeev1alpha1.Role) error {
+func AnsibleExecution(
+	ctx context.Context,
+	helper *helper.Helper,
+	obj client.Object,
+	label string,
+	sshKeySecret string,
+	inventoryConfigMap string,
+	play string,
+	role ansibleeev1alpha1.Role,
+	networkAttachments []string,
+) error {
 
 	var err error
 
@@ -60,6 +70,7 @@ func AnsibleExecution(ctx context.Context, helper *helper.Helper, obj client.Obj
 
 	_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), ansibleEE, func() error {
 		ansibleEE.Spec.Image = "quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
+		ansibleEE.Spec.NetworkAttachments = networkAttachments
 		// TODO(slagle): Handle either play or role being specified
 		ansibleEE.Spec.Role = role
 

@@ -49,6 +49,11 @@ type OpenStackDataPlaneNodeSpec struct {
 	// NodeFrom - Existing node name to reference. Can only be used if Node is
 	// empty.
 	NodeFrom string `json:"nodeFrom,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
+	// which allows to connect the ansibleee runner to the given network
+	NetworkAttachments []string `json:"networkAttachments"`
 }
 
 // NodeSection is a specification of the node attributes
