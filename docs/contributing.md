@@ -39,7 +39,7 @@ Create a `puml` file inside `docs/diagrams/src`
 touch docs/diagrams/src/demo.puml
 ```
 
-Check the PlantUML sintax here: <https://plantuml.com/deployment-diagram>
+Check the PlantUML syntax here: <https://plantuml.com/deployment-diagram>
 
 Serve docs site on localhost:
 
