@@ -28,20 +28,20 @@ folder AEEconfigmap #line.bold
 
 user --> OCPCR #line:red;line.bold;text:red  : applies
 user --> ODPCR #line:red;line.bold;text:red  : applies
-OCPCR --> OSOp #line:brown;line.bold
-ODPCR --> OSOp #line:brown;line.bold
+OCPCR <-- OSOp #line:brown;line.bold;text:brown : reconciles
+ODPCR <-- OSOp #line:brown;line.bold;text:brown : reconciles
 OSOp --> NCR #line:purple;line.bold;text:purple  : creates
 OSOp --> ODPNCR #line:purple;line.bold;text:purple  : creates
 OSOp --> ODPRCR #line:purple;line.bold;text:purple  : creates
-ODPNCR --> DOp #line:brown;line.bold
-ODPRCR --> DOp #line:brown;line.bold
-NCR --> NOp #line:brown;line.bold
+ODPNCR <-- DOp #line:brown;line.bold;text:brown : reconciles
+ODPRCR <-- DOp #line:brown;line.bold;text:brown : reconciles
+NCR <-- NOp #line:brown;line.bold;text:brown : reconciles
 DOp --> AEECR #line:purple;line.bold;text:purple  : creates
 DOp --> NECCR #line:purple;line.bold;text:purple  : creates
-AEECR --> AEEOp #line:brown;line.bold
-NECCR --> NOp #line:brown;line.bold
-AEEOp --> AJI #line:blue;line.bold
-AEEOp --> AJNC #line:blue;line.bold
+AEECR <-- AEEOp #line:brown;line.bold;text:brown : reconciles
+NECCR <-- NOp #line:brown;line.bold;text:brown : reconciles
+AEEOp --> AJI #line:blue;line.bold;text:blue : yields
+AEEOp --> AJNC #line:blue;line.bold;text:blue : yields
 NOp --> AEECR #line:purple;line.bold;text:purple  : creates
 NOp --> NCeCR #line:purple;line.bold;text:purple  : creates
 NOp --> NCoCR #line:purple;line.bold;text:purple  : creates
