@@ -47,6 +47,7 @@ func AnsibleExecution(
 	play string,
 	role ansibleeev1alpha1.Role,
 	networkAttachments []string,
+	openStackAnsibleEERunnerImage string,
 ) error {
 
 	var err error
@@ -69,7 +70,7 @@ func AnsibleExecution(
 	}
 
 	_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), ansibleEE, func() error {
-		ansibleEE.Spec.Image = "quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
+		ansibleEE.Spec.Image = openStackAnsibleEERunnerImage
 		ansibleEE.Spec.NetworkAttachments = networkAttachments
 		// TODO(slagle): Handle either play or role being specified
 		ansibleEE.Spec.Role = role

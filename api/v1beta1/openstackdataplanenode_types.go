@@ -54,6 +54,11 @@ type OpenStackDataPlaneNodeSpec struct {
 	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
 	// which allows to connect the ansibleee runner to the given network
 	NetworkAttachments []string `json:"networkAttachments"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
+	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
+	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage"`
 }
 
 // NodeSection is a specification of the node attributes

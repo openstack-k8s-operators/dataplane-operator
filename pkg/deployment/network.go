@@ -27,7 +27,7 @@ import (
 )
 
 // ConfigureNetwork ensures the network config
-func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string) error {
+func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string) error {
 
 	role := ansibleeev1alpha1.Role{
 		Name:     "edpm_network_config",
@@ -44,7 +44,7 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Obj
 		},
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureNetworkLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureNetworkLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for ConfigureNetwork")
 		return err
@@ -55,7 +55,7 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Obj
 }
 
 // ValidateNetwork ensures the node network config
-func ValidateNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string) error {
+func ValidateNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string) error {
 
 	role := ansibleeev1alpha1.Role{
 		Name:     "edpm_nodes_validation",
@@ -72,7 +72,7 @@ func ValidateNetwork(ctx context.Context, helper *helper.Helper, obj client.Obje
 		},
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ValidateNetworkLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ValidateNetworkLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for ValidateNetwork")
 		return err

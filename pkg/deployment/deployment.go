@@ -33,7 +33,7 @@ import (
 )
 
 // deployFuncDef so we can pass a function to ConditionalDeploy
-type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string, []string) error
+type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string, []string, string) error
 
 // Deploy function encapsulating primary deloyment handling
 func Deploy(
@@ -44,6 +44,7 @@ func Deploy(
 	inventoryConfigMap string,
 	status *dataplanev1beta1.OpenStackDataPlaneNodeStatus,
 	networkAttachments []string,
+	openStackAnsibleEERunnerImage string,
 ) (ctrl.Result, error) {
 
 	var result ctrl.Result
@@ -69,7 +70,7 @@ func Deploy(
 	deployFunc = ConfigureNetwork
 	deployName = "ConfigureNetwork"
 	deployLabel = ConfigureNetworkLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments, openStackAnsibleEERunnerImage)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -81,7 +82,7 @@ func Deploy(
 	deployFunc = ValidateNetwork
 	deployName = "ValidateNetwork"
 	deployLabel = ValidateNetworkLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments, openStackAnsibleEERunnerImage)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -93,7 +94,7 @@ func Deploy(
 	deployFunc = InstallOS
 	deployName = "InstallOS"
 	deployLabel = InstallOSLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments, openStackAnsibleEERunnerImage)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -105,7 +106,7 @@ func Deploy(
 	deployFunc = ConfigureOS
 	deployName = "ConfigureOS"
 	deployLabel = ConfigureOSLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments, openStackAnsibleEERunnerImage)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -117,7 +118,7 @@ func Deploy(
 	deployFunc = RunOS
 	deployName = "RunOS"
 	deployLabel = RunOSLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments, openStackAnsibleEERunnerImage)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -129,7 +130,7 @@ func Deploy(
 	deployFunc = InstallOpenStack
 	deployName = "InstallOpenStack"
 	deployLabel = InstallOpenStackLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments, openStackAnsibleEERunnerImage)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -141,7 +142,7 @@ func Deploy(
 	deployFunc = ConfigureOpenStack
 	deployName = "ConfigureOpenStack"
 	deployLabel = ConfigureOpenStackLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments, openStackAnsibleEERunnerImage)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -153,7 +154,7 @@ func Deploy(
 	deployFunc = RunOpenStack
 	deployName = "RunOpenStack"
 	deployLabel = RunOpenStackLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments, openStackAnsibleEERunnerImage)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -179,6 +180,7 @@ func ConditionalDeploy(
 	deployName string,
 	deployLabel string,
 	networkAttachments []string,
+	openStackAnsibleEERunnerImage string,
 ) (ctrl.Result, error) {
 
 	var err error
@@ -186,7 +188,7 @@ func ConditionalDeploy(
 
 	if status.Conditions.IsUnknown(readyCondition) {
 		log.Info(fmt.Sprintf("%s Unknown, starting %s", readyCondition, deployName))
-		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap, networkAttachments)
+		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap, networkAttachments, openStackAnsibleEERunnerImage)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to %s for %s", deployName, obj.GetName()), obj)
 			return ctrl.Result{}, err
