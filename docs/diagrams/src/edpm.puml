@@ -1,0 +1,54 @@
+@startuml
+actor "Human Operator" as user #blue;line:blue;line.bold;text:blue
+
+file "OpenStack Control Plane CR" as OCPCR #pink;line:red;line.bold;text:red
+file "OpenStack Data Plane CR" as ODPCR #pink;line:red;line.bold;text:red
+file "OpenStack Data Plane Node CR" as ODPNCR #line:red;line.bold;text:red
+file "OpenStack Data Plane Role CR" as ODPRCR #line:red;line.bold;text:red
+file "Nova CR" as NCR #line:red;line.bold;text:red
+file "OpenStack AnsibleEE CR" as AEECR #line:red;line.bold;text:red
+file "Nova External Compute CR" as NECCR #line:red;line.bold;text:red
+file "Nova Cell CR" as NCeCR #line:red;line.bold;text:red
+file "Nova Conductor CR" as NCoCR #line:red;line.bold;text:red
+
+rectangle "OpenStack Operator" as OSOp #line.bold
+rectangle "Dataplane Operator" as DOp #line.bold
+rectangle "Nova Operator" as NOp #line.bold
+rectangle "AnsibleEE Operator" as AEEOp #line.bold
+
+usecase "Ansible Job - Infra" as AJI #line:green;line.bold
+usecase "Ansible Job - Nova Config" as AJNC #line:green;line.bold
+
+boundary secret #line.bold
+boundary NovaSecret #line.bold
+
+folder configmap #line.bold
+folder NovaConfigMap #line.bold
+folder AEEconfigmap #line.bold
+
+user --> OCPCR #line:red;line.bold;text:red  : applies
+user --> ODPCR #line:red;line.bold;text:red  : applies
+OCPCR --> OSOp #line:brown;line.bold
+ODPCR --> OSOp #line:brown;line.bold
+OSOp --> NCR #line:purple;line.bold;text:purple  : creates
+OSOp --> ODPNCR #line:purple;line.bold;text:purple  : creates
+OSOp --> ODPRCR #line:purple;line.bold;text:purple  : creates
+ODPNCR --> DOp #line:brown;line.bold
+ODPRCR --> DOp #line:brown;line.bold
+NCR --> NOp #line:brown;line.bold
+DOp --> AEECR #line:purple;line.bold;text:purple  : creates
+DOp --> NECCR #line:purple;line.bold;text:purple  : creates
+AEECR --> AEEOp #line:brown;line.bold
+NECCR --> NOp #line:brown;line.bold
+AEEOp --> AJI #line:blue;line.bold
+AEEOp --> AJNC #line:blue;line.bold
+NOp --> AEECR #line:purple;line.bold;text:purple  : creates
+NOp --> NCeCR #line:purple;line.bold;text:purple  : creates
+NOp --> NCoCR #line:purple;line.bold;text:purple  : creates
+NCR --> NovaSecret #line:green;line.bold;text:green  : mounts
+NCR --> NovaConfigMap #line:green;line.bold;text:green  : mounts
+NECCR --> secret #line:green;line.bold;text:green  : mounts
+NECCR --> configmap #line:green;line.bold;text:green  : mounts
+AEECR --> AEEconfigmap #line:green;line.bold;text:green  : mounts
+
+@enduml

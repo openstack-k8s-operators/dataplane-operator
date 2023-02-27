@@ -31,6 +31,7 @@ nav:
       - OpenStackDataPlaneNode: openstack_dataplanenode.md
       - OpenStackDataPlaneRole: openstack_dataplanerole.md
       - Inheritance: inheritance.md
+  - Architecture: architecture.md
   - Contributing: contributing.md
 markdown_extensions:
   - toc:
@@ -43,6 +44,9 @@ extra:
     default: latest
 plugins:
   - git-revision-date
+  - build_plantuml:
+      diagram_root: "docs/diagrams"
+      output_format: "svg"
   - search:
       lang: en
       prebuild_index: true
