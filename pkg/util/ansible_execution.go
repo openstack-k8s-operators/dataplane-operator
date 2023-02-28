@@ -71,7 +71,7 @@ func AnsibleExecution(ctx context.Context, helper *helper.Helper, obj client.Obj
 					SecretName: sshKeySecret,
 					Items: []corev1.KeyToPath{
 						{
-							Key:  "ssh_private_key",
+							Key:  "ssh-privatekey",
 							Path: "ssh_key",
 						},
 					},

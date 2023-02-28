@@ -27,8 +27,8 @@ spec:
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:number
       - description: 'AnsibleSSHPrivateKeySecret Private SSH Key secret containing
-          private SSH key for connecting to node. Must be of the form: Secret.data.ssh_private_key:
-          <base64 encoded private key contents>'
+          private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey:
+          <base64 encoded private key contents> https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets'
         displayName: Ansible SSHPrivate Key Secret
         path: node.ansibleSSHPrivateKeySecret
         x-descriptors:
@@ -68,8 +68,8 @@ spec:
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:number
       - description: 'AnsibleSSHPrivateKeySecret Private SSH Key secret containing
-          private SSH key for connecting to node. Must be of the form: Secret.data.ssh_private_key:
-          <base64 encoded private key contents>'
+          private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey:
+          <base64 encoded private key contents> https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets'
         displayName: Ansible SSHPrivate Key Secret
         path: dataPlaneNodes[0].node.ansibleSSHPrivateKeySecret
         x-descriptors:
@@ -86,8 +86,8 @@ spec:
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:number
       - description: 'AnsibleSSHPrivateKeySecret Private SSH Key secret containing
-          private SSH key for connecting to node. Must be of the form: Secret.data.ssh_private_key:
-          <base64 encoded private key contents>'
+          private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey:
+          <base64 encoded private key contents> https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets'
         displayName: Ansible SSHPrivate Key Secret
         path: nodeTemplate.ansibleSSHPrivateKeySecret
         x-descriptors:
@@ -115,8 +115,8 @@ spec:
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:number
       - description: 'AnsibleSSHPrivateKeySecret Private SSH Key secret containing
-          private SSH key for connecting to node. Must be of the form: Secret.data.ssh_private_key:
-          <base64 encoded private key contents>'
+          private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey:
+          <base64 encoded private key contents> https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets'
         displayName: Ansible SSHPrivate Key Secret
         path: dataPlaneRoles[0].dataPlaneNodes[0].node.ansibleSSHPrivateKeySecret
         x-descriptors:
@@ -133,8 +133,8 @@ spec:
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:number
       - description: 'AnsibleSSHPrivateKeySecret Private SSH Key secret containing
-          private SSH key for connecting to node. Must be of the form: Secret.data.ssh_private_key:
-          <base64 encoded private key contents>'
+          private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey:
+          <base64 encoded private key contents> https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets'
         displayName: Ansible SSHPrivate Key Secret
         path: dataPlaneRoles[0].nodeTemplate.ansibleSSHPrivateKeySecret
         x-descriptors:

@@ -61,8 +61,8 @@ spec:
                         ansibleSSHPrivateKeySecret:
                           description: 'AnsibleSSHPrivateKeySecret Private SSH Key
                             secret containing private SSH key for connecting to node.
-                            Must be of the form: Secret.data.ssh_private_key: <base64
-                            encoded private key contents>'
+                            Must be of the form: Secret.data.ssh-privatekey: <base64
+                            encoded private key contents> https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets'
                           type: string
                         ansibleUser:
                           description: AnsibleUser SSH user for Ansible connection
@@ -103,6 +103,8 @@ spec:
                                 type: string
                             type: object
                           type: array
+                      required:
+                      - ansibleSSHPrivateKeySecret
                       type: object
                     nodeFrom:
                       description: NodeFrom - Existing node name to reference. Can
@@ -124,8 +126,8 @@ spec:
                   ansibleSSHPrivateKeySecret:
                     description: 'AnsibleSSHPrivateKeySecret Private SSH Key secret
                       containing private SSH key for connecting to node. Must be of
-                      the form: Secret.data.ssh_private_key: <base64 encoded private
-                      key contents>'
+                      the form: Secret.data.ssh-privatekey: <base64 encoded private
+                      key contents> https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets'
                     type: string
                   ansibleUser:
                     description: AnsibleUser SSH user for Ansible connection
@@ -166,6 +168,8 @@ spec:
                           type: string
                       type: object
                     type: array
+                required:
+                - ansibleSSHPrivateKeySecret
                 type: object
             type: object
           status:
