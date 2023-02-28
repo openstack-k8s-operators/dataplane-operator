@@ -33,10 +33,18 @@ import (
 )
 
 // deployFuncDef so we can pass a function to ConditionalDeploy
-type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string) error
+type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string, []string) error
 
 // Deploy function encapsulating primary deloyment handling
-func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneNodeStatus) (ctrl.Result, error) {
+func Deploy(
+	ctx context.Context,
+	helper *helper.Helper,
+	obj client.Object,
+	sshKeySecret string,
+	inventoryConfigMap string,
+	status *dataplanev1beta1.OpenStackDataPlaneNodeStatus,
+	networkAttachments []string,
+) (ctrl.Result, error) {
 
 	var result ctrl.Result
 	var err error
@@ -61,7 +69,7 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 	deployFunc = ConfigureNetwork
 	deployName = "ConfigureNetwork"
 	deployLabel = ConfigureNetworkLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -73,7 +81,7 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 	deployFunc = ValidateNetwork
 	deployName = "ValidateNetwork"
 	deployLabel = ValidateNetworkLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -85,7 +93,7 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 	deployFunc = InstallOS
 	deployName = "InstallOS"
 	deployLabel = InstallOSLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -97,7 +105,7 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 	deployFunc = ConfigureOS
 	deployName = "ConfigureOS"
 	deployLabel = ConfigureOSLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -109,7 +117,7 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 	deployFunc = RunOS
 	deployName = "RunOS"
 	deployLabel = RunOSLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -121,7 +129,7 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 	deployFunc = InstallOpenStack
 	deployName = "InstallOpenStack"
 	deployLabel = InstallOpenStackLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -133,7 +141,7 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 	deployFunc = ConfigureOpenStack
 	deployName = "ConfigureOpenStack"
 	deployLabel = ConfigureOpenStackLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -145,7 +153,7 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 	deployFunc = RunOpenStack
 	deployName = "RunOpenStack"
 	deployLabel = RunOpenStackLabel
-	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel)
+	result, err = ConditionalDeploy(ctx, helper, obj, sshKeySecret, inventoryConfigMap, status, readyCondition, readyMessage, readyWaitingMessage, deployFunc, deployName, deployLabel, networkAttachments)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -157,15 +165,28 @@ func Deploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKe
 
 // ConditionalDeploy function encapsulating primary deloyment handling with
 // conditions.
-func ConditionalDeploy(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneNodeStatus, readyCondition condition.Type, readyMessage string, readyWaitingMessage string, deployFunc deployFuncDef, deployName string, deployLabel string) (ctrl.Result, error) {
+func ConditionalDeploy(
+	ctx context.Context,
+	helper *helper.Helper,
+	obj client.Object,
+	sshKeySecret string,
+	inventoryConfigMap string,
+	status *dataplanev1beta1.OpenStackDataPlaneNodeStatus,
+	readyCondition condition.Type,
+	readyMessage string,
+	readyWaitingMessage string,
+	deployFunc deployFuncDef,
+	deployName string,
+	deployLabel string,
+	networkAttachments []string,
+) (ctrl.Result, error) {
 
 	var err error
-
 	log := helper.GetLogger()
 
 	if status.Conditions.IsUnknown(readyCondition) {
 		log.Info(fmt.Sprintf("%s Unknown, starting %s", readyCondition, deployName))
-		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap)
+		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap, networkAttachments)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to %s for %s", deployName, obj.GetName()), obj)
 			return ctrl.Result{}, err

@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	networkv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/controllers"
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
@@ -49,6 +50,7 @@ func init() {
 
 	utilruntime.Must(dataplanev1beta1.AddToScheme(scheme))
 	utilruntime.Must(ansibleeev1alpha1.AddToScheme(scheme))
+	utilruntime.Must(networkv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

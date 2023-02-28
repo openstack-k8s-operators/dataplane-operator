@@ -85,6 +85,7 @@ OpenStackDataPlaneNodeSpec defines the desired state of OpenStackDataPlaneNode
 | ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
 | deploy | Deploy boolean to trigger ansible execution | bool | true |
 | nodeFrom | NodeFrom - Existing node name to reference. Can only be used if Node is empty. | string | false |
+| networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |
 
 [Back to Custom Resources](#custom-resources)
 

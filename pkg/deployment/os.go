@@ -26,7 +26,7 @@ import (
 )
 
 // InstallOS ensures the node Operating System is installed
-func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string) error {
+func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -76,7 +76,7 @@ func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, ss
 		Tasks:          dataplaneutil.PopulateTasks(tasks),
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, InstallOSLabel, sshKeySecret, inventoryConfigMap, "", role)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, InstallOSLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for InstallOS")
 		return err
@@ -87,7 +87,7 @@ func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, ss
 }
 
 // ConfigureOS ensures the node Operating System config
-func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string) error {
+func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -143,7 +143,7 @@ func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, 
 		Tasks:          dataplaneutil.PopulateTasks(tasks),
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureOSLabel, sshKeySecret, inventoryConfigMap, "", role)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureOSLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for ConfigureOS")
 		return err
@@ -154,7 +154,7 @@ func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, 
 }
 
 // RunOS ensures the node Operating System is running
-func RunOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string) error {
+func RunOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -204,7 +204,7 @@ func RunOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKey
 		Tasks:          dataplaneutil.PopulateTasks(tasks),
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, RunOSLabel, sshKeySecret, inventoryConfigMap, "", role)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, RunOSLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for RunOS")
 		return err

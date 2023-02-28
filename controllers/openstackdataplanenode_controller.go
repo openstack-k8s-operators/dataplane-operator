@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/go-logr/logr"
 	yaml "gopkg.in/yaml.v3"
@@ -37,6 +38,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/ansible"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	nad "github.com/openstack-k8s-operators/lib-common/modules/common/networkattachment"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
@@ -55,6 +57,7 @@ type OpenStackDataPlaneNodeReconciler struct {
 //+kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
+// +kubebuilder:rbac:groups=k8s.cni.cncf.io,resources=network-attachment-definitions,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -131,6 +134,29 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 	}
 
+	// check if provided network attachments exist
+	for _, netAtt := range instance.Spec.NetworkAttachments {
+		_, err := nad.GetNADWithName(ctx, helper, netAtt, instance.Namespace)
+		if err != nil {
+			if k8s_errors.IsNotFound(err) {
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					condition.NetworkAttachmentsReadyCondition,
+					condition.RequestedReason,
+					condition.SeverityInfo,
+					condition.NetworkAttachmentsReadyWaitingMessage,
+					netAtt))
+				return ctrl.Result{RequeueAfter: time.Second * 10}, fmt.Errorf("network-attachment-definition %s not found", netAtt)
+			}
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				condition.NetworkAttachmentsReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				condition.NetworkAttachmentsReadyErrorMessage,
+				err.Error()))
+			return ctrl.Result{}, err
+		}
+	}
+
 	if instance.Spec.Node.Managed {
 		err = r.Provision(ctx, instance)
 		if err != nil {
@@ -146,7 +172,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	}
 
 	if instance.Spec.Deploy {
-		result, err = deployment.Deploy(ctx, helper, instance, instance.Spec.Node.AnsibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status)
+		result, err = deployment.Deploy(ctx, helper, instance, instance.Spec.Node.AnsibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status, instance.Spec.NetworkAttachments)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			return ctrl.Result{}, err
