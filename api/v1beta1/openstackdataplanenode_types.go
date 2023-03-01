@@ -96,6 +96,7 @@ type NodeSection struct {
 	// AnsibleVars for configuring ansible
 	AnsibleVars string `json:"ansibleVars,omitempty"`
 
+	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
 	// AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH
 	// key for connecting to node. Must be of the form:
