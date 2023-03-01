@@ -19,6 +19,8 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -112,6 +114,11 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		return result, err
 	}
 
+	instanceRole, err := r.GetInstanceRole(ctx, instance)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	// Always patch the instance status when exiting this function so we can
 	// persist any changes.
 	defer func() {
@@ -146,7 +153,6 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		// Register overall status immediately to have an early feedback e.g.
 		// in the cli
 		return ctrl.Result{}, nil
-
 	}
 
 	// check if provided network attachments exist
@@ -180,7 +186,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		}
 	}
 
-	inventoryConfigMap, err := r.GenerateInventory(ctx, instance)
+	inventoryConfigMap, err := r.GenerateInventory(ctx, instance, instanceRole)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
 		return ctrl.Result{}, err
@@ -218,7 +224,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Provision(ctx context.Context, instan
 }
 
 // GenerateInventory yields a parsed Inventory
-func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode) (string, error) {
+func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) (string, error) {
 	var (
 		err      error
 		hostName string
@@ -227,11 +233,13 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 	inventory := ansible.MakeInventory()
 	all := inventory.AddGroup("all")
 	host := all.AddHost(instance.Name)
-	host.Vars["ansible_user"] = instance.Spec.Node.AnsibleUser
 
-	if instance.Spec.Node.AnsiblePort != 0 {
-		host.Vars["ansible_port"] = instance.Spec.Node.AnsiblePort
-	}
+	host.Vars["ansible_user"] = r.GetAnsibleUser(instance, instanceRole)
+	host.Vars["ansible_port"] = r.GetAnsiblePort(instance, instanceRole)
+	host.Vars["managed"] = r.GetAnsibleManaged(instance, instanceRole)
+	host.Vars["management_network"] = r.GetAnsibleManagementNetwork(instance, instanceRole)
+	host.Vars["network_config"] = r.GetAnsibleNetworkConfig(instance, instanceRole)
+	host.Vars["networks"] = r.GetAnsibleNetworks(instance, instanceRole)
 
 	if instance.Spec.AnsibleHost == "" {
 		hostName = instance.Spec.HostName
@@ -241,7 +249,7 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 	host.Vars["ansible_host"] = hostName
 
 	ansibleVarsData := make(map[string]interface{})
-	err = yaml.Unmarshal([]byte(instance.Spec.Node.AnsibleVars), ansibleVarsData)
+	err = yaml.Unmarshal([]byte(r.GetAnsibleVars(instance, instanceRole)), ansibleVarsData)
 	if err != nil {
 		return "", err
 	}
@@ -280,4 +288,80 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 	}
 
 	return configMapName, nil
+}
+
+// GetInstanceRole returns the role of a node based on the node's role name
+func (r *OpenStackDataPlaneNodeReconciler) GetInstanceRole(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode) (*dataplanev1beta1.OpenStackDataPlaneRole, error) {
+	// Use the instances's role name to get its role object
+	var err error
+	instanceRole := &dataplanev1beta1.OpenStackDataPlaneRole{}
+	err = r.Client.Get(ctx, client.ObjectKey{
+		Namespace: instance.Namespace,
+		Name:      instance.Spec.Role,
+	}, instanceRole)
+	return instanceRole, err
+}
+
+// GetAnsibleUser returns the string value from the template unless it is set in the node
+func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleUser(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
+	if instance.Spec.Node.AnsibleUser != "" {
+		return instance.Spec.Node.AnsibleUser
+	}
+	return instanceRole.Spec.NodeTemplate.AnsibleUser
+}
+
+// GetAnsiblePort returns the string value from the template unless it is set in the node
+func (r *OpenStackDataPlaneNodeReconciler) GetAnsiblePort(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
+	if instance.Spec.Node.AnsiblePort > 0 {
+		return strconv.Itoa(instance.Spec.Node.AnsiblePort)
+	}
+	return strconv.Itoa(instanceRole.Spec.NodeTemplate.AnsiblePort)
+}
+
+// GetAnsibleManaged returns the string (from boolean) value from the template unless it is set in the node
+func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleManaged(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
+	if instance.Spec.Node.Managed {
+		return strconv.FormatBool(instance.Spec.Node.Managed)
+	}
+	return strconv.FormatBool(instanceRole.Spec.NodeTemplate.Managed)
+}
+
+// GetAnsibleManagementNetwork returns the string value from the template unless it is set in the node
+func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleManagementNetwork(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
+	if instance.Spec.Node.ManagementNetwork != "" {
+		return instance.Spec.Node.ManagementNetwork
+	}
+	return instanceRole.Spec.NodeTemplate.ManagementNetwork
+}
+
+// GetAnsibleNetworkConfig returns a JSON string value from the template unless it is set in the node
+func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleNetworkConfig(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
+	if instance.Spec.Node.NetworkConfig != instanceRole.Spec.NodeTemplate.NetworkConfig {
+		return fmt.Sprintf("{template: %s}", instance.Spec.Node.NetworkConfig)
+
+	}
+	return fmt.Sprintf("{template: %s}", instanceRole.Spec.NodeTemplate.NetworkConfig.Template)
+}
+
+// GetAnsibleNetworks returns a JSON string mapping fixedIP and/or network name to their valules
+func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleNetworks(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
+	var network string // the resulting string containing each network
+	for _, netMap := range instance.Spec.Node.Networks {
+		if netMap.FixedIP != "" && netMap.Network == "" {
+			network += fmt.Sprintf("{%s: %s},", "fixedIP", netMap.FixedIP)
+		}
+		if netMap.FixedIP != "" && netMap.Network != "" {
+			network += fmt.Sprintf("{%s: %s, %s: %s},",
+				"fixedIP", netMap.FixedIP, "network", netMap.Network)
+		}
+	}
+	return fmt.Sprintf("[%s]", strings.TrimSuffix(network, ","))
+}
+
+// GetAnsibleVars returns a string value of ansible vars from the template unless it is set in the node
+func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleVars(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
+	if instance.Spec.Node.AnsibleVars != "" {
+		return instance.Spec.Node.AnsibleVars
+	}
+	return instanceRole.Spec.NodeTemplate.AnsibleVars
 }
