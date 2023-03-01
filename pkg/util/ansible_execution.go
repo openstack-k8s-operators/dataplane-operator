@@ -83,7 +83,7 @@ func AnsibleExecution(
 					SecretName: sshKeySecret,
 					Items: []corev1.KeyToPath{
 						{
-							Key:  "ssh_private_key",
+							Key:  "ssh-privatekey",
 							Path: "ssh_key",
 						},
 					},

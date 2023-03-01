@@ -27,6 +27,7 @@ import (
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -95,6 +96,20 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	)
 	if err != nil {
 		return ctrl.Result{}, err
+	}
+
+	_, result, err = ensureSecret(
+		ctx,
+		types.NamespacedName{Namespace: instance.Namespace, Name: instance.Spec.Node.AnsibleSSHPrivateKeySecret},
+		[]string{
+			"ssh-privatekey",
+		},
+		helper.GetClient(),
+		&instance.Status.Conditions,
+		time.Duration(5)*time.Second,
+	)
+	if err != nil {
+		return result, err
 	}
 
 	// Always patch the instance status when exiting this function so we can
