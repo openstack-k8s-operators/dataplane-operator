@@ -40,6 +40,7 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	nad "github.com/openstack-k8s-operators/lib-common/modules/common/networkattachment"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
@@ -98,14 +99,13 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
-	_, result, err = ensureSecret(
+	_, result, err = secret.VerifySecret(
 		ctx,
 		types.NamespacedName{Namespace: instance.Namespace, Name: instance.Spec.Node.AnsibleSSHPrivateKeySecret},
 		[]string{
 			"ssh-privatekey",
 		},
 		helper.GetClient(),
-		&instance.Status.Conditions,
 		time.Duration(5)*time.Second,
 	)
 	if err != nil {
