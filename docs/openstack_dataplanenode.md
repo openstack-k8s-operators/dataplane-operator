@@ -5,12 +5,24 @@
 
 ### Sub Resources
 
+* [DeployStrategySection](#deploystrategysection)
 * [NetworkConfigSection](#networkconfigsection)
 * [NetworksSection](#networkssection)
 * [NodeSection](#nodesection)
 * [OpenStackDataPlaneNodeList](#openstackdataplanenodelist)
 * [OpenStackDataPlaneNodeSpec](#openstackdataplanenodespec)
 * [OpenStackDataPlaneNodeStatus](#openstackdataplanenodestatus)
+
+#### DeployStrategySection
+
+DeployStrategySection for fields controlling the deployment
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| deploy | Deploy boolean to trigger ansible execution | bool | true |
+| ansibleTags | AnsibleTags for ansible execution | string | false |
+
+[Back to Custom Resources](#custom-resources)
 
 #### NetworkConfigSection
 
@@ -83,7 +95,7 @@ OpenStackDataPlaneNodeSpec defines the desired state of OpenStackDataPlaneNode
 | node | Node - node attributes specific to this node | [NodeSection](#nodesection) | false |
 | role | Role - role name for this node | string | false |
 | ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
-| deploy | Deploy boolean to trigger ansible execution | bool | true |
+| deployStrategy | DeployStrategy section to control how the node is deployed | [DeployStrategySection](#deploystrategysection) | false |
 | nodeFrom | NodeFrom - Existing node name to reference. Can only be used if Node is empty. | string | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | true |
