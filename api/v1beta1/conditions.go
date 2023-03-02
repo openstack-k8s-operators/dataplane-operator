@@ -31,6 +31,9 @@ const (
 	// DataPlaneNodeReadyWaitingMessage ready
 	DataPlaneNodeReadyWaitingMessage = "DataPlaneNode not yet ready"
 
+	// DataPlaneNodeErrorMessage error
+	DataPlaneNodeErrorMessage = "DataPlaneNode error occured %s"
+
 	// ConfigureNetworkReadyCondition Status=True condition indicates if the
 	// network configuration is finished and successful.
 	ConfigureNetworkReadyCondition condition.Type = "ConfigureNetworkReady"
@@ -40,6 +43,9 @@ const (
 
 	// ConfigureNetworkReadyWaitingMessage not yet ready
 	ConfigureNetworkReadyWaitingMessage = "ConfigureNetwork not yet ready"
+
+	// ConfigureNetworkErrorMessage error
+	ConfigureNetworkErrorMessage = "ConfigureNetwork error occured %s"
 
 	// ValidateNetworkReadyCondition Status=True condition indicates if the
 	// network validation is finished and successful.
@@ -51,6 +57,9 @@ const (
 	// ValidateNetworkReadyWaitingMessage not yet ready
 	ValidateNetworkReadyWaitingMessage = "ValidateNetwork not yet ready"
 
+	// ValidateNetworkErrorMessage error
+	ValidateNetworkErrorMessage = "ValidateNetwork error occured %s"
+
 	// InstallOSReadyCondition Status=True condition indicates if the
 	// OS configuration is finished and successful.
 	InstallOSReadyCondition condition.Type = "InstallOSReady"
@@ -60,6 +69,9 @@ const (
 
 	// InstallOSReadyWaitingMessage not yet ready
 	InstallOSReadyWaitingMessage = "InstallOS not yet ready"
+
+	// InstallOSErrorMessage error
+	InstallOSErrorMessage = "InstallOS error occured %s"
 
 	// ConfigureOSReadyCondition Status=True condition indicates if the
 	// OS configuration is finished and successful.
@@ -71,6 +83,9 @@ const (
 	// ConfigureOSReadyWaitingMessage not yet ready
 	ConfigureOSReadyWaitingMessage = "ConfigureOS not yet ready"
 
+	// ConfigureOSErrorMessage error
+	ConfigureOSErrorMessage = "ConfigureOS error occured %s"
+
 	// RunOSReadyCondition Status=True condition indicates if the
 	// OS configuration is finished and successful.
 	RunOSReadyCondition condition.Type = "RunOSReady"
@@ -80,6 +95,9 @@ const (
 
 	// RunOSReadyWaitingMessage not yet ready
 	RunOSReadyWaitingMessage = "RunOS not yet ready"
+
+	// RunOSErrorMessage error
+	RunOSErrorMessage = "RunOS error occured %s"
 
 	// InstallOpenStackReadyCondition Status=True condition indicates if the
 	// OpenStack configuration is finished and successful.
@@ -91,6 +109,9 @@ const (
 	// InstallOpenStackReadyWaitingMessage not yet ready
 	InstallOpenStackReadyWaitingMessage = "InstallOpenStack not yet ready"
 
+	// InstallOpenStackErrorMessage error
+	InstallOpenStackErrorMessage = "InstallOpenStack error occured %s"
+
 	// ConfigureOpenStackReadyCondition Status=True condition indicates if the
 	// OpenStack configuration is finished and successful.
 	ConfigureOpenStackReadyCondition condition.Type = "ConfigureOpenStackReady"
@@ -101,6 +122,9 @@ const (
 	// ConfigureOpenStackReadyWaitingMessage not yet ready
 	ConfigureOpenStackReadyWaitingMessage = "ConfigureOpenStack not yet ready"
 
+	// ConfigureOpenStackErrorMessage error
+	ConfigureOpenStackErrorMessage = "ConfigureOpenStack error occured %s"
+
 	// RunOpenStackReadyCondition Status=True condition indicates if the
 	// OpenStack configuration is finished and successful.
 	RunOpenStackReadyCondition condition.Type = "RunOpenStackReady"
@@ -110,4 +134,7 @@ const (
 
 	// RunOpenStackReadyWaitingMessage not yet ready
 	RunOpenStackReadyWaitingMessage = "RunOpenStack not yet ready"
+
+	// RunOpenStackErrorMessage error
+	RunOpenStackErrorMessage = "RunOpenStack error occured %s"
 )

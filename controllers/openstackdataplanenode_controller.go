@@ -197,6 +197,12 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status, instance.Spec.NetworkAttachments, instance.Spec.OpenStackAnsibleEERunnerImage)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				dataplanev1beta1.DataPlaneNodeReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				dataplanev1beta1.DataPlaneNodeErrorMessage,
+				err.Error()))
 			return ctrl.Result{}, err
 		}
 		if result.RequeueAfter > 0 {
