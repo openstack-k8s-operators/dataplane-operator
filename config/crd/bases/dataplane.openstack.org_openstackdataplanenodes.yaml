@@ -113,8 +113,6 @@ spec:
                           type: string
                       type: object
                     type: array
-                required:
-                - ansibleSSHPrivateKeySecret
                 type: object
               nodeFrom:
                 description: NodeFrom - Existing node name to reference. Can only

@@ -101,9 +101,15 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
+	instanceRole, err := r.GetInstanceRole(ctx, instance)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	ansibleSSHPrivateKeySecret := r.GetAnsibleSSHPrivateKeySecret(instance, instanceRole)
 	_, result, err = secret.VerifySecret(
 		ctx,
-		types.NamespacedName{Namespace: instance.Namespace, Name: instance.Spec.Node.AnsibleSSHPrivateKeySecret},
+		types.NamespacedName{Namespace: instance.Namespace, Name: ansibleSSHPrivateKeySecret},
 		[]string{
 			"ssh-privatekey",
 		},
@@ -112,11 +118,6 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	)
 	if err != nil {
 		return result, err
-	}
-
-	instanceRole, err := r.GetInstanceRole(ctx, instance)
-	if err != nil {
-		return ctrl.Result{}, err
 	}
 
 	// Always patch the instance status when exiting this function so we can
@@ -193,7 +194,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	}
 
 	if instance.Spec.Deploy {
-		result, err = deployment.Deploy(ctx, helper, instance, instance.Spec.Node.AnsibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status, instance.Spec.NetworkAttachments, instance.Spec.OpenStackAnsibleEERunnerImage)
+		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status, instance.Spec.NetworkAttachments, instance.Spec.OpenStackAnsibleEERunnerImage)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			return ctrl.Result{}, err
@@ -364,4 +365,12 @@ func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleVars(instance *dataplanev1b
 		return instance.Spec.Node.AnsibleVars
 	}
 	return instanceRole.Spec.NodeTemplate.AnsibleVars
+}
+
+// GetAnsibleSSHPrivateKeySecret returns the secret name holding the private SSH key
+func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleSSHPrivateKeySecret(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
+	if instance.Spec.Node.AnsibleSSHPrivateKeySecret != "" {
+		return instance.Spec.Node.AnsibleSSHPrivateKeySecret
+	}
+	return instanceRole.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 }
