@@ -368,13 +368,14 @@ func ConditionalDeploy(
 				readyMessage))
 		} else if ansibleEEJob.Status.Failed > 0 {
 			log.Info(fmt.Sprintf("%s error", readyCondition))
-			err = fmt.Errorf("job: job.namespace %s job.name %s failed", ansibleEEJob.Namespace, ansibleEEJob.Name)
+			err = fmt.Errorf("failed: job.name %s job.namespace %s", ansibleEEJob.Name, ansibleEEJob.Namespace)
 			status.Conditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.ErrorReason,
 				condition.SeverityWarning,
 				readyErrorMessage,
 				err.Error()))
+			return ctrl.Result{}, err
 		} else {
 			log.Info(fmt.Sprintf("%s not yet ready, requeueing", readyCondition))
 			return ctrl.Result{RequeueAfter: time.Second * 2}, nil

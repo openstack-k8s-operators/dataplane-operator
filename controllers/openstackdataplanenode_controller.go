@@ -309,10 +309,12 @@ func (r *OpenStackDataPlaneNodeReconciler) GetInstanceRole(ctx context.Context, 
 	// Use the instances's role name to get its role object
 	var err error
 	instanceRole := &dataplanev1beta1.OpenStackDataPlaneRole{}
-	err = r.Client.Get(ctx, client.ObjectKey{
-		Namespace: instance.Namespace,
-		Name:      instance.Spec.Role,
-	}, instanceRole)
+	if len(instance.Spec.Role) > 0 {
+		err = r.Client.Get(ctx, client.ObjectKey{
+			Namespace: instance.Namespace,
+			Name:      instance.Spec.Role,
+		}, instanceRole)
+	}
 	return instanceRole, err
 }
 
