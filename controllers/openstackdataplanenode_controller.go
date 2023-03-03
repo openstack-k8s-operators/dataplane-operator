@@ -43,6 +43,7 @@ import (
 	nad "github.com/openstack-k8s-operators/lib-common/modules/common/networkattachment"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
@@ -250,6 +251,7 @@ func (r *OpenStackDataPlaneNodeReconciler) SetupWithManager(mgr ctrl.Manager) er
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1beta1.OpenStackDataPlaneNode{}).
 		Owns(&v1alpha1.OpenStackAnsibleEE{}).
+		Owns(&novav1beta1.NovaExternalCompute{}).
 		Owns(&corev1.ConfigMap{}).
 		Complete(r)
 }
