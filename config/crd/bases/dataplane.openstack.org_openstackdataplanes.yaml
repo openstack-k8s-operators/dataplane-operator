@@ -92,6 +92,9 @@ spec:
                               network:
                                 description: Network - Network name to configure
                                 type: string
+                              subnet:
+                                description: Subnet - Subnet name to configure
+                                type: string
                             type: object
                           type: array
                       type: object

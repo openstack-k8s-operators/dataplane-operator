@@ -130,6 +130,10 @@ type NetworksSection struct {
 	Network string `json:"network,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// Subnet - Subnet name to configure
+	Subnet string `json:"subnet,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// FixedIP - Specific IP address to use for this network
 	FixedIP string `json:"fixedIP,omitempty"`
 }

@@ -1,0 +1,27 @@
+# permissions for end users to view dataplaneipsets.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: dataplaneipset-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: dataplane-operator
+    app.kubernetes.io/part-of: dataplane-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: dataplaneipset-viewer-role
+rules:
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - dataplaneipsets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - dataplaneipsets/status
+  verbs:
+  - get

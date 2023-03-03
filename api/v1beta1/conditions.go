@@ -137,4 +137,22 @@ const (
 
 	// RunOpenStackErrorMessage error
 	RunOpenStackErrorMessage = "RunOpenStack error occurred %s"
+
+	// OpenStackNetworkReadyCondition ready
+	OpenStackNetworkReadyCondition condition.Type = "OpenStackNetworkReady"
+
+	// OpenStackNetworkReadyMessage ready
+	OpenStackNetworkReadyMessage = "OpenStack Network Ready"
+
+	// OpenStackNetworkErrorMessage error
+	OpenStackNetworkErrorMessage = "OpenStack Network error occured %s"
+
+	// DataPlaneIPSetReadyCondition ready
+	DataPlaneIPSetReadyCondition condition.Type = "DataPlaneIPSetReady"
+
+	// DataPlaneIPSetReadyMessage ready
+	DataPlaneIPSetReadyMessage = "DataPlane IPSet Ready"
+
+	// DataPlaneIPSetErrorMessage error
+	DataPlaneIPSetErrorMessage = "DataPlane IPSet error occured %s"
 )

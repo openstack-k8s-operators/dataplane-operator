@@ -3,4 +3,6 @@ resources:
 - dataplane_v1beta1_openstackdataplane.yaml
 - dataplane_v1beta1_openstackdataplanerole.yaml
 - dataplane_v1beta1_openstackdataplanenode.yaml
+- dataplane_v1beta1_dataplaneipset.yaml
+- dataplane_v1beta1_openstacknet.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

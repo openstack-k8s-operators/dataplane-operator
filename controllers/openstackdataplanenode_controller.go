@@ -248,6 +248,44 @@ func (r *OpenStackDataPlaneNodeReconciler) Provision(ctx context.Context, instan
 	return nil
 }
 
+// BuildNetworkConfig for the dataplane node
+func (r *OpenStackDataPlaneNodeReconciler) BuildNetworkConfig(ctx context.Context, helper helper.Helper, instance *dataplanev1beta1.OpenStackDataPlaneNode) error {
+
+	// create an ipset resource
+	// Build the networkconfig with the template
+	// Apply network config with os-net.config/namstate
+
+	//Look if Data		osnet := &dataplanev1beta1.OpenStackNet{
+	dataplaneIPSet := &dataplanev1beta1.DataPlaneIPSet{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.Spec.HostName,
+			Namespace: instance.Namespace,
+		},
+	}
+	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), dataplaneIPSet, func() error {
+		for _, network := range instance.Spec.Node.Networks {
+			dn := dataplanev1beta1.DataPlaneNetwork{
+				Name: network.Network, SubnetName: network.Subnet, FixedIP: network.FixedIP}
+			dataplaneIPSet.Spec.DataPlaneNetworks = append(dataplaneIPSet.Spec.DataPlaneNetworks, dn)
+		}
+		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), dataplaneIPSet, helper.GetScheme())
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	if op != controllerutil.OperationResultNone {
+		helper.GetLogger().Info(fmt.Sprintf("DataplaneIPSet %s - %s", dataplaneIPSet.Name, op))
+	}
+
+	// TODO Generate templates network config
+	return nil
+}
+
 // GenerateInventory yields a parsed Inventory
 func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) (string, error) {
 	var (

@@ -56,6 +56,32 @@ rules:
 - apiGroups:
   - dataplane.openstack.org
   resources:
+  - dataplaneipsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - dataplaneipsets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - dataplaneipsets/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
   - openstackdataplanenodes
   verbs:
   - create
@@ -127,6 +153,33 @@ rules:
   - dataplane.openstack.org
   resources:
   - openstackdataplanes/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstacknets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+  - watcif k8s_errors.IsNotFound(err) {
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstacknets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstacknets/status
   verbs:
   - get
   - patch

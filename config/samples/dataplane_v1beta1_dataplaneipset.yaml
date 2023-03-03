@@ -1,0 +1,24 @@
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: DataPlaneIPSet
+metadata:
+    name: compute-0
+spec:
+  networks:
+    - name:  ctlplane
+      subnetName: ctlplane-subnet
+      fixedIP: 10.0.0.18
+    - name:  storage
+      subnetName: storage-subnet
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: DataPlaneIPSet
+metadata:
+    name: compute-1
+spec:
+  networks:
+    - name:  ctlplane
+      subnetName: ctlplane-subnet
+      fixedIP: 10.0.0.21
+    - name: storage
+      subnetName: storage-subnet
