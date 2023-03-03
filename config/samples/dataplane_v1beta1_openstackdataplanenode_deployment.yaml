@@ -21,5 +21,6 @@ spec:
       dns_search_domains: []
       tenant_ip: 192.168.24.100
       edpm_ovn_dbs: 192.168.24.1
-    deploy: true
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+  deployStrategy:
+    deploy: true

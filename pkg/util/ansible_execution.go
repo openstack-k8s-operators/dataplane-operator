@@ -48,6 +48,7 @@ func AnsibleExecution(
 	role ansibleeev1alpha1.Role,
 	networkAttachments []string,
 	openStackAnsibleEERunnerImage string,
+	ansibleTags string,
 ) error {
 
 	var err error
@@ -72,6 +73,9 @@ func AnsibleExecution(
 	_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), ansibleEE, func() error {
 		ansibleEE.Spec.Image = openStackAnsibleEERunnerImage
 		ansibleEE.Spec.NetworkAttachments = networkAttachments
+		if len(ansibleTags) > 0 {
+			ansibleEE.Spec.CmdLine = fmt.Sprintf("--tags %s", ansibleTags)
+		}
 		// TODO(slagle): Handle either play or role being specified
 		ansibleEE.Spec.Role = role
 

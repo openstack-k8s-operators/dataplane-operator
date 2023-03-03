@@ -33,7 +33,7 @@ import (
 )
 
 // deployFuncDef so we can pass a function to ConditionalDeploy
-type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string, []string, string) error
+type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string, []string, string, string) error
 
 // Deploy function encapsulating primary deloyment handling
 func Deploy(
@@ -45,6 +45,7 @@ func Deploy(
 	status *dataplanev1beta1.OpenStackDataPlaneNodeStatus,
 	networkAttachments []string,
 	openStackAnsibleEERunnerImage string,
+	ansibleTags string,
 ) (ctrl.Result, error) {
 
 	var result ctrl.Result
@@ -88,6 +89,7 @@ func Deploy(
 		deployLabel,
 		networkAttachments,
 		openStackAnsibleEERunnerImage,
+		ansibleTags,
 	)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
@@ -117,6 +119,7 @@ func Deploy(
 		deployLabel,
 		networkAttachments,
 		openStackAnsibleEERunnerImage,
+		ansibleTags,
 	)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
@@ -146,7 +149,7 @@ func Deploy(
 		deployLabel,
 		networkAttachments,
 		openStackAnsibleEERunnerImage,
-	)
+		ansibleTags)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -175,7 +178,7 @@ func Deploy(
 		deployLabel,
 		networkAttachments,
 		openStackAnsibleEERunnerImage,
-	)
+		ansibleTags)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -204,7 +207,7 @@ func Deploy(
 		deployLabel,
 		networkAttachments,
 		openStackAnsibleEERunnerImage,
-	)
+		ansibleTags)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -233,7 +236,7 @@ func Deploy(
 		deployLabel,
 		networkAttachments,
 		openStackAnsibleEERunnerImage,
-	)
+		ansibleTags)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -262,7 +265,7 @@ func Deploy(
 		deployLabel,
 		networkAttachments,
 		openStackAnsibleEERunnerImage,
-	)
+		ansibleTags)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -291,7 +294,7 @@ func Deploy(
 		deployLabel,
 		networkAttachments,
 		openStackAnsibleEERunnerImage,
-	)
+		ansibleTags)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -319,6 +322,7 @@ func ConditionalDeploy(
 	deployLabel string,
 	networkAttachments []string,
 	openStackAnsibleEERunnerImage string,
+	ansibleTags string,
 ) (ctrl.Result, error) {
 
 	var err error
@@ -328,7 +332,7 @@ func ConditionalDeploy(
 		log.Info(fmt.Sprintf("%s Unknown, starting %s", readyCondition, deployName))
 		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap, networkAttachments,
 			openStackAnsibleEERunnerImage,
-		)
+			ansibleTags)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to %s for %s", deployName, obj.GetName()), obj)
 			return ctrl.Result{}, err

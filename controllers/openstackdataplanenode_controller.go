@@ -194,8 +194,8 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
-	if instance.Spec.Deploy {
-		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status, instance.Spec.NetworkAttachments, instance.Spec.OpenStackAnsibleEERunnerImage)
+	if instance.Spec.DeployStrategy.Deploy {
+		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status, instance.Spec.NetworkAttachments, instance.Spec.OpenStackAnsibleEERunnerImage, instance.Spec.DeployStrategy.AnsibleTags)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -213,6 +213,12 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 	r.Log.Info("Set DataPlaneNodeReadyCondition true")
 	instance.Status.Conditions.Set(condition.TrueCondition(dataplanev1beta1.DataPlaneNodeReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage))
+
+	// Explicitly set instance.Spec.Deploy = false
+	// We don't want another deploy triggered by any roncile request, it should
+	// only be triggered when the user (or another controller) specifically
+	// sets it to true.
+	instance.Spec.DeployStrategy.Deploy = false
 
 	return result, nil
 }

@@ -45,10 +45,20 @@ spec:
                     ansibleHost:
                       description: AnsibleHost SSH host for Ansible connection
                       type: string
-                    deploy:
-                      default: true
-                      description: Deploy boolean to trigger ansible execution
-                      type: boolean
+                    deployStrategy:
+                      description: DeployStrategy section to control how the node
+                        is deployed
+                      properties:
+                        ansibleTags:
+                          description: AnsibleTags for ansible execution
+                          type: string
+                        deploy:
+                          default: true
+                          description: Deploy boolean to trigger ansible execution
+                          type: boolean
+                      required:
+                      - deploy
+                      type: object
                     hostName:
                       description: HostName - node name
                       type: string
@@ -123,8 +133,6 @@ spec:
                     role:
                       description: Role - role name for this node
                       type: string
-                  required:
-                  - deploy
                   type: object
                 type: array
               nodeTemplate:

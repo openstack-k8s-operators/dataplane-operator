@@ -40,10 +40,10 @@ type OpenStackDataPlaneNodeSpec struct {
 	// AnsibleHost SSH host for Ansible connection
 	AnsibleHost string `json:"ansibleHost,omitempty"`
 
-	// +kubebuilder:default=true
+	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Deploy boolean to trigger ansible execution
-	Deploy bool `json:"deploy"`
+	// DeployStrategy section to control how the node is deployed
+	DeployStrategy DeployStrategySection `json:"deployStrategy,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// NodeFrom - Existing node name to reference. Can only be used if Node is
@@ -103,6 +103,19 @@ type NodeSection struct {
 	// Secret.data.ssh-privatekey: <base64 encoded private key contents>
 	// https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets
 	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret"`
+}
+
+// DeployStrategySection for fields controlling the deployment
+type DeployStrategySection struct {
+
+	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Deploy boolean to trigger ansible execution
+	Deploy bool `json:"deploy"`
+
+	// +kubebuilder:validation:Optional
+	// AnsibleTags for ansible execution
+	AnsibleTags string `json:"ansibleTags,omitempty"`
 }
 
 // NetworkConfigSection is a specification of the Network configuration details
