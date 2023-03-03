@@ -96,7 +96,6 @@ OpenStackDataPlaneNodeSpec defines the desired state of OpenStackDataPlaneNode
 | role | Role - role name for this node | string | false |
 | ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
 | deployStrategy | DeployStrategy section to control how the node is deployed | [DeployStrategySection](#deploystrategysection) | false |
-| nodeFrom | NodeFrom - Existing node name to reference. Can only be used if Node is empty. | string | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | true |
 

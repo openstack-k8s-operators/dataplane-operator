@@ -123,10 +123,6 @@ spec:
                       type: object
                     type: array
                 type: object
-              nodeFrom:
-                description: NodeFrom - Existing node name to reference. Can only
-                  be used if Node is empty.
-                type: string
               openStackAnsibleEERunnerImage:
                 default: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
                 description: OpenStackAnsibleEERunnerImage image to use as the ansibleEE

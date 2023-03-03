@@ -18,17 +18,12 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
@@ -61,13 +56,6 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 
 	// Fetch the OpenStackDataPlaneRole instance
 	instance := &dataplanev1beta1.OpenStackDataPlaneRole{}
-	helper, _ := helper.NewHelper(
-		instance,
-		r.Client,
-		r.Kclient,
-		r.Scheme,
-		r.Log,
-	)
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
@@ -79,11 +67,6 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		// Error reading the object - requeue the request.
 		return ctrl.Result{}, err
 	}
-	err = r.ReconcileNodes(ctx, instance)
-	if err != nil {
-		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to reconcile nodes for %s", instance.Name), instance)
-		return ctrl.Result{}, err
-	}
 
 	return ctrl.Result{}, nil
 }
@@ -93,75 +76,4 @@ func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) er
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1beta1.OpenStackDataPlaneRole{}).
 		Complete(r)
-}
-
-// ReconcileNodes ensure the desired state for the nodes
-func (r *OpenStackDataPlaneRoleReconciler) ReconcileNodes(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneRole) error {
-	// loop over instance.Spec.DataPlaneNodes:
-	//   for each node:
-	//     (1) complete node.Spec based r.Spec.nodeTemplate, and values set on the
-	//         node (values on the node take precedence over those from the template)
-	//     (2) Create a CR of OpenStackDataPlaneNode from the node
-
-	var NodeName string
-	for _, node := range instance.Spec.DataPlaneNodes {
-		if node.HostName == "" {
-			NodeName = node.AnsibleHost
-		} else {
-			NodeName = node.HostName
-		}
-		newNode := &dataplanev1beta1.OpenStackDataPlaneNode{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      NodeName,
-				Namespace: instance.Namespace,
-			},
-		}
-		// Set new node with values from its entry on the DataPlaneNodes list
-		_, err := controllerutil.CreateOrUpdate(ctx, r.Client, newNode, func() error {
-			newNode.TypeMeta = metav1.TypeMeta{
-				APIVersion: "v1",
-				Kind:       "OpenStackDataPlaneNode",
-			}
-			newNode.ObjectMeta = metav1.ObjectMeta{
-				Name:      NodeName,
-				Namespace: instance.Namespace,
-			}
-			newNode.Spec.Role = instance.Name
-			newNode.Spec.Node.Networks = node.Node.Networks
-			// Set new node with optional overriding node values, if found.
-			// The OpenStackDataPlaneNode (not the role) will ensure that
-			// values on the node take precedence over those from the template.
-
-			if node.AnsibleHost != "" {
-				newNode.Spec.AnsibleHost = node.AnsibleHost
-			}
-			if node.HostName != "" {
-				newNode.Spec.HostName = node.HostName
-			}
-			if node.Node.AnsiblePort > 0 {
-				newNode.Spec.Node.AnsiblePort = node.Node.AnsiblePort
-			}
-			if node.Node.AnsibleUser != "" {
-				newNode.Spec.Node.AnsibleUser = node.Node.AnsibleUser
-			}
-			if node.Node.Managed {
-				newNode.Spec.Node.Managed = node.Node.Managed
-			}
-			if node.Node.ManagementNetwork != "" {
-				newNode.Spec.Node.ManagementNetwork = node.Node.ManagementNetwork
-			}
-			if node.Node.NetworkConfig != instance.Spec.NodeTemplate.NetworkConfig {
-				newNode.Spec.Node.NetworkConfig = node.Node.NetworkConfig
-			}
-			if node.Node.AnsibleVars != "" {
-				newNode.Spec.Node.AnsibleVars = node.Node.AnsibleVars
-			}
-			return nil
-		})
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

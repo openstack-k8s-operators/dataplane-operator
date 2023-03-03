@@ -10,3 +10,4 @@ spec:
     networks:
       - network: ctlplane
         fixedIP: 192.168.122.18
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
