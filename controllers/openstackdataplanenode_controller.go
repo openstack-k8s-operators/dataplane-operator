@@ -102,10 +102,8 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
-	instanceRole, err := r.GetInstanceRole(ctx, instance)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
+	// An instance can be created without a role so ignore error
+	instanceRole, _ := r.GetInstanceRole(ctx, instance)
 
 	ansibleSSHPrivateKeySecret := r.GetAnsibleSSHPrivateKeySecret(instance, instanceRole)
 	_, result, err = secret.VerifySecret(
