@@ -41,7 +41,6 @@ type OpenStackDataPlaneNodeSpec struct {
 	AnsibleHost string `json:"ansibleHost,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// DeployStrategy section to control how the node is deployed
 	DeployStrategy DeployStrategySection `json:"deployStrategy,omitempty"`
 

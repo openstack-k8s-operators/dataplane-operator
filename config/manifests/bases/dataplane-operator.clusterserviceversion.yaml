@@ -18,7 +18,7 @@ spec:
       specDescriptors:
       - description: Deploy boolean to trigger ansible execution
         displayName: Deploy
-        path: deploy
+        path: deployStrategy.deploy
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       - description: AnsiblePort SSH port for Ansible connection
@@ -59,7 +59,7 @@ spec:
       specDescriptors:
       - description: Deploy boolean to trigger ansible execution
         displayName: Deploy
-        path: dataPlaneNodes[0].deploy
+        path: dataPlaneNodes[0].deployStrategy.deploy
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       - description: AnsiblePort SSH port for Ansible connection
@@ -106,7 +106,7 @@ spec:
       specDescriptors:
       - description: Deploy boolean to trigger ansible execution
         displayName: Deploy
-        path: dataPlaneRoles[0].dataPlaneNodes[0].deploy
+        path: dataPlaneRoles[0].dataPlaneNodes[0].deployStrategy.deploy
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       - description: AnsiblePort SSH port for Ansible connection
