@@ -150,4 +150,17 @@ const (
 
 	// RunOpenStackErrorMessage error
 	RunOpenStackErrorMessage = "RunOpenStack error occurred %s"
+
+	// NovaComputeReadyCondition Status=True condition indicates nova-compute
+	// has been deployed and is ready
+	NovaComputeReadyCondition condition.Type = "NovaComputeReady"
+
+	// NovaComputeReadyMessage ready
+	NovaComputeReadyMessage = "NovaComputeReady ready"
+
+	// NovaComputeReadyWaitingMessage not yet ready
+	NovaComputeReadyWaitingMessage = "NovaComputeReady not yet ready"
+
+	// NovaComputeErrorMessage error
+	NovaComputeErrorMessage = "NovaCompute error occurred"
 )
