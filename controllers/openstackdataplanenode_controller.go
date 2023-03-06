@@ -102,6 +102,17 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
+	if len(instance.Spec.Role) > 0 {
+		if instance.ObjectMeta.Labels == nil {
+			instance.ObjectMeta.Labels = make(map[string]string)
+		}
+		r.Log.Info(fmt.Sprintf("Adding label %s=%s", "openstackdataplanerole", instance.Spec.Role))
+		instance.ObjectMeta.Labels["openstackdataplanerole"] = instance.Spec.Role
+	} else if instance.ObjectMeta.Labels != nil {
+		r.Log.Info(fmt.Sprintf("Removing label %s", "openstackdataplanerole"))
+		delete(instance.ObjectMeta.Labels, "openstackdataplanerole")
+	}
+
 	instanceRole, err := r.GetInstanceRole(ctx, instance)
 	if err != nil {
 		return ctrl.Result{}, err

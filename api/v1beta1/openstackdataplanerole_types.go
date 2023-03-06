@@ -26,24 +26,8 @@ import (
 // OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
 type OpenStackDataPlaneRoleSpec struct {
 	// +kubebuilder:validation:Optional
-	// DataPlaneNodes - List of nodes
-	DataPlaneNodes []OpenStackDataPlaneNodeSpec `json:"dataPlaneNodes,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	// NodeTemplate - node attributes specific to this roles
 	NodeTemplate NodeSection `json:"nodeTemplate,omitempty"`
-}
-
-// DataPlaneNodeSection is a specification of the data plane node attributes
-type DataPlaneNodeSection struct {
-	// +kubebuilder:validation:Optional
-	// Node - node attributes specific to this node
-	Node NodeSection `json:"node,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// NodeFrom - Existing node name to reference. Can only be used if Node is
-	// empty.
-	NodeFrom string `json:"nodeFrom,omitempty"`
 }
 
 // OpenStackDataPlaneRoleStatus defines the observed state of OpenStackDataPlaneRole

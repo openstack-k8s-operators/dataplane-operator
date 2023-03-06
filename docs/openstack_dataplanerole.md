@@ -5,20 +5,8 @@
 
 ### Sub Resources
 
-* [DataPlaneNodeSection](#dataplanenodesection)
 * [OpenStackDataPlaneRoleList](#openstackdataplanerolelist)
 * [OpenStackDataPlaneRoleSpec](#openstackdataplanerolespec)
-
-#### DataPlaneNodeSection
-
-DataPlaneNodeSection is a specification of the data plane node attributes
-
-| Field | Description | Scheme | Required |
-| ----- | ----------- | ------ | -------- |
-| node | Node - node attributes specific to this node | NodeSection | false |
-| nodeFrom | NodeFrom - Existing node name to reference. Can only be used if Node is empty. | string | false |
-
-[Back to Custom Resources](#custom-resources)
 
 #### OpenStackDataPlaneRole
 
@@ -49,7 +37,6 @@ OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| dataPlaneNodes | DataPlaneNodes - List of nodes | []OpenStackDataPlaneNodeSpec | false |
 | nodeTemplate | NodeTemplate - node attributes specific to this roles | NodeSection | false |
 
 [Back to Custom Resources](#custom-resources)
