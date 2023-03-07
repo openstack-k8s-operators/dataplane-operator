@@ -18,16 +18,26 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"strings"
+	"time"
 
+	yaml "gopkg.in/yaml.v3"
+	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/ansible"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 )
 
 // OpenStackDataPlaneRoleReconciler reconciles a OpenStackDataPlaneRole object
@@ -68,7 +78,120 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
+	helper, _ := helper.NewHelper(
+		instance,
+		r.Client,
+		r.Kclient,
+		r.Scheme,
+		r.Log,
+	)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{}
+
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.GetNamespace()),
+	}
+	labelSelector := map[string]string{
+		"openstackdataplanerole": instance.Name,
+	}
+	if len(labelSelector) > 0 {
+		labels := client.MatchingLabels(labelSelector)
+		listOpts = append(listOpts, labels)
+	}
+	err = helper.GetClient().List(ctx, nodes, listOpts...)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if len(nodes.Items) == 0 {
+		r.Log.Info("Role: ", instance.Name, "doesn't have nodes yet, requeueing")
+		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
+	}
+
+	for _, node := range nodes.Items {
+		if node.Spec.Role != instance.Name {
+			err = fmt.Errorf("node %s: node.Role does not match with node.Label", node.Name)
+			return ctrl.Result{}, err
+		}
+		if !node.Status.Deployed {
+			r.Log.Info("Node: ", node.Name, "isn't deployed yet, requeueing")
+			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
+		}
+	}
+
+	_, err = r.GenerateInventory(ctx, instance, nodes.Items)
+	if err != nil {
+		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
+		return ctrl.Result{}, err
+	}
+
 	return ctrl.Result{}, nil
+}
+
+// GenerateInventory yields a parsed Inventory
+func (r *OpenStackDataPlaneRoleReconciler) GenerateInventory(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneRole, nodes []dataplanev1beta1.OpenStackDataPlaneNode) (string, error) {
+	var (
+		err      error
+		hostName string
+	)
+
+	inventory := ansible.MakeInventory()
+	roleNameGroup := inventory.AddGroup(instance.Name)
+	err = resolveAnsibleVars(&instance.Spec.NodeTemplate, &ansible.Host{}, &roleNameGroup)
+	if err != nil {
+		return "", err
+	}
+
+	for _, node := range nodes {
+		host := roleNameGroup.AddHost(node.Name)
+		if node.Spec.AnsibleHost == "" {
+			hostName = node.Spec.HostName
+		} else {
+			hostName = node.Spec.AnsibleHost
+		}
+		host.Vars["ansible_host"] = hostName
+		err = resolveAnsibleVars(&node.Spec.Node, &host, &ansible.Group{})
+		if err != nil {
+			return "", err
+		}
+	}
+
+	configMapName := fmt.Sprintf("dataplanerole-%s-inventory", instance.Name)
+	cm := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      configMapName,
+			Namespace: instance.Namespace,
+			Labels:    instance.ObjectMeta.Labels,
+		},
+	}
+
+	_, err = controllerutil.CreateOrUpdate(ctx, r.Client, cm, func() error {
+		cm.TypeMeta = metav1.TypeMeta{
+			APIVersion: "v1",
+			Kind:       "ConfigMap",
+		}
+		cm.ObjectMeta = metav1.ObjectMeta{
+			Name:      configMapName,
+			Namespace: instance.Namespace,
+			Labels:    instance.ObjectMeta.Labels,
+		}
+		invData, err := inventory.MarshalYAML()
+		if err != nil {
+			return err
+		}
+		cm.Data = map[string]string{
+			"inventory": string(invData),
+		}
+		return nil
+	})
+	if err != nil {
+		return configMapName, err
+	}
+
+	return configMapName, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -76,4 +199,56 @@ func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) er
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1beta1.OpenStackDataPlaneRole{}).
 		Complete(r)
+}
+
+func resolveAnsibleVars(node *dataplanev1beta1.NodeSection, host *ansible.Host, group *ansible.Group) error {
+	ansibleVarsData := make(map[string]interface{})
+
+	if node.AnsibleUser != "" {
+		ansibleVarsData["ansible_user"] = node.AnsibleUser
+	}
+	if node.AnsiblePort > 0 {
+		ansibleVarsData["ansible_port"] = node.AnsiblePort
+	}
+	if node.Managed {
+		ansibleVarsData["managed"] = node.Managed
+	}
+	if node.ManagementNetwork != "" {
+		ansibleVarsData["management_network"] = node.ManagementNetwork
+	}
+	if node.NetworkConfig.Template != "" {
+		ansibleVarsData["network_config"] = fmt.Sprintf("{template: %s}", node.NetworkConfig.Template)
+	}
+	if len(node.Networks) > 0 {
+		var network string // the resulting string containing each network
+		for _, netMap := range node.Networks {
+			if netMap.FixedIP != "" && netMap.Network == "" {
+				network += fmt.Sprintf("{%s: %s},", "fixedIP", netMap.FixedIP)
+			}
+			if netMap.FixedIP != "" && netMap.Network != "" {
+				network += fmt.Sprintf("{%s: %s, %s: %s},",
+					"fixedIP", netMap.FixedIP, "network", netMap.Network)
+			}
+		}
+		ansibleVarsData["networks"] = fmt.Sprintf("[%s]", strings.TrimSuffix(network, ","))
+	}
+
+	err := yaml.Unmarshal([]byte(node.AnsibleVars), ansibleVarsData)
+	if err != nil {
+		return err
+	}
+
+	if host.Vars != nil {
+		for key, value := range ansibleVarsData {
+			host.Vars[key] = value
+		}
+	}
+
+	if group.Vars != nil {
+		for key, value := range ansibleVarsData {
+			group.Vars[key] = value
+		}
+	}
+
+	return nil
 }

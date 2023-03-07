@@ -292,10 +292,10 @@ github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7J
 github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1ybHNo=
 github.com/onsi/gomega v1.26.0 h1:03cDLK28U6hWvCAns6NeydX3zIm4SF3ci69ulidS32Q=
 github.com/onsi/gomega v1.26.0/go.mod h1:r+zV744Re+DiYCIPRlYOTxn0YkOLcAnW8k1xXdMPGhM=
-github.com/openstack-k8s-operators/lib-common/modules/ansible v0.0.0-20230220181542-93a9b32e5ec9 h1:PEh9TcC16GzCOf3PRq93dSO5k7hxLn/zhBvBatWFcOg=
-github.com/openstack-k8s-operators/lib-common/modules/ansible v0.0.0-20230220181542-93a9b32e5ec9/go.mod h1:QAVBOvQLipeljnKMPxCdjQfMtPL1yiAgZykX/SeNFEo=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230301145136-e77d8d19c2ff h1:4W7sZFkup2HHZW6nYvjddIuTrEfzNnmGWVKjQRrkpJQ=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230301145136-e77d8d19c2ff/go.mod h1:wDUzrnAhtC0O99PYR8qQWQoGJzVQwGnfGepKzExCVk8=
+github.com/openstack-k8s-operators/lib-common/modules/ansible v0.0.0-20230307144813-39ed0da90b23 h1:2eM2RXefBh1VPRTN9larfD9966gVJND51OxX6v9zm+k=
+github.com/openstack-k8s-operators/lib-common/modules/ansible v0.0.0-20230307144813-39ed0da90b23/go.mod h1:QAVBOvQLipeljnKMPxCdjQfMtPL1yiAgZykX/SeNFEo=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230307144813-39ed0da90b23 h1:XPgJD+Z6iXzb4EmM/k3GtHBlCLEFM/ci8pGDyyZePRM=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230307144813-39ed0da90b23/go.mod h1:wDUzrnAhtC0O99PYR8qQWQoGJzVQwGnfGepKzExCVk8=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230208113903-f7b52e2a2ccb h1:ryKoUXxe7kfpfCJoYd0wj9JkYcO6HmLgM+d3+L4AStM=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230208113903-f7b52e2a2ccb/go.mod h1:I8t9nOD+GpfOakInGk9C47aIrI0ZvKTKiuhz9G3tehU=
 github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230302143714-7e1818eab25c h1:Xg+58lnXIZbZNrH/l8i5PMYR2IoAz75lrLlOf0PN5NM=
