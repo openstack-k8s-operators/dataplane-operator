@@ -287,6 +287,7 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      configMapName,
 			Namespace: instance.Namespace,
+			Labels:    instance.ObjectMeta.Labels,
 		},
 	}
 
@@ -298,6 +299,7 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 		cm.ObjectMeta = metav1.ObjectMeta{
 			Name:      configMapName,
 			Namespace: instance.Namespace,
+			Labels:    instance.ObjectMeta.Labels,
 		}
 		invData, err := inventory.MarshalYAML()
 		if err != nil {

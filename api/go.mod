@@ -3,7 +3,7 @@ module github.com/openstack-k8s-operators/dataplane-operator/api
 go 1.19
 
 require (
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230301145136-e77d8d19c2ff
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230307144813-39ed0da90b23
 	k8s.io/apimachinery v0.25.4
 	sigs.k8s.io/controller-runtime v0.13.1
 )
