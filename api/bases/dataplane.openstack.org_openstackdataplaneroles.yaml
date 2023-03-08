@@ -36,6 +36,9 @@ spec:
           spec:
             description: OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
             properties:
+              dataPlane:
+                description: DataPlane name of OpenStackDataPlane for this role
+                type: string
               nodeTemplate:
                 description: NodeTemplate - node attributes specific to this roles
                 properties:

@@ -26,10 +26,6 @@ import (
 
 // OpenStackDataPlaneSpec defines the desired state of OpenStackDataPlane
 type OpenStackDataPlaneSpec struct {
-
-	// +kubebuilder:validation:Optional
-	// DataPlaneRoles - List of roles
-	DataPlaneRoles []OpenStackDataPlaneRoleSpec `json:"dataPlaneRoles,omitempty"`
 }
 
 // OpenStackDataPlaneStatus defines the observed state of OpenStackDataPlaneNode

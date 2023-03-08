@@ -26,6 +26,10 @@ import (
 // OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
 type OpenStackDataPlaneRoleSpec struct {
 	// +kubebuilder:validation:Optional
+	// DataPlane name of OpenStackDataPlane for this role
+	DataPlane string `json:"dataPlane,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// NodeTemplate - node attributes specific to this roles
 	NodeTemplate NodeSection `json:"nodeTemplate,omitempty"`
 }
