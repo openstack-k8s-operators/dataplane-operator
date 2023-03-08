@@ -26,6 +26,7 @@ import (
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -34,9 +35,11 @@ import (
 
 	"github.com/go-logr/logr"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
 	"github.com/openstack-k8s-operators/lib-common/modules/ansible"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 )
 
@@ -61,8 +64,9 @@ type OpenStackDataPlaneRoleReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
-func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
+	r.Log = log.FromContext(ctx)
+	r.Log.Info("Reconciling")
 
 	// Fetch the OpenStackDataPlaneRole instance
 	instance := &dataplanev1beta1.OpenStackDataPlaneRole{}
@@ -124,7 +128,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		}
 	}
 
-	_, err = r.GenerateInventory(ctx, instance, nodes.Items)
+	inventoryConfigMap, err := r.GenerateInventory(ctx, instance, nodes.Items)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
 		return ctrl.Result{}, err
@@ -140,6 +144,20 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 			return
 		}
 	}()
+
+	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
+	_, result, err = secret.VerifySecret(
+		ctx,
+		types.NamespacedName{Namespace: instance.Namespace, Name: ansibleSSHPrivateKeySecret},
+		[]string{
+			"ssh-privatekey",
+		},
+		helper.GetClient(),
+		time.Duration(5)*time.Second,
+	)
+	if err != nil {
+		return result, err
+	}
 
 	// Initialize Status
 	if instance.Status.Conditions == nil {
@@ -166,11 +184,41 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, nil
 	}
 
+	if instance.Spec.DeployStrategy.Deploy {
+
+		r.Log.Info("Set DataPlaneRoleReadyCondition false")
+		instance.Status.Conditions.Set(condition.FalseCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
+
+		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status, instance.Spec.NetworkAttachments, instance.Spec.OpenStackAnsibleEERunnerImage, instance.Spec.DeployStrategy.AnsibleTags, instance.Spec.NodeTemplate.ExtraMounts)
+		if err != nil {
+			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				dataplanev1beta1.DataPlaneRoleReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				dataplanev1beta1.DataPlaneRoleErrorMessage,
+				err.Error()))
+			return ctrl.Result{}, err
+		}
+		if result.RequeueAfter > 0 {
+			return result, nil
+		}
+
+		r.Log.Info("Set DataPlaneRoleReadyCondition true")
+		instance.Status.Conditions.Set(condition.FalseCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
+	}
+
 	// Set DataPlaneRoleReadyCondition to False if it was unknown
 	if instance.Status.Conditions.IsUnknown(dataplanev1beta1.DataPlaneRoleReadyCondition) {
 		r.Log.Info("Set DataPlaneRoleReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
 	}
+
+	// Explicitly set instance.Spec.Deploy = false
+	// We don't want another deploy triggered by any reconcile request, it should
+	// only be triggered when the user (or another controller) specifically
+	// sets it to true.
+	instance.Spec.DeployStrategy.Deploy = false
 
 	return ctrl.Result{}, nil
 }

@@ -39,6 +39,26 @@ spec:
               dataPlane:
                 description: DataPlane name of OpenStackDataPlane for this role
                 type: string
+              deployStrategy:
+                description: DeployStrategy section to control how the node is deployed
+                properties:
+                  ansibleTags:
+                    description: AnsibleTags for ansible execution
+                    type: string
+                  deploy:
+                    default: true
+                    description: Deploy boolean to trigger ansible execution
+                    type: boolean
+                required:
+                - deploy
+                type: object
+              networkAttachments:
+                description: NetworkAttachments is a list of NetworkAttachment resource
+                  names to pass to the ansibleee resource which allows to connect
+                  the ansibleee runner to the given network
+                items:
+                  type: string
+                type: array
               nodeTemplate:
                 description: NodeTemplate - node attributes specific to this roles
                 properties:
@@ -1842,6 +1862,11 @@ spec:
                       type: object
                     type: array
                 type: object
+              openStackAnsibleEERunnerImage:
+                default: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+                description: OpenStackAnsibleEERunnerImage image to use as the ansibleEE
+                  runner image
+                type: string
             type: object
           status:
             description: OpenStackDataPlaneStatus defines the observed state of OpenStackDataPlaneNode
