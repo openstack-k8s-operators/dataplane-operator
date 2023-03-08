@@ -35,6 +35,7 @@ import (
 	"github.com/go-logr/logr"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/ansible"
+	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 )
@@ -116,6 +117,48 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
 		return ctrl.Result{}, err
+	}
+
+	// Always patch the instance status when exiting this function so we can
+	// persist any changes.
+	defer func() {
+		err := helper.PatchInstance(ctx, instance)
+		if err != nil {
+			r.Log.Error(_err, "PatchInstance error")
+			_err = err
+			return
+		}
+	}()
+
+	// Initialize Status
+	if instance.Status.Conditions == nil {
+		instance.Status.Conditions = condition.Conditions{}
+
+		cl := condition.CreateList(
+			condition.UnknownCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, condition.InitReason, condition.InitReason),
+			condition.UnknownCondition(dataplanev1beta1.ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
+			condition.UnknownCondition(dataplanev1beta1.ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
+			condition.UnknownCondition(dataplanev1beta1.InstallOSReadyCondition, condition.InitReason, condition.InitReason),
+			condition.UnknownCondition(dataplanev1beta1.ConfigureOSReadyCondition, condition.InitReason, condition.InitReason),
+			condition.UnknownCondition(dataplanev1beta1.RunOSReadyCondition, condition.InitReason, condition.InitReason),
+			condition.UnknownCondition(dataplanev1beta1.InstallOpenStackReadyCondition, condition.InitReason, condition.InitReason),
+			condition.UnknownCondition(dataplanev1beta1.ConfigureOpenStackReadyCondition, condition.InitReason, condition.InitReason),
+			condition.UnknownCondition(dataplanev1beta1.RunOpenStackReadyCondition, condition.InitReason, condition.InitReason),
+		)
+
+		instance.Status.Conditions.Init(&cl)
+
+		instance.Status.Deployed = false
+
+		// Register overall status immediately to have an early feedback e.g.
+		// in the cli
+		return ctrl.Result{}, nil
+	}
+
+	// Set DataPlaneRoleReadyCondition to False if it was unknown
+	if instance.Status.Conditions.IsUnknown(dataplanev1beta1.DataPlaneRoleReadyCondition) {
+		r.Log.Info("Set DataPlaneRoleReadyCondition false")
+		instance.Status.Conditions.Set(condition.FalseCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
 	}
 
 	return ctrl.Result{}, nil
