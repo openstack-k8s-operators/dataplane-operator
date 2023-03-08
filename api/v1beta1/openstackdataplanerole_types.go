@@ -45,8 +45,8 @@ type OpenStackDataPlaneRole struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   OpenStackDataPlaneRoleSpec   `json:"spec,omitempty"`
-	Status OpenStackDataPlaneRoleStatus `json:"status,omitempty"`
+	Spec   OpenStackDataPlaneRoleSpec `json:"spec,omitempty"`
+	Status OpenStackDataPlaneStatus   `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true

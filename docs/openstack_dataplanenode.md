@@ -11,7 +11,6 @@
 * [NodeSection](#nodesection)
 * [OpenStackDataPlaneNodeList](#openstackdataplanenodelist)
 * [OpenStackDataPlaneNodeSpec](#openstackdataplanenodespec)
-* [OpenStackDataPlaneNodeStatus](#openstackdataplanenodestatus)
 
 #### DeployStrategySection
 
@@ -71,7 +70,7 @@ OpenStackDataPlaneNode is the Schema for the openstackdataplanenodes API
 | ----- | ----------- | ------ | -------- |
 | metadata |  | metav1.ObjectMeta | false |
 | spec |  | [OpenStackDataPlaneNodeSpec](#openstackdataplanenodespec) | false |
-| status |  | [OpenStackDataPlaneNodeStatus](#openstackdataplanenodestatus) | false |
+| status |  | OpenStackDataPlaneStatus | false |
 
 [Back to Custom Resources](#custom-resources)
 
@@ -99,16 +98,5 @@ OpenStackDataPlaneNodeSpec defines the desired state of OpenStackDataPlaneNode
 | deployStrategy | DeployStrategy section to control how the node is deployed | [DeployStrategySection](#deploystrategysection) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | true |
-
-[Back to Custom Resources](#custom-resources)
-
-#### OpenStackDataPlaneNodeStatus
-
-OpenStackDataPlaneNodeStatus defines the observed state of OpenStackDataPlaneNode
-
-| Field | Description | Scheme | Required |
-| ----- | ----------- | ------ | -------- |
-| conditions | Conditions | condition.Conditions | false |
-| deployed | Deployed | bool | false |
 
 [Back to Custom Resources](#custom-resources)
