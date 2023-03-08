@@ -32,12 +32,20 @@ type OpenStackDataPlaneRoleSpec struct {
 	// +kubebuilder:validation:Optional
 	// NodeTemplate - node attributes specific to this roles
 	NodeTemplate NodeSection `json:"nodeTemplate,omitempty"`
-}
 
-// OpenStackDataPlaneRoleStatus defines the observed state of OpenStackDataPlaneRole
-type OpenStackDataPlaneRoleStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// +kubebuilder:validation:Optional
+	// DeployStrategy section to control how the node is deployed
+	DeployStrategy DeployStrategySection `json:"deployStrategy,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
+	// which allows to connect the ansibleee runner to the given network
+	NetworkAttachments []string `json:"networkAttachments"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
+	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
+	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage"`
 }
 
 //+kubebuilder:object:root=true
