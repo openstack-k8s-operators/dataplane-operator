@@ -105,19 +105,10 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
-	if len(nodes.Items) == 0 {
-		r.Log.Info("Role: ", instance.Name, "doesn't have nodes yet, requeueing")
-		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
-	}
-
 	for _, node := range nodes.Items {
 		if node.Spec.Role != instance.Name {
 			err = fmt.Errorf("node %s: node.Role does not match with node.Label", node.Name)
 			return ctrl.Result{}, err
-		}
-		if !node.Status.Deployed {
-			r.Log.Info("Node: ", node.Name, "isn't deployed yet, requeueing")
-			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
 		}
 	}
 
