@@ -35,68 +35,6 @@ spec:
             type: object
           spec:
             description: OpenStackDataPlaneSpec defines the desired state of OpenStackDataPlane
-            properties:
-              dataPlaneRoles:
-                description: DataPlaneRoles - List of roles
-                items:
-                  description: OpenStackDataPlaneRoleSpec defines the desired state
-                    of OpenStackDataPlaneRole
-                  properties:
-                    nodeTemplate:
-                      description: NodeTemplate - node attributes specific to this
-                        roles
-                      properties:
-                        ansiblePort:
-                          description: AnsiblePort SSH port for Ansible connection
-                          type: integer
-                        ansibleSSHPrivateKeySecret:
-                          description: 'AnsibleSSHPrivateKeySecret Private SSH Key
-                            secret containing private SSH key for connecting to node.
-                            Must be of the form: Secret.data.ssh-privatekey: <base64
-                            encoded private key contents> https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets'
-                          type: string
-                        ansibleUser:
-                          description: AnsibleUser SSH user for Ansible connection
-                          type: string
-                        ansibleVars:
-                          description: AnsibleVars for configuring ansible
-                          type: string
-                        managed:
-                          description: Managed - Whether the node is actually provisioned
-                            (True) or should be treated as preprovisioned (False)
-                          type: boolean
-                        managementNetwork:
-                          description: ManagementNetwork - Name of network to use
-                            for management (SSH/Ansible)
-                          type: string
-                        networkConfig:
-                          description: NetworkConfig - Network configuration details.
-                            Contains os-net-config related properties.
-                          properties:
-                            template:
-                              default: templates/net_config_bridge.j2
-                              description: Template - ansible j2 nic config template
-                                to use when applying node network configuration
-                              type: string
-                          type: object
-                        networks:
-                          description: Networks - Instance networks
-                          items:
-                            description: NetworksSection is a specification of the
-                              network attributes
-                            properties:
-                              fixedIP:
-                                description: FixedIP - Specific IP address to use
-                                  for this network
-                                type: string
-                              network:
-                                description: Network - Network name to configure
-                                type: string
-                            type: object
-                          type: array
-                      type: object
-                  type: object
-                type: array
             type: object
           status:
             description: OpenStackDataPlaneStatus defines the observed state of OpenStackDataPlaneNode

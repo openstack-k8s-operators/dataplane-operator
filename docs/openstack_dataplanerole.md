@@ -37,6 +37,7 @@ OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
+| dataPlane | DataPlane name of OpenStackDataPlane for this role | string | false |
 | nodeTemplate | NodeTemplate - node attributes specific to this roles | NodeSection | false |
 
 [Back to Custom Resources](#custom-resources)
