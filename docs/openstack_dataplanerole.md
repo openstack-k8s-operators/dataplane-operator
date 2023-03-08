@@ -16,7 +16,7 @@ OpenStackDataPlaneRole is the Schema for the openstackdataplaneroles API
 | ----- | ----------- | ------ | -------- |
 | metadata |  | metav1.ObjectMeta | false |
 | spec |  | [OpenStackDataPlaneRoleSpec](#openstackdataplanerolespec) | false |
-| status |  | [OpenStackDataPlaneRoleStatus](#openstackdataplanerolestatus) | false |
+| status |  | OpenStackDataPlaneStatus | false |
 
 [Back to Custom Resources](#custom-resources)
 
