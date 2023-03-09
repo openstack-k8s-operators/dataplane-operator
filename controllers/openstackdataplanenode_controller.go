@@ -135,6 +135,18 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	// Always patch the instance status when exiting this function so we can
 	// persist any changes.
 	defer func() {
+		// update the overall status condition if service is ready
+		if instance.IsReady() {
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage)
+		}
+		c := instance.Status.Conditions.Mirror(dataplanev1beta1.DataPlaneNodeReadyCondition)
+		if c.Reason == condition.ErrorReason {
+			instance.Status.Conditions.MarkFalse(
+				condition.ReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				c.Message)
+		}
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
 			r.Log.Error(_err, "PatchInstance error")
@@ -212,7 +224,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				dataplanev1beta1.DataPlaneNodeReadyCondition,
 				condition.ErrorReason,
-				condition.SeverityWarning,
+				condition.SeverityError,
 				dataplanev1beta1.DataPlaneNodeErrorMessage,
 				err.Error()))
 			return ctrl.Result{}, err

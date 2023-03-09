@@ -372,7 +372,7 @@ func ConditionalDeploy(
 			status.Conditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.ErrorReason,
-				condition.SeverityWarning,
+				condition.SeverityError,
 				readyErrorMessage,
 				err.Error()))
 			return ctrl.Result{}, err
