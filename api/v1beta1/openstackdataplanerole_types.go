@@ -73,3 +73,8 @@ type OpenStackDataPlaneRoleList struct {
 func init() {
 	SchemeBuilder.Register(&OpenStackDataPlaneRole{}, &OpenStackDataPlaneRoleList{})
 }
+
+// IsReady - returns true if the DataPlane is ready
+func (instance OpenStackDataPlaneRole) IsReady() bool {
+	return instance.Status.Conditions.IsTrue(DataPlaneRoleReadyCondition)
+}

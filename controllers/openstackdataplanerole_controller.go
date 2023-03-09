@@ -137,6 +137,18 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	// Always patch the instance status when exiting this function so we can
 	// persist any changes.
 	defer func() {
+		// update the overall status condition if service is ready
+		if instance.IsReady() {
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneRoleReadyMessage)
+		}
+		c := instance.Status.Conditions.Mirror(dataplanev1beta1.DataPlaneRoleReadyCondition)
+		if c.Reason == condition.ErrorReason {
+			instance.Status.Conditions.MarkFalse(
+				condition.ReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				c.Message)
+		}
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
 			r.Log.Error(_err, "PatchInstance error")
