@@ -6,7 +6,7 @@
 ### Sub Resources
 
 * [OpenStackDataPlaneList](#openstackdataplanelist)
-* [OpenStackDataPlaneSpec](#openstackdataplanespec)
+* [OpenStackDataPlaneStatus](#openstackdataplanestatus)
 
 #### OpenStackDataPlane
 
@@ -31,12 +31,13 @@ OpenStackDataPlaneList contains a list of OpenStackDataPlane
 
 [Back to Custom Resources](#custom-resources)
 
-#### OpenStackDataPlaneSpec
+#### OpenStackDataPlaneStatus
 
-OpenStackDataPlaneSpec defines the desired state of OpenStackDataPlane
+OpenStackDataPlaneStatus defines the observed state of OpenStackDataPlaneNode
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| dataPlaneRoles | DataPlaneRoles - List of roles | []OpenStackDataPlaneRoleSpec | false |
+| conditions | Conditions | condition.Conditions | false |
+| deployed | Deployed | bool | false |
 
 [Back to Custom Resources](#custom-resources)

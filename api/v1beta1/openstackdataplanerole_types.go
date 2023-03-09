@@ -26,14 +26,26 @@ import (
 // OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
 type OpenStackDataPlaneRoleSpec struct {
 	// +kubebuilder:validation:Optional
+	// DataPlane name of OpenStackDataPlane for this role
+	DataPlane string `json:"dataPlane,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// NodeTemplate - node attributes specific to this roles
 	NodeTemplate NodeSection `json:"nodeTemplate,omitempty"`
-}
 
-// OpenStackDataPlaneRoleStatus defines the observed state of OpenStackDataPlaneRole
-type OpenStackDataPlaneRoleStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// +kubebuilder:validation:Optional
+	// DeployStrategy section to control how the node is deployed
+	DeployStrategy DeployStrategySection `json:"deployStrategy,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
+	// which allows to connect the ansibleee runner to the given network
+	NetworkAttachments []string `json:"networkAttachments"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
+	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
+	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage"`
 }
 
 //+kubebuilder:object:root=true
@@ -45,8 +57,8 @@ type OpenStackDataPlaneRole struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   OpenStackDataPlaneRoleSpec   `json:"spec,omitempty"`
-	Status OpenStackDataPlaneRoleStatus `json:"status,omitempty"`
+	Spec   OpenStackDataPlaneRoleSpec `json:"spec,omitempty"`
+	Status OpenStackDataPlaneStatus   `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -60,4 +72,9 @@ type OpenStackDataPlaneRoleList struct {
 
 func init() {
 	SchemeBuilder.Register(&OpenStackDataPlaneRole{}, &OpenStackDataPlaneRoleList{})
+}
+
+// IsReady - returns true if the DataPlane is ready
+func (instance OpenStackDataPlaneRole) IsReady() bool {
+	return instance.Status.Conditions.IsTrue(DataPlaneRoleReadyCondition)
 }

@@ -16,7 +16,7 @@ OpenStackDataPlaneRole is the Schema for the openstackdataplaneroles API
 | ----- | ----------- | ------ | -------- |
 | metadata |  | metav1.ObjectMeta | false |
 | spec |  | [OpenStackDataPlaneRoleSpec](#openstackdataplanerolespec) | false |
-| status |  | [OpenStackDataPlaneRoleStatus](#openstackdataplanerolestatus) | false |
+| status |  | OpenStackDataPlaneStatus | false |
 
 [Back to Custom Resources](#custom-resources)
 
@@ -37,6 +37,10 @@ OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
+| dataPlane | DataPlane name of OpenStackDataPlane for this role | string | false |
 | nodeTemplate | NodeTemplate - node attributes specific to this roles | NodeSection | false |
+| deployStrategy | DeployStrategy section to control how the node is deployed | DeployStrategySection | false |
+| networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |
+| openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | true |
 
 [Back to Custom Resources](#custom-resources)
