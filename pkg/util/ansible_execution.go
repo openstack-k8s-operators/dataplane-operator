@@ -49,6 +49,7 @@ func AnsibleExecution(
 	networkAttachments []string,
 	openStackAnsibleEERunnerImage string,
 	ansibleTags string,
+	extraMounts []storage.VolMounts,
 ) error {
 
 	var err error
@@ -127,7 +128,7 @@ func AnsibleExecution(
 		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, sshKeyMount)
 		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, inventoryMount)
 
-		ansibleEE.Spec.ExtraMounts = []storage.VolMounts{ansibleEEMounts}
+		ansibleEE.Spec.ExtraMounts = append(extraMounts, []storage.VolMounts{ansibleEEMounts}...)
 
 		err := controllerutil.SetControllerReference(obj, ansibleEE, helper.GetScheme())
 		if err != nil {

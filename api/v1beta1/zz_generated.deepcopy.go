@@ -23,6 +23,7 @@ package v1beta1
 
 import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -79,6 +80,13 @@ func (in *NodeSection) DeepCopyInto(out *NodeSection) {
 		in, out := &in.Networks, &out.Networks
 		*out = make([]NetworksSection, len(*in))
 		copy(*out, *in)
+	}
+	if in.ExtraMounts != nil {
+		in, out := &in.ExtraMounts, &out.ExtraMounts
+		*out = make([]storage.VolMounts, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 }
 

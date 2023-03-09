@@ -21,12 +21,13 @@ import (
 
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // InstallOpenStack ensures the node OpenStack is installed
-func InstallOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string) error {
+func InstallOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string, extraMounts []storage.VolMounts) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -51,7 +52,7 @@ func InstallOpenStack(ctx context.Context, helper *helper.Helper, obj client.Obj
 		Tasks:          dataplaneutil.PopulateTasks(tasks),
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, InstallOpenStackLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, InstallOpenStackLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags, extraMounts)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for InstallOpenStack")
 		return err
@@ -62,7 +63,7 @@ func InstallOpenStack(ctx context.Context, helper *helper.Helper, obj client.Obj
 }
 
 // ConfigureOpenStack ensures the node OpenStack config
-func ConfigureOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string) error {
+func ConfigureOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string, extraMounts []storage.VolMounts) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -99,7 +100,7 @@ func ConfigureOpenStack(ctx context.Context, helper *helper.Helper, obj client.O
 		Tasks:          dataplaneutil.PopulateTasks(tasks),
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureOpenStackLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureOpenStackLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags, extraMounts)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for ConfigureOpenStack")
 		return err
@@ -110,7 +111,7 @@ func ConfigureOpenStack(ctx context.Context, helper *helper.Helper, obj client.O
 }
 
 // RunOpenStack ensures the node OpenStack is running
-func RunOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string) error {
+func RunOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string, extraMounts []storage.VolMounts) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -142,7 +143,7 @@ func RunOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object,
 		Tasks:          dataplaneutil.PopulateTasks(tasks),
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, RunOpenStackLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, RunOpenStackLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags, extraMounts)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for RunOpenStack")
 		return err
