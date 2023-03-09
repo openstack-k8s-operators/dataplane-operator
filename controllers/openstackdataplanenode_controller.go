@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -364,27 +363,19 @@ func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleManagementNetwork(instance 
 }
 
 // GetAnsibleNetworkConfig returns a JSON string value from the template unless it is set in the node
-func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleNetworkConfig(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
-	if instance.Spec.Node.NetworkConfig != instanceRole.Spec.NodeTemplate.NetworkConfig {
-		return fmt.Sprintf("{template: %s}", instance.Spec.Node.NetworkConfig)
-
+func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleNetworkConfig(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) dataplanev1beta1.NetworkConfigSection {
+	if instance.Spec.Node.NetworkConfig.Template != "" {
+		return instance.Spec.Node.NetworkConfig
 	}
-	return fmt.Sprintf("{template: %s}", instanceRole.Spec.NodeTemplate.NetworkConfig.Template)
+	return instanceRole.Spec.NodeTemplate.NetworkConfig
 }
 
 // GetAnsibleNetworks returns a JSON string mapping fixedIP and/or network name to their valules
-func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleNetworks(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
-	var network string // the resulting string containing each network
-	for _, netMap := range instance.Spec.Node.Networks {
-		if netMap.FixedIP != "" && netMap.Network == "" {
-			network += fmt.Sprintf("{%s: %s},", "fixedIP", netMap.FixedIP)
-		}
-		if netMap.FixedIP != "" && netMap.Network != "" {
-			network += fmt.Sprintf("{%s: %s, %s: %s},",
-				"fixedIP", netMap.FixedIP, "network", netMap.Network)
-		}
+func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleNetworks(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) []dataplanev1beta1.NetworksSection {
+	if len(instance.Spec.Node.Networks) > 0 {
+		return instance.Spec.Node.Networks
 	}
-	return fmt.Sprintf("[%s]", strings.TrimSuffix(network, ","))
+	return instanceRole.Spec.NodeTemplate.Networks
 }
 
 // GetAnsibleVars returns a string value of ansible vars from the template unless it is set in the node

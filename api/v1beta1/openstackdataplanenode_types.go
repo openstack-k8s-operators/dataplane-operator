@@ -119,7 +119,7 @@ type NetworkConfigSection struct {
 	// +kubebuilder:default=templates/net_config_bridge.j2
 	// Template - ansible j2 nic config template to use when applying node
 	// network configuration
-	Template string `json:"template,omitempty"`
+	Template string `json:"template,omitempty" yaml:"template,omitempty"`
 }
 
 // NetworksSection is a specification of the network attributes
@@ -127,11 +127,11 @@ type NetworksSection struct {
 
 	// +kubebuilder:validation:Optional
 	// Network - Network name to configure
-	Network string `json:"network,omitempty"`
+	Network string `json:"network,omitempty" yaml:"network,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// FixedIP - Specific IP address to use for this network
-	FixedIP string `json:"fixedIP,omitempty"`
+	FixedIP string `json:"fixedIP,omitempty" yaml:"fixedIP,omitempty"`
 }
 
 // OpenStackDataPlaneNodeStatus defines the observed state of OpenStackDataPlaneNode
