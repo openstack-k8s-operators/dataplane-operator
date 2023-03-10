@@ -19,7 +19,6 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	yaml "gopkg.in/yaml.v3"
@@ -217,20 +216,10 @@ func resolveAnsibleVars(node *dataplanev1beta1.NodeSection, host *ansible.Host, 
 		ansibleVarsData["management_network"] = node.ManagementNetwork
 	}
 	if node.NetworkConfig.Template != "" {
-		ansibleVarsData["network_config"] = fmt.Sprintf("{template: %s}", node.NetworkConfig.Template)
+		ansibleVarsData["network_config"] = node.NetworkConfig
 	}
 	if len(node.Networks) > 0 {
-		var network string // the resulting string containing each network
-		for _, netMap := range node.Networks {
-			if netMap.FixedIP != "" && netMap.Network == "" {
-				network += fmt.Sprintf("{%s: %s},", "fixedIP", netMap.FixedIP)
-			}
-			if netMap.FixedIP != "" && netMap.Network != "" {
-				network += fmt.Sprintf("{%s: %s, %s: %s},",
-					"fixedIP", netMap.FixedIP, "network", netMap.Network)
-			}
-		}
-		ansibleVarsData["networks"] = fmt.Sprintf("[%s]", strings.TrimSuffix(network, ","))
+		ansibleVarsData["networks"] = node.Networks
 	}
 
 	err := yaml.Unmarshal([]byte(node.AnsibleVars), ansibleVarsData)
