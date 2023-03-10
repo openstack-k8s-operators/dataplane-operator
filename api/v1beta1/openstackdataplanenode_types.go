@@ -18,6 +18,7 @@ package v1beta1
 
 import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -97,6 +98,11 @@ type NodeSection struct {
 	// Secret.data.ssh-privatekey: <base64 encoded private key contents>
 	// https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets
 	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret"`
+
+	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={}
+	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 }
 
 // DeployStrategySection for fields controlling the deployment
