@@ -219,6 +219,48 @@ func Deploy(
 		return result, err
 	}
 
+	// ConfigureCephClient
+	haveCephSecret := false
+	for _, extraMount := range extraMounts {
+		if extraMount.ExtraVolType == "Ceph" {
+			haveCephSecret = true
+			break
+		}
+	}
+	if !haveCephSecret {
+		helper.GetLogger().Info("Skipping execution of Ansible for ConfigureCephClient because extraMounts does not have an extraVolType of Ceph.")
+	} else {
+		readyCondition = dataplanev1beta1.ConfigureCephClientReadyCondition
+		readyWaitingMessage = dataplanev1beta1.ConfigureCephClientReadyWaitingMessage
+		readyMessage = dataplanev1beta1.ConfigureCephClientReadyMessage
+		readyErrorMessage = dataplanev1beta1.ConfigureCephClientErrorMessage
+		deployFunc = ConfigureCephClient
+		deployName = "ConfigureCephClient"
+		deployLabel = ConfigureCephClientLabel
+		result, err = ConditionalDeploy(
+			ctx,
+			helper,
+			obj,
+			sshKeySecret,
+			inventoryConfigMap,
+			status,
+			readyCondition,
+			readyMessage,
+			readyWaitingMessage,
+			readyErrorMessage,
+			deployFunc,
+			deployName,
+			deployLabel,
+			networkAttachments,
+			openStackAnsibleEERunnerImage,
+			ansibleTags,
+			extraMounts,
+		)
+		if err != nil || result.RequeueAfter > 0 {
+			return result, err
+		}
+	}
+
 	// InstallOpenStack
 	readyCondition = dataplanev1beta1.InstallOpenStackReadyCondition
 	readyWaitingMessage = dataplanev1beta1.InstallOpenStackReadyWaitingMessage
