@@ -18,10 +18,13 @@ package deployment
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
@@ -30,6 +33,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
+	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -341,7 +345,23 @@ func ConditionalDeploy(
 
 	if status.Conditions.IsUnknown(readyCondition) {
 		log.Info(fmt.Sprintf("%s Unknown, starting %s", readyCondition, deployName))
+		preConfigMapName := "pre-" + obj.GetName() + "-" + deployLabel
+		err = hookDeployFunc(ctx, helper, obj, preConfigMapName, sshKeySecret, inventoryConfigMap, networkAttachments,
+			openStackAnsibleEERunnerImage,
+			ansibleTags, extraMounts)
+		if err != nil {
+			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to %s for %s", deployName, obj.GetName()), obj)
+			return ctrl.Result{}, err
+		}
 		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap, networkAttachments,
+			openStackAnsibleEERunnerImage,
+			ansibleTags, extraMounts)
+		if err != nil {
+			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to %s for %s", deployName, obj.GetName()), obj)
+			return ctrl.Result{}, err
+		}
+		posConfigMapName := "pos-" + obj.GetName() + "-" + deployLabel
+		err = hookDeployFunc(ctx, helper, obj, posConfigMapName, sshKeySecret, inventoryConfigMap, networkAttachments,
 			openStackAnsibleEERunnerImage,
 			ansibleTags, extraMounts)
 		if err != nil {
@@ -398,4 +418,30 @@ func ConditionalDeploy(
 
 	return ctrl.Result{}, err
 
+}
+
+func hookDeployFunc(ctx context.Context, helper *helper.Helper, obj client.Object, hookConfigMapName string, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string, extraMounts []storage.VolMounts) error {
+	log := helper.GetLogger()
+	hookConfigMap := &corev1.ConfigMap{}
+	err := helper.GetClient().Get(ctx, types.NamespacedName{Name: hookConfigMapName, Namespace: obj.GetNamespace()}, hookConfigMap)
+	if err != nil && !k8s_errors.IsNotFound(err) {
+		log.Error(err, "Unable to get configMap: %s", hookConfigMapName)
+		return err
+	}
+	if k8s_errors.IsNotFound(err) {
+		log.Info("no %s hook found, continuing...", hookConfigMapName)
+		return nil
+	}
+	hookData, err := json.Marshal(hookConfigMap.Data)
+	if err != nil {
+		log.Error(err, "Unable to parse: %s", hookConfigMapName)
+		return err
+	}
+	play := string(hookData)
+	err = dataplaneutil.AnsibleExecution(ctx, helper, obj, hookConfigMapName, sshKeySecret, inventoryConfigMap, play, ansibleeev1alpha1.Role{}, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags, extraMounts)
+	if err != nil {
+		log.Error(err, "Unable to execute Ansible for %s", hookConfigMapName)
+		return err
+	}
+	return nil
 }
