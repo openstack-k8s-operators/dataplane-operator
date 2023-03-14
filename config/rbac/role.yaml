@@ -139,3 +139,15 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - nova.openstack.org
+  resources:
+  - novaexternalcomputes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
