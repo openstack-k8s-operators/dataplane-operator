@@ -9,6 +9,7 @@
 * [NetworkConfigSection](#networkconfigsection)
 * [NetworksSection](#networkssection)
 * [NodeSection](#nodesection)
+* [OpenStackDataPlaneStatus](#openstackdataplanestatus)
 * [OpenStackDataPlaneNodeList](#openstackdataplanenodelist)
 * [OpenStackDataPlaneNodeSpec](#openstackdataplanenodespec)
 
@@ -62,6 +63,17 @@ NodeSection is a specification of the node attributes
 
 [Back to Custom Resources](#custom-resources)
 
+#### OpenStackDataPlaneStatus
+
+OpenStackDataPlaneStatus defines the observed state of OpenStackDataPlaneNode
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| conditions | Conditions | condition.Conditions | false |
+| deployed | Deployed | bool | false |
+
+[Back to Custom Resources](#custom-resources)
+
 #### OpenStackDataPlaneNode
 
 OpenStackDataPlaneNode is the Schema for the openstackdataplanenodes API
@@ -70,7 +82,7 @@ OpenStackDataPlaneNode is the Schema for the openstackdataplanenodes API
 | ----- | ----------- | ------ | -------- |
 | metadata |  | metav1.ObjectMeta | false |
 | spec |  | [OpenStackDataPlaneNodeSpec](#openstackdataplanenodespec) | false |
-| status |  | OpenStackDataPlaneStatus | false |
+| status |  | [OpenStackDataPlaneStatus](#openstackdataplanestatus) | false |
 
 [Back to Custom Resources](#custom-resources)
 

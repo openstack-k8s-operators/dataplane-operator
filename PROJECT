@@ -13,15 +13,6 @@ resources:
   controller: true
   domain: openstack.org
   group: dataplane
-  kind: OpenStackDataPlane
-  path: github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1
-  version: v1beta1
-- api:
-    crdVersion: v1
-    namespaced: true
-  controller: true
-  domain: openstack.org
-  group: dataplane
   kind: OpenStackDataPlaneRole
   path: github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1
   version: v1beta1

@@ -108,15 +108,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.OpenStackDataPlaneReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackDataPlane"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlane")
-		os.Exit(1)
-	}
 	if err = (&controllers.OpenStackDataPlaneRoleReconciler{
 		Client:  mgr.GetClient(),
 		Scheme:  mgr.GetScheme(),

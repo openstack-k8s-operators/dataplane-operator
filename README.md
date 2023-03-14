@@ -2,27 +2,14 @@
 The dataplane-operator automates the deployment of an OpenStack dataplane.
 
 ---
-**NOTE**
 
-The OpenStackDataPlane CRD/controller may eventually be moved to
-[openstack-operator](https://github.com/openstack-k8s-operator/openstack-operator).
-The move is so that openstack-operator, as the umbrella operator, remains the
-single managing operator and UX for a complete OpenStack deployment
-(control plane and data plane).
+## Roles, and Nodes
 
----
-
-## DataPlane, Roles, and Nodes
-
-The dataplane-operator exposes the concepts of data plane role and nodes. These
+The dataplane-operator exposes the concepts of data plane: role and nodes. These
 are represented as CRD's within the operator:
 
-* [OpenStackDataPlane](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplane.yaml)
 * [OpenStackDataPlaneRole](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplaneroles.yaml)
 * [OpenStackDataPlaneNode](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplanenodes.yaml)
-
-The OpenStackDataPlane CRD provides for a logical grouping of roles, that
-altogether make up an OpenStack dataplane.
 
 Roles are grouped into the dataplane with the `DataPlane` field set on the
 role. Roles are also labeled with the dataplane they belong to:
