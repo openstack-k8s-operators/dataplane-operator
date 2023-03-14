@@ -17,7 +17,6 @@ limitations under the License.
 package v1beta1
 
 import (
-	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -139,18 +138,6 @@ type NetworksSection struct {
 	FixedIP string `json:"fixedIP,omitempty" yaml:"fixedIP,omitempty"`
 }
 
-// OpenStackDataPlaneNodeStatus defines the observed state of OpenStackDataPlaneNode
-type OpenStackDataPlaneNodeStatus struct {
-
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
-	// Conditions
-	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
-
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Deployed
-	Deployed bool `json:"deployed,omitempty" optional:"true"`
-}
-
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane Node"
@@ -162,8 +149,8 @@ type OpenStackDataPlaneNode struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   OpenStackDataPlaneNodeSpec   `json:"spec,omitempty"`
-	Status OpenStackDataPlaneNodeStatus `json:"status,omitempty"`
+	Spec   OpenStackDataPlaneNodeSpec `json:"spec,omitempty"`
+	Status OpenStackDataPlaneStatus   `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true

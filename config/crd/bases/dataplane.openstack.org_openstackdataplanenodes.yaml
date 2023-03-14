@@ -1884,8 +1884,7 @@ spec:
                 type: string
             type: object
           status:
-            description: OpenStackDataPlaneNodeStatus defines the observed state of
-              OpenStackDataPlaneNode
+            description: OpenStackDataPlaneStatus defines the observed state of OpenStackDataPlaneNode
             properties:
               conditions:
                 description: Conditions
