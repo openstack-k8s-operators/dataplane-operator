@@ -1971,7 +1971,6 @@ spec:
                             Contains os-net-config related properties.
                           properties:
                             template:
-                              default: templates/net_config_bridge.j2
                               description: Template - ansible j2 nic config template
                                 to use when applying node network configuration
                               type: string
