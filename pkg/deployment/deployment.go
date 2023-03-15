@@ -60,9 +60,9 @@ func Deploy(
 	var deployName string
 	var deployLabel string
 
-	// Set DataPlaneNodeReadyCondition to requested
+	// Set ReadyCondition to requested
 	status.Conditions.Set(condition.FalseCondition(
-		dataplanev1beta1.DataPlaneNodeReadyCondition,
+		condition.ReadyCondition,
 		condition.RequestedReason,
 		condition.SeverityInfo,
 		dataplanev1beta1.DataPlaneNodeReadyWaitingMessage))
@@ -351,22 +351,6 @@ func Deploy(
 		return result, err
 	}
 
-	result, err = DeployNovaExternalCompute(
-		ctx,
-		helper,
-		obj,
-		sshKeySecret,
-		inventoryConfigMap,
-		status,
-		networkAttachments,
-		openStackAnsibleEERunnerImage)
-	if err != nil || result.RequeueAfter > 0 {
-		return result, err
-	}
-
-	if status.Conditions.IsTrue(dataplanev1beta1.NovaComputeReadyCondition) {
-		status.Deployed = true
-	}
 	return ctrl.Result{}, nil
 
 }

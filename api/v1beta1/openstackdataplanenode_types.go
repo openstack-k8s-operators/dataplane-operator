@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -84,5 +85,5 @@ func init() {
 
 // IsReady - returns true if the DataPlane is ready
 func (instance OpenStackDataPlaneNode) IsReady() bool {
-	return instance.Status.Conditions.IsTrue(DataPlaneNodeReadyCondition)
+	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
 }
