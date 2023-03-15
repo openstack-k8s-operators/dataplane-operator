@@ -112,6 +112,19 @@ const (
 	// RunOSErrorMessage error
 	RunOSErrorMessage = "RunOS error occurred %s"
 
+	// ConfigureCephClientReadyCondition Status=True condition indicates if the
+	// Ceph client configuration is finished and successful.
+	ConfigureCephClientReadyCondition condition.Type = "ConfigureCephClientReady"
+
+	// ConfigureCephClientReadyMessage ready
+	ConfigureCephClientReadyMessage = "ConfigureCephClient ready"
+
+	// ConfigureCephClientReadyWaitingMessage not yet ready
+	ConfigureCephClientReadyWaitingMessage = "ConfigureCephClient not yet ready"
+
+	// ConfigureCephClientErrorMessage error
+	ConfigureCephClientErrorMessage = "ConfigureCephClient error occurred %s"
+
 	// InstallOpenStackReadyCondition Status=True condition indicates if the
 	// OpenStack configuration is finished and successful.
 	InstallOpenStackReadyCondition condition.Type = "InstallOpenStackReady"
