@@ -99,9 +99,9 @@ an `ansiblePort` set directly in that node's CR. This allows the user
 to change the `nodeTemplate` after creation and once reconciliation is
 completed all existing nodes will inherit the new value.
 
-Any top level property in the node overrides the whole property in the
-role so that there is no merging of any sub-properties. E.g. if the
-role `nodeTemplate` had a list like the following:
+Almost any top level property in a node overrides the whole property
+in a role. E.g. if the role `nodeTemplate` had a list like the
+following:
 ```
     foo:
       - bar: baz
@@ -112,9 +112,50 @@ and a node had a list like the following:
       - qux: quux
 ```
 Then the node will only have `{"qux": "quux"}` in its list. I.e. there
-would not be any merging and the node would not have also have
-`{"bar": "baz"}` in its list. This is the same way that Ansible merges
-variables and was done by design for simplicity.
+would not be any merging and the node would not also have `{"bar":
+"baz"}` in its list. The one exception to this rule is the
+`AnsibleVars` property. If the following CRs are created:
+
+```yaml
+kind: OpenStackDataPlaneRole
+metadata:
+  name: edpm-compute
+spec:
+  nodeTemplate:
+    ansibleVars: |
+      neutron_public_interface_name: eth0
+      edpm_chrony_ntp_servers:
+        - clock.redhat.com
+        - clock2.redhat.com
+  ...
+```
+
+```yaml
+kind: OpenStackDataPlaneNode
+metadata:
+  name: edpm-compute-0
+spec:
+  role: edpm-compute
+  node:
+    ansibleVars: |
+      tenant_ip: 192.168.24.100
+  ...
+```
+The `ConfigMap` containing the inventory would have the following
+vars:
+
+```yaml
+      neutron_public_interface_name: eth0
+      tenant_ip: 192.168.24.100
+      edpm_chrony_ntp_servers:
+        - clock.redhat.com
+        - clock2.redhat.com
+```
+Only top level keys are compared for merging. E.g. if `edpm-compute-0`
+had a `edpm_chrony_ntp_servers` list with `clock3.redhat.com`, then
+the resultant inventory for the node would not have three NTP servers;
+it would only have `clock3.redhat.com`. I.e. there is no "deep
+merging".
 
 It's also possible to create a node directly outside of a role CR
 and define its role. If the following CR is created:
