@@ -21,10 +21,6 @@ import (
 )
 
 const (
-	// DataPlaneNodeReadyCondition Status=True condition indicates
-	// DataPlaneNode is ready.
-	DataPlaneNodeReadyCondition condition.Type = "DataPlaneNodeReady"
-
 	// DataPlaneNodeReadyMessage ready
 	DataPlaneNodeReadyMessage = "DataPlaneNode ready"
 
@@ -33,10 +29,6 @@ const (
 
 	// DataPlaneNodeErrorMessage error
 	DataPlaneNodeErrorMessage = "DataPlaneNode error occurred %s"
-
-	// DataPlaneRoleReadyCondition Status=True condition indicates
-	// DataPlaneRole is ready.
-	DataPlaneRoleReadyCondition condition.Type = "DataPlaneRoleReady"
 
 	// DataPlaneRoleReadyMessage ready
 	DataPlaneRoleReadyMessage = "DataPlaneRole ready"

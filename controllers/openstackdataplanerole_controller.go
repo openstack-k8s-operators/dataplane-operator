@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -41,6 +42,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 )
 
 // OpenStackDataPlaneRoleReconciler reconciles a OpenStackDataPlaneRole object
@@ -141,7 +143,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		if instance.IsReady() {
 			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneRoleReadyMessage)
 		}
-		c := instance.Status.Conditions.Mirror(dataplanev1beta1.DataPlaneRoleReadyCondition)
+		c := instance.Status.Conditions.Mirror(condition.ReadyCondition)
 		if c.Reason == condition.ErrorReason {
 			instance.Status.Conditions.MarkFalse(
 				condition.ReadyCondition,
@@ -176,7 +178,6 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		instance.Status.Conditions = condition.Conditions{}
 
 		cl := condition.CreateList(
-			condition.UnknownCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.InstallOSReadyCondition, condition.InitReason, condition.InitReason),
@@ -198,14 +199,15 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 
 	if instance.Spec.DeployStrategy.Deploy {
 
-		r.Log.Info("Set DataPlaneRoleReadyCondition false")
-		instance.Status.Conditions.Set(condition.FalseCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
+		r.Log.Info("Starting DataPlaneRole deploy")
+		r.Log.Info("Set ReadyCondition false")
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.RequestedReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
 
 		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status, instance.Spec.NetworkAttachments, instance.Spec.OpenStackAnsibleEERunnerImage, instance.Spec.DeployStrategy.AnsibleTags, instance.Spec.NodeTemplate.ExtraMounts)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(
-				dataplanev1beta1.DataPlaneRoleReadyCondition,
+				condition.ReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityWarning,
 				dataplanev1beta1.DataPlaneRoleErrorMessage,
@@ -216,21 +218,72 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 			return result, nil
 		}
 
-		r.Log.Info("Set DataPlaneRoleReadyCondition true")
-		instance.Status.Conditions.Set(condition.FalseCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
+		// Call DeployNovaExternalCompute individually for each node
+		var novaExternalCompute *novav1beta1.NovaExternalCompute
+		var novaReadyConditionsTrue []*condition.Condition
+		var novaErrors []error
+		for _, node := range nodes.Items {
+			nodeConfigMapName := fmt.Sprintf("dataplanenode-%s-inventory", node.Name)
+			result, novaExternalCompute, err = deployment.DeployNovaExternalCompute(
+				ctx,
+				helper,
+				&node,
+				ansibleSSHPrivateKeySecret,
+				nodeConfigMapName,
+				&instance.Status,
+				instance.Spec.NetworkAttachments,
+				instance.Spec.OpenStackAnsibleEERunnerImage)
+			if err != nil {
+				novaErrors = append(novaErrors, err)
+			}
+			novaReadyCondition := novaExternalCompute.Status.Conditions.Get(condition.ReadyCondition)
+			if novaExternalCompute.IsReady() {
+				r.Log.Info(fmt.Sprintf("NovaExternalCompute %s, IsReady true", node.Name))
+				novaReadyConditionsTrue = append(novaReadyConditionsTrue, novaReadyCondition)
+
+			}
+		}
+
+		// When any errors are found, wrap all into a single error, and return
+		// it
+		errStr := "DeployNovaExternalCompute error:"
+		if len(novaErrors) > 0 {
+			for _, err := range novaErrors {
+				errStr = fmt.Sprintf("%s: %s", errStr, err.Error())
+			}
+			err = errors.New(errStr)
+			return result, err
+		}
+
+		// Return when any condition is not ready, otherwise set the role as
+		// deployed.
+		if len(novaReadyConditionsTrue) < len(nodes.Items) {
+			r.Log.Info("Not all NovaExternalCompute ReadyConditions are true")
+			return result, nil
+		}
+
+		r.Log.Info("All NovaExternalCompute ReadyConditions are true")
+		instance.Status.Conditions.Set(condition.TrueCondition(dataplanev1beta1.NovaComputeReadyCondition, dataplanev1beta1.NovaComputeReadyMessage))
+		instance.Status.Deployed = true
+		r.Log.Info("Set ReadyCondition true")
+		instance.Status.Conditions.Set(condition.TrueCondition(condition.ReadyCondition, dataplanev1beta1.DataPlaneRoleReadyMessage))
+
+		// Explicitly set instance.Spec.Deploy = false
+		// We don't want another deploy triggered by any reconcile request, it should
+		// only be triggered when the user (or another controller) specifically
+		// sets it to true.
+		r.Log.Info("Set DeployStrategy.Deploy to false")
+		instance.Spec.DeployStrategy.Deploy = false
+
 	}
 
-	// Set DataPlaneRoleReadyCondition to False if it was unknown
-	if instance.Status.Conditions.IsUnknown(dataplanev1beta1.DataPlaneRoleReadyCondition) {
-		r.Log.Info("Set DataPlaneRoleReadyCondition false")
-		instance.Status.Conditions.Set(condition.FalseCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
+	// Set ReadyCondition to False if it was unknown.
+	// Handles the case where the Role is created with
+	// DeployStrategy.Deploy=false.
+	if instance.Status.Conditions.IsUnknown(condition.ReadyCondition) {
+		r.Log.Info("Set ReadyCondition false")
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
 	}
-
-	// Explicitly set instance.Spec.Deploy = false
-	// We don't want another deploy triggered by any reconcile request, it should
-	// only be triggered when the user (or another controller) specifically
-	// sets it to true.
-	instance.Spec.DeployStrategy.Deploy = false
 
 	return ctrl.Result{}, nil
 }

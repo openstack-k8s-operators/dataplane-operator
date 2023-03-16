@@ -140,7 +140,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		if instance.IsReady() {
 			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage)
 		}
-		c := instance.Status.Conditions.Mirror(dataplanev1beta1.DataPlaneNodeReadyCondition)
+		c := instance.Status.Conditions.Mirror(condition.ReadyCondition)
 		if c.Reason == condition.ErrorReason {
 			instance.Status.Conditions.MarkFalse(
 				condition.ReadyCondition,
@@ -161,7 +161,6 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		instance.Status.Conditions = condition.Conditions{}
 
 		cl := condition.CreateList(
-			condition.UnknownCondition(dataplanev1beta1.DataPlaneNodeReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.InstallOSReadyCondition, condition.InitReason, condition.InitReason),
@@ -224,7 +223,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(
-				dataplanev1beta1.DataPlaneNodeReadyCondition,
+				condition.ReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityError,
 				dataplanev1beta1.DataPlaneNodeErrorMessage,
@@ -234,17 +233,60 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		if result.RequeueAfter > 0 {
 			return result, nil
 		}
+
+		var novaExternalCompute *novav1beta1.NovaExternalCompute
+		result, novaExternalCompute, err = deployment.DeployNovaExternalCompute(
+			ctx,
+			helper,
+			instance,
+			ansibleSSHPrivateKeySecret,
+			inventoryConfigMap,
+			&instance.Status,
+			instance.Spec.NetworkAttachments,
+			instance.Spec.OpenStackAnsibleEERunnerImage)
+		if err != nil {
+			return result, err
+		}
+
+		novaReadyCondition := novaExternalCompute.Status.Conditions.Get(condition.ReadyCondition)
+		if novaReadyCondition != nil {
+			r.Log.Info(fmt.Sprintf("NovaExternalCompute ReadyCondition status: %s", novaReadyCondition.Status))
+		} else {
+			r.Log.Info("NovaExternalCompute ReadyCondition not yet set")
+		}
+
+		mirroredCondition := novaExternalCompute.Status.Conditions.Mirror(dataplanev1beta1.NovaComputeReadyCondition)
+		if mirroredCondition != nil {
+			instance.Status.Conditions.Set(mirroredCondition)
+		}
+
+		if condition.IsError(instance.Status.Conditions.Get(dataplanev1beta1.NovaComputeReadyCondition)) {
+			r.Log.Info(fmt.Sprintf("%s error", dataplanev1beta1.NovaComputeReadyCondition))
+			err = fmt.Errorf("failed: NovaExternalCompute name %s NovaExternalCompute namespace %s", novaExternalCompute.Name, novaExternalCompute.Namespace)
+			return ctrl.Result{}, err
+		}
+
+		if instance.Status.Conditions.IsTrue(dataplanev1beta1.NovaComputeReadyCondition) {
+			instance.Status.Deployed = true
+			r.Log.Info("Set ReadyCondition true")
+			instance.Status.Conditions.Set(condition.TrueCondition(condition.ReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage))
+
+			// Explicitly set instance.Spec.Deploy = false
+			// We don't want another deploy triggered by any reconcile request, it
+			// should only be triggered when the user (or another controller)
+			// specifically sets it to true.
+			instance.Spec.DeployStrategy.Deploy = false
+		}
+
 	}
 
-	r.Log.Info("Set DataPlaneNodeReadyCondition true")
-	instance.Status.Conditions.Set(condition.TrueCondition(dataplanev1beta1.DataPlaneNodeReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage))
-
-	// Explicitly set instance.Spec.Deploy = false
-	// We don't want another deploy triggered by any roncile request, it should
-	// only be triggered when the user (or another controller) specifically
-	// sets it to true.
-	instance.Spec.DeployStrategy.Deploy = false
-
+	// Set ReadyCondition to False if it was unknown.
+	// Handles the case where the Node is created with
+	// DeployStrategy.Deploy=false.
+	if instance.Status.Conditions.IsUnknown(condition.ReadyCondition) {
+		r.Log.Info("Set ReadyCondition false")
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneNodeReadyWaitingMessage))
+	}
 	return result, nil
 }
 

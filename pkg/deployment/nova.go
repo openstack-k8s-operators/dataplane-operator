@@ -26,17 +26,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
-	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 )
 
 // DeployNovaExternalCompute deploys the nova compute configuration and services
-func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneStatus, networkAttachments []string, openStackAnsibleEERunnerImage string) (ctrl.Result, error) {
+func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneStatus, networkAttachments []string, openStackAnsibleEERunnerImage string) (ctrl.Result, *novav1beta1.NovaExternalCompute, error) {
 
 	log := helper.GetLogger()
-	log.Info("NovaExternalCompute deploy")
+	log.Info(fmt.Sprintf("NovaExternalCompute deploy for %s", obj.GetName()))
 
 	novaExternalCompute := &novav1beta1.NovaExternalCompute{
 		ObjectMeta: metav1.ObjectMeta{
@@ -67,25 +66,9 @@ func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj c
 	})
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to CreateOrPatch NovaExternalCompute %s", novaExternalCompute.Name), novaExternalCompute)
-		return ctrl.Result{}, err
+		return ctrl.Result{}, nil, err
 	}
 
-	mirroredCondition := novaExternalCompute.Status.Conditions.Mirror(dataplanev1beta1.NovaComputeReadyCondition)
-	if mirroredCondition != nil {
-		status.Conditions.Set(mirroredCondition)
-	}
-	readyCondition := novaExternalCompute.Status.Conditions.Get(condition.ReadyCondition)
-	if readyCondition != nil {
-		log.Info(fmt.Sprintf("NovaExternalCompute ReadyCondition status: %s", readyCondition.Status))
-	} else {
-		log.Info("NovaExternalCompute ReadyCondition not yet set")
-	}
+	return ctrl.Result{}, novaExternalCompute, nil
 
-	if condition.IsError(status.Conditions.Get(dataplanev1beta1.NovaComputeReadyCondition)) {
-		log.Info(fmt.Sprintf("%s error", dataplanev1beta1.NovaComputeReadyCondition))
-		err = fmt.Errorf("failed: NovaExternalCompute name %s NovaExternalCompute namespace %s", novaExternalCompute.Name, novaExternalCompute.Namespace)
-		return ctrl.Result{}, err
-	}
-
-	return ctrl.Result{}, nil
 }
