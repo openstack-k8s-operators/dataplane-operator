@@ -412,6 +412,13 @@ func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleVars(instance *dataplanev1b
 		return nil, nodeYamlError
 	}
 
+	if role == nil && node != nil {
+		return node, nil
+	}
+	if role != nil && node == nil {
+		return role, nil
+	}
+
 	// Merge the two maps
 	for k, v := range node {
 		role[k] = v
