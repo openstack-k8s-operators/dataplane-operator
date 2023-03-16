@@ -1,5 +1,9 @@
 ## Append samples you want in your CSV to this file as resources ##
 resources:
+- dataplane_v1beta1_openstackdataplanerole_edpm_compute.yaml
+- dataplane_v1beta1_openstackdataplanenode_edpm_compute_0.yaml
+- dataplane_v1beta1_openstackdataplanenode_edpm_compute_1.yaml
+- dataplane_v1beta1_openstackdataplanenode_edpm_compute_0_full.yaml
 - dataplane_v1beta1_openstackdataplane.yaml
 - dataplane_v1beta1_openstackdataplanerole.yaml
 - dataplane_v1beta1_openstackdataplanenode.yaml
