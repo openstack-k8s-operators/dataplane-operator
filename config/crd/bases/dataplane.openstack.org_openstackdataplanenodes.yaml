@@ -12,6 +12,9 @@ spec:
     kind: OpenStackDataPlaneNode
     listKind: OpenStackDataPlaneNodeList
     plural: openstackdataplanenodes
+    shortNames:
+    - osdpnode
+    - osdpnodes
     singular: openstackdataplanenode
   scope: Namespaced
   versions:

@@ -12,6 +12,9 @@ spec:
     kind: OpenStackDataPlaneRole
     listKind: OpenStackDataPlaneRoleList
     plural: openstackdataplaneroles
+    shortNames:
+    - osdprole
+    - osdproles
     singular: openstackdataplanerole
   scope: Namespaced
   versions:
