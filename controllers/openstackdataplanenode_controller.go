@@ -288,8 +288,7 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 	}
 	host.Vars["ansible_host"] = hostName
 
-	ansibleVarsData := make(map[string]interface{})
-	err = yaml.Unmarshal([]byte(r.GetAnsibleVars(instance, instanceRole)), ansibleVarsData)
+	ansibleVarsData, err := r.GetAnsibleVars(instance, instanceRole)
 	if err != nil {
 		return "", err
 	}
@@ -394,12 +393,30 @@ func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleNetworks(instance *dataplan
 	return instanceRole.Spec.NodeTemplate.Networks
 }
 
-// GetAnsibleVars returns a string value of ansible vars from the template unless it is set in the node
-func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleVars(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
-	if instance.Spec.Node.AnsibleVars != "" {
-		return instance.Spec.Node.AnsibleVars
+// GetAnsibleVars returns a map of strings representing ansible vars which were merged from the role template vars and node vars
+func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleVars(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) (map[string]interface{}, error) {
+	// Merge the ansibleVars from the role into the value set on the node.
+	// Top level keys set on the node ansibleVars should override top level keys from the role AnsibleVars.
+	// However, there is no "deep" merge of values. Only top level keys are compared for merging
+
+	// Unmarshal the YAML strings into two maps
+	var role, node map[string]interface{}
+	roleYamlError := yaml.Unmarshal([]byte(instanceRole.Spec.NodeTemplate.AnsibleVars), &role)
+	if roleYamlError != nil {
+		r.Log.Error(roleYamlError, fmt.Sprintf("Failed to unmarshal YAML data from role AnsibleVars '%s'", instanceRole.Spec.NodeTemplate.AnsibleVars))
+		return nil, roleYamlError
 	}
-	return instanceRole.Spec.NodeTemplate.AnsibleVars
+	nodeYamlError := yaml.Unmarshal([]byte(instance.Spec.Node.AnsibleVars), &node)
+	if nodeYamlError != nil {
+		r.Log.Error(nodeYamlError, fmt.Sprintf("Failed to unmarshal YAML data from node AnsibleVars '%s'", instance.Spec.Node.AnsibleVars))
+		return nil, nodeYamlError
+	}
+
+	// Merge the two maps
+	for k, v := range node {
+		role[k] = v
+	}
+	return role, nil
 }
 
 // GetAnsibleSSHPrivateKeySecret returns the secret name holding the private SSH key
