@@ -182,6 +182,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 			condition.UnknownCondition(dataplanev1beta1.InstallOSReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.ConfigureOSReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.RunOSReadyCondition, condition.InitReason, condition.InitReason),
+			condition.UnknownCondition(dataplanev1beta1.ConfigureCephClientReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.InstallOpenStackReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.ConfigureOpenStackReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.RunOpenStackReadyCondition, condition.InitReason, condition.InitReason),

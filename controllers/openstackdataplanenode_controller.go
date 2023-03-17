@@ -43,6 +43,7 @@ import (
 	nad "github.com/openstack-k8s-operators/lib-common/modules/common/networkattachment"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
@@ -220,7 +221,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	}
 
 	if instance.Spec.DeployStrategy.Deploy {
-		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status, instance.Spec.NetworkAttachments, instance.Spec.OpenStackAnsibleEERunnerImage, instance.Spec.DeployStrategy.AnsibleTags, instance.Spec.Node.ExtraMounts)
+		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status, instance.Spec.NetworkAttachments, instance.Spec.OpenStackAnsibleEERunnerImage, instance.Spec.DeployStrategy.AnsibleTags, r.GetExtraMounts(instance, instanceRole))
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -432,4 +433,12 @@ func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleSSHPrivateKeySecret(instanc
 		return instance.Spec.Node.AnsibleSSHPrivateKeySecret
 	}
 	return instanceRole.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
+}
+
+// GetExtraMounts returns the extraMounts data structure from role, unless the node has it
+func (r *OpenStackDataPlaneNodeReconciler) GetExtraMounts(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) []storage.VolMounts {
+	if instance.Spec.Node.ExtraMounts != nil {
+		return instance.Spec.Node.ExtraMounts
+	}
+	return instanceRole.Spec.NodeTemplate.ExtraMounts
 }
