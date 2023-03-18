@@ -140,14 +140,12 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		// update the overall status condition if service is ready
 		if instance.IsReady() {
 			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage)
-		}
-		c := instance.Status.Conditions.Mirror(condition.ReadyCondition)
-		if c.Reason == condition.ErrorReason {
-			instance.Status.Conditions.MarkFalse(
-				condition.ReadyCondition,
-				condition.ErrorReason,
-				condition.SeverityError,
-				c.Message)
+		} else {
+			// something is not ready so reset the Ready condition
+			instance.Status.Conditions.MarkUnknown(
+				condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage)
+			// and recalculate it based on the state of the rest of the conditions
+			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
