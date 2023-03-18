@@ -51,8 +51,9 @@ func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj c
 		log.Info(fmt.Sprintf("NovaExternalCompute: Adding label %s=%s", "openstackdataplanenode", obj.GetName()))
 		novaExternalCompute.ObjectMeta.Labels["openstackdataplanenode"] = obj.GetName()
 
-		novaExternalCompute.Spec.InventoryConfigMapName = inventoryConfigMap
-		novaExternalCompute.Spec.SSHKeySecretName = sshKeySecret
+		// We need to call the default ctor to get the unspecified fields defaulted according to the CRD defaults
+		// as otherwise golang would defaul those field to the golang empty value instead.
+		novaExternalCompute.Spec = novav1beta1.NewNovaExternalComputeSpec(inventoryConfigMap, sshKeySecret)
 		novaExternalCompute.Spec.Deploy = true
 		novaExternalCompute.Spec.NetworkAttachments = networkAttachments
 		novaExternalCompute.Spec.AnsibleEEContainerImage = openStackAnsibleEERunnerImage
