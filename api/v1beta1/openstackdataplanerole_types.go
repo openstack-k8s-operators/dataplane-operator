@@ -17,6 +17,9 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+	"reflect"
+
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -81,4 +84,47 @@ func init() {
 // IsReady - returns true if the DataPlane is ready
 func (instance OpenStackDataPlaneRole) IsReady() bool {
 	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
+}
+
+// Validate - validates the shared data between role and nodes
+func (instance OpenStackDataPlaneRole) Validate(nodes []OpenStackDataPlaneNode) error {
+	var errorMsgs []string
+	containsEmptyField := false
+	for _, field := range UniqueSpecFields {
+		if reflect.ValueOf(instance.Spec).FieldByName(field).IsZero() {
+			containsEmptyField = true
+			break
+		}
+	}
+
+	if !containsEmptyField {
+		for _, node := range nodes {
+			suffix := fmt.Sprintf("node: %s and role: %s", node.Name, instance.Name)
+			msgs := AssertUniquenessBetween(node.Spec, instance.Spec, suffix)
+			errorMsgs = append(errorMsgs, msgs...)
+		}
+	}
+
+	// Compare nodes when role fields are empty
+	if containsEmptyField {
+		nodeMap := make(map[string]OpenStackDataPlaneNode)
+
+		for _, node := range nodes {
+			for _, field := range UniqueSpecFields {
+				if len(nodeMap[field].Name) > 0 {
+					suffix := fmt.Sprintf("node: %s and node: %s", node.Name, nodeMap[field].Name)
+					msgs := AssertUniquenessBetween(node.Spec, nodeMap[field].Spec, suffix)
+					errorMsgs = append(errorMsgs, msgs...)
+				}
+				if len(nodeMap[field].Name) == 0 && !reflect.ValueOf(node.Spec).FieldByName(field).IsZero() {
+					nodeMap[field] = node
+				}
+			}
+		}
+	}
+
+	if len(errorMsgs) > 0 {
+		return fmt.Errorf("validation error(s): %s", errorMsgs)
+	}
+	return nil
 }
