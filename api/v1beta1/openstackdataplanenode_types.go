@@ -17,6 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -87,4 +89,15 @@ func init() {
 // IsReady - returns true if the DataPlane is ready
 func (instance OpenStackDataPlaneNode) IsReady() bool {
 	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
+}
+
+// Validate - validates the shared data between node and role
+func (instance OpenStackDataPlaneNode) Validate(role OpenStackDataPlaneRole) error {
+	suffix := fmt.Sprintf("node: %s and role: %s", instance.Name, role.Name)
+	errorMsgs := AssertUniquenessBetween(instance.Spec, role.Spec, suffix)
+
+	if len(errorMsgs) > 0 {
+		return fmt.Errorf("validation error(s): %s", errorMsgs)
+	}
+	return nil
 }

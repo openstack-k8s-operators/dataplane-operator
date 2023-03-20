@@ -382,6 +382,9 @@ func (r *OpenStackDataPlaneNodeReconciler) GetInstanceRole(ctx context.Context, 
 			Namespace: instance.Namespace,
 			Name:      instance.Spec.Role,
 		}, instanceRole)
+		if err == nil {
+			err = instance.Validate(*instanceRole)
+		}
 	}
 	return instanceRole, err
 }

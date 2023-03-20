@@ -129,6 +129,10 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 			return ctrl.Result{}, err
 		}
 	}
+	err = instance.Validate(nodes.Items)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
 	inventoryConfigMap, err := r.GenerateInventory(ctx, instance, nodes.Items)
 	if err != nil {
