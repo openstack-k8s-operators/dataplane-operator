@@ -18,15 +18,24 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"time"
 
+	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
-	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 )
 
 // OpenStackDataPlaneReconciler reconciles a OpenStackDataPlane object
@@ -38,6 +47,7 @@ type OpenStackDataPlaneReconciler struct {
 }
 
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanes,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodes;openstackdataplaneroles,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanes/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanes/finalizers,verbs=update
 
@@ -50,10 +60,158 @@ type OpenStackDataPlaneReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
-func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
 	_ = log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	// Fetch the OpenStackDataPlane instance
+	instance := &dataplanev1beta1.OpenStackDataPlane{}
+	err := r.Client.Get(ctx, req.NamespacedName, instance)
+	if err != nil {
+		if k8s_errors.IsNotFound(err) {
+			// Request object not found, could have been deleted after reconcile request.
+			// Owned objects are automatically garbage collected.
+			// For additional cleanup logic use finalizers. Return and don't requeue.
+			return ctrl.Result{}, nil
+		}
+		// Error reading the object - requeue the request.
+		return ctrl.Result{}, err
+	}
+
+	helper, err := helper.NewHelper(
+		instance,
+		r.Client,
+		r.Kclient,
+		r.Scheme,
+		r.Log,
+	)
+	if err != nil {
+		// helper might be nil, so can't use util.LogErrorForObject since it requires helper as first arg
+		r.Log.Error(err, fmt.Sprintf("unable to acquire helper for OpenStackDataPlane %s", instance.Name))
+		return ctrl.Result{}, err
+	}
+
+	// Always patch the instance status when exiting this function so we can persist any changes.
+	defer func() {
+		// update the overall status condition if service is ready
+		if instance.IsReady() {
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneRoleReadyMessage)
+		} else {
+			// something is not ready so reset the Ready condition
+			instance.Status.Conditions.MarkUnknown(
+				condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage)
+			// and recalculate it based on the state of the rest of the conditions
+			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
+		}
+		err := helper.PatchInstance(ctx, instance)
+		if err != nil {
+			r.Log.Error(_err, "PatchInstance error")
+			_err = err
+			return
+		}
+	}()
+
+	if instance.Status.Conditions == nil {
+		instance.InitConditions()
+		// Register overall status immediately to have an early feedback e.g. in the cli
+		return ctrl.Result{}, nil
+	}
+
+	// Reset all ReadyConditons to 'Unknown'
+	instance.InitConditions()
+
+	ctrlResult, err := CreateDataPlaneResources(ctx, instance, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
+	var deployErrors []string
+	shouldRequeue := false
+	if instance.Spec.DeployStrategy.Deploy {
+		r.Log.Info("Starting DataPlane deploy")
+		r.Log.Info("Set ReadyCondition false")
+		roles := &dataplanev1beta1.OpenStackDataPlaneRoleList{}
+
+		listOpts := []client.ListOption{
+			client.InNamespace(instance.GetNamespace()),
+		}
+		labelSelector := map[string]string{
+			"openstackdataplane": instance.Name,
+		}
+		if len(labelSelector) > 0 {
+			labels := client.MatchingLabels(labelSelector)
+			listOpts = append(listOpts, labels)
+		}
+		err = helper.GetClient().List(ctx, roles, listOpts...)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		instance.Status.Conditions.Set(condition.FalseCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
+		for _, role := range roles.Items {
+			if role.Spec.DataPlane != instance.Name {
+				err = fmt.Errorf("role %s: role.DataPlane does not match with role.Label", role.Name)
+				deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
+			}
+			if !role.Spec.DeployStrategy.Deploy {
+				_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), &role, func() error {
+					helper.GetLogger().Info("Reconciling Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+					role.Spec.DeployStrategy.Deploy = instance.Spec.DeployStrategy.Deploy
+					err := controllerutil.SetControllerReference(helper.GetBeforeObject(), &role, helper.GetScheme())
+					if err != nil {
+						deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
+					}
+					return nil
+				})
+				if err != nil {
+					deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
+				}
+			}
+			if !role.IsReady() {
+				shouldRequeue = true
+				mirroredCondition := role.Status.Conditions.Mirror(condition.ReadyCondition)
+				if mirroredCondition != nil {
+					instance.Status.Conditions.Set(mirroredCondition)
+					if condition.IsError(mirroredCondition) {
+						deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+mirroredCondition.Message)
+					}
+				}
+
+			}
+		}
+	}
+
+	if len(deployErrors) > 0 {
+		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
+		err = fmt.Errorf(fmt.Sprintf("DeployDataplane error(s): %s", deployErrors))
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			dataplanev1beta1.DataPlaneRoleReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			dataplanev1beta1.DataPlaneRoleErrorMessage,
+			err.Error()))
+		return ctrl.Result{}, err
+	}
+	if shouldRequeue {
+		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
+	}
+	if instance.Spec.DeployStrategy.Deploy && len(deployErrors) == 0 {
+		r.Log.Info("Set DataPlaneRoleReadyCondition true")
+		instance.Status.Conditions.Set(condition.TrueCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, dataplanev1beta1.DataPlaneRoleReadyMessage))
+	}
+
+	// Set DataPlaneRoleReadyCondition to False if it was unknown
+	if instance.Status.Conditions.IsUnknown(dataplanev1beta1.DataPlaneRoleReadyCondition) {
+		r.Log.Info("Set DataPlaneRoleReadyCondition false")
+		instance.Status.Conditions.Set(condition.FalseCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, condition.RequestedReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
+	}
+
+	// Explicitly set instance.Spec.Deploy = false
+	// We don't want another deploy triggered by any reconcile request, it should
+	// only be triggered when the user (or another controller) specifically
+	// sets it to true.
+	instance.Spec.DeployStrategy.Deploy = false
 
 	return ctrl.Result{}, nil
 }
@@ -62,5 +220,97 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 func (r *OpenStackDataPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1beta1.OpenStackDataPlane{}).
+		Owns(&dataplanev1beta1.OpenStackDataPlaneNode{}).
+		Owns(&dataplanev1beta1.OpenStackDataPlaneRole{}).
 		Complete(r)
+}
+
+// CreateDataPlaneResources -
+func CreateDataPlaneResources(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) (ctrl.Result, error) {
+	err := CreateDataPlaneRole(ctx, instance, helper)
+	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			dataplanev1beta1.DataPlaneRoleReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			dataplanev1beta1.DataPlaneRoleErrorMessage,
+			err.Error()))
+		return ctrl.Result{}, err
+	}
+	err = CreateDataPlaneNode(ctx, instance, helper)
+	if err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			condition.ReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			dataplanev1beta1.DataPlaneNodeErrorMessage,
+			err.Error()))
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{}, nil
+
+}
+
+// CreateDataPlaneNode -
+func CreateDataPlaneNode(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) error {
+	client := helper.GetClient()
+	logger := helper.GetLogger()
+
+	for nodeName, nodeSpec := range instance.Spec.Nodes {
+		node := &dataplanev1beta1.OpenStackDataPlaneNode{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      nodeName,
+				Namespace: instance.Namespace,
+			},
+		}
+		nodeSpec.DeepCopyInto(&node.Spec)
+		err := client.Get(ctx, types.NamespacedName{Name: node.Name, Namespace: instance.Namespace}, node)
+		if err != nil && !k8s_errors.IsNotFound(err) {
+			logger.Info("Failed to get Node", "Node.Namespace", instance.Namespace, "Node.Name", node.Name)
+			return err
+		}
+		if k8s_errors.IsNotFound(err) {
+			err := client.Create(ctx, node)
+			if err != nil {
+				logger.Info("Failed to create Node", "Node.Namespace", instance.Namespace, "Node.Name", node.Name)
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// CreateDataPlaneRole -
+func CreateDataPlaneRole(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) error {
+	client := helper.GetClient()
+	logger := helper.GetLogger()
+
+	for roleName, roleSpec := range instance.Spec.Roles {
+		role := &dataplanev1beta1.OpenStackDataPlaneRole{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      roleName,
+				Namespace: instance.Namespace,
+			},
+		}
+		roleSpec.DeepCopyInto(&role.Spec)
+		if len(role.Spec.DataPlane) == 0 {
+			role.Spec.DataPlane = instance.Name
+		}
+		err := client.Get(ctx, types.NamespacedName{Name: role.Name, Namespace: instance.Namespace}, role)
+		if err != nil && !k8s_errors.IsNotFound(err) {
+			logger.Info("Failed to get Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+			return err
+		}
+		if k8s_errors.IsNotFound(err) {
+			err := client.Create(ctx, role)
+			if err != nil {
+				logger.Info("Failed to create Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+				return err
+			}
+		}
+
+	}
+	return nil
 }

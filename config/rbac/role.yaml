@@ -68,6 +68,19 @@ rules:
 - apiGroups:
   - dataplane.openstack.org
   resources:
+  - openstackdataplanenodes
+  - openstackdataplaneroles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
   - openstackdataplanenodes/finalizers
   verbs:
   - update

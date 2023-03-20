@@ -17,7 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
-	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -26,6 +26,16 @@ import (
 
 // OpenStackDataPlaneSpec defines the desired state of OpenStackDataPlane
 type OpenStackDataPlaneSpec struct {
+
+	// +kubebuilder:validation:Optional
+	// Nodes - Map of nodes
+	Nodes map[string]OpenStackDataPlaneNodeSpec `json:"nodes,omitempty"`
+	// +kubebuilder:validation:Optional
+	// Roles - Map of roles
+	Roles map[string]OpenStackDataPlaneRoleSpec `json:"roles,omitempty"`
+	// +kubebuilder:validation:Optional
+	// DeployStrategy section to control how the node is deployed
+	DeployStrategy DeployStrategySection `json:"deployStrategy,omitempty"`
 }
 
 // OpenStackDataPlaneStatus defines the observed state of OpenStackDataPlaneNode
@@ -67,4 +77,19 @@ type OpenStackDataPlaneList struct {
 
 func init() {
 	SchemeBuilder.Register(&OpenStackDataPlane{}, &OpenStackDataPlaneList{})
+}
+
+// IsReady - returns true if service is ready to serve requests
+func (instance OpenStackDataPlane) IsReady() bool {
+	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
+}
+
+// InitConditions - Initializes Status Conditons
+func (instance OpenStackDataPlane) InitConditions() {
+	if instance.Status.Conditions == nil {
+		instance.Status.Conditions = condition.Conditions{}
+	}
+	cl := condition.CreateList(condition.UnknownCondition(DataPlaneRoleReadyCondition, condition.InitReason, condition.InitReason))
+	// initialize conditions used later as Status=Unknown
+	instance.Status.Conditions.Init(&cl)
 }

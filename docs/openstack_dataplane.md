@@ -6,6 +6,7 @@
 ### Sub Resources
 
 * [OpenStackDataPlaneList](#openstackdataplanelist)
+* [OpenStackDataPlaneSpec](#openstackdataplanespec)
 * [OpenStackDataPlaneStatus](#openstackdataplanestatus)
 
 #### OpenStackDataPlane
@@ -28,6 +29,18 @@ OpenStackDataPlaneList contains a list of OpenStackDataPlane
 | ----- | ----------- | ------ | -------- |
 | metadata |  | metav1.ListMeta | false |
 | items |  | [][OpenStackDataPlane](#openstackdataplane) | true |
+
+[Back to Custom Resources](#custom-resources)
+
+#### OpenStackDataPlaneSpec
+
+OpenStackDataPlaneSpec defines the desired state of OpenStackDataPlane
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| nodes | Nodes - Map of nodes | map[string]OpenStackDataPlaneNodeSpec | false |
+| roles | Roles - Map of roles | map[string]OpenStackDataPlaneRoleSpec | false |
+| deployStrategy | DeployStrategy section to control how the node is deployed | DeployStrategySection | false |
 
 [Back to Custom Resources](#custom-resources)
 
