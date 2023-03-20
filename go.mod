@@ -17,7 +17,7 @@ require (
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230302143714-7e1818eab25c
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.1
-	k8s.io/apimachinery v0.26.1
+	k8s.io/apimachinery v0.26.3
 	k8s.io/apiserver v0.26.1
 	k8s.io/client-go v0.26.1
 	sigs.k8s.io/controller-runtime v0.14.4
