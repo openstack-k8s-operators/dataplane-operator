@@ -30,19 +30,25 @@ import (
 // ConfigureNetwork ensures the network config
 func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string, extraMounts []storage.VolMounts) error {
 
+	tasks := []dataplaneutil.Task{
+		{
+			Name:          "Configure Hosts Entries",
+			RoleName:      "edpm_hosts_entries",
+			RoleTasksFrom: "main.yml",
+			Tags:          []string{"edpm_hosts_entries"},
+		},
+		{
+			Name:          "import edpm_network_config",
+			RoleName:      "edpm_network_config",
+			RoleTasksFrom: "main.yml",
+			Tags:          []string{"edpm_network_config"},
+		},
+	}
 	role := ansibleeev1alpha1.Role{
-		Name:     "edpm_network_config",
+		Name:     "Deploy EDPM Network",
 		Hosts:    "all",
 		Strategy: "linear",
-		Tasks: []ansibleeev1alpha1.Task{
-			{
-				Name: "import edpm_network_config",
-				ImportRole: ansibleeev1alpha1.ImportRole{
-					Name:      "edpm_network_config",
-					TasksFrom: "main.yml",
-				},
-			},
-		},
+		Tasks:    dataplaneutil.PopulateTasks(tasks),
 	}
 
 	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureNetworkLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags, extraMounts)
