@@ -276,6 +276,10 @@ func CreateDataPlaneNode(ctx context.Context, instance *dataplanev1beta1.OpenSta
 				logger.Info("Failed to create Node", "Node.Namespace", instance.Namespace, "Node.Name", node.Name)
 				return err
 			}
+			err = controllerutil.SetControllerReference(instance, node, helper.GetScheme())
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -307,6 +311,10 @@ func CreateDataPlaneRole(ctx context.Context, instance *dataplanev1beta1.OpenSta
 			err := client.Create(ctx, role)
 			if err != nil {
 				logger.Info("Failed to create Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+				return err
+			}
+			err = controllerutil.SetControllerReference(instance, role, helper.GetScheme())
+			if err != nil {
 				return err
 			}
 		}
