@@ -28,7 +28,6 @@ import (
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -61,7 +60,7 @@ type OpenStackDataPlaneReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
-	_ = log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 
 	// Fetch the OpenStackDataPlane instance
 	instance := &dataplanev1beta1.OpenStackDataPlane{}
@@ -82,7 +81,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		r.Client,
 		r.Kclient,
 		r.Scheme,
-		r.Log,
+		logger,
 	)
 	if err != nil {
 		// helper might be nil, so can't use util.LogErrorForObject since it requires helper as first arg
@@ -150,6 +149,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneReadyWaitingMessage))
 		for _, role := range roles.Items {
+			logger.Info("DataPlane deploy", "role.Name", role.Name)
 			if role.Spec.DataPlane != instance.Name {
 				err = fmt.Errorf("role %s: role.DataPlane does not match with role.Label", role.Name)
 				deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
@@ -158,8 +158,8 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 			if !role.Spec.DeployStrategy.Deploy {
 				_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), &role, func() error {
 					r.Log.Info("Reconciling Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+					helper.GetLogger().Info("CreateOrPatch Role.DeployStrategy.Deploy", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
 					role.Spec.DeployStrategy.Deploy = instance.Spec.DeployStrategy.Deploy
-					err := controllerutil.SetControllerReference(helper.GetBeforeObject(), &role, helper.GetScheme())
 					if err != nil {
 						deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
 					}
@@ -258,32 +258,27 @@ func CreateDataPlaneResources(ctx context.Context, instance *dataplanev1beta1.Op
 
 // CreateDataPlaneNode -
 func CreateDataPlaneNode(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) error {
-	client := helper.GetClient()
 	logger := helper.GetLogger()
+	client := helper.GetClient()
 
 	for nodeName, nodeSpec := range instance.Spec.Nodes {
+		logger.Info("CreateDataPlaneNode", "nodeName", nodeName)
 		node := &dataplanev1beta1.OpenStackDataPlaneNode{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      nodeName,
 				Namespace: instance.Namespace,
 			},
 		}
-		nodeSpec.DeepCopyInto(&node.Spec)
-		err := client.Get(ctx, types.NamespacedName{Name: node.Name, Namespace: instance.Namespace}, node)
-		if err != nil && !k8s_errors.IsNotFound(err) {
-			logger.Info("Failed to get Node", "Node.Namespace", instance.Namespace, "Node.Name", node.Name)
+		_, err := controllerutil.CreateOrPatch(ctx, client, node, func() error {
+			nodeSpec.DeepCopyInto(&node.Spec)
+			err := controllerutil.SetControllerReference(instance, node, helper.GetScheme())
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+		if err != nil {
 			return err
-		}
-		if k8s_errors.IsNotFound(err) {
-			err := client.Create(ctx, node)
-			if err != nil {
-				logger.Info("Failed to create Node", "Node.Namespace", instance.Namespace, "Node.Name", node.Name)
-				return err
-			}
-			err = controllerutil.SetControllerReference(instance, node, helper.GetScheme())
-			if err != nil {
-				return err
-			}
 		}
 	}
 
@@ -296,31 +291,30 @@ func CreateDataPlaneRole(ctx context.Context, instance *dataplanev1beta1.OpenSta
 	logger := helper.GetLogger()
 
 	for roleName, roleSpec := range instance.Spec.Roles {
+		logger.Info("CreateDataPlaneRole", "roleName", roleName)
 		role := &dataplanev1beta1.OpenStackDataPlaneRole{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      roleName,
 				Namespace: instance.Namespace,
 			},
 		}
-		roleSpec.DeepCopyInto(&role.Spec)
-		if len(role.Spec.DataPlane) == 0 {
+		_, err := controllerutil.CreateOrPatch(ctx, client, role, func() error {
+			// role.Spec.DeployStrategy is explicitly omitted. Otherwise, it
+			// could get reset to False, and if the DataPlane deploy sets it to
+			// True, the DataPlane and DataPlaneRole controllers will be stuck
+			// looping trying to reconcile.
 			role.Spec.DataPlane = instance.Name
-		}
-		err := client.Get(ctx, types.NamespacedName{Name: role.Name, Namespace: instance.Namespace}, role)
-		if err != nil && !k8s_errors.IsNotFound(err) {
-			logger.Info("Failed to get Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+			role.Spec.NodeTemplate = roleSpec.NodeTemplate
+			role.Spec.NetworkAttachments = roleSpec.NetworkAttachments
+			role.Spec.OpenStackAnsibleEERunnerImage = roleSpec.OpenStackAnsibleEERunnerImage
+			err := controllerutil.SetControllerReference(instance, role, helper.GetScheme())
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+		if err != nil {
 			return err
-		}
-		if k8s_errors.IsNotFound(err) {
-			err := client.Create(ctx, role)
-			if err != nil {
-				logger.Info("Failed to create Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-				return err
-			}
-			err = controllerutil.SetControllerReference(instance, role, helper.GetScheme())
-			if err != nil {
-				return err
-			}
 		}
 
 	}
