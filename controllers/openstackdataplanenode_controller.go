@@ -77,7 +77,7 @@ type OpenStackDataPlaneNodeReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
 	r.Log = log.FromContext(ctx)
-	r.Log.Info("Reconciling")
+	r.Log.Info("Reconciling Node")
 
 	// Fetch the OpenStackDataPlaneNode instance
 	instance := &dataplanev1beta1.OpenStackDataPlaneNode{}
@@ -217,6 +217,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
+	r.Log.Info("Node", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Node.Namespace", instance.Namespace, "Node.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
 		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status, instance.Spec.NetworkAttachments, instance.Spec.OpenStackAnsibleEERunnerImage, instance.Spec.DeployStrategy.AnsibleTags, r.GetExtraMounts(instance, instanceRole))
 		if err != nil {
