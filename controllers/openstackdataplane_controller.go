@@ -94,7 +94,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	defer func() {
 		// update the overall status condition if service is ready
 		if instance.IsReady() {
-			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneRoleReadyMessage)
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneReadyMessage)
 		} else {
 			// something is not ready so reset the Ready condition
 			instance.Status.Conditions.MarkUnknown(
@@ -148,7 +148,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 			return ctrl.Result{}, err
 		}
 
-		instance.Status.Conditions.Set(condition.FalseCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneReadyWaitingMessage))
 		for _, role := range roles.Items {
 			if role.Spec.DataPlane != instance.Name {
 				err = fmt.Errorf("role %s: role.DataPlane does not match with role.Label", role.Name)
@@ -189,10 +189,10 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 		err = fmt.Errorf(fmt.Sprintf("DeployDataplane error(s): %s", deployErrors))
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			dataplanev1beta1.DataPlaneRoleReadyCondition,
+			condition.ReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityError,
-			dataplanev1beta1.DataPlaneRoleErrorMessage,
+			dataplanev1beta1.DataPlaneErrorMessage,
 			err.Error()))
 		return ctrl.Result{}, err
 	}
@@ -201,14 +201,14 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
 	}
 	if instance.Spec.DeployStrategy.Deploy && len(deployErrors) == 0 {
-		r.Log.Info("Set DataPlaneRoleReadyCondition true")
-		instance.Status.Conditions.Set(condition.TrueCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, dataplanev1beta1.DataPlaneRoleReadyMessage))
+		r.Log.Info("Set ReadyCondition true")
+		instance.Status.Conditions.Set(condition.TrueCondition(condition.ReadyCondition, dataplanev1beta1.DataPlaneReadyMessage))
 	}
 
-	// Set DataPlaneRoleReadyCondition to False if it was unknown
-	if instance.Status.Conditions.IsUnknown(dataplanev1beta1.DataPlaneRoleReadyCondition) {
-		r.Log.Info("Set DataPlaneRoleReadyCondition false")
-		instance.Status.Conditions.Set(condition.FalseCondition(dataplanev1beta1.DataPlaneRoleReadyCondition, condition.RequestedReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
+	// Set ReadyCondition to False if it was unknown
+	if instance.Status.Conditions.IsUnknown(condition.ReadyCondition) {
+		r.Log.Info("Set ReadyCondition false")
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.RequestedReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneReadyWaitingMessage))
 	}
 
 	// Explicitly set instance.Spec.Deploy = false
@@ -234,10 +234,10 @@ func CreateDataPlaneResources(ctx context.Context, instance *dataplanev1beta1.Op
 	err := CreateDataPlaneRole(ctx, instance, helper)
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			dataplanev1beta1.DataPlaneRoleReadyCondition,
+			condition.ReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityError,
-			dataplanev1beta1.DataPlaneRoleErrorMessage,
+			dataplanev1beta1.DataPlaneErrorMessage,
 			err.Error()))
 		return ctrl.Result{}, err
 	}
