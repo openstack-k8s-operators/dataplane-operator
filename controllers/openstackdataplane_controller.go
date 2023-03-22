@@ -154,9 +154,10 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 				err = fmt.Errorf("role %s: role.DataPlane does not match with role.Label", role.Name)
 				deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
 			}
+			r.Log.Info("Role", "DeployStrategy.Deploy", role.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
 			if !role.Spec.DeployStrategy.Deploy {
 				_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), &role, func() error {
-					helper.GetLogger().Info("Reconciling Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+					r.Log.Info("Reconciling Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
 					role.Spec.DeployStrategy.Deploy = instance.Spec.DeployStrategy.Deploy
 					err := controllerutil.SetControllerReference(helper.GetBeforeObject(), &role, helper.GetScheme())
 					if err != nil {
@@ -169,9 +170,11 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 				}
 			}
 			if !role.IsReady() {
+				r.Log.Info("Role", "IsReady", role.IsReady(), "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
 				shouldRequeue = true
 				mirroredCondition := role.Status.Conditions.Mirror(condition.ReadyCondition)
 				if mirroredCondition != nil {
+					r.Log.Info("Role", "Status", mirroredCondition.Message, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
 					instance.Status.Conditions.Set(mirroredCondition)
 					if condition.IsError(mirroredCondition) {
 						deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+mirroredCondition.Message)
@@ -194,6 +197,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 	if shouldRequeue {
+		r.Log.Info("one or more roles aren't ready, requeueing")
 		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
 	}
 	if instance.Spec.DeployStrategy.Deploy && len(deployErrors) == 0 {

@@ -68,7 +68,7 @@ type OpenStackDataPlaneRoleReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
 	r.Log = log.FromContext(ctx)
-	r.Log.Info("Reconciling")
+	r.Log.Info("Reconciling Role")
 
 	// Fetch the OpenStackDataPlaneRole instance
 	instance := &dataplanev1beta1.OpenStackDataPlaneRole{}
@@ -122,13 +122,15 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-
+	nodeNames := ""
 	for _, node := range nodes.Items {
 		if node.Spec.Role != instance.Name {
 			err = fmt.Errorf("node %s: node.Role does not match with node.Label", node.Name)
 			return ctrl.Result{}, err
 		}
+		nodeNames = nodeNames + node.Name + ","
 	}
+	r.Log.Info("Role", "Nodes", nodeNames, "Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
 	err = instance.Validate(nodes.Items)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -200,6 +202,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, nil
 	}
 
+	r.Log.Info("Role", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
 
 		r.Log.Info("Starting DataPlaneRole deploy")
