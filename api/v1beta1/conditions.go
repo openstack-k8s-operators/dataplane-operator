@@ -30,10 +30,6 @@ const (
 	// DataPlaneNodeErrorMessage error
 	DataPlaneNodeErrorMessage = "DataPlaneNode error occurred %s"
 
-	// DataPlaneRoleReadyCondition Status=True condition indicates
-	// DataPlaneRole is ready.
-	DataPlaneRoleReadyCondition condition.Type = "DataPlaneRoleReady"
-
 	// DataPlaneRoleReadyMessage ready
 	DataPlaneRoleReadyMessage = "DataPlaneRole ready"
 
@@ -42,6 +38,15 @@ const (
 
 	// DataPlaneRoleErrorMessage error
 	DataPlaneRoleErrorMessage = "DataPlaneRole error occurred %s"
+
+	// DataPlaneReadyMessage ready
+	DataPlaneReadyMessage = "DataPlane ready"
+
+	// DataPlaneReadyWaitingMessage ready
+	DataPlaneReadyWaitingMessage = "DataPlane not yet ready"
+
+	// DataPlaneErrorMessage error
+	DataPlaneErrorMessage = "DataPlane error occurred %s"
 
 	// ConfigureNetworkReadyCondition Status=True condition indicates if the
 	// network configuration is finished and successful.
