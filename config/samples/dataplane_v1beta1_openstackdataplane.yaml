@@ -16,7 +16,7 @@ spec:
           internal_api_ip: 172.17.0.100
           storage_ip: 172.18.0.100
           tenant_ip: 172.10.0.100
-          fqdn_internal_api: '{{ ansible_fqdn }}'
+          fqdn_internal_api: edpm-compute-0.example.com
         ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
       deployStrategy:
         deploy: false
@@ -30,7 +30,7 @@ spec:
           internal_api_ip: 172.17.0.101
           storage_ip: 172.18.0.101
           tenant_ip: 172.10.0.101
-          fqdn_internal_api: '{{ ansible_fqdn }}'
+          fqdn_internal_api: edpm-compute-1.example.com
         ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
       deployStrategy:
         deploy: false
@@ -109,15 +109,12 @@ spec:
           edpm_ovn_dbs:
           - 192.168.24.1
 
-          registry_name: quay.io
-          registry_namespace: tripleozedcentos9
-          image_tag: current-tripleo
-          edpm_ovn_controller_agent_image: "{{ registry_name }}/{{ registry_namespace }}/openstack-ovn-controller:{{ image_tag }}"
-          edpm_iscsid_image: "{{ registry_name }}/{{ registry_namespace }}/openstack-iscsid:{{ image_tag }}"
-          edpm_logrotate_crond_image: "{{ registry_name }}/{{ registry_namespace }}/openstack-cron:{{ image_tag }}"
-          edpm_nova_compute_container_image: "{{ registry_name }}/{{ registry_namespace }}/openstack-nova-compute:{{ image_tag }}"
-          edpm_nova_libvirt_container_image: "{{ registry_name }}/{{ registry_namespace }}/openstack-nova-libvirt:{{ image_tag }}"
-          edpm_ovn_metadata_agent_image: "{{ registry_name }}/{{ registry_namespace }}/openstack-neutron-metadata-agent-ovn:{{ image_tag }}"
+          edpm_ovn_controller_agent_image: quay.io/tripleozedcentos9/openstack-ovn-controller:current-tripleo
+          edpm_iscsid_image: quay.io/tripleozedcentos9/openstack-iscsid:current-tripleo
+          edpm_logrotate_crond_image: quay.io/tripleozedcentos9/openstack-cron:current-tripleo
+          edpm_nova_compute_container_image: quay.io/tripleozedcentos9/openstack-nova-compute:current-tripleo
+          edpm_nova_libvirt_container_image: quay.io/tripleozedcentos9/openstack-nova-libvirt:current-tripleo
+          edpm_ovn_metadata_agent_image: quay.io/tripleozedcentos9/openstack-neutron-metadata-agent-ovn:current-tripleo
 
           gather_facts: false
           enable_debug: false
