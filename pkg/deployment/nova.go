@@ -32,7 +32,7 @@ import (
 )
 
 // DeployNovaExternalCompute deploys the nova compute configuration and services
-func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneStatus, networkAttachments []string, openStackAnsibleEERunnerImage string) (ctrl.Result, *novav1beta1.NovaExternalCompute, error) {
+func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj client.Object, owner client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneStatus, networkAttachments []string, openStackAnsibleEERunnerImage string) (ctrl.Result, *novav1beta1.NovaExternalCompute, error) {
 
 	log := helper.GetLogger()
 	log.Info(fmt.Sprintf("NovaExternalCompute deploy for %s", obj.GetName()))
@@ -58,7 +58,7 @@ func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj c
 		novaExternalCompute.Spec.NetworkAttachments = networkAttachments
 		novaExternalCompute.Spec.AnsibleEEContainerImage = openStackAnsibleEERunnerImage
 
-		err := controllerutil.SetControllerReference(obj, novaExternalCompute, helper.GetScheme())
+		err := controllerutil.SetControllerReference(owner, novaExternalCompute, helper.GetScheme())
 		if err != nil {
 			return err
 		}
