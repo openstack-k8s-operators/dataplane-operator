@@ -59,7 +59,7 @@ func AnsibleExecution(
 		return err
 	}
 	if ansibleEE == nil {
-		executionName := names.SimpleNameGenerator.GenerateName(label)
+		executionName := names.SimpleNameGenerator.GenerateName(fmt.Sprintf("%s-", label))
 		ansibleEE = &ansibleeev1alpha1.OpenStackAnsibleEE{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      executionName,
