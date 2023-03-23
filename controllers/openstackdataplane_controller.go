@@ -32,6 +32,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
@@ -226,6 +227,7 @@ func (r *OpenStackDataPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error 
 		For(&dataplanev1beta1.OpenStackDataPlane{}).
 		Owns(&dataplanev1beta1.OpenStackDataPlaneNode{}).
 		Owns(&dataplanev1beta1.OpenStackDataPlaneRole{}).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 2}).
 		Complete(r)
 }
 
