@@ -131,5 +131,10 @@ spec:
           edpm_hosts_entries_vip_hosts_entries: []
           hosts_entries: []
           hosts_entry: []
+      networkAttachments:
+        - ctlplane
+        - internalapi
+        - storage
+        - tenant
       deployStrategy:
         deploy: false
