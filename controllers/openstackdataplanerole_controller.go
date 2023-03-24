@@ -43,6 +43,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
 // OpenStackDataPlaneRoleReconciler reconciles a OpenStackDataPlaneRole object
@@ -56,6 +57,12 @@ type OpenStackDataPlaneRoleReconciler struct {
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneroles,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneroles/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneroles/finalizers,verbs=update
+//+kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=nova.openstack.org,resources=novaexternalcomputes,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete;
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete;
+// +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
+// +kubebuilder:rbac:groups=k8s.cni.cncf.io,resources=network-attachment-definitions,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -234,6 +241,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 				ctx,
 				helper,
 				&node,
+				instance,
 				ansibleSSHPrivateKeySecret,
 				nodeConfigMapName,
 				&instance.Status,
@@ -264,8 +272,8 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		// Return when any condition is not ready, otherwise set the role as
 		// deployed.
 		if len(novaReadyConditionsTrue) < len(nodes.Items) {
-			r.Log.Info("Not all NovaExternalCompute ReadyConditions are true")
-			return result, nil
+			r.Log.Info("Not all NovaExternalCompute ReadyConditions are true.")
+			return ctrl.Result{}, nil
 		}
 
 		r.Log.Info("All NovaExternalCompute ReadyConditions are true")
@@ -361,6 +369,9 @@ func (r *OpenStackDataPlaneRoleReconciler) GenerateInventory(ctx context.Context
 func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1beta1.OpenStackDataPlaneRole{}).
+		Owns(&v1alpha1.OpenStackAnsibleEE{}).
+		Owns(&novav1beta1.NovaExternalCompute{}).
+		Owns(&corev1.ConfigMap{}).
 		Complete(r)
 }
 

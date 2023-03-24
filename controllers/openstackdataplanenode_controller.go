@@ -239,6 +239,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 			ctx,
 			helper,
 			instance,
+			instance,
 			ansibleSSHPrivateKeySecret,
 			inventoryConfigMap,
 			&instance.Status,
