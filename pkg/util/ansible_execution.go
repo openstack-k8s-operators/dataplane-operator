@@ -26,7 +26,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apiserver/pkg/storage/names"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -59,7 +58,7 @@ func AnsibleExecution(
 		return err
 	}
 	if ansibleEE == nil {
-		executionName := names.SimpleNameGenerator.GenerateName(fmt.Sprintf("%s-", label))
+		executionName := fmt.Sprintf("%s-%s", label, obj.GetName())
 		ansibleEE = &ansibleeev1alpha1.OpenStackAnsibleEE{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      executionName,
