@@ -10,11 +10,11 @@ require (
 	github.com/onsi/ginkgo/v2 v2.9.2
 	github.com/onsi/gomega v1.27.4
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-00010101000000-000000000000
-	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.0.0-20230307144813-39ed0da90b23
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230307144813-39ed0da90b23
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230208113903-f7b52e2a2ccb
-	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230320091827-f81236c6a1a0
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230302143714-7e1818eab25c
+	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.0.0-20230327081958-ea3a766f017d
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230327081958-ea3a766f017d
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230327081958-ea3a766f017d
+	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230324200502-165d29fe64b1
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230323145008-d9f7aa208997
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.3
 	k8s.io/apimachinery v0.26.3
@@ -42,7 +42,7 @@ require (
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/imdario/mergo v0.3.13 // indirect
+	github.com/imdario/mergo v0.3.14 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
@@ -72,11 +72,11 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apiextensions-apiserver v0.26.1 // indirect
-	k8s.io/component-base v0.26.1 // indirect
+	k8s.io/apiextensions-apiserver v0.26.2 // indirect
+	k8s.io/component-base v0.26.2 // indirect
 	k8s.io/klog/v2 v2.80.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20230131200451-5e46c6e584a1 // indirect
-	k8s.io/utils v0.0.0-20230115233650-391b47cb4029 // indirect
+	k8s.io/kube-openapi v0.0.0-20230308215209-15aac26d736a // indirect
+	k8s.io/utils v0.0.0-20230313181309-38a27ef9d749 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect

@@ -77,7 +77,7 @@ func AnsibleExecution(
 			ansibleEE.Spec.CmdLine = fmt.Sprintf("--tags %s", ansibleTags)
 		}
 		// TODO(slagle): Handle either play or role being specified
-		ansibleEE.Spec.Role = role
+		ansibleEE.Spec.Role = &role
 
 		ansibleEEMounts := storage.VolMounts{}
 		sshKeyVolume := corev1.Volume{
