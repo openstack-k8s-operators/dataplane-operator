@@ -138,7 +138,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	// persist any changes.
 	defer func() {
 		// update the overall status condition if service is ready
-		if instance.IsReady() {
+		if instance.IsReady() || instanceRole.IsReady() {
 			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage)
 		} else {
 			// something is not ready so reset the Ready condition
