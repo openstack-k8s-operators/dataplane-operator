@@ -32,7 +32,7 @@ github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJ
 github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9Gz0M=
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/onsi/ginkgo/v2 v2.9.2 h1:BA2GMJOtfGAfagzYtrAlufIP0lq6QERkFmHLMLPwFSU=
-github.com/onsi/gomega v1.27.5 h1:T/X6I0RNFw/kTqgfkZPcQ5KU6vCnWNBGdtrIx2dpGeQ=
+github.com/onsi/gomega v1.27.4 h1:Z2AnStgsdSayCMDiCU42qIz+HLqEPcgiOCXjAU/w+8E=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230307144813-39ed0da90b23 h1:XPgJD+Z6iXzb4EmM/k3GtHBlCLEFM/ci8pGDyyZePRM=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230307144813-39ed0da90b23/go.mod h1:wDUzrnAhtC0O99PYR8qQWQoGJzVQwGnfGepKzExCVk8=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230208113903-f7b52e2a2ccb h1:ryKoUXxe7kfpfCJoYd0wj9JkYcO6HmLgM+d3+L4AStM=
