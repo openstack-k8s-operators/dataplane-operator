@@ -251,8 +251,8 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 				novaErrors = append(novaErrors, err)
 			}
 			novaReadyCondition := novaExternalCompute.Status.Conditions.Get(condition.ReadyCondition)
+			r.Log.Info("Nova Status", "NovaExternalCompute", node.Name, "IsReady", novaExternalCompute.IsReady())
 			if novaExternalCompute.IsReady() {
-				r.Log.Info(fmt.Sprintf("NovaExternalCompute %s, IsReady true", node.Name))
 				novaReadyConditionsTrue = append(novaReadyConditionsTrue, novaReadyCondition)
 
 			}
@@ -281,6 +281,17 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		instance.Status.Deployed = true
 		r.Log.Info("Set ReadyCondition true")
 		instance.Status.Conditions.Set(condition.TrueCondition(condition.ReadyCondition, dataplanev1beta1.DataPlaneRoleReadyMessage))
+		for _, node := range nodes.Items {
+			if !node.IsReady() {
+				_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), &node, func() error {
+					node.Status.Deployed = true
+					return nil
+				})
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+			}
+		}
 
 		// Explicitly set instance.Spec.Deploy = false
 		// We don't want another deploy triggered by any reconcile request, it should
