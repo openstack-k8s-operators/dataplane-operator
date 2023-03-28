@@ -33,13 +33,13 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Obj
 	tasks := []dataplaneutil.Task{
 		{
 			Name:          "Configure Hosts Entries",
-			RoleName:      "edpm_hosts_entries",
+			RoleName:      "osp.edpm.edpm_hosts_entries",
 			RoleTasksFrom: "main.yml",
 			Tags:          []string{"edpm_hosts_entries"},
 		},
 		{
 			Name:          "import edpm_network_config",
-			RoleName:      "edpm_network_config",
+			RoleName:      "osp.edpm.edpm_network_config",
 			RoleTasksFrom: "main.yml",
 			Tags:          []string{"edpm_network_config"},
 		},
@@ -65,14 +65,14 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Obj
 func ValidateNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string, extraMounts []storage.VolMounts) error {
 
 	role := ansibleeev1alpha1.Role{
-		Name:     "edpm_nodes_validation",
+		Name:     "osp.edpm.edpm_nodes_validation",
 		Hosts:    "all",
 		Strategy: "linear",
 		Tasks: []ansibleeev1alpha1.Task{
 			{
 				Name: "import edpm_nodes_validation",
 				ImportRole: ansibleeev1alpha1.ImportRole{
-					Name:      "edpm_nodes_validation",
+					Name:      "osp.edpm.edpm_nodes_validation",
 					TasksFrom: "main.yml",
 				},
 			},
