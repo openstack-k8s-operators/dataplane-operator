@@ -215,7 +215,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		r.Log.Info("Set ReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.RequestedReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
 
-		result, err = deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, roleConfigMap, &instance.Status, instance.GetAnsibleEESpec())
+		deployResult, err := deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, roleConfigMap, &instance.Status, instance.GetAnsibleEESpec())
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -226,7 +226,8 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 				err.Error()))
 			return ctrl.Result{}, err
 		}
-		if result.RequeueAfter > 0 {
+		if deployResult != nil {
+			result = *deployResult
 			return result, nil
 		}
 
