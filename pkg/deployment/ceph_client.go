@@ -21,14 +21,14 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
-	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
 // ConfigureCephClient ensures the Ceph client configuration files are on data plane nodes
-func ConfigureCephClient(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string, extraMounts []storage.VolMounts) error {
+func ConfigureCephClient(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
 
 	role := ansibleeev1alpha1.Role{
 		Name:     "edpm_ceph_client_files",
@@ -45,7 +45,7 @@ func ConfigureCephClient(ctx context.Context, helper *helper.Helper, obj client.
 		},
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureCephClientLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags, extraMounts)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureCephClientLabel, sshKeySecret, inventoryConfigMap, "", role, aeeSpec)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for ConfigureCephClient")
 		return err

@@ -5,12 +5,27 @@
 
 ### Sub Resources
 
+* [AnsibleEESpec](#ansibleeespec)
 * [DeployStrategySection](#deploystrategysection)
 * [NetworkConfigSection](#networkconfigsection)
 * [NetworksSection](#networkssection)
 * [NodeSection](#nodesection)
 * [OpenStackDataPlaneNodeList](#openstackdataplanenodelist)
 * [OpenStackDataPlaneNodeSpec](#openstackdataplanenodespec)
+
+#### AnsibleEESpec
+
+AnsibleEESpec is a specification of the ansible EE attributes
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |
+| openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | true |
+| ansibleTags | AnsibleTags for ansible execution | string | false |
+| extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | true |
+| env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
+
+[Back to Custom Resources](#custom-resources)
 
 #### DeployStrategySection
 
@@ -95,6 +110,7 @@ OpenStackDataPlaneNodeSpec defines the desired state of OpenStackDataPlaneNode
 | node | Node - node attributes specific to this node | [NodeSection](#nodesection) | false |
 | role | Role - role name for this node | string | false |
 | ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
+| env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
 | deployStrategy | DeployStrategy section to control how the node is deployed | [DeployStrategySection](#deploystrategysection) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | true |

@@ -307,6 +307,7 @@ func CreateDataPlaneRole(ctx context.Context, instance *dataplanev1beta1.OpenSta
 			role.Spec.NodeTemplate = roleSpec.NodeTemplate
 			role.Spec.NetworkAttachments = roleSpec.NetworkAttachments
 			role.Spec.OpenStackAnsibleEERunnerImage = roleSpec.OpenStackAnsibleEERunnerImage
+			role.Spec.Env = roleSpec.Env
 			err := controllerutil.SetControllerReference(instance, role, helper.GetScheme())
 			if err != nil {
 				return err

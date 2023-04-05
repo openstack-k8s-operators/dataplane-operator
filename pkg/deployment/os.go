@@ -19,15 +19,15 @@ package deployment
 import (
 	"context"
 
+	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
-	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // InstallOS ensures the node Operating System is installed
-func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string, extraMounts []storage.VolMounts) error {
+func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -77,7 +77,7 @@ func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, ss
 		Tasks:          dataplaneutil.PopulateTasks(tasks),
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, InstallOSLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags, extraMounts)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, InstallOSLabel, sshKeySecret, inventoryConfigMap, "", role, aeeSpec)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for InstallOS")
 		return err
@@ -88,7 +88,7 @@ func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, ss
 }
 
 // ConfigureOS ensures the node Operating System config
-func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string, extraMounts []storage.VolMounts) error {
+func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -144,7 +144,7 @@ func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, 
 		Tasks:          dataplaneutil.PopulateTasks(tasks),
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureOSLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags, extraMounts)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureOSLabel, sshKeySecret, inventoryConfigMap, "", role, aeeSpec)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for ConfigureOS")
 		return err
@@ -155,7 +155,7 @@ func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, 
 }
 
 // RunOS ensures the node Operating System is running
-func RunOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string, extraMounts []storage.VolMounts) error {
+func RunOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -205,7 +205,7 @@ func RunOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKey
 		Tasks:          dataplaneutil.PopulateTasks(tasks),
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, RunOSLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags, extraMounts)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, RunOSLabel, sshKeySecret, inventoryConfigMap, "", role, aeeSpec)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for RunOS")
 		return err

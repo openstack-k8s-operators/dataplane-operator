@@ -29,12 +29,11 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // deployFuncDef so we can pass a function to ConditionalDeploy
-type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string, []string, string, string, []storage.VolMounts) error
+type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string, dataplanev1beta1.AnsibleEESpec) error
 
 // Deploy function encapsulating primary deloyment handling
 func Deploy(
@@ -44,10 +43,7 @@ func Deploy(
 	sshKeySecret string,
 	inventoryConfigMap string,
 	status *dataplanev1beta1.OpenStackDataPlaneStatus,
-	networkAttachments []string,
-	openStackAnsibleEERunnerImage string,
-	ansibleTags string,
-	extraMounts []storage.VolMounts,
+	aeeSpec dataplanev1beta1.AnsibleEESpec,
 ) (ctrl.Result, error) {
 
 	var result ctrl.Result
@@ -89,10 +85,7 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		networkAttachments,
-		openStackAnsibleEERunnerImage,
-		ansibleTags,
-		extraMounts,
+		aeeSpec,
 	)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
@@ -120,10 +113,7 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		networkAttachments,
-		openStackAnsibleEERunnerImage,
-		ansibleTags,
-		extraMounts,
+		aeeSpec,
 	)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
@@ -151,10 +141,7 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		networkAttachments,
-		openStackAnsibleEERunnerImage,
-		ansibleTags,
-		extraMounts)
+		aeeSpec)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -181,10 +168,7 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		networkAttachments,
-		openStackAnsibleEERunnerImage,
-		ansibleTags,
-		extraMounts)
+		aeeSpec)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -211,17 +195,14 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		networkAttachments,
-		openStackAnsibleEERunnerImage,
-		ansibleTags,
-		extraMounts)
+		aeeSpec)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
 
 	// ConfigureCephClient
 	haveCephSecret := false
-	for _, extraMount := range extraMounts {
+	for _, extraMount := range aeeSpec.ExtraMounts {
 		if extraMount.ExtraVolType == "Ceph" {
 			haveCephSecret = true
 			break
@@ -251,10 +232,7 @@ func Deploy(
 			deployFunc,
 			deployName,
 			deployLabel,
-			networkAttachments,
-			openStackAnsibleEERunnerImage,
-			ansibleTags,
-			extraMounts,
+			aeeSpec,
 		)
 		if err != nil || result.RequeueAfter > 0 {
 			return result, err
@@ -283,10 +261,7 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		networkAttachments,
-		openStackAnsibleEERunnerImage,
-		ansibleTags,
-		extraMounts)
+		aeeSpec)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -313,10 +288,7 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		networkAttachments,
-		openStackAnsibleEERunnerImage,
-		ansibleTags,
-		extraMounts)
+		aeeSpec)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -343,10 +315,7 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		networkAttachments,
-		openStackAnsibleEERunnerImage,
-		ansibleTags,
-		extraMounts)
+		aeeSpec)
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
@@ -371,10 +340,7 @@ func ConditionalDeploy(
 	deployFunc deployFuncDef,
 	deployName string,
 	deployLabel string,
-	networkAttachments []string,
-	openStackAnsibleEERunnerImage string,
-	ansibleTags string,
-	extraMounts []storage.VolMounts,
+	aeeSpec dataplanev1beta1.AnsibleEESpec,
 ) (ctrl.Result, error) {
 
 	var err error
@@ -382,9 +348,7 @@ func ConditionalDeploy(
 
 	if status.Conditions.IsUnknown(readyCondition) {
 		log.Info(fmt.Sprintf("%s Unknown, starting %s", readyCondition, deployName))
-		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap, networkAttachments,
-			openStackAnsibleEERunnerImage,
-			ansibleTags, extraMounts)
+		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap, aeeSpec)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to %s for %s", deployName, obj.GetName()), obj)
 			return ctrl.Result{}, err
