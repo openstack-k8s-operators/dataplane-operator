@@ -32,13 +32,13 @@ func InstallOpenStack(ctx context.Context, helper *helper.Helper, obj client.Obj
 	tasks := []dataplaneutil.Task{
 		{
 			Name:          "Install edpm_logrotate_crond",
-			RoleName:      "edpm_logrotate_crond",
+			RoleName:      "osp.edpm.edpm_logrotate_crond",
 			RoleTasksFrom: "install.yml",
 			Tags:          []string{"edpm_logrotate_crond"},
 		},
 		{
 			Name:          "Install edpm_iscsid",
-			RoleName:      "edpm_iscsid",
+			RoleName:      "osp.edpm.edpm_iscsid",
 			RoleTasksFrom: "install.yml",
 			Tags:          []string{"edpm_iscsid"},
 		},
@@ -68,25 +68,25 @@ func ConfigureOpenStack(ctx context.Context, helper *helper.Helper, obj client.O
 	tasks := []dataplaneutil.Task{
 		{
 			Name:          "Configure edpm_ssh_known_hosts",
-			RoleName:      "edpm_ssh_known_hosts",
+			RoleName:      "osp.edpm.edpm_ssh_known_hosts",
 			RoleTasksFrom: "main.yml",
 			Tags:          []string{"edpm_ssh_known_hosts"},
 		},
 		{
 			Name:          "Configure edpm_logrotate_crond",
-			RoleName:      "edpm_logrotate_crond",
+			RoleName:      "osp.edpm.edpm_logrotate_crond",
 			RoleTasksFrom: "configure.yml",
 			Tags:          []string{"edpm_logrotate_crond"},
 		},
 		{
 			Name:          "Configure edpm_iscsid",
-			RoleName:      "edpm_iscsid",
+			RoleName:      "osp.edpm.edpm_iscsid",
 			RoleTasksFrom: "configure.yml",
 			Tags:          []string{"edpm_iscsid"},
 		},
 		{
 			Name:          "Configure nftables",
-			RoleName:      "edpm_nftables",
+			RoleName:      "osp.edpm.edpm_nftables",
 			RoleTasksFrom: "configure.yml",
 			Tags:          []string{"edpm_firewall"},
 		},
@@ -116,20 +116,20 @@ func RunOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object,
 	tasks := []dataplaneutil.Task{
 		{
 			Name:          "Apply nftables configuration",
-			RoleName:      "edpm_nftables",
+			RoleName:      "osp.edpm.edpm_nftables",
 			RoleTasksFrom: "run.yml",
 			When:          "deploy_edpm_openstack_run_firewall|default(true)|bool",
 			Tags:          []string{"edpm_firewall"},
 		},
 		{
 			Name:          "Run edpm_logrotate_crond",
-			RoleName:      "edpm_logrotate_crond",
+			RoleName:      "osp.edpm.edpm_logrotate_crond",
 			RoleTasksFrom: "run.yml",
 			Tags:          []string{"edpm_logrotate_crond"},
 		},
 		{
 			Name:          "Run edpm_iscsid",
-			RoleName:      "edpm_iscsid",
+			RoleName:      "osp.edpm.edpm_iscsid",
 			RoleTasksFrom: "run.yml",
 			Tags:          []string{"edpm_iscsid"},
 		},
