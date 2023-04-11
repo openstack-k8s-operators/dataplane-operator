@@ -21,14 +21,14 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
-	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
 // ConfigureNetwork ensures the network config
-func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string, extraMounts []storage.VolMounts) error {
+func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -51,7 +51,7 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Obj
 		Tasks:    dataplaneutil.PopulateTasks(tasks),
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureNetworkLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags, extraMounts)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureNetworkLabel, sshKeySecret, inventoryConfigMap, "", role, aeeSpec)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for ConfigureNetwork")
 		return err
@@ -62,7 +62,7 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Obj
 }
 
 // ValidateNetwork ensures the node network config
-func ValidateNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, networkAttachments []string, openStackAnsibleEERunnerImage string, ansibleTags string, extraMounts []storage.VolMounts) error {
+func ValidateNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
 
 	role := ansibleeev1alpha1.Role{
 		Name:     "osp.edpm.edpm_nodes_validation",
@@ -79,7 +79,7 @@ func ValidateNetwork(ctx context.Context, helper *helper.Helper, obj client.Obje
 		},
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ValidateNetworkLabel, sshKeySecret, inventoryConfigMap, "", role, networkAttachments, openStackAnsibleEERunnerImage, ansibleTags, extraMounts)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ValidateNetworkLabel, sshKeySecret, inventoryConfigMap, "", role, aeeSpec)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for ValidateNetwork")
 		return err

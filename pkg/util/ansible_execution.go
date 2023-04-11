@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
@@ -45,10 +46,7 @@ func AnsibleExecution(
 	inventoryConfigMap string,
 	play string,
 	role ansibleeev1alpha1.Role,
-	networkAttachments []string,
-	openStackAnsibleEERunnerImage string,
-	ansibleTags string,
-	extraMounts []storage.VolMounts,
+	aeeSpec dataplanev1beta1.AnsibleEESpec,
 ) error {
 
 	var err error
@@ -71,10 +69,10 @@ func AnsibleExecution(
 	}
 
 	_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), ansibleEE, func() error {
-		ansibleEE.Spec.Image = openStackAnsibleEERunnerImage
-		ansibleEE.Spec.NetworkAttachments = networkAttachments
-		if len(ansibleTags) > 0 {
-			ansibleEE.Spec.CmdLine = fmt.Sprintf("--tags %s", ansibleTags)
+		ansibleEE.Spec.Image = aeeSpec.OpenStackAnsibleEERunnerImage
+		ansibleEE.Spec.NetworkAttachments = aeeSpec.NetworkAttachments
+		if len(aeeSpec.AnsibleTags) > 0 {
+			ansibleEE.Spec.CmdLine = fmt.Sprintf("--tags %s", aeeSpec.AnsibleTags)
 		}
 		// TODO(slagle): Handle either play or role being specified
 		ansibleEE.Spec.Role = &role
@@ -127,7 +125,8 @@ func AnsibleExecution(
 		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, sshKeyMount)
 		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, inventoryMount)
 
-		ansibleEE.Spec.ExtraMounts = append(extraMounts, []storage.VolMounts{ansibleEEMounts}...)
+		ansibleEE.Spec.ExtraMounts = append(aeeSpec.ExtraMounts, []storage.VolMounts{ansibleEEMounts}...)
+		ansibleEE.Spec.Env = aeeSpec.Env
 
 		err := controllerutil.SetControllerReference(obj, ansibleEE, helper.GetScheme())
 		if err != nil {

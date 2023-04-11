@@ -20,6 +20,7 @@ import (
 	"reflect"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // NodeSection is a specification of the node attributes
@@ -125,4 +126,25 @@ func AssertUniquenessBetween(spec interface{}, otherSpec interface{}, suffix str
 		}
 	}
 	return errorMsgs
+}
+
+// AnsibleEESpec is a specification of the ansible EE attributes
+type AnsibleEESpec struct {
+	// +kubebuilder:validation:Optional
+	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
+	// which allows to connect the ansibleee runner to the given network
+	NetworkAttachments []string `json:"networkAttachments"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
+	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
+	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage"`
+	// +kubebuilder:validation:Optional
+	// AnsibleTags for ansible execution
+	AnsibleTags string `json:"ansibleTags,omitempty"`
+	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={}
+	ExtraMounts []storage.VolMounts `json:"extraMounts"`
+	// Env is a list containing the environment variables to pass to the pod
+	Env []corev1.EnvVar `json:"env,omitempty"`
 }

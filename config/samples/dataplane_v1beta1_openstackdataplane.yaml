@@ -36,6 +36,13 @@ spec:
         deploy: false
   roles:
     edpm-compute:
+      env:
+        - name: ANSIBLE_FORCE_COLOR
+          value: "True"
+        - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+          value: "True"
+        - name: ANSIBLE_VERBOSITY
+          value: "2"
       nodeTemplate:
         managed: false
         managementNetwork: ctlplane

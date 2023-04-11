@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -41,6 +42,9 @@ type OpenStackDataPlaneNodeSpec struct {
 	// +kubebuilder:validation:Optional
 	// AnsibleHost SSH host for Ansible connection
 	AnsibleHost string `json:"ansibleHost,omitempty"`
+
+	// Env is a list containing the environment variables to pass to the pod
+	Env []corev1.EnvVar `json:"env,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// DeployStrategy section to control how the node is deployed
@@ -100,4 +104,35 @@ func (instance OpenStackDataPlaneNode) Validate(role OpenStackDataPlaneRole) err
 		return fmt.Errorf("validation error(s): %s", errorMsgs)
 	}
 	return nil
+}
+
+// GetAnsibleEESpec - get the fields that will be passed to AEE
+func (instance OpenStackDataPlaneNode) GetAnsibleEESpec(role OpenStackDataPlaneRole) AnsibleEESpec {
+	aee := AnsibleEESpec{}
+	if len(instance.Spec.Node.ExtraMounts) > 0 {
+		aee.ExtraMounts = instance.Spec.Node.ExtraMounts
+	} else {
+		aee.ExtraMounts = role.Spec.NodeTemplate.ExtraMounts
+	}
+	if len(instance.Spec.NetworkAttachments) > 0 {
+		aee.NetworkAttachments = instance.Spec.NetworkAttachments
+	} else {
+		aee.NetworkAttachments = role.Spec.NetworkAttachments
+	}
+	if len(instance.Spec.DeployStrategy.AnsibleTags) > 0 {
+		aee.AnsibleTags = instance.Spec.DeployStrategy.AnsibleTags
+	} else {
+		aee.AnsibleTags = role.Spec.DeployStrategy.AnsibleTags
+	}
+	if len(instance.Spec.Env) > 0 {
+		aee.Env = instance.Spec.Env
+	} else {
+		aee.Env = role.Spec.Env
+	}
+	if len(instance.Spec.OpenStackAnsibleEERunnerImage) > 0 {
+		aee.OpenStackAnsibleEERunnerImage = instance.Spec.OpenStackAnsibleEERunnerImage
+	} else {
+		aee.OpenStackAnsibleEERunnerImage = role.Spec.OpenStackAnsibleEERunnerImage
+	}
+	return aee
 }

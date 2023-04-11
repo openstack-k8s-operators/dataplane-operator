@@ -21,6 +21,7 @@ import (
 	"reflect"
 
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -36,6 +37,9 @@ type OpenStackDataPlaneRoleSpec struct {
 	// +kubebuilder:validation:Optional
 	// NodeTemplate - node attributes specific to this roles
 	NodeTemplate NodeSection `json:"nodeTemplate,omitempty"`
+
+	// Env is a list containing the environment variables to pass to the pod
+	Env []corev1.EnvVar `json:"env,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// DeployStrategy section to control how the node is deployed
@@ -127,4 +131,15 @@ func (instance OpenStackDataPlaneRole) Validate(nodes []OpenStackDataPlaneNode) 
 		return fmt.Errorf("validation error(s): %s", errorMsgs)
 	}
 	return nil
+}
+
+// GetAnsibleEESpec - get the fields that will be passed to AEE
+func (instance OpenStackDataPlaneRole) GetAnsibleEESpec() AnsibleEESpec {
+	return AnsibleEESpec{
+		NetworkAttachments:            instance.Spec.NetworkAttachments,
+		OpenStackAnsibleEERunnerImage: instance.Spec.OpenStackAnsibleEERunnerImage,
+		AnsibleTags:                   instance.Spec.DeployStrategy.AnsibleTags,
+		ExtraMounts:                   instance.Spec.NodeTemplate.ExtraMounts,
+		Env:                           instance.Spec.Env,
+	}
 }
