@@ -71,7 +71,6 @@ NodeSection is a specification of the node attributes
 | ----- | ----------- | ------ | -------- |
 | networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | false |
 | networks | Networks - Instance networks | [][NetworksSection](#networkssection) | false |
-| managed | Managed - Whether the node is actually provisioned (True) or should be treated as preprovisioned (False) | bool | false |
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
 | ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
 | ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
@@ -111,7 +110,9 @@ OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | dataPlane | DataPlane name of OpenStackDataPlane for this role | string | false |
+| baremetalSetTemplate | BaremetalSetTemplate Template for BaremetalSet for the Role | baremetalv1.OpenStackBaremetalSetSpec | false |
 | nodeTemplate | NodeTemplate - node attributes specific to this roles | [NodeSection](#nodesection) | false |
+| preProvisioned | \n\nPreProvisioned - Whether the nodes are actually pre-provisioned (True) or should be preprovisioned (False) | bool | false |
 | env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
 | deployStrategy | DeployStrategy section to control how the node is deployed | [DeployStrategySection](#deploystrategysection) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |

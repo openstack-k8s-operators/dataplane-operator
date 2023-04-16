@@ -36,12 +36,6 @@ type NodeSection struct {
 	Networks []NetworksSection `json:"networks,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Managed - Whether the node is actually provisioned (True) or should be
-	// treated as preprovisioned (False)
-	Managed bool `json:"managed,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	// ManagementNetwork - Name of network to use for management (SSH/Ansible)
 	ManagementNetwork string `json:"managementNetwork,omitempty"`
 

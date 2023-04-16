@@ -199,4 +199,16 @@ const (
 
 	// NovaComputeErrorMessage error
 	NovaComputeErrorMessage = "NovaCompute error occurred"
+
+	// RoleBareMetalProvisionReadyCondition Status=True condition indicates
+	// all baremetal nodes provisioned for the Role.
+	RoleBareMetalProvisionReadyCondition condition.Type = "RoleBaremetalProvisionReady"
+	// RoleBaremetalProvisionReadyMessage ready
+	RoleBaremetalProvisionReadyMessage = "RoleBaremetalProvisionReady ready"
+
+	// RoleBaremetalProvisionReadyWaitingMessage not yet ready
+	RoleBaremetalProvisionReadyWaitingMessage = "RoleBaremetalProvisionReady not yet ready"
+
+	// RoleBaremetalProvisionErrorMessage error
+	RoleBaremetalProvisionErrorMessage = "RoleBaremetalProvisionReady error occurred"
 )

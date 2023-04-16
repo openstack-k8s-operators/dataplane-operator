@@ -880,8 +880,6 @@ spec:
                       - volumes
                       type: object
                     type: array
-                  managed:
-                    type: boolean
                   managementNetwork:
                     type: string
                   networkConfig:
