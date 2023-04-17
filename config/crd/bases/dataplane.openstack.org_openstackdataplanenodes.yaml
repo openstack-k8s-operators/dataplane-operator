@@ -43,6 +43,8 @@ spec:
                 type: string
               deployStrategy:
                 properties:
+                  ansibleLimit:
+                    type: string
                   ansibleTags:
                     type: string
                   deploy:
