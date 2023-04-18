@@ -45,6 +45,8 @@ spec:
                 properties:
                   ansibleLimit:
                     type: string
+                  ansibleSkipTags:
+                    type: string
                   ansibleTags:
                     type: string
                   deploy:

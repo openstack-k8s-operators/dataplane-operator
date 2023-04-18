@@ -87,6 +87,10 @@ type DeployStrategySection struct {
 	// +kubebuilder:validation:Optional
 	// AnsibleLimit for ansible execution
 	AnsibleLimit string `json:"ansibleLimit,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// AnsibleSkipTags for ansible execution
+	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
 }
 
 // NetworkConfigSection is a specification of the Network configuration details
@@ -148,6 +152,9 @@ type AnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
 	// AnsibleLimit for ansible execution
 	AnsibleLimit string `json:"ansibleLimit,omitempty"`
+	// +kubebuilder:validation:Optional
+	// AnsibleSkipTags for ansible execution
+	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
 	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default={}
