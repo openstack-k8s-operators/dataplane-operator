@@ -124,6 +124,11 @@ func (instance OpenStackDataPlaneNode) GetAnsibleEESpec(role OpenStackDataPlaneR
 	} else {
 		aee.AnsibleTags = role.Spec.DeployStrategy.AnsibleTags
 	}
+	if len(instance.Spec.DeployStrategy.AnsibleLimit) > 0 {
+		aee.AnsibleLimit = instance.Spec.DeployStrategy.AnsibleLimit
+	} else {
+		aee.AnsibleLimit = role.Spec.DeployStrategy.AnsibleLimit
+	}
 	if len(instance.Spec.Env) > 0 {
 		aee.Env = instance.Spec.Env
 	} else {

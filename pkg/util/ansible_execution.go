@@ -74,6 +74,9 @@ func AnsibleExecution(
 		if len(aeeSpec.AnsibleTags) > 0 {
 			ansibleEE.Spec.CmdLine = fmt.Sprintf("--tags %s", aeeSpec.AnsibleTags)
 		}
+		if len(aeeSpec.AnsibleLimit) > 0 {
+			ansibleEE.Spec.CmdLine = fmt.Sprintf("--limit %s", aeeSpec.AnsibleLimit)
+		}
 		// TODO(slagle): Handle either play or role being specified
 		ansibleEE.Spec.Role = &role
 

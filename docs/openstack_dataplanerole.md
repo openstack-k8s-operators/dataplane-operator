@@ -22,6 +22,7 @@ AnsibleEESpec is a specification of the ansible EE attributes
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | true |
 | ansibleTags | AnsibleTags for ansible execution | string | false |
+| ansibleLimit | AnsibleLimit for ansible execution | string | false |
 | extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | true |
 | env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
 
@@ -35,6 +36,7 @@ DeployStrategySection for fields controlling the deployment
 | ----- | ----------- | ------ | -------- |
 | deploy | Deploy boolean to trigger ansible execution | bool | true |
 | ansibleTags | AnsibleTags for ansible execution | string | false |
+| ansibleLimit | AnsibleLimit for ansible execution | string | false |
 
 [Back to Custom Resources](#custom-resources)
 
