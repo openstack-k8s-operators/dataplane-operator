@@ -19,6 +19,7 @@ package util
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -50,6 +51,7 @@ func AnsibleExecution(
 ) error {
 
 	var err error
+	var cmdLineArguments strings.Builder
 
 	ansibleEE, err := GetAnsibleExecution(ctx, helper, obj, label)
 	if err != nil && !k8serrors.IsNotFound(err) {
@@ -72,11 +74,18 @@ func AnsibleExecution(
 		ansibleEE.Spec.Image = aeeSpec.OpenStackAnsibleEERunnerImage
 		ansibleEE.Spec.NetworkAttachments = aeeSpec.NetworkAttachments
 		if len(aeeSpec.AnsibleTags) > 0 {
-			ansibleEE.Spec.CmdLine = fmt.Sprintf("--tags %s", aeeSpec.AnsibleTags)
+			fmt.Fprintf(&cmdLineArguments, "--tags %s ", aeeSpec.AnsibleTags)
 		}
 		if len(aeeSpec.AnsibleLimit) > 0 {
-			ansibleEE.Spec.CmdLine = fmt.Sprintf("--limit %s", aeeSpec.AnsibleLimit)
+			fmt.Fprintf(&cmdLineArguments, "--limit %s ", aeeSpec.AnsibleLimit)
 		}
+		if len(aeeSpec.AnsibleSkipTags) > 0 {
+			fmt.Fprintf(&cmdLineArguments, "--skip-tags %s ", aeeSpec.AnsibleSkipTags)
+		}
+		if cmdLineArguments.Len() > 0 {
+			ansibleEE.Spec.CmdLine = strings.TrimSpace(cmdLineArguments.String())
+		}
+
 		// TODO(slagle): Handle either play or role being specified
 		ansibleEE.Spec.Role = &role
 

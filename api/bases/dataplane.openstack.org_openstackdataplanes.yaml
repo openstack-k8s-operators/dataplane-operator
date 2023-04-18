@@ -45,6 +45,8 @@ spec:
                 properties:
                   ansibleLimit:
                     type: string
+                  ansibleSkipTags:
+                    type: string
                   ansibleTags:
                     type: string
                   deploy:
@@ -61,6 +63,8 @@ spec:
                     deployStrategy:
                       properties:
                         ansibleLimit:
+                          type: string
+                        ansibleSkipTags:
                           type: string
                         ansibleTags:
                           type: string
@@ -929,6 +933,8 @@ spec:
                     deployStrategy:
                       properties:
                         ansibleLimit:
+                          type: string
+                        ansibleSkipTags:
                           type: string
                         ansibleTags:
                           type: string
