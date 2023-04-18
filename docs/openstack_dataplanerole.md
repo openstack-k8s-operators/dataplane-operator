@@ -44,7 +44,7 @@ NetworkConfigSection is a specification of the Network configuration details
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| template | Template - ansible j2 nic config template to use when applying node network configuration | string | false |
+| template | Template - Contains a Ansible j2 nic config template to use when applying node network configuration | string | false |
 
 [Back to Custom Resources](#custom-resources)
 

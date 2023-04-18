@@ -110,6 +110,10 @@ func AnsibleExecution(
 							Key:  "inventory",
 							Path: "inventory",
 						},
+						{
+							Key:  "network",
+							Path: "network",
+						},
 					},
 				},
 			},
@@ -119,11 +123,17 @@ func AnsibleExecution(
 			MountPath: "/runner/inventory/hosts",
 			SubPath:   "inventory",
 		}
+		networkConfigMount := corev1.VolumeMount{
+			Name:      "inventory",
+			MountPath: "/runner/network/nic-config-template",
+			SubPath:   "network",
+		}
 
 		ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, sshKeyVolume)
 		ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, inventoryVolume)
 		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, sshKeyMount)
 		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, inventoryMount)
+		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, networkConfigMount)
 
 		ansibleEE.Spec.ExtraMounts = append(aeeSpec.ExtraMounts, []storage.VolMounts{ansibleEEMounts}...)
 		ansibleEE.Spec.Env = aeeSpec.Env

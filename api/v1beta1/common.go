@@ -89,7 +89,7 @@ type DeployStrategySection struct {
 type NetworkConfigSection struct {
 
 	// +kubebuilder:validation:Optional
-	// Template - ansible j2 nic config template to use when applying node
+	// Template - Contains a Ansible j2 nic config template to use when applying node
 	// network configuration
 	Template string `json:"template,omitempty" yaml:"template,omitempty"`
 }

@@ -44,4 +44,7 @@ const (
 
 	// RunOpenStackLabel for RunOpenStack OpenStackAnsibleEE
 	RunOpenStackLabel = "dataplane-deployment-run-openstack"
+
+	// NicConfigTemplateFile is the custom nic config file we use when user provided network config templates are provided.
+	NicConfigTemplateFile = "/runner/network/nic-config-template"
 )

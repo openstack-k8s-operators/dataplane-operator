@@ -210,7 +210,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		}
 	}
 
-	inventoryConfigMap, err := r.GenerateInventory(ctx, instance, instanceRole)
+	nodeConfigMap, err := r.GenerateInventory(ctx, instance, instanceRole)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
 		return ctrl.Result{}, err
@@ -218,7 +218,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 	r.Log.Info("Node", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Node.Namespace", instance.Namespace, "Node.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
-		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status, instance.GetAnsibleEESpec(*instanceRole))
+		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, nodeConfigMap, &instance.Status, instance.GetAnsibleEESpec(*instanceRole))
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -240,7 +240,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 			instance,
 			instance,
 			ansibleSSHPrivateKeySecret,
-			inventoryConfigMap,
+			nodeConfigMap,
 			&instance.Status,
 			instance.Spec.NetworkAttachments,
 			instance.Spec.OpenStackAnsibleEERunnerImage)
@@ -316,11 +316,16 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 	all := inventory.AddGroup("all")
 	host := all.AddHost(instance.Name)
 
+	networkConfig := r.GetAnsibleNetworkConfig(instance, instanceRole)
+
+	if networkConfig.Template != "" {
+		host.Vars["edpm_network_config_template"] = deployment.NicConfigTemplateFile
+	}
+
 	host.Vars["ansible_user"] = r.GetAnsibleUser(instance, instanceRole)
 	host.Vars["ansible_port"] = r.GetAnsiblePort(instance, instanceRole)
 	host.Vars["managed"] = r.GetAnsibleManaged(instance, instanceRole)
 	host.Vars["management_network"] = r.GetAnsibleManagementNetwork(instance, instanceRole)
-	host.Vars["network_config"] = r.GetAnsibleNetworkConfig(instance, instanceRole)
 	host.Vars["networks"] = r.GetAnsibleNetworks(instance, instanceRole)
 
 	if instance.Spec.AnsibleHost == "" {
@@ -338,7 +343,7 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 		host.Vars[key] = value
 	}
 
-	configMapName := fmt.Sprintf("dataplanenode-%s-inventory", instance.Name)
+	configMapName := fmt.Sprintf("dataplanenode-%s", instance.Name)
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      configMapName,
@@ -363,6 +368,7 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 		}
 		cm.Data = map[string]string{
 			"inventory": string(invData),
+			"network":   string(networkConfig.Template),
 		}
 		return nil
 	})
