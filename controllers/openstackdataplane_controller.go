@@ -118,7 +118,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// Reset all ReadyConditons to 'Unknown'
 	instance.InitConditions()
 
-	ctrlResult, err := CreateDataPlaneResources(ctx, instance, helper)
+	ctrlResult, err := r.CreateDataPlaneResources(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
@@ -142,7 +142,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 			labels := client.MatchingLabels(labelSelector)
 			listOpts = append(listOpts, labels)
 		}
-		err = helper.GetClient().List(ctx, roles, listOpts...)
+		err = r.Client.List(ctx, roles, listOpts...)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -230,8 +230,8 @@ func (r *OpenStackDataPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error 
 }
 
 // CreateDataPlaneResources -
-func CreateDataPlaneResources(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) (ctrl.Result, error) {
-	err := CreateDataPlaneRole(ctx, instance, helper)
+func (r *OpenStackDataPlaneReconciler) CreateDataPlaneResources(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) (ctrl.Result, error) {
+	err := r.CreateDataPlaneRole(ctx, instance, helper)
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			condition.ReadyCondition,
@@ -241,7 +241,7 @@ func CreateDataPlaneResources(ctx context.Context, instance *dataplanev1beta1.Op
 			err.Error()))
 		return ctrl.Result{}, err
 	}
-	err = CreateDataPlaneNode(ctx, instance, helper)
+	err = r.CreateDataPlaneNode(ctx, instance, helper)
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			condition.ReadyCondition,
@@ -257,19 +257,17 @@ func CreateDataPlaneResources(ctx context.Context, instance *dataplanev1beta1.Op
 }
 
 // CreateDataPlaneNode -
-func CreateDataPlaneNode(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) error {
-	logger := helper.GetLogger()
-	client := helper.GetClient()
+func (r *OpenStackDataPlaneReconciler) CreateDataPlaneNode(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) error {
 
 	for nodeName, nodeSpec := range instance.Spec.Nodes {
-		logger.Info("CreateDataPlaneNode", "nodeName", nodeName)
+		r.Log.Info("CreateDataPlaneNode", "nodeName", nodeName)
 		node := &dataplanev1beta1.OpenStackDataPlaneNode{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      nodeName,
 				Namespace: instance.Namespace,
 			},
 		}
-		_, err := controllerutil.CreateOrPatch(ctx, client, node, func() error {
+		_, err := controllerutil.CreateOrPatch(ctx, r.Client, node, func() error {
 			nodeSpec.DeepCopyInto(&node.Spec)
 			err := controllerutil.SetControllerReference(instance, node, helper.GetScheme())
 			if err != nil {
@@ -286,19 +284,17 @@ func CreateDataPlaneNode(ctx context.Context, instance *dataplanev1beta1.OpenSta
 }
 
 // CreateDataPlaneRole -
-func CreateDataPlaneRole(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) error {
-	client := helper.GetClient()
-	logger := helper.GetLogger()
+func (r *OpenStackDataPlaneReconciler) CreateDataPlaneRole(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) error {
 
 	for roleName, roleSpec := range instance.Spec.Roles {
-		logger.Info("CreateDataPlaneRole", "roleName", roleName)
+		r.Log.Info("CreateDataPlaneRole", "roleName", roleName)
 		role := &dataplanev1beta1.OpenStackDataPlaneRole{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      roleName,
 				Namespace: instance.Namespace,
 			},
 		}
-		_, err := controllerutil.CreateOrPatch(ctx, client, role, func() error {
+		_, err := controllerutil.CreateOrPatch(ctx, r.Client, role, func() error {
 			// role.Spec.DeployStrategy is explicitly omitted. Otherwise, it
 			// could get reset to False, and if the DataPlane deploy sets it to
 			// True, the DataPlane and DataPlaneRole controllers will be stuck

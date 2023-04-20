@@ -125,7 +125,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		labels := client.MatchingLabels(labelSelector)
 		listOpts = append(listOpts, labels)
 	}
-	err = helper.GetClient().List(ctx, nodes, listOpts...)
+	err = r.Client.List(ctx, nodes, listOpts...)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -177,7 +177,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		[]string{
 			"ssh-privatekey",
 		},
-		helper.GetClient(),
+		r.Client,
 		time.Duration(5)*time.Second,
 	)
 	if err != nil {
@@ -283,7 +283,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		instance.Status.Conditions.Set(condition.TrueCondition(condition.ReadyCondition, dataplanev1beta1.DataPlaneRoleReadyMessage))
 		for _, node := range nodes.Items {
 			if !node.IsReady() {
-				_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), &node, func() error {
+				_, err := controllerutil.CreateOrPatch(ctx, r.Client, &node, func() error {
 					node.Status.Deployed = true
 					return nil
 				})
