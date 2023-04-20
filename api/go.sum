@@ -39,6 +39,8 @@ github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-202304201824
 github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230420182422-a15a0625dc00/go.mod h1:jDSW6narykfQyBtGTx6Kb6ZfTZgfzlyn/hF2zFs6sAs=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230420182422-a15a0625dc00 h1:DbptmSukJInVoQDrBwnKRTrgLmC2swd+SgiIzmVyHWE=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230420182422-a15a0625dc00/go.mod h1:jQptsKvwYn02U0k6jt24/4eX0sdIehwNs0fW1R/V/kw=
+github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230327144131-090f0d5f8dd4 h1:RYmNhH/m/rOYazLBdQZMPten1qPr43a60BCRtasCA70=
+github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230327144131-090f0d5f8dd4/go.mod h1:NI3NHazp637VOmH/hWgnH50uE5gj+YXF2aIFNh5z/28=
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
