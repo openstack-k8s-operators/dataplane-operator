@@ -105,37 +105,6 @@ func Deploy(
 		log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 	}
 
-	// ConfigureNetwork
-	readyCondition = dataplanev1beta1.ConfigureNetworkReadyCondition
-	readyWaitingMessage = dataplanev1beta1.ConfigureNetworkReadyWaitingMessage
-	readyMessage = dataplanev1beta1.ConfigureNetworkReadyMessage
-	readyErrorMessage = dataplanev1beta1.ConfigureNetworkErrorMessage
-	deployFunc = ConfigureNetwork
-	deployName = "ConfigureNetwork"
-	deployLabel = ConfigureNetworkLabel
-	err = ConditionalDeploy(
-		ctx,
-		helper,
-		obj,
-		sshKeySecret,
-		inventoryConfigMap,
-		status,
-		readyCondition,
-		readyMessage,
-		readyWaitingMessage,
-		readyErrorMessage,
-		deployFunc,
-		deployName,
-		deployLabel,
-		aeeSpec,
-		foundService,
-	)
-
-	if err != nil || !status.Conditions.IsTrue(readyCondition) {
-		return &ctrl.Result{}, err
-	}
-	log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
-
 	// ValidateNetwork
 	readyCondition = dataplanev1beta1.ValidateNetworkReadyCondition
 	readyWaitingMessage = dataplanev1beta1.ValidateNetworkReadyWaitingMessage
