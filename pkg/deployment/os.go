@@ -27,7 +27,7 @@ import (
 )
 
 // InstallOS ensures the node Operating System is installed
-func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec, foundService dataplanev1beta1.OpenStackDataPlaneService) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -88,7 +88,7 @@ func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, ss
 }
 
 // ConfigureOS ensures the node Operating System config
-func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec, foundService dataplanev1beta1.OpenStackDataPlaneService) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -155,7 +155,7 @@ func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, 
 }
 
 // RunOS ensures the node Operating System is running
-func RunOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+func RunOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec, foundService dataplanev1beta1.OpenStackDataPlaneService) error {
 
 	tasks := []dataplaneutil.Task{
 		{

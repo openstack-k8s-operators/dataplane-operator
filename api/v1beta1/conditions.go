@@ -57,6 +57,19 @@ const (
 	// DataPlaneServiceErrorMessage error
 	DataPlaneServiceErrorMessage = "DataPlaneService error occurred %s"
 
+	// ServiceReadyCondition Status=True condition indicates if the
+	// service is finished and successful.
+	ServiceReadyCondition string = "%s service ready"
+
+	// ServiceReadyMessage ready
+	ServiceReadyMessage = "%s service ready"
+
+	// ServiceReadyWaitingMessage not yet ready
+	ServiceReadyWaitingMessage = "%s service not yet ready"
+
+	// ServiceErrorMessage error
+	ServiceErrorMessage = "Service error occurred %s"
+
 	// ConfigureNetworkReadyCondition Status=True condition indicates if the
 	// network configuration is finished and successful.
 	ConfigureNetworkReadyCondition condition.Type = "ConfigureNetworkReady"

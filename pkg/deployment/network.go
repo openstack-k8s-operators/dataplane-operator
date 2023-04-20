@@ -28,7 +28,7 @@ import (
 )
 
 // ConfigureNetwork ensures the network config
-func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec, foundService dataplanev1beta1.OpenStackDataPlaneService) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -92,7 +92,7 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Obj
 }
 
 // ValidateNetwork ensures the node network config
-func ValidateNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+func ValidateNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec, foundService dataplanev1beta1.OpenStackDataPlaneService) error {
 
 	role := ansibleeev1alpha1.Role{
 		Name:     "osp.edpm.edpm_nodes_validation",

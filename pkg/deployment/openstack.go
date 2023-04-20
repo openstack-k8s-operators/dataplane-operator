@@ -27,7 +27,7 @@ import (
 )
 
 // InstallOpenStack ensures the node OpenStack is installed
-func InstallOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+func InstallOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec, foundService dataplanev1beta1.OpenStackDataPlaneService) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -63,7 +63,7 @@ func InstallOpenStack(ctx context.Context, helper *helper.Helper, obj client.Obj
 }
 
 // ConfigureOpenStack ensures the node OpenStack config
-func ConfigureOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+func ConfigureOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec, foundService dataplanev1beta1.OpenStackDataPlaneService) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -111,7 +111,7 @@ func ConfigureOpenStack(ctx context.Context, helper *helper.Helper, obj client.O
 }
 
 // RunOpenStack ensures the node OpenStack is running
-func RunOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+func RunOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec, foundService dataplanev1beta1.OpenStackDataPlaneService) error {
 
 	tasks := []dataplaneutil.Task{
 		{

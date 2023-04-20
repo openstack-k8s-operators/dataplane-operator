@@ -34,7 +34,7 @@ import (
 )
 
 // deployFuncDef so we can pass a function to ConditionalDeploy
-type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string, dataplanev1beta1.AnsibleEESpec) error
+type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string, dataplanev1beta1.AnsibleEESpec, dataplanev1beta1.OpenStackDataPlaneService) error
 
 // Deploy function encapsulating primary deloyment handling
 func Deploy(
@@ -46,6 +46,7 @@ func Deploy(
 	inventoryConfigMap string,
 	status *dataplanev1beta1.OpenStackDataPlaneStatus,
 	aeeSpec dataplanev1beta1.AnsibleEESpec,
+	services []string,
 ) (*ctrl.Result, error) {
 
 	log := helper.GetLogger()
@@ -58,6 +59,7 @@ func Deploy(
 	var deployFunc deployFuncDef
 	var deployName string
 	var deployLabel string
+	var foundService dataplanev1beta1.OpenStackDataPlaneService
 
 	// Set ReadyCondition to requested
 	status.Conditions.Set(condition.FalseCondition(
@@ -65,6 +67,43 @@ func Deploy(
 		condition.RequestedReason,
 		condition.SeverityInfo,
 		dataplanev1beta1.DataPlaneNodeReadyWaitingMessage))
+
+	// (slagle) For the prototype, we deploy all the composable services first
+	for _, service := range services {
+		log.Info("Deploying service", "service", service)
+		foundService, err := GetService(ctx, helper, service)
+		if err != nil {
+			return &ctrl.Result{}, err
+		}
+		deployFunc = DeployService
+		deployName = foundService.Name
+		deployLabel = foundService.Spec.Label
+		readyCondition = condition.Type(fmt.Sprintf(dataplanev1beta1.ServiceReadyCondition, service))
+		readyWaitingMessage = fmt.Sprintf(dataplanev1beta1.ServiceReadyWaitingMessage, deployName)
+		readyMessage = fmt.Sprintf(dataplanev1beta1.ServiceReadyMessage, deployName)
+		readyErrorMessage = dataplanev1beta1.ServiceErrorMessage
+		err = ConditionalDeploy(
+			ctx,
+			helper,
+			obj,
+			sshKeySecret,
+			inventoryConfigMap,
+			status,
+			readyCondition,
+			readyMessage,
+			readyWaitingMessage,
+			readyErrorMessage,
+			deployFunc,
+			deployName,
+			deployLabel,
+			aeeSpec,
+			foundService,
+		)
+		if err != nil || !status.Conditions.IsTrue(readyCondition) {
+			return &ctrl.Result{}, err
+		}
+		log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
+	}
 
 	// ConfigureNetwork
 	readyCondition = dataplanev1beta1.ConfigureNetworkReadyCondition
@@ -89,6 +128,7 @@ func Deploy(
 		deployName,
 		deployLabel,
 		aeeSpec,
+		foundService,
 	)
 
 	if err != nil || !status.Conditions.IsTrue(readyCondition) {
@@ -119,6 +159,7 @@ func Deploy(
 		deployName,
 		deployLabel,
 		aeeSpec,
+		foundService,
 	)
 
 	if err != nil || !status.Conditions.IsTrue(readyCondition) {
@@ -148,7 +189,8 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		aeeSpec)
+		aeeSpec,
+		foundService)
 
 	if err != nil || !status.Conditions.IsTrue(readyCondition) {
 		return &ctrl.Result{}, err
@@ -177,7 +219,8 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		aeeSpec)
+		aeeSpec,
+		foundService)
 
 	if err != nil || !status.Conditions.IsTrue(readyCondition) {
 		return &ctrl.Result{}, err
@@ -206,7 +249,8 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		aeeSpec)
+		aeeSpec,
+		foundService)
 
 	if err != nil || !status.Conditions.IsTrue(readyCondition) {
 		return &ctrl.Result{}, err
@@ -246,6 +290,7 @@ func Deploy(
 			deployName,
 			deployLabel,
 			aeeSpec,
+			foundService,
 		)
 
 		if err != nil || !status.Conditions.IsTrue(readyCondition) {
@@ -276,7 +321,8 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		aeeSpec)
+		aeeSpec,
+		foundService)
 
 	if err != nil || !status.Conditions.IsTrue(readyCondition) {
 		return &ctrl.Result{}, err
@@ -305,7 +351,8 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		aeeSpec)
+		aeeSpec,
+		foundService)
 
 	if err != nil || !status.Conditions.IsTrue(readyCondition) {
 		return &ctrl.Result{}, err
@@ -334,7 +381,8 @@ func Deploy(
 		deployFunc,
 		deployName,
 		deployLabel,
-		aeeSpec)
+		aeeSpec,
+		foundService)
 
 	if err != nil || !status.Conditions.IsTrue(readyCondition) {
 		return &ctrl.Result{}, err
@@ -409,6 +457,7 @@ func ConditionalDeploy(
 	deployName string,
 	deployLabel string,
 	aeeSpec dataplanev1beta1.AnsibleEESpec,
+	foundService dataplanev1beta1.OpenStackDataPlaneService,
 ) error {
 
 	var err error
@@ -416,7 +465,7 @@ func ConditionalDeploy(
 
 	if status.Conditions.IsUnknown(readyCondition) {
 		log.Info(fmt.Sprintf("%s Unknown, starting %s", readyCondition, deployName))
-		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap, aeeSpec)
+		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap, aeeSpec, foundService)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to %s for %s", deployName, obj.GetName()), obj)
 			return err

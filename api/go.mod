@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230420182422-a15a0625dc00
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230420182422-a15a0625dc00
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230327144131-090f0d5f8dd4
 	k8s.io/api v0.26.3
 	k8s.io/apimachinery v0.26.3
 	sigs.k8s.io/controller-runtime v0.14.6
