@@ -30,19 +30,20 @@ import (
 // ConfigureCephClient ensures the Ceph client configuration files are on data plane nodes
 func ConfigureCephClient(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
 
+	tasks := []dataplaneutil.Task{
+		{
+			Name:          "Configure Ceph Client",
+			RoleName:      "osp.edpm.edpm_ceph_client_files",
+			RoleTasksFrom: "main.yml",
+			Tags:          []string{"edpm_ceph_client_files"},
+		},
+	}
+
 	role := ansibleeev1alpha1.Role{
-		Name:     "edpm_ceph_client_files",
+		Name:     "Deploy EDPM Ceph client",
 		Hosts:    "all",
 		Strategy: "linear",
-		Tasks: []ansibleeev1alpha1.Task{
-			{
-				Name: "import edpm_ceph_client_files",
-				ImportRole: ansibleeev1alpha1.ImportRole{
-					Name:      "edpm_ceph_client_files",
-					TasksFrom: "main.yml",
-				},
-			},
-		},
+		Tasks:    dataplaneutil.PopulateTasks(tasks),
 	}
 
 	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureCephClientLabel, sshKeySecret, inventoryConfigMap, "", role, aeeSpec)
