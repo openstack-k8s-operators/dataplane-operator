@@ -126,7 +126,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		[]string{
 			"ssh-privatekey",
 		},
-		helper.GetClient(),
+		r.Client,
 		time.Duration(5)*time.Second,
 	)
 	if err != nil {
