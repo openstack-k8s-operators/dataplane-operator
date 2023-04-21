@@ -1,6 +1,6 @@
 # See the OWNERS docs at https://go.k8s.io/owners
 approvers:
-  - edpm-approvers
+  - dataplane-approvers
   - ci-approvers
   - openstack-approvers
 
