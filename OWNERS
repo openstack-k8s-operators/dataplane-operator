@@ -5,6 +5,6 @@ approvers:
   - openstack-approvers
 
 reviewers:
-  - edpm-approvers
+  - dataplane-approvers
   - ci-approvers
   - openstack-approvers
