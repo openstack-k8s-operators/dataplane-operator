@@ -19,7 +19,6 @@ package deployment
 import (
 	"context"
 	"fmt"
-	"time"
 
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -46,7 +45,8 @@ func Deploy(
 	aeeSpec dataplanev1beta1.AnsibleEESpec,
 ) (ctrl.Result, error) {
 
-	var result ctrl.Result
+	log := helper.GetLogger()
+
 	var err error
 	var readyCondition condition.Type
 	var readyMessage string
@@ -71,7 +71,7 @@ func Deploy(
 	deployFunc = ConfigureNetwork
 	deployName = "ConfigureNetwork"
 	deployLabel = ConfigureNetworkLabel
-	result, err = ConditionalDeploy(
+	err = ConditionalDeploy(
 		ctx,
 		helper,
 		obj,
@@ -87,9 +87,11 @@ func Deploy(
 		deployLabel,
 		aeeSpec,
 	)
-	if err != nil || result.RequeueAfter > 0 {
-		return result, err
+
+	if err != nil || !status.Conditions.IsTrue(readyCondition) {
+		return ctrl.Result{}, err
 	}
+	log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 
 	// ValidateNetwork
 	readyCondition = dataplanev1beta1.ValidateNetworkReadyCondition
@@ -99,7 +101,7 @@ func Deploy(
 	deployFunc = ValidateNetwork
 	deployName = "ValidateNetwork"
 	deployLabel = ValidateNetworkLabel
-	result, err = ConditionalDeploy(
+	err = ConditionalDeploy(
 		ctx,
 		helper,
 		obj,
@@ -115,9 +117,11 @@ func Deploy(
 		deployLabel,
 		aeeSpec,
 	)
-	if err != nil || result.RequeueAfter > 0 {
-		return result, err
+
+	if err != nil || !status.Conditions.IsTrue(readyCondition) {
+		return ctrl.Result{}, err
 	}
+	log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 
 	// InstallOS
 	readyCondition = dataplanev1beta1.InstallOSReadyCondition
@@ -127,7 +131,7 @@ func Deploy(
 	deployFunc = InstallOS
 	deployName = "InstallOS"
 	deployLabel = InstallOSLabel
-	result, err = ConditionalDeploy(
+	err = ConditionalDeploy(
 		ctx,
 		helper,
 		obj,
@@ -142,9 +146,11 @@ func Deploy(
 		deployName,
 		deployLabel,
 		aeeSpec)
-	if err != nil || result.RequeueAfter > 0 {
-		return result, err
+
+	if err != nil || !status.Conditions.IsTrue(readyCondition) {
+		return ctrl.Result{}, err
 	}
+	log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 
 	// ConfigureOS
 	readyCondition = dataplanev1beta1.ConfigureOSReadyCondition
@@ -154,7 +160,7 @@ func Deploy(
 	deployFunc = ConfigureOS
 	deployName = "ConfigureOS"
 	deployLabel = ConfigureOSLabel
-	result, err = ConditionalDeploy(
+	err = ConditionalDeploy(
 		ctx,
 		helper,
 		obj,
@@ -169,9 +175,11 @@ func Deploy(
 		deployName,
 		deployLabel,
 		aeeSpec)
-	if err != nil || result.RequeueAfter > 0 {
-		return result, err
+
+	if err != nil || !status.Conditions.IsTrue(readyCondition) {
+		return ctrl.Result{}, err
 	}
+	log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 
 	// RunOS
 	readyCondition = dataplanev1beta1.RunOSReadyCondition
@@ -181,7 +189,7 @@ func Deploy(
 	deployFunc = RunOS
 	deployName = "RunOS"
 	deployLabel = RunOSLabel
-	result, err = ConditionalDeploy(
+	err = ConditionalDeploy(
 		ctx,
 		helper,
 		obj,
@@ -196,9 +204,11 @@ func Deploy(
 		deployName,
 		deployLabel,
 		aeeSpec)
-	if err != nil || result.RequeueAfter > 0 {
-		return result, err
+
+	if err != nil || !status.Conditions.IsTrue(readyCondition) {
+		return ctrl.Result{}, err
 	}
+	log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 
 	// ConfigureCephClient
 	haveCephSecret := false
@@ -218,7 +228,7 @@ func Deploy(
 		deployFunc = ConfigureCephClient
 		deployName = "ConfigureCephClient"
 		deployLabel = ConfigureCephClientLabel
-		result, err = ConditionalDeploy(
+		err = ConditionalDeploy(
 			ctx,
 			helper,
 			obj,
@@ -234,9 +244,11 @@ func Deploy(
 			deployLabel,
 			aeeSpec,
 		)
-		if err != nil || result.RequeueAfter > 0 {
-			return result, err
+
+		if err != nil || !status.Conditions.IsTrue(readyCondition) {
+			return ctrl.Result{}, err
 		}
+		log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 	}
 
 	// InstallOpenStack
@@ -247,7 +259,7 @@ func Deploy(
 	deployFunc = InstallOpenStack
 	deployName = "InstallOpenStack"
 	deployLabel = InstallOpenStackLabel
-	result, err = ConditionalDeploy(
+	err = ConditionalDeploy(
 		ctx,
 		helper,
 		obj,
@@ -262,9 +274,11 @@ func Deploy(
 		deployName,
 		deployLabel,
 		aeeSpec)
-	if err != nil || result.RequeueAfter > 0 {
-		return result, err
+
+	if err != nil || !status.Conditions.IsTrue(readyCondition) {
+		return ctrl.Result{}, err
 	}
+	log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 
 	// ConfigureOpenStack
 	readyCondition = dataplanev1beta1.ConfigureOpenStackReadyCondition
@@ -274,7 +288,7 @@ func Deploy(
 	deployFunc = ConfigureOpenStack
 	deployName = "ConfigureOpenStack"
 	deployLabel = ConfigureOpenStackLabel
-	result, err = ConditionalDeploy(
+	err = ConditionalDeploy(
 		ctx,
 		helper,
 		obj,
@@ -289,9 +303,11 @@ func Deploy(
 		deployName,
 		deployLabel,
 		aeeSpec)
-	if err != nil || result.RequeueAfter > 0 {
-		return result, err
+
+	if err != nil || !status.Conditions.IsTrue(readyCondition) {
+		return ctrl.Result{}, err
 	}
+	log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 
 	// RunOpenStack
 	readyCondition = dataplanev1beta1.RunOpenStackReadyCondition
@@ -301,7 +317,7 @@ func Deploy(
 	deployFunc = RunOpenStack
 	deployName = "RunOpenStack"
 	deployLabel = RunOpenStackLabel
-	result, err = ConditionalDeploy(
+	err = ConditionalDeploy(
 		ctx,
 		helper,
 		obj,
@@ -316,9 +332,11 @@ func Deploy(
 		deployName,
 		deployLabel,
 		aeeSpec)
-	if err != nil || result.RequeueAfter > 0 {
-		return result, err
+
+	if err != nil || !status.Conditions.IsTrue(readyCondition) {
+		return ctrl.Result{}, err
 	}
+	log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 
 	return ctrl.Result{}, nil
 
@@ -341,7 +359,7 @@ func ConditionalDeploy(
 	deployName string,
 	deployLabel string,
 	aeeSpec dataplanev1beta1.AnsibleEESpec,
-) (ctrl.Result, error) {
+) error {
 
 	var err error
 	log := helper.GetLogger()
@@ -351,7 +369,7 @@ func ConditionalDeploy(
 		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap, aeeSpec)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to %s for %s", deployName, obj.GetName()), obj)
-			return ctrl.Result{}, err
+			return err
 		}
 
 		status.Conditions.Set(condition.FalseCondition(
@@ -360,14 +378,14 @@ func ConditionalDeploy(
 			condition.SeverityInfo,
 			readyWaitingMessage))
 
-		log.Info(fmt.Sprintf("%s not yet ready, requeueing", readyCondition))
-		return ctrl.Result{RequeueAfter: time.Second * 2}, nil
+		log.Info(fmt.Sprintf("Condition %s unknown", readyCondition))
+		return nil
 
 	} else if status.Conditions.IsFalse(readyCondition) {
 		ansibleEEJob, err := dataplaneutil.GetAnsibleExecutionJob(ctx, helper, obj, deployLabel)
 		if err != nil && k8s_errors.IsNotFound(err) {
-			log.Info(fmt.Sprintf("%s not yet ready, requeueing", readyCondition))
-			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
+			log.Info(fmt.Sprintf("%s OpenStackAnsibleEE Job not yet found", readyCondition))
+			return nil
 		} else if err != nil {
 			log.Error(err, fmt.Sprintf("Error getting ansibleEE job for %s", deployName))
 			status.Conditions.Set(condition.FalseCondition(
@@ -376,14 +394,14 @@ func ConditionalDeploy(
 				condition.SeverityWarning,
 				readyErrorMessage,
 				err.Error()))
-			return ctrl.Result{}, err
+			return err
 		} else if ansibleEEJob.Status.Succeeded > 0 {
-			log.Info(fmt.Sprintf("%s ready", readyCondition))
+			log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 			status.Conditions.Set(condition.TrueCondition(
 				readyCondition,
 				readyMessage))
 		} else if ansibleEEJob.Status.Failed > 0 {
-			log.Info(fmt.Sprintf("%s error", readyCondition))
+			log.Info(fmt.Sprintf("Condition %s error", readyCondition))
 			err = fmt.Errorf("failed: job.name %s job.namespace %s", ansibleEEJob.Name, ansibleEEJob.Namespace)
 			status.Conditions.Set(condition.FalseCondition(
 				readyCondition,
@@ -391,16 +409,14 @@ func ConditionalDeploy(
 				condition.SeverityError,
 				readyErrorMessage,
 				err.Error()))
-			return ctrl.Result{}, err
+			return err
 		} else {
-			log.Info(fmt.Sprintf("%s not yet ready, requeueing", readyCondition))
-			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
+			log.Info(fmt.Sprintf("Condition %s not yet ready", readyCondition))
+			return nil
 		}
 
-	} else if status.Conditions.IsTrue(readyCondition) {
-		log.Info(fmt.Sprintf("%s already ready", readyCondition))
 	}
 
-	return ctrl.Result{}, err
+	return err
 
 }
