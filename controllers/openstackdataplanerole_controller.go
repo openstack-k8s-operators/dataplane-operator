@@ -143,7 +143,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
-	inventoryConfigMap, err := r.GenerateInventory(ctx, instance, nodes.Items)
+	roleConfigMap, err := r.GenerateInventory(ctx, instance, nodes.Items)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
 		return ctrl.Result{}, err
@@ -216,7 +216,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		r.Log.Info("Set ReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.RequestedReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
 
-		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, inventoryConfigMap, &instance.Status, instance.GetAnsibleEESpec())
+		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, roleConfigMap, &instance.Status, instance.GetAnsibleEESpec())
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -236,7 +236,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		var novaReadyConditionsTrue []*condition.Condition
 		var novaErrors []error
 		for _, node := range nodes.Items {
-			nodeConfigMapName := fmt.Sprintf("dataplanenode-%s-inventory", node.Name)
+			nodeConfigMapName := fmt.Sprintf("dataplanenode-%s", node.Name)
 			result, novaExternalCompute, err = deployment.DeployNovaExternalCompute(
 				ctx,
 				helper,
@@ -341,7 +341,7 @@ func (r *OpenStackDataPlaneRoleReconciler) GenerateInventory(ctx context.Context
 		}
 	}
 
-	configMapName := fmt.Sprintf("dataplanerole-%s-inventory", instance.Name)
+	configMapName := fmt.Sprintf("dataplanerole-%s", instance.Name)
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      configMapName,
@@ -366,6 +366,7 @@ func (r *OpenStackDataPlaneRoleReconciler) GenerateInventory(ctx context.Context
 		}
 		cm.Data = map[string]string{
 			"inventory": string(invData),
+			"network":   string(instance.Spec.NodeTemplate.NetworkConfig.Template),
 		}
 		return nil
 	})
@@ -402,7 +403,7 @@ func resolveAnsibleVars(node *dataplanev1beta1.NodeSection, host *ansible.Host, 
 		ansibleVarsData["management_network"] = node.ManagementNetwork
 	}
 	if node.NetworkConfig.Template != "" {
-		ansibleVarsData["network_config"] = node.NetworkConfig
+		ansibleVarsData["edpm_network_config_template"] = deployment.NicConfigTemplateFile
 	}
 	if len(node.Networks) > 0 {
 		ansibleVarsData["networks"] = node.Networks
