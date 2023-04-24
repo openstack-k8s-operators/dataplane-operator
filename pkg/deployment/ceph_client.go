@@ -18,6 +18,7 @@ package deployment
 
 import (
 	"context"
+	"fmt"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -27,8 +28,8 @@ import (
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
-// ConfigureCephClient ensures the Ceph client configuration files are on data plane nodes
-func ConfigureCephClient(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+// Configure ensures the Ceph client configuration files are on data plane nodes
+func (c CephClient) Configure(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -54,4 +55,19 @@ func ConfigureCephClient(ctx context.Context, helper *helper.Helper, obj client.
 
 	return nil
 
+}
+
+// Validate - CephClient does not implement this method but is required to satisfy the interface contract
+func (c CephClient) Validate(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+	return fmt.Errorf("CephClient does not implement the Validate method")
+}
+
+// Install - CephClient does not implement this method but is required to satisfy the interface contract
+func (c CephClient) Install(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+	return fmt.Errorf("CephClient does not implement the Install method")
+}
+
+// Run - CephClient does not implement this method but is required to satisfy the interface contract
+func (c CephClient) Run(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+	return fmt.Errorf("CephClient does not implement the Run method")
 }

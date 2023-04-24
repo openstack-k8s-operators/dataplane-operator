@@ -18,6 +18,7 @@ package deployment
 
 import (
 	"context"
+	"fmt"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -27,8 +28,8 @@ import (
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
-// ConfigureNetwork ensures the network config
-func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+// Configure ensures the network config
+func (n Networker) Configure(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -61,8 +62,8 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Obj
 
 }
 
-// ValidateNetwork ensures the node network config
-func ValidateNetwork(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+// Validate ensures the node network config
+func (n Networker) Validate(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
 
 	role := ansibleeev1alpha1.Role{
 		Name:     "osp.edpm.edpm_nodes_validation",
@@ -87,4 +88,14 @@ func ValidateNetwork(ctx context.Context, helper *helper.Helper, obj client.Obje
 
 	return nil
 
+}
+
+// Install - Networker does not implement this method but is required to satisfy the interface contract
+func (n Networker) Install(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+	return fmt.Errorf("Network does not implement the Install method")
+}
+
+// Run - Networker does not implement this method but is required to satisfy the interface contract
+func (n Networker) Run(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+	return fmt.Errorf("Network does not implement the Run method")
 }

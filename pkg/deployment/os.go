@@ -18,6 +18,7 @@ package deployment
 
 import (
 	"context"
+	"fmt"
 
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
@@ -26,8 +27,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// InstallOS ensures the node Operating System is installed
-func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+// Install ensures the node Operating System is installed
+func (os OperatingSystem) Install(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -87,8 +88,8 @@ func InstallOS(ctx context.Context, helper *helper.Helper, obj client.Object, ss
 
 }
 
-// ConfigureOS ensures the node Operating System config
-func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+// Configure ensures the node Operating System config
+func (os OperatingSystem) Configure(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -154,8 +155,8 @@ func ConfigureOS(ctx context.Context, helper *helper.Helper, obj client.Object, 
 
 }
 
-// RunOS ensures the node Operating System is running
-func RunOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+// Run ensures the node Operating System is running
+func (os OperatingSystem) Run(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -213,4 +214,9 @@ func RunOS(ctx context.Context, helper *helper.Helper, obj client.Object, sshKey
 
 	return nil
 
+}
+
+// Validate is not implemented for OS, but is required to satisfy the interface contract
+func (os OperatingSystem) Validate(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+	return fmt.Errorf("OS does not implement the Validate method")
 }

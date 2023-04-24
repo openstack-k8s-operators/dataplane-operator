@@ -19,6 +19,7 @@ package deployment
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -31,8 +32,47 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// deployFuncDef so we can pass a function to ConditionalDeploy
-type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string, dataplanev1beta1.AnsibleEESpec) error
+// Deployer specifies the methods that must be defined to use the interface. This provides a standard
+// and re-usable interface for all methods associated with the deployment of a Dataplane node.
+type Deployer interface {
+	Configuration
+	Validation
+	Installation
+	Runner
+}
+
+// Configuration defines the Configure interface. This method is implemented by each module used to deploy
+// the Dataplane nodes.
+type Configuration interface {
+	Configure(context.Context, *helper.Helper, client.Object, string, string, dataplanev1beta1.AnsibleEESpec) error
+}
+
+// Validation defines the Validate interface. This method is implemented by each module used to deploy
+// the Dataplane nodes.
+type Validation interface {
+	Validate(context.Context, *helper.Helper, client.Object, string, string, dataplanev1beta1.AnsibleEESpec) error
+}
+
+// Installation defines the Install interface. This method is implemented by each module used to deploy
+// the Dataplane nodes.
+type Installation interface {
+	Install(context.Context, *helper.Helper, client.Object, string, string, dataplanev1beta1.AnsibleEESpec) error
+}
+
+// Runner defines the Run interface. This method is implemented by each module used to deploy
+// the Dataplane nodes.
+type Runner interface {
+	Run(context.Context, *helper.Helper, client.Object, string, string, dataplanev1beta1.AnsibleEESpec) error
+}
+
+// Networker provides the struct used for the network.go receiver functions.
+type Networker struct{}
+
+// OperatingSystem provides the struct used for the os.go receiver functions.
+type OperatingSystem struct{}
+
+// CephClient provides the struct used for the ceph_client.go receiver functions.
+type CephClient struct{}
 
 // Deploy function encapsulating primary deloyment handling
 func Deploy(
@@ -52,7 +92,6 @@ func Deploy(
 	var readyMessage string
 	var readyWaitingMessage string
 	var readyErrorMessage string
-	var deployFunc deployFuncDef
 	var deployName string
 	var deployLabel string
 
@@ -68,7 +107,6 @@ func Deploy(
 	readyWaitingMessage = dataplanev1beta1.ConfigureNetworkReadyWaitingMessage
 	readyMessage = dataplanev1beta1.ConfigureNetworkReadyMessage
 	readyErrorMessage = dataplanev1beta1.ConfigureNetworkErrorMessage
-	deployFunc = ConfigureNetwork
 	deployName = "ConfigureNetwork"
 	deployLabel = ConfigureNetworkLabel
 	err = ConditionalDeploy(
@@ -82,7 +120,7 @@ func Deploy(
 		readyMessage,
 		readyWaitingMessage,
 		readyErrorMessage,
-		deployFunc,
+		Networker{},
 		deployName,
 		deployLabel,
 		aeeSpec,
@@ -98,7 +136,6 @@ func Deploy(
 	readyWaitingMessage = dataplanev1beta1.ValidateNetworkReadyWaitingMessage
 	readyMessage = dataplanev1beta1.ValidateNetworkReadyMessage
 	readyErrorMessage = dataplanev1beta1.ValidateNetworkErrorMessage
-	deployFunc = ValidateNetwork
 	deployName = "ValidateNetwork"
 	deployLabel = ValidateNetworkLabel
 	err = ConditionalDeploy(
@@ -112,7 +149,7 @@ func Deploy(
 		readyMessage,
 		readyWaitingMessage,
 		readyErrorMessage,
-		deployFunc,
+		Networker{},
 		deployName,
 		deployLabel,
 		aeeSpec,
@@ -128,7 +165,6 @@ func Deploy(
 	readyWaitingMessage = dataplanev1beta1.InstallOSReadyWaitingMessage
 	readyMessage = dataplanev1beta1.InstallOSReadyMessage
 	readyErrorMessage = dataplanev1beta1.InstallOSErrorMessage
-	deployFunc = InstallOS
 	deployName = "InstallOS"
 	deployLabel = InstallOSLabel
 	err = ConditionalDeploy(
@@ -142,7 +178,7 @@ func Deploy(
 		readyMessage,
 		readyWaitingMessage,
 		readyErrorMessage,
-		deployFunc,
+		OperatingSystem{},
 		deployName,
 		deployLabel,
 		aeeSpec)
@@ -157,7 +193,6 @@ func Deploy(
 	readyWaitingMessage = dataplanev1beta1.ConfigureOSReadyWaitingMessage
 	readyMessage = dataplanev1beta1.ConfigureOSReadyMessage
 	readyErrorMessage = dataplanev1beta1.ConfigureOSErrorMessage
-	deployFunc = ConfigureOS
 	deployName = "ConfigureOS"
 	deployLabel = ConfigureOSLabel
 	err = ConditionalDeploy(
@@ -171,7 +206,7 @@ func Deploy(
 		readyMessage,
 		readyWaitingMessage,
 		readyErrorMessage,
-		deployFunc,
+		OperatingSystem{},
 		deployName,
 		deployLabel,
 		aeeSpec)
@@ -186,7 +221,6 @@ func Deploy(
 	readyWaitingMessage = dataplanev1beta1.RunOSReadyWaitingMessage
 	readyMessage = dataplanev1beta1.RunOSReadyMessage
 	readyErrorMessage = dataplanev1beta1.RunOSErrorMessage
-	deployFunc = RunOS
 	deployName = "RunOS"
 	deployLabel = RunOSLabel
 	err = ConditionalDeploy(
@@ -200,7 +234,7 @@ func Deploy(
 		readyMessage,
 		readyWaitingMessage,
 		readyErrorMessage,
-		deployFunc,
+		OperatingSystem{},
 		deployName,
 		deployLabel,
 		aeeSpec)
@@ -225,7 +259,6 @@ func Deploy(
 		readyWaitingMessage = dataplanev1beta1.ConfigureCephClientReadyWaitingMessage
 		readyMessage = dataplanev1beta1.ConfigureCephClientReadyMessage
 		readyErrorMessage = dataplanev1beta1.ConfigureCephClientErrorMessage
-		deployFunc = ConfigureCephClient
 		deployName = "ConfigureCephClient"
 		deployLabel = ConfigureCephClientLabel
 		err = ConditionalDeploy(
@@ -239,7 +272,7 @@ func Deploy(
 			readyMessage,
 			readyWaitingMessage,
 			readyErrorMessage,
-			deployFunc,
+			CephClient{},
 			deployName,
 			deployLabel,
 			aeeSpec,
@@ -256,7 +289,6 @@ func Deploy(
 	readyWaitingMessage = dataplanev1beta1.InstallOpenStackReadyWaitingMessage
 	readyMessage = dataplanev1beta1.InstallOpenStackReadyMessage
 	readyErrorMessage = dataplanev1beta1.InstallOpenStackErrorMessage
-	deployFunc = InstallOpenStack
 	deployName = "InstallOpenStack"
 	deployLabel = InstallOpenStackLabel
 	err = ConditionalDeploy(
@@ -270,7 +302,7 @@ func Deploy(
 		readyMessage,
 		readyWaitingMessage,
 		readyErrorMessage,
-		deployFunc,
+		OperatingSystem{},
 		deployName,
 		deployLabel,
 		aeeSpec)
@@ -285,7 +317,6 @@ func Deploy(
 	readyWaitingMessage = dataplanev1beta1.ConfigureOpenStackReadyWaitingMessage
 	readyMessage = dataplanev1beta1.ConfigureOpenStackReadyMessage
 	readyErrorMessage = dataplanev1beta1.ConfigureOpenStackErrorMessage
-	deployFunc = ConfigureOpenStack
 	deployName = "ConfigureOpenStack"
 	deployLabel = ConfigureOpenStackLabel
 	err = ConditionalDeploy(
@@ -299,7 +330,7 @@ func Deploy(
 		readyMessage,
 		readyWaitingMessage,
 		readyErrorMessage,
-		deployFunc,
+		OperatingSystem{},
 		deployName,
 		deployLabel,
 		aeeSpec)
@@ -314,7 +345,6 @@ func Deploy(
 	readyWaitingMessage = dataplanev1beta1.RunOpenStackReadyWaitingMessage
 	readyMessage = dataplanev1beta1.RunOpenStackReadyMessage
 	readyErrorMessage = dataplanev1beta1.RunOpenStackErrorMessage
-	deployFunc = RunOpenStack
 	deployName = "RunOpenStack"
 	deployLabel = RunOpenStackLabel
 	err = ConditionalDeploy(
@@ -328,7 +358,7 @@ func Deploy(
 		readyMessage,
 		readyWaitingMessage,
 		readyErrorMessage,
-		deployFunc,
+		OperatingSystem{},
 		deployName,
 		deployLabel,
 		aeeSpec)
@@ -355,7 +385,7 @@ func ConditionalDeploy(
 	readyMessage string,
 	readyWaitingMessage string,
 	readyErrorMessage string,
-	deployFunc deployFuncDef,
+	serviceInterface Deployer,
 	deployName string,
 	deployLabel string,
 	aeeSpec dataplanev1beta1.AnsibleEESpec,
@@ -366,7 +396,17 @@ func ConditionalDeploy(
 
 	if status.Conditions.IsUnknown(readyCondition) {
 		log.Info(fmt.Sprintf("%s Unknown, starting %s", readyCondition, deployName))
-		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap, aeeSpec)
+		switch true {
+		case strings.Contains(deployName, "Configure"):
+			err = serviceInterface.Configure(ctx, helper, obj, sshKeySecret, inventoryConfigMap, aeeSpec)
+		case strings.Contains(deployName, "Validate"):
+			err = serviceInterface.Validate(ctx, helper, obj, sshKeySecret, inventoryConfigMap, aeeSpec)
+		case strings.Contains(deployName, "Install"):
+			err = serviceInterface.Install(ctx, helper, obj, sshKeySecret, inventoryConfigMap, aeeSpec)
+		case strings.Contains(deployName, "Run"):
+			err = serviceInterface.Run(ctx, helper, obj, sshKeySecret, inventoryConfigMap, aeeSpec)
+		}
+
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to %s for %s", deployName, obj.GetName()), obj)
 			return err
