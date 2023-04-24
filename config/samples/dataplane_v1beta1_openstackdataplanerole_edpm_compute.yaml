@@ -4,6 +4,7 @@ metadata:
   name: edpm-compute
 spec:
   nodeTemplate:
+    nova: {}
     managed: false
     managementNetwork: ctlplane
     ansibleUser: root
