@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -32,7 +31,7 @@ import (
 )
 
 // DeployNovaExternalCompute deploys the nova compute configuration and services
-func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj client.Object, owner client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneStatus, networkAttachments []string, openStackAnsibleEERunnerImage string) (ctrl.Result, *novav1beta1.NovaExternalCompute, error) {
+func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj client.Object, owner client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneStatus, aeeSpec dataplanev1beta1.AnsibleEESpec) (*novav1beta1.NovaExternalCompute, error) {
 
 	log := helper.GetLogger()
 	log.Info(fmt.Sprintf("NovaExternalCompute deploy for %s", obj.GetName()))
@@ -55,8 +54,8 @@ func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj c
 		// as otherwise golang would defaul those field to the golang empty value instead.
 		novaExternalCompute.Spec = novav1beta1.NewNovaExternalComputeSpec(inventoryConfigMap, sshKeySecret)
 		novaExternalCompute.Spec.Deploy = true
-		novaExternalCompute.Spec.NetworkAttachments = networkAttachments
-		novaExternalCompute.Spec.AnsibleEEContainerImage = openStackAnsibleEERunnerImage
+		novaExternalCompute.Spec.NetworkAttachments = aeeSpec.NetworkAttachments
+		novaExternalCompute.Spec.AnsibleEEContainerImage = aeeSpec.OpenStackAnsibleEERunnerImage
 
 		err := controllerutil.SetControllerReference(owner, novaExternalCompute, helper.GetScheme())
 		if err != nil {
@@ -67,9 +66,9 @@ func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj c
 	})
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to CreateOrPatch NovaExternalCompute %s", novaExternalCompute.Name), novaExternalCompute)
-		return ctrl.Result{}, nil, err
+		return nil, err
 	}
 
-	return ctrl.Result{}, novaExternalCompute, nil
+	return novaExternalCompute, nil
 
 }

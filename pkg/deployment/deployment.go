@@ -18,6 +18,7 @@ package deployment
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -29,6 +30,7 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -40,6 +42,7 @@ func Deploy(
 	ctx context.Context,
 	helper *helper.Helper,
 	obj client.Object,
+	nodes *dataplanev1beta1.OpenStackDataPlaneNodeList,
 	sshKeySecret string,
 	inventoryConfigMap string,
 	status *dataplanev1beta1.OpenStackDataPlaneStatus,
@@ -55,6 +58,8 @@ func Deploy(
 	var deployFunc deployFuncDef
 	var deployName string
 	var deployLabel string
+
+	logger := helper.GetLogger()
 
 	// Set ReadyCondition to requested
 	status.Conditions.Set(condition.FalseCondition(
@@ -209,7 +214,7 @@ func Deploy(
 		}
 	}
 	if !haveCephSecret {
-		helper.GetLogger().Info("Skipping execution of Ansible for ConfigureCephClient because extraMounts does not have an extraVolType of Ceph.")
+		logger.Info("Skipping execution of Ansible for ConfigureCephClient because extraMounts does not have an extraVolType of Ceph.")
 	} else {
 		readyCondition = dataplanev1beta1.ConfigureCephClientReadyCondition
 		readyWaitingMessage = dataplanev1beta1.ConfigureCephClientReadyWaitingMessage
@@ -319,6 +324,53 @@ func Deploy(
 	if err != nil || result.RequeueAfter > 0 {
 		return result, err
 	}
+
+	// Call DeployNovaExternalCompute individually for each node
+	var novaExternalCompute *novav1beta1.NovaExternalCompute
+	var novaReadyConditionsTrue []*condition.Condition
+	var novaErrors []error
+	for _, node := range nodes.Items {
+		nodeConfigMapName := fmt.Sprintf("dataplanenode-%s", node.Name)
+		result, novaExternalCompute, err = DeployNovaExternalCompute(
+			ctx,
+			helper,
+			&node,
+			obj,
+			sshKeySecret,
+			nodeConfigMapName,
+			status,
+			aeeSpec)
+		if err != nil {
+			novaErrors = append(novaErrors, err)
+		}
+		novaReadyCondition := novaExternalCompute.Status.Conditions.Get(condition.ReadyCondition)
+		logger.Info("Nova Status", "NovaExternalCompute", node.Name, "IsReady", novaExternalCompute.IsReady())
+		if novaExternalCompute.IsReady() {
+			novaReadyConditionsTrue = append(novaReadyConditionsTrue, novaReadyCondition)
+
+		}
+	}
+
+	// When any errors are found, wrap all into a single error, and return
+	// it
+	errStr := "DeployNovaExternalCompute error:"
+	if len(novaErrors) > 0 {
+		for _, err := range novaErrors {
+			errStr = fmt.Sprintf("%s: %s", errStr, err.Error())
+		}
+		err = errors.New(errStr)
+		return result, err
+	}
+
+	// Return when any condition is not ready, otherwise set the role as
+	// deployed.
+	if len(novaReadyConditionsTrue) < len(nodes.Items) {
+		logger.Info("Not all NovaExternalCompute ReadyConditions are true.")
+		return ctrl.Result{}, nil
+	}
+
+	logger.Info("All NovaExternalCompute ReadyConditions are true")
+	status.Conditions.Set(condition.TrueCondition(dataplanev1beta1.NovaComputeReadyCondition, dataplanev1beta1.NovaComputeReadyMessage))
 
 	return ctrl.Result{}, nil
 
