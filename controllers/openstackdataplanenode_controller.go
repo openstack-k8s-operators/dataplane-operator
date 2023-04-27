@@ -218,7 +218,10 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 	r.Log.Info("Node", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Node.Namespace", instance.Namespace, "Node.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
-		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, nodeConfigMap, &instance.Status, instance.GetAnsibleEESpec(*instanceRole))
+		nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{
+			Items: []dataplanev1beta1.OpenStackDataPlaneNode{*instance},
+		}
+		deployResult, err := deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, nodeConfigMap, &instance.Status, instance.GetAnsibleEESpec(*instanceRole))
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -229,54 +232,20 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 				err.Error()))
 			return ctrl.Result{}, err
 		}
-		if result.RequeueAfter > 0 {
+		if deployResult != nil {
+			result = *deployResult
 			return result, nil
 		}
 
-		var novaExternalCompute *novav1beta1.NovaExternalCompute
-		result, novaExternalCompute, err = deployment.DeployNovaExternalCompute(
-			ctx,
-			helper,
-			instance,
-			instance,
-			ansibleSSHPrivateKeySecret,
-			nodeConfigMap,
-			&instance.Status,
-			instance.Spec.NetworkAttachments,
-			instance.Spec.OpenStackAnsibleEERunnerImage)
-		if err != nil {
-			return result, err
-		}
+		instance.Status.Deployed = true
+		r.Log.Info("Set ReadyCondition true")
+		instance.Status.Conditions.Set(condition.TrueCondition(condition.ReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage))
 
-		novaReadyCondition := novaExternalCompute.Status.Conditions.Get(condition.ReadyCondition)
-		if novaReadyCondition != nil {
-			r.Log.Info(fmt.Sprintf("NovaExternalCompute ReadyCondition status: %s", novaReadyCondition.Status))
-		} else {
-			r.Log.Info("NovaExternalCompute ReadyCondition not yet set")
-		}
-
-		mirroredCondition := novaExternalCompute.Status.Conditions.Mirror(dataplanev1beta1.NovaComputeReadyCondition)
-		if mirroredCondition != nil {
-			instance.Status.Conditions.Set(mirroredCondition)
-		}
-
-		if condition.IsError(instance.Status.Conditions.Get(dataplanev1beta1.NovaComputeReadyCondition)) {
-			r.Log.Info(fmt.Sprintf("%s error", dataplanev1beta1.NovaComputeReadyCondition))
-			err = fmt.Errorf("failed: NovaExternalCompute name %s NovaExternalCompute namespace %s", novaExternalCompute.Name, novaExternalCompute.Namespace)
-			return ctrl.Result{}, err
-		}
-
-		if instance.Status.Conditions.IsTrue(dataplanev1beta1.NovaComputeReadyCondition) {
-			instance.Status.Deployed = true
-			r.Log.Info("Set ReadyCondition true")
-			instance.Status.Conditions.Set(condition.TrueCondition(condition.ReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage))
-
-			// Explicitly set instance.Spec.Deploy = false
-			// We don't want another deploy triggered by any reconcile request, it
-			// should only be triggered when the user (or another controller)
-			// specifically sets it to true.
-			instance.Spec.DeployStrategy.Deploy = false
-		}
+		// Explicitly set instance.Spec.Deploy = false
+		// We don't want another deploy triggered by any reconcile request, it
+		// should only be triggered when the user (or another controller)
+		// specifically sets it to true.
+		instance.Spec.DeployStrategy.Deploy = false
 
 	}
 

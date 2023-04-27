@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -216,7 +215,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		r.Log.Info("Set ReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.RequestedReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
 
-		result, err = deployment.Deploy(ctx, helper, instance, ansibleSSHPrivateKeySecret, roleConfigMap, &instance.Status, instance.GetAnsibleEESpec())
+		deployResult, err := deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, roleConfigMap, &instance.Status, instance.GetAnsibleEESpec())
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -227,57 +226,11 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 				err.Error()))
 			return ctrl.Result{}, err
 		}
-		if result.RequeueAfter > 0 {
+		if deployResult != nil {
+			result = *deployResult
 			return result, nil
 		}
 
-		// Call DeployNovaExternalCompute individually for each node
-		var novaExternalCompute *novav1beta1.NovaExternalCompute
-		var novaReadyConditionsTrue []*condition.Condition
-		var novaErrors []error
-		for _, node := range nodes.Items {
-			nodeConfigMapName := fmt.Sprintf("dataplanenode-%s", node.Name)
-			result, novaExternalCompute, err = deployment.DeployNovaExternalCompute(
-				ctx,
-				helper,
-				&node,
-				instance,
-				ansibleSSHPrivateKeySecret,
-				nodeConfigMapName,
-				&instance.Status,
-				instance.Spec.NetworkAttachments,
-				instance.Spec.OpenStackAnsibleEERunnerImage)
-			if err != nil {
-				novaErrors = append(novaErrors, err)
-			}
-			novaReadyCondition := novaExternalCompute.Status.Conditions.Get(condition.ReadyCondition)
-			r.Log.Info("Nova Status", "NovaExternalCompute", node.Name, "IsReady", novaExternalCompute.IsReady())
-			if novaExternalCompute.IsReady() {
-				novaReadyConditionsTrue = append(novaReadyConditionsTrue, novaReadyCondition)
-
-			}
-		}
-
-		// When any errors are found, wrap all into a single error, and return
-		// it
-		errStr := "DeployNovaExternalCompute error:"
-		if len(novaErrors) > 0 {
-			for _, err := range novaErrors {
-				errStr = fmt.Sprintf("%s: %s", errStr, err.Error())
-			}
-			err = errors.New(errStr)
-			return result, err
-		}
-
-		// Return when any condition is not ready, otherwise set the role as
-		// deployed.
-		if len(novaReadyConditionsTrue) < len(nodes.Items) {
-			r.Log.Info("Not all NovaExternalCompute ReadyConditions are true.")
-			return ctrl.Result{}, nil
-		}
-
-		r.Log.Info("All NovaExternalCompute ReadyConditions are true")
-		instance.Status.Conditions.Set(condition.TrueCondition(dataplanev1beta1.NovaComputeReadyCondition, dataplanev1beta1.NovaComputeReadyMessage))
 		instance.Status.Deployed = true
 		r.Log.Info("Set ReadyCondition true")
 		instance.Status.Conditions.Set(condition.TrueCondition(condition.ReadyCondition, dataplanev1beta1.DataPlaneRoleReadyMessage))
