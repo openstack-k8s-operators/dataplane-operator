@@ -32,6 +32,36 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Obj
 
 	tasks := []dataplaneutil.Task{
 		{
+			Name:          "Install edpm_bootstrap",
+			RoleName:      "osp.edpm.edpm_bootstrap",
+			RoleTasksFrom: "bootstrap.yml",
+			Tags:          []string{"edpm_bootstrap"},
+		},
+		{
+			Name:          "Grow volumes",
+			RoleName:      "osp.edpm.edpm_growvols",
+			RoleTasksFrom: "main.yml",
+			Tags:          []string{"edpm_growvols"},
+		},
+		{
+			Name:          "Install edpm_kernel",
+			RoleName:      "osp.edpm.edpm_kernel",
+			RoleTasksFrom: "main.yml",
+			Tags:          []string{"edpm_kernel"},
+		},
+		{
+			Name:          "Import edpm_tuned",
+			RoleName:      "osp.edpm.edpm_tuned",
+			RoleTasksFrom: "main.yml",
+			Tags:          []string{"edpm_tuned"},
+		},
+		{
+			Name:          "Configure Kernel Args",
+			RoleName:      "osp.edpm.edpm_tuned",
+			RoleTasksFrom: "kernelargs.yml",
+			Tags:          []string{"edpm_tuned"},
+		},
+		{
 			Name:          "Configure Hosts Entries",
 			RoleName:      "osp.edpm.edpm_hosts_entries",
 			RoleTasksFrom: "main.yml",
