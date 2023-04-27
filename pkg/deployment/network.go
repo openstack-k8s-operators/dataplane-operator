@@ -57,9 +57,9 @@ func ConfigureNetwork(ctx context.Context, helper *helper.Helper, obj client.Obj
 		},
 		{
 			Name:          "Configure Kernel Args",
-			RoleName:      "osp.edpm.edpm_tuned",
+			RoleName:      "osp.edpm.edpm_kernel",
 			RoleTasksFrom: "kernelargs.yml",
-			Tags:          []string{"edpm_tuned"},
+			Tags:          []string{"edpm_kernel"},
 		},
 		{
 			Name:          "Configure Hosts Entries",
