@@ -91,6 +91,11 @@ type DeployStrategySection struct {
 	// +kubebuilder:validation:Optional
 	// AnsibleSkipTags for ansible execution
 	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
+
+	// DeployIdentifier is a randomly created string created for new deploy
+	// it can be used to override a current deploy on ansibleee objects
+	// +kubebuilder:validation:Optional
+	DeployIdentifier string `json:"deployIdentifier"`
 }
 
 // NetworkConfigSection is a specification of the Network configuration details
@@ -155,6 +160,10 @@ type AnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
 	// AnsibleSkipTags for ansible execution
 	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
+	// DeployIdentifier is a randomly created string created for new deploy
+	// it can be used to override a current deploy on ansibleee objects
+	// +kubebuilder:validation:Optional
+	DeployIdentifier string `json:"deployIdentifier"`
 	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default={}

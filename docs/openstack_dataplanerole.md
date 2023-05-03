@@ -24,6 +24,7 @@ AnsibleEESpec is a specification of the ansible EE attributes
 | ansibleTags | AnsibleTags for ansible execution | string | false |
 | ansibleLimit | AnsibleLimit for ansible execution | string | false |
 | ansibleSkipTags | AnsibleSkipTags for ansible execution | string | false |
+| deployIdentifier | DeployIdentifier is a randomly created string created for new deploy it can be used to override a current deploy on ansibleee objects | string | true |
 | extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | true |
 | env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
 
@@ -39,6 +40,7 @@ DeployStrategySection for fields controlling the deployment
 | ansibleTags | AnsibleTags for ansible execution | string | false |
 | ansibleLimit | AnsibleLimit for ansible execution | string | false |
 | ansibleSkipTags | AnsibleSkipTags for ansible execution | string | false |
+| deployIdentifier | DeployIdentifier is a randomly created string created for new deploy it can be used to override a current deploy on ansibleee objects | string | true |
 
 [Back to Custom Resources](#custom-resources)
 

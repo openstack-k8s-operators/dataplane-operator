@@ -52,6 +52,8 @@ spec:
                   deploy:
                     default: true
                     type: boolean
+                  deployIdentifier:
+                    type: string
                 required:
                 - deploy
                 type: object
