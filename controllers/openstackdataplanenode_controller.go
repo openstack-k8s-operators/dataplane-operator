@@ -221,13 +221,15 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 		// create deployIdentifier
 		if len(instance.Spec.DeployStrategy.DeployIdentifier) == 0 {
-			newIdentifier := dataplanev1beta1.GenerateDeployIdentifier()
-			instance.Spec.DeployStrategy.DeployIdentifier = newIdentifier
-			err = r.Update(ctx, instance)
-			if err != nil && k8s_errors.IsConflict(err) {
+			_, err = controllerutil.CreateOrUpdate(ctx, r.Client, instance, func() error {
+				newIdentifier := dataplanev1beta1.GenerateDeployIdentifier()
+				instance.Spec.DeployStrategy.DeployIdentifier = newIdentifier
+				r.Log.Info("DeployIdentifier updated to: ", "identifier", instance.Spec.DeployStrategy.DeployIdentifier)
+				return nil
+			})
+			if err != nil {
 				return ctrl.Result{}, err
 			}
-			r.Log.Info("DeployIdentifier updated to: ", "identifier", newIdentifier)
 		}
 
 		nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{
