@@ -216,7 +216,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 			newIdentifier := dataplanev1beta1.GenerateDeployIdentifier()
 			instance.Spec.DeployStrategy.DeployIdentifier = newIdentifier
 			err = r.Update(ctx, instance)
-			if err != nil {
+			if err != nil && k8s_errors.IsConflict(err) {
 				return ctrl.Result{}, err
 			}
 			r.Log.Info("DeployIdentifier updated to: ", "identifier", newIdentifier)

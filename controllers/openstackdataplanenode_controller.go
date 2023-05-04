@@ -224,7 +224,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 			newIdentifier := dataplanev1beta1.GenerateDeployIdentifier()
 			instance.Spec.DeployStrategy.DeployIdentifier = newIdentifier
 			err = r.Update(ctx, instance)
-			if err != nil {
+			if err != nil && k8s_errors.IsConflict(err) {
 				return ctrl.Result{}, err
 			}
 			r.Log.Info("DeployIdentifier updated to: ", "identifier", newIdentifier)
@@ -236,7 +236,6 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 		r.Log.Info("Starting DataPlaneNode deploy")
 		r.Log.Info("Set ReadyCondition false")
-		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.RequestedReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneNodeReadyWaitingMessage))
 
 		deployResult, err := deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, nodeConfigMap, &instance.Status, instance.GetAnsibleEESpec(*instanceRole))
 		if err != nil {
