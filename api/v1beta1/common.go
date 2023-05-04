@@ -142,7 +142,7 @@ func AssertUniquenessBetween(spec interface{}, otherSpec interface{}, suffix str
 	return errorMsgs
 }
 
-// GenerateDeployIdentifer - generate a UUID
+// GenerateDeployIdentifier - generate a UUID
 func GenerateDeployIdentifier() string {
 	newIdentifier := uuid.New().String()
 	return newIdentifier
