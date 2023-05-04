@@ -128,7 +128,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	var deployErrors []string
 	shouldRequeue := false
 	if instance.Spec.DeployStrategy.Deploy {
-		instance.Spec.DeployStrategy.DeployIdentifier = "foo"
+
 		r.Log.Info("Starting DataPlane deploy")
 		r.Log.Info("Set ReadyCondition false")
 		roles := &dataplanev1beta1.OpenStackDataPlaneRoleList{}

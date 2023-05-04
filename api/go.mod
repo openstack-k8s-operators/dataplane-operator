@@ -3,6 +3,7 @@ module github.com/openstack-k8s-operators/dataplane-operator/api
 go 1.19
 
 require (
+	github.com/google/uuid v1.3.0
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230420182422-a15a0625dc00
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230420182422-a15a0625dc00
 	k8s.io/api v0.26.3

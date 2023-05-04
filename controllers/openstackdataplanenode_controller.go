@@ -218,9 +218,26 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 	r.Log.Info("Node", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Node.Namespace", instance.Namespace, "Node.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
+
+		// create deployIdentifier
+		if len(instance.Spec.DeployStrategy.DeployIdentifier) == 0 {
+			newIdentifier := dataplanev1beta1.GenerateDeployIdentifier()
+			instance.Spec.DeployStrategy.DeployIdentifier = newIdentifier
+			err = r.Update(ctx, instance)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			r.Log.Info("DeployIdentifier updated to: ", "identifier", newIdentifier)
+		}
+
 		nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{
 			Items: []dataplanev1beta1.OpenStackDataPlaneNode{*instance},
 		}
+
+		r.Log.Info("Starting DataPlaneNode deploy")
+		r.Log.Info("Set ReadyCondition false")
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.RequestedReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneNodeReadyWaitingMessage))
+
 		deployResult, err := deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, nodeConfigMap, &instance.Status, instance.GetAnsibleEESpec(*instanceRole))
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
@@ -245,6 +262,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		// We don't want another deploy triggered by any reconcile request, it
 		// should only be triggered when the user (or another controller)
 		// specifically sets it to true.
+		r.Log.Info("Set DeployStrategy.Deploy to false")
 		instance.Spec.DeployStrategy.Deploy = false
 
 	}

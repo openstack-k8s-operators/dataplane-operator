@@ -208,14 +208,20 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, nil
 	}
 
-	if instance.Spec.DeployStrategy.DeployIdentifier == "" {
-		instance.Spec.DeployStrategy.DeployIdentifier = "aaaaaaaaa"
-	}
-
 	r.Log.Info("Role", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
 
-		instance.Spec.DeployStrategy.DeployIdentifier = "bbbbbbb"
+		// create deployIdentifier
+		if len(instance.Spec.DeployStrategy.DeployIdentifier) == 0 {
+			newIdentifier := dataplanev1beta1.GenerateDeployIdentifier()
+			instance.Spec.DeployStrategy.DeployIdentifier = newIdentifier
+			err = r.Update(ctx, instance)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			r.Log.Info("DeployIdentifier updated to: ", "identifier", newIdentifier)
+		}
+
 		r.Log.Info("Starting DataPlaneRole deploy")
 		r.Log.Info("Set ReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.RequestedReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))

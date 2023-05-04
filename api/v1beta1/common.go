@@ -19,6 +19,7 @@ package v1beta1
 import (
 	"reflect"
 
+	"github.com/google/uuid"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -139,6 +140,12 @@ func AssertUniquenessBetween(spec interface{}, otherSpec interface{}, suffix str
 		}
 	}
 	return errorMsgs
+}
+
+// GenerateDeployIdentifer - generate a UUID
+func GenerateDeployIdentifier() string {
+	newIdentifier := uuid.New().String()
+	return newIdentifier
 }
 
 // AnsibleEESpec is a specification of the ansible EE attributes
