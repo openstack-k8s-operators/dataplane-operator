@@ -146,6 +146,10 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 			// and recalculate it based on the state of the rest of the conditions
 			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
+
+		// Ensure conditions are always sorted by type
+		instance.Status.Conditions.Sort()
+
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
 			r.Log.Error(_err, "PatchInstance error")
@@ -159,6 +163,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		instance.Status.Conditions = condition.Conditions{}
 
 		cl := condition.CreateList(
+			condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.InstallOSReadyCondition, condition.InitReason, condition.InitReason),
@@ -210,6 +215,9 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 	r.Log.Info("Node", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Node.Namespace", instance.Namespace, "Node.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
+		r.Log.Info("Starting DataPlaneNode deploy")
+		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
 		nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{
 			Items: []dataplanev1beta1.OpenStackDataPlaneNode{*instance},
 		}
@@ -230,8 +238,8 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		}
 
 		instance.Status.Deployed = true
-		r.Log.Info("Set ReadyCondition true")
-		instance.Status.Conditions.Set(condition.TrueCondition(condition.ReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage))
+		r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
+		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.ReadyReason, condition.SeverityInfo, condition.DeploymentReadyMessage))
 
 		// Explicitly set instance.Spec.Deploy = false
 		// We don't want another deploy triggered by any reconcile request, it
@@ -241,12 +249,12 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 	}
 
-	// Set ReadyCondition to False if it was unknown.
+	// Set DeploymentReadyCondition to False if it was unknown.
 	// Handles the case where the Node is created with
 	// DeployStrategy.Deploy=false.
-	if instance.Status.Conditions.IsUnknown(condition.ReadyCondition) {
-		r.Log.Info("Set ReadyCondition false")
-		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneNodeReadyWaitingMessage))
+	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
+		r.Log.Info("Set DeploymentReadyCondition false")
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
 	}
 	return result, nil
 }

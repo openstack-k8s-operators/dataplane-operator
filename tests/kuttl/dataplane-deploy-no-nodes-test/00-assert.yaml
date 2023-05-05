@@ -35,7 +35,53 @@ spec:
   deployStrategy:
     deploy: false
   nodeTemplate:
-    ansibleSSHPrivateKeySecret: ""
-    networkConfig: {}
-  openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+status:
+  conditions:
+  - message: Deploy not started
+    reason: Deploy not started
+    severity: Info
+    status: "False"
+    type: Ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: ConfigureCephClientReady
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: ConfigureNetworkReady
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: ConfigureOSReady
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: ConfigureOpenStackReady
+  - message: Deploy not started
+    reason: Deploy not started
+    severity: Info
+    status: "False"
+    type: DeployReady
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: InstallOSReady
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: InstallOpenStackReady
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: RunOSReady
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: RunOpenStackReady
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: ValidateNetworkReady
 ---

@@ -128,9 +128,10 @@ spec:
   openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
 status:
   conditions:
-  - message: Init
-    reason: Init
-    status: Unknown
+  - message: Deploy not started
+    reason: Deploy not started
+    severity: Info
+    status: "False"
     type: Ready
   - message: Init
     reason: Init
@@ -148,6 +149,11 @@ status:
     reason: Init
     status: Unknown
     type: ConfigureOpenStackReady
+  - message: Deploy not started
+    reason: Deploy not started
+    severity: Info
+    status: "False"
+    type: DeployReady
   - message: Init
     reason: Init
     status: Unknown
@@ -200,9 +206,10 @@ spec:
   role: edpm-compute
 status:
   conditions:
-  - message: Init
-    reason: Init
-    status: Unknown
+  - message: Deploy not started
+    reason: Deploy not started
+    severity: Info
+    status: "False"
     type: Ready
   - message: Init
     reason: Init
@@ -220,6 +227,11 @@ status:
     reason: Init
     status: Unknown
     type: ConfigureOpenStackReady
+  - message: Deploy not started
+    reason: Deploy not started
+    severity: Info
+    status: "False"
+    type: DeployReady
   - message: Init
     reason: Init
     status: Unknown
@@ -272,9 +284,10 @@ spec:
   role: edpm-compute
 status:
   conditions:
-  - message: Init
-    reason: Init
-    status: Unknown
+  - message: Deploy not started
+    reason: Deploy not started
+    severity: Info
+    status: "False"
     type: Ready
   - message: Init
     reason: Init
@@ -292,6 +305,11 @@ status:
     reason: Init
     status: Unknown
     type: ConfigureOpenStackReady
+  - message: Deploy not started
+    reason: Deploy not started
+    severity: Info
+    status: "False"
+    type: DeployReady
   - message: Init
     reason: Init
     status: Unknown
