@@ -1,0 +1,41 @@
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlane
+metadata:
+  name: openstack-edpm-no-nodes
+  namespace: openstack
+spec:
+  deployStrategy:
+    deploy: false
+  roles:
+    edpm-compute-no-nodes:
+      openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+status:
+  conditions:
+  - message: Setup started
+    reason: Init
+    status: Unknown
+    type: Ready
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneRole
+metadata:
+  labels:
+    openstackdataplane: openstack-edpm-no-nodes
+  name: edpm-compute-no-nodes
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlane
+    name: openstack-edpm-no-nodes
+spec:
+  dataPlane: openstack-edpm-no-nodes
+  deployStrategy:
+    deploy: false
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: ""
+    networkConfig: {}
+  openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+---
