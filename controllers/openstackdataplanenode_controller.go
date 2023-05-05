@@ -75,6 +75,7 @@ type OpenStackDataPlaneNodeReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
+
 	r.Log = log.FromContext(ctx)
 	r.Log.Info("Reconciling Node")
 
@@ -103,6 +104,11 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
+	instanceRole, err := r.GetInstanceRole(ctx, instance)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	if len(instance.Spec.Role) > 0 {
 		if instance.ObjectMeta.Labels == nil {
 			instance.ObjectMeta.Labels = make(map[string]string)
@@ -112,25 +118,6 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	} else if instance.ObjectMeta.Labels != nil {
 		r.Log.Info(fmt.Sprintf("Removing label %s", "openstackdataplanerole"))
 		delete(instance.ObjectMeta.Labels, "openstackdataplanerole")
-	}
-
-	instanceRole, err := r.GetInstanceRole(ctx, instance)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	ansibleSSHPrivateKeySecret := r.GetAnsibleSSHPrivateKeySecret(instance, instanceRole)
-	_, result, err = secret.VerifySecret(
-		ctx,
-		types.NamespacedName{Namespace: instance.Namespace, Name: ansibleSSHPrivateKeySecret},
-		[]string{
-			"ssh-privatekey",
-		},
-		r.Client,
-		time.Duration(5)*time.Second,
-	)
-	if err != nil {
-		return result, err
 	}
 
 	// Always patch the instance status when exiting this function so we can
@@ -164,6 +151,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 		cl := condition.CreateList(
 			condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
+			condition.UnknownCondition(dataplanev1beta1.SetupReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
 			condition.UnknownCondition(dataplanev1beta1.InstallOSReadyCondition, condition.InitReason, condition.InitReason),
@@ -182,6 +170,24 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		// Register overall status immediately to have an early feedback e.g.
 		// in the cli
 		return ctrl.Result{}, nil
+	}
+
+	if instance.Status.Conditions.IsUnknown(dataplanev1beta1.SetupReadyCondition) {
+		instance.Status.Conditions.MarkFalse(dataplanev1beta1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
+	}
+
+	ansibleSSHPrivateKeySecret := r.GetAnsibleSSHPrivateKeySecret(instance, instanceRole)
+	_, result, err = secret.VerifySecret(
+		ctx,
+		types.NamespacedName{Namespace: instance.Namespace, Name: ansibleSSHPrivateKeySecret},
+		[]string{
+			"ssh-privatekey",
+		},
+		r.Client,
+		time.Duration(5)*time.Second,
+	)
+	if err != nil {
+		return result, err
 	}
 
 	// check if provided network attachments exist
@@ -256,6 +262,9 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		r.Log.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
 	}
+
+	instance.Status.Conditions.MarkTrue(dataplanev1beta1.SetupReadyCondition, condition.ReadyMessage)
+
 	return result, nil
 }
 

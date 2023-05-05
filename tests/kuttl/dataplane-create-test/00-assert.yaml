@@ -128,8 +128,8 @@ spec:
   openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
 status:
   conditions:
-  - message: Deploy not started
-    reason: Deploy not started
+  - message: Deployment not started
+    reason: NotRequested
     severity: Info
     status: "False"
     type: Ready
@@ -149,11 +149,11 @@ status:
     reason: Init
     status: Unknown
     type: ConfigureOpenStackReady
-  - message: Deploy not started
-    reason: Deploy not started
+  - message: Deployment not started
+    reason: NotRequested
     severity: Info
     status: "False"
-    type: DeployReady
+    type: DeploymentReady
   - message: Init
     reason: Init
     status: Unknown
@@ -170,6 +170,10 @@ status:
     reason: Init
     status: Unknown
     type: RunOpenStackReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
   - message: Init
     reason: Init
     status: Unknown
@@ -206,8 +210,8 @@ spec:
   role: edpm-compute
 status:
   conditions:
-  - message: Deploy not started
-    reason: Deploy not started
+  - message: Deployment not started
+    reason: NotRequested
     severity: Info
     status: "False"
     type: Ready
@@ -227,11 +231,11 @@ status:
     reason: Init
     status: Unknown
     type: ConfigureOpenStackReady
-  - message: Deploy not started
-    reason: Deploy not started
+  - message: Deployment not started
+    reason: NotRequested
     severity: Info
     status: "False"
-    type: DeployReady
+    type: DeploymentReady
   - message: Init
     reason: Init
     status: Unknown
@@ -248,6 +252,10 @@ status:
     reason: Init
     status: Unknown
     type: RunOpenStackReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
   - message: Init
     reason: Init
     status: Unknown
@@ -284,8 +292,8 @@ spec:
   role: edpm-compute
 status:
   conditions:
-  - message: Deploy not started
-    reason: Deploy not started
+  - message: Deployment not started
+    reason: NotRequested
     severity: Info
     status: "False"
     type: Ready
@@ -305,11 +313,11 @@ status:
     reason: Init
     status: Unknown
     type: ConfigureOpenStackReady
-  - message: Deploy not started
-    reason: Deploy not started
+  - message: Deployment not started
+    reason: NotRequested
     severity: Info
     status: "False"
-    type: DeployReady
+    type: DeploymentReady
   - message: Init
     reason: Init
     status: Unknown
@@ -326,6 +334,10 @@ status:
     reason: Init
     status: Unknown
     type: RunOpenStackReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
   - message: Init
     reason: Init
     status: Unknown

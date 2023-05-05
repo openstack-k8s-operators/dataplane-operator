@@ -112,6 +112,7 @@ func (instance OpenStackDataPlaneRole) InitConditions() {
 
 	cl := condition.CreateList(
 		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(InstallOSReadyCondition, condition.InitReason, condition.InitReason),
