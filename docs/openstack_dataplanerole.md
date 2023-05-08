@@ -116,5 +116,6 @@ OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
 | deployStrategy | DeployStrategy section to control how the node is deployed | [DeployStrategySection](#deploystrategysection) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | true |
+| services | Services list | []string | false |
 
 [Back to Custom Resources](#custom-resources)

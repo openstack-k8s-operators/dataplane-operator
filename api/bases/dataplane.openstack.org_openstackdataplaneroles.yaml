@@ -900,6 +900,10 @@ spec:
               openStackAnsibleEERunnerImage:
                 default: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
                 type: string
+              services:
+                items:
+                  type: string
+                type: array
             type: object
           status:
             properties:

@@ -28,7 +28,7 @@ import (
 )
 
 // ConfigureCephClient ensures the Ceph client configuration files are on data plane nodes
-func ConfigureCephClient(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec) error {
+func ConfigureCephClient(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec, foundService dataplanev1beta1.OpenStackDataPlaneService) error {
 
 	tasks := []dataplaneutil.Task{
 		{

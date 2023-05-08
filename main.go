@@ -34,11 +34,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	networkv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
-	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
-	"github.com/openstack-k8s-operators/dataplane-operator/controllers"
 	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+
+	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/dataplane-operator/controllers"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -138,6 +139,13 @@ func main() {
 		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackDataPlaneNode"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneNode")
+		os.Exit(1)
+	}
+	if err = (&controllers.OpenStackDataPlaneServiceReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneService")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
