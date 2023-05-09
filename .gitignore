@@ -39,3 +39,7 @@ go.work.sum
 
 # docs
 site/
+
+# kuttl files
+kubeconfig
+kuttl-test-dataplane.json
