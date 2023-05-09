@@ -118,9 +118,6 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
 
-		// Ensure conditions are always sorted by type
-		instance.Status.Conditions.Sort()
-
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
 			r.Log.Error(_err, "PatchInstance error")
@@ -234,7 +231,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 
 		instance.Status.Deployed = true
 		r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
-		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.ReadyReason, condition.SeverityInfo, condition.DeploymentReadyMessage))
+		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
 
 		for _, node := range nodes.Items {
 			if !node.IsReady() {

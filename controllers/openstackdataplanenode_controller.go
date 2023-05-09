@@ -134,9 +134,6 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
 
-		// Ensure conditions are always sorted by type
-		instance.Status.Conditions.Sort()
-
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
 			r.Log.Error(_err, "PatchInstance error")
@@ -245,7 +242,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 		instance.Status.Deployed = true
 		r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
-		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.ReadyReason, condition.SeverityInfo, condition.DeploymentReadyMessage))
+		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
 
 		// Explicitly set instance.Spec.Deploy = false
 		// We don't want another deploy triggered by any reconcile request, it
