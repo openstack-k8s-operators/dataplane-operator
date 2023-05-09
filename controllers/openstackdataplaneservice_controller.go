@@ -41,10 +41,11 @@ type OpenStackDataPlaneServiceReconciler struct {
 	Log     logr.Logger
 }
 
-// Reconcile reconciles a OpenStackDataPlaneService object
 // +kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices/finalizers,verbs=update
+
+// Reconcile reconciles a OpenStackDataPlaneService object
 func (r *OpenStackDataPlaneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
 	logger := log.FromContext(ctx)
 	logger.Info("Reconcile begin")
