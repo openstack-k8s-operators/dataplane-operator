@@ -94,12 +94,18 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	defer func() {
 		// update the overall status condition if service is ready
 		if instance.IsReady() {
-			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneReadyMessage)
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage)
 		} else {
 			// something is not ready so reset the Ready condition
 			instance.Status.Conditions.MarkUnknown(
 				condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage)
+			// and recalculate it based on the state of the rest of the conditions
+			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
+
+		// Ensure conditions are always sorted by type
+		instance.Status.Conditions.Sort()
+
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
 			r.Log.Error(_err, "PatchInstance error")
@@ -114,8 +120,9 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, nil
 	}
 
-	// Reset all ReadyConditons to 'Unknown'
-	instance.InitConditions()
+	if instance.Status.Conditions.IsUnknown(dataplanev1beta1.SetupReadyCondition) {
+		instance.Status.Conditions.MarkFalse(dataplanev1beta1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
+	}
 
 	ctrlResult, err := createOrPatchDataPlaneResources(ctx, instance, helper)
 	if err != nil {
@@ -204,10 +211,12 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.Conditions.Set(condition.TrueCondition(condition.ReadyCondition, dataplanev1beta1.DataPlaneReadyMessage))
 	}
 
-	// Set ReadyCondition to False if it was unknown
-	if instance.Status.Conditions.IsUnknown(condition.ReadyCondition) {
-		r.Log.Info("Set ReadyCondition false")
-		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.RequestedReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneReadyWaitingMessage))
+	// Set DeploymentReadyCondition to False if it was unknown.
+	// Handles the case where the DataPlane is created with
+	// DeployStrategy.Deploy=false.
+	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
+		r.Log.Info("Set DeploymentReadyCondition false")
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
 	}
 
 	// Explicitly set instance.Spec.Deploy = false
@@ -215,6 +224,8 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// only be triggered when the user (or another controller) specifically
 	// sets it to true.
 	instance.Spec.DeployStrategy.Deploy = false
+
+	instance.Status.Conditions.MarkTrue(dataplanev1beta1.SetupReadyCondition, condition.ReadyMessage)
 
 	return ctrl.Result{}, nil
 }

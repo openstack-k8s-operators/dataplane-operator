@@ -6,6 +6,22 @@ metadata:
 spec:
   deployStrategy:
     deploy: False
+status:
+  conditions:
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
+    type: Ready
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
+    type: DeploymentReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneRole

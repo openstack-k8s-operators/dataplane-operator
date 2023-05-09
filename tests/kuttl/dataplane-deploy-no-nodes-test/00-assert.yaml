@@ -12,10 +12,20 @@ spec:
       openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
 status:
   conditions:
-  - message: Setup started
-    reason: Init
-    status: Unknown
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
     type: Ready
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
+    type: DeploymentReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneRole

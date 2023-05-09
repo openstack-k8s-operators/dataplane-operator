@@ -89,7 +89,11 @@ func (instance OpenStackDataPlane) InitConditions() {
 	if instance.Status.Conditions == nil {
 		instance.Status.Conditions = condition.Conditions{}
 	}
-	cl := condition.CreateList(condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.InitReason))
+	cl := condition.CreateList(
+		condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
+	)
 	// initialize conditions used later as Status=Unknown
 	instance.Status.Conditions.Init(&cl)
 }
