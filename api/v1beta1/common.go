@@ -93,9 +93,9 @@ type DeployStrategySection struct {
 	// AnsibleSkipTags for ansible execution
 	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
 
-	// DeployIdentifier is a randomly created string created for new deploy
-	// it can be used to override a current deploy on ansibleee objects
-	// +kubebuilder:validation:Optional
+	// DeployIdentifier is a generated UUID set as input on OpenStackAnsibleEE resources
+	// so that the OpenStackAnsibleEE controller can determine job input uniqueness.
+	// It is generated on each new deploy request (when DeployStrategy.Deploy is changed to true).
 	DeployIdentifier string `json:"deployIdentifier"`
 }
 
