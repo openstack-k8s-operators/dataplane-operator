@@ -36,12 +36,6 @@ type NodeSection struct {
 	Networks []NetworksSection `json:"networks,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Managed - Whether the node is actually provisioned (True) or should be
-	// treated as preprovisioned (False)
-	Managed bool `json:"managed,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	// ManagementNetwork - Name of network to use for management (SSH/Ansible)
 	ManagementNetwork string `json:"managementNetwork,omitempty"`
 
@@ -70,6 +64,14 @@ type NodeSection struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default={}
 	ExtraMounts []storage.VolMounts `json:"extraMounts"`
+
+	// UserData  node specific user-data
+	// +kubebuilder:validation:Optional
+	UserData *corev1.SecretReference `json:"userData,omitempty"`
+
+	// NetworkData  node specific network-data
+	// +kubebuilder:validation:Optional
+	NetworkData *corev1.SecretReference `json:"networkData,omitempty"`
 }
 
 // DeployStrategySection for fields controlling the deployment
