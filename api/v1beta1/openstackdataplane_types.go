@@ -85,7 +85,7 @@ func (instance OpenStackDataPlane) IsReady() bool {
 }
 
 // InitConditions - Initializes Status Conditons
-func (instance OpenStackDataPlane) InitConditions() {
+func (instance *OpenStackDataPlane) InitConditions() {
 	if instance.Status.Conditions == nil {
 		instance.Status.Conditions = condition.Conditions{}
 	}

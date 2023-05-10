@@ -181,6 +181,10 @@ status:
   - message: Init
     reason: Init
     status: Unknown
+    type: RoleBaremetalProvisionReady
+  - message: Init
+    reason: Init
+    status: Unknown
     type: RunOSReady
   - message: Init
     reason: Init
@@ -530,7 +534,6 @@ data:
                 internal_api_ip: 172.17.0.100
                 internal_api_mtu: 1500
                 internal_api_vlan_id: 20
-                managed: "false"
                 management_network: ctlplane
                 networks: []
                 networks_lower:
@@ -627,7 +630,6 @@ data:
                 internal_api_ip: 172.17.0.101
                 internal_api_mtu: 1500
                 internal_api_vlan_id: 20
-                managed: "false"
                 management_network: ctlplane
                 networks: []
                 networks_lower:

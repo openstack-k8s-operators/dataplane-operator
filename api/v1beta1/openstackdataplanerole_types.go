@@ -107,7 +107,7 @@ func (instance OpenStackDataPlaneRole) IsReady() bool {
 }
 
 // InitConditions - Initializes Status Conditons
-func (instance OpenStackDataPlaneRole) InitConditions() {
+func (instance *OpenStackDataPlaneRole) InitConditions() {
 	instance.Status.Conditions = condition.Conditions{}
 
 	cl := condition.CreateList(

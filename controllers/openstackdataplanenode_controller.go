@@ -144,26 +144,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 	// Initialize Status
 	if instance.Status.Conditions == nil {
-		instance.Status.Conditions = condition.Conditions{}
-
-		cl := condition.CreateList(
-			condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.SetupReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.InstallOSReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.ConfigureOSReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.RunOSReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.ConfigureCephClientReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.InstallOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.ConfigureOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.RunOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-		)
-
-		instance.Status.Conditions.Init(&cl)
-
-		instance.Status.Deployed = false
-
+		instance.InitConditions()
 		// Register overall status immediately to have an early feedback e.g.
 		// in the cli
 		return ctrl.Result{}, nil

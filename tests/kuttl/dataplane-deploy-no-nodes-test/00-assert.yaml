@@ -85,6 +85,10 @@ status:
   - message: Init
     reason: Init
     status: Unknown
+    type: RoleBaremetalProvisionReady
+  - message: Init
+    reason: Init
+    status: Unknown
     type: RunOSReady
   - message: Init
     reason: Init
