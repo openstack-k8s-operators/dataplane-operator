@@ -21,6 +21,7 @@ import (
 	"reflect"
 
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -35,8 +36,19 @@ type OpenStackDataPlaneRoleSpec struct {
 	DataPlane string `json:"dataPlane,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// BaremetalSetTemplate Template for BaremetalSet for the Role
+	BaremetalSetTemplate baremetalv1.OpenStackBaremetalSetSpec `json:"baremetalSetTemplate,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	// NodeTemplate - node attributes specific to this roles
 	NodeTemplate NodeSection `json:"nodeTemplate,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	//
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// PreProvisioned - Whether the nodes are actually pre-provisioned (True) or should be
+	// preprovisioned (False)
+	PreProvisioned bool `json:"preProvisioned,omitempty"`
 
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
@@ -54,6 +66,10 @@ type OpenStackDataPlaneRoleSpec struct {
 	// +kubebuilder:default="quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
 	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
 	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage"`
+
+	// +kubebuilder:validation:Optional
+	// Services list
+	Services []string `json:"services,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -88,6 +104,27 @@ func init() {
 // IsReady - returns true if the DataPlane is ready
 func (instance OpenStackDataPlaneRole) IsReady() bool {
 	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
+}
+
+// InitConditions - Initializes Status Conditons
+func (instance OpenStackDataPlaneRole) InitConditions() {
+	instance.Status.Conditions = condition.Conditions{}
+
+	cl := condition.CreateList(
+		condition.UnknownCondition(ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(InstallOSReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(ConfigureOSReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(RunOSReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(ConfigureCephClientReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(InstallOpenStackReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(ConfigureOpenStackReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(RunOpenStackReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(RoleBareMetalProvisionReadyCondition, condition.InitReason, condition.InitReason),
+	)
+
+	instance.Status.Conditions.Init(&cl)
+	instance.Status.Deployed = false
 }
 
 // Validate - validates the shared data between role and nodes

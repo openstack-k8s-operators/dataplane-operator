@@ -25,6 +25,7 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -118,7 +119,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// Reset all ReadyConditons to 'Unknown'
 	instance.InitConditions()
 
-	ctrlResult, err := r.CreateDataPlaneResources(ctx, instance, helper)
+	ctrlResult, err := createOrPatchDataPlaneResources(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
@@ -230,45 +231,84 @@ func (r *OpenStackDataPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error 
 		Complete(r)
 }
 
-// CreateDataPlaneResources -
-func (r *OpenStackDataPlaneReconciler) CreateDataPlaneResources(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) (ctrl.Result, error) {
-	err := r.CreateDataPlaneRole(ctx, instance, helper)
+// createOrPatchDataPlaneResources -
+func createOrPatchDataPlaneResources(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) (ctrl.Result, error) {
+	// create DataPlaneRoles
+	roleManagedHostMap := make(map[string]map[string]baremetalv1.InstanceSpec)
+	err := createOrPatchDataPlaneRoles(ctx, instance, helper, roleManagedHostMap)
 	if err != nil {
-		instance.Status.Conditions.Set(condition.FalseCondition(
+		instance.Status.Conditions.MarkFalse(
 			condition.ReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityError,
 			dataplanev1beta1.DataPlaneErrorMessage,
-			err.Error()))
+			err.Error())
 		return ctrl.Result{}, err
 	}
-	err = r.CreateDataPlaneNode(ctx, instance, helper)
+
+	// Create DataPlaneNodes
+	err = createOrPatchDataPlaneNodes(ctx, instance, helper)
 	if err != nil {
-		instance.Status.Conditions.Set(condition.FalseCondition(
+		instance.Status.Conditions.MarkFalse(
 			condition.ReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityError,
 			dataplanev1beta1.DataPlaneNodeErrorMessage,
-			err.Error()))
+			err.Error())
+		return ctrl.Result{}, err
+	}
+
+	// Get All Nodes
+	nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{}
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.GetNamespace()),
+	}
+
+	err = helper.GetClient().List(ctx, nodes, listOpts...)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if len(nodes.Items) < len(instance.Spec.Nodes) {
+		// All dataplane nodes are not created yet, requeue the request
+		err = fmt.Errorf("All nodes not yet created, requeueing")
+		return ctrl.Result{}, err
+	}
+
+	err = buildBMHHostMap(instance, nodes, roleManagedHostMap)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// Patch the role again to provision the nodes
+	err = createOrPatchDataPlaneRoles(ctx, instance, helper, roleManagedHostMap)
+	if err != nil {
+		instance.Status.Conditions.MarkFalse(
+			condition.ReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			dataplanev1beta1.DataPlaneErrorMessage,
+			err.Error())
 		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
-
 }
 
-// CreateDataPlaneNode -
-func (r *OpenStackDataPlaneReconciler) CreateDataPlaneNode(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) error {
+// createOrPatchDataPlaneNodes Create or Patch DataPlaneNodes
+func createOrPatchDataPlaneNodes(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) error {
+	logger := helper.GetLogger()
+	client := helper.GetClient()
 
 	for nodeName, nodeSpec := range instance.Spec.Nodes {
-		r.Log.Info("CreateDataPlaneNode", "nodeName", nodeName)
+		logger.Info("CreateDataPlaneNode", "nodeName", nodeName)
 		node := &dataplanev1beta1.OpenStackDataPlaneNode{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      nodeName,
 				Namespace: instance.Namespace,
 			},
 		}
-		_, err := controllerutil.CreateOrPatch(ctx, r.Client, node, func() error {
+		_, err := controllerutil.CreateOrPatch(ctx, client, node, func() error {
 			nodeSpec.DeepCopyInto(&node.Spec)
 			err := controllerutil.SetControllerReference(instance, node, helper.GetScheme())
 			if err != nil {
@@ -284,18 +324,21 @@ func (r *OpenStackDataPlaneReconciler) CreateDataPlaneNode(ctx context.Context, 
 	return nil
 }
 
-// CreateDataPlaneRole -
-func (r *OpenStackDataPlaneReconciler) CreateDataPlaneRole(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) error {
-
+// createOrPatchDataPlaneRoles Create or Patch DataPlaneRole
+func createOrPatchDataPlaneRoles(ctx context.Context,
+	instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper,
+	roleManagedHostMap map[string]map[string]baremetalv1.InstanceSpec) error {
+	client := helper.GetClient()
+	logger := helper.GetLogger()
 	for roleName, roleSpec := range instance.Spec.Roles {
-		r.Log.Info("CreateDataPlaneRole", "roleName", roleName)
+		logger.Info("CreateDataPlaneRole", "roleName", roleName)
 		role := &dataplanev1beta1.OpenStackDataPlaneRole{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      roleName,
 				Namespace: instance.Namespace,
 			},
 		}
-		_, err := controllerutil.CreateOrPatch(ctx, r.Client, role, func() error {
+		_, err := controllerutil.CreateOrPatch(ctx, client, role, func() error {
 			// role.Spec.DeployStrategy is explicitly omitted. Otherwise, it
 			// could get reset to False, and if the DataPlane deploy sets it to
 			// True, the DataPlane and DataPlaneRole controllers will be stuck
@@ -305,6 +348,12 @@ func (r *OpenStackDataPlaneReconciler) CreateDataPlaneRole(ctx context.Context, 
 			role.Spec.NetworkAttachments = roleSpec.NetworkAttachments
 			role.Spec.OpenStackAnsibleEERunnerImage = roleSpec.OpenStackAnsibleEERunnerImage
 			role.Spec.Env = roleSpec.Env
+			role.Spec.Services = roleSpec.Services
+			role.Spec.BaremetalSetTemplate = roleSpec.BaremetalSetTemplate
+			hostMap, ok := roleManagedHostMap[roleName]
+			if ok {
+				role.Spec.BaremetalSetTemplate.BaremetalHosts = hostMap
+			}
 			err := controllerutil.SetControllerReference(instance, role, helper.GetScheme())
 			if err != nil {
 				return err
@@ -314,7 +363,34 @@ func (r *OpenStackDataPlaneReconciler) CreateDataPlaneRole(ctx context.Context, 
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
 
+// buildBMHHostMap  Build managed host map for all roles
+func buildBMHHostMap(instance *dataplanev1beta1.OpenStackDataPlane,
+	nodes *dataplanev1beta1.OpenStackDataPlaneNodeList,
+	roleManagedHostMap map[string]map[string]baremetalv1.InstanceSpec) error {
+	for _, node := range nodes.Items {
+		labels := node.GetObjectMeta().GetLabels()
+		roleName, ok := labels["openstackdataplanerole"]
+		if !ok {
+			// Node does not have a label
+			continue
+		}
+		if roleManagedHostMap[roleName] == nil {
+			roleManagedHostMap[roleName] = make(map[string]baremetalv1.InstanceSpec)
+		}
+		// Using AnsibleHost (assuming it to be the ctlplane ip atm)
+		// Once IPAM has been implemented use that
+		if !instance.Spec.Roles[roleName].PreProvisioned {
+			instanceSpec := baremetalv1.InstanceSpec{}
+			instanceSpec.CtlPlaneIP = node.Spec.AnsibleHost
+			instanceSpec.UserData = node.Spec.Node.UserData
+			instanceSpec.NetworkData = node.Spec.Node.NetworkData
+			roleManagedHostMap[roleName][node.Spec.HostName] = instanceSpec
+
+		}
 	}
 	return nil
 }

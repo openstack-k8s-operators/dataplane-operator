@@ -7,7 +7,7 @@ replace github.com/openstack-k8s-operators/dataplane-operator/api => ./api
 require (
 	github.com/go-logr/logr v1.2.4
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
-	github.com/onsi/ginkgo/v2 v2.9.2
+	github.com/onsi/ginkgo/v2 v2.9.4
 	github.com/onsi/gomega v1.27.6
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.0.0-20230420182422-a15a0625dc00
@@ -15,6 +15,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230420182422-a15a0625dc00
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230417105650-be429a49aa8b
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230419203517-e2dc6bc77bae
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230506130220-9b7e3a72d236
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.3
 	k8s.io/apimachinery v0.26.3
@@ -47,6 +48,8 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
+	github.com/metal3-io/baremetal-operator/apis v0.2.0 // indirect
+	github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.1.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -66,7 +69,7 @@ require (
 	golang.org/x/term v0.7.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	golang.org/x/tools v0.7.0 // indirect
+	golang.org/x/tools v0.8.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect

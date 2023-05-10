@@ -39,6 +39,147 @@ spec:
             type: object
           spec:
             properties:
+              baremetalSetTemplate:
+                properties:
+                  automatedCleaningMode:
+                    default: metadata
+                    enum:
+                    - metadata
+                    - disabled
+                    type: string
+                  baremetalHosts:
+                    additionalProperties:
+                      properties:
+                        ctlPlaneIP:
+                          type: string
+                        networkData:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
+                        userData:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
+                      type: object
+                    type: object
+                  bmhLabelSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  bmhNamespace:
+                    default: openshift-machine-api
+                    type: string
+                  bootstrapDns:
+                    items:
+                      type: string
+                    type: array
+                  ctlplaneGateway:
+                    type: string
+                  ctlplaneInterface:
+                    type: string
+                  ctlplaneNetmask:
+                    type: string
+                  deploymentSSHSecret:
+                    type: string
+                  dnsSearchDomains:
+                    items:
+                      type: string
+                    type: array
+                  domainName:
+                    type: string
+                  hardwareReqs:
+                    properties:
+                      cpuReqs:
+                        properties:
+                          arch:
+                            enum:
+                            - x86_64
+                            - ppc64le
+                            type: string
+                          countReq:
+                            properties:
+                              count:
+                                minimum: 1
+                                type: integer
+                              exactMatch:
+                                type: boolean
+                            type: object
+                          mhzReq:
+                            properties:
+                              exactMatch:
+                                type: boolean
+                              mhz:
+                                minimum: 1
+                                type: integer
+                            type: object
+                        type: object
+                      diskReqs:
+                        properties:
+                          gbReq:
+                            properties:
+                              exactMatch:
+                                type: boolean
+                              gb:
+                                minimum: 1
+                                type: integer
+                            type: object
+                          ssdReq:
+                            properties:
+                              exactMatch:
+                                type: boolean
+                              ssd:
+                                type: boolean
+                            type: object
+                        type: object
+                      memReqs:
+                        properties:
+                          gbReq:
+                            properties:
+                              exactMatch:
+                                type: boolean
+                              gb:
+                                minimum: 1
+                                type: integer
+                            type: object
+                        type: object
+                    type: object
+                  networkData:
+                    properties:
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
+                  passwordSecret:
+                    type: string
+                  provisionServerName:
+                    type: string
+                  rhelImageUrl:
+                    type: string
+                  userData:
+                    properties:
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
+                required:
+                - ctlplaneGateway
+                - ctlplaneInterface
+                - ctlplaneNetmask
+                - deploymentSSHSecret
+                - domainName
+                type: object
               dataPlane:
                 type: string
               deployStrategy:
@@ -880,8 +1021,6 @@ spec:
                       - volumes
                       type: object
                     type: array
-                  managed:
-                    type: boolean
                   managementNetwork:
                     type: string
                   networkConfig:
@@ -889,6 +1028,14 @@ spec:
                       template:
                         type: string
                     type: object
+                  networkData:
+                    properties:
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
                   networks:
                     items:
                       properties:
@@ -898,10 +1045,24 @@ spec:
                           type: string
                       type: object
                     type: array
+                  userData:
+                    properties:
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
                 type: object
               openStackAnsibleEERunnerImage:
                 default: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
                 type: string
+              preProvisioned:
+                type: boolean
+              services:
+                items:
+                  type: string
+                type: array
             type: object
           status:
             properties:

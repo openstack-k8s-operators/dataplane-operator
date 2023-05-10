@@ -202,14 +202,6 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		}
 	}
 
-	if instance.Spec.Node.Managed {
-		err = r.Provision(ctx, instance)
-		if err != nil {
-			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to OpenStackDataPlaneNode %s", instance.Name), instance)
-			return ctrl.Result{}, err
-		}
-	}
-
 	nodeConfigMap, err := r.GenerateInventory(ctx, instance, instanceRole)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
@@ -235,10 +227,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 			Items: []dataplanev1beta1.OpenStackDataPlaneNode{*instance},
 		}
 
-		r.Log.Info("Starting DataPlaneNode deploy")
-		r.Log.Info("Set ReadyCondition false")
-
-		deployResult, err := deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, nodeConfigMap, &instance.Status, instance.GetAnsibleEESpec(*instanceRole))
+		deployResult, err := deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, nodeConfigMap, &instance.Status, instance.GetAnsibleEESpec(*instanceRole), r.GetServices(instance, instanceRole))
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -294,11 +283,6 @@ func (r *OpenStackDataPlaneNodeReconciler) SetupWithManager(mgr ctrl.Manager) er
 		Complete(r)
 }
 
-// Provision the data plane node
-func (r *OpenStackDataPlaneNodeReconciler) Provision(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode) error {
-	return nil
-}
-
 // GenerateInventory yields a parsed Inventory
 func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) (string, error) {
 	var (
@@ -318,7 +302,6 @@ func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context
 
 	host.Vars["ansible_user"] = r.GetAnsibleUser(instance, instanceRole)
 	host.Vars["ansible_port"] = r.GetAnsiblePort(instance, instanceRole)
-	host.Vars["managed"] = r.GetAnsibleManaged(instance, instanceRole)
 	host.Vars["management_network"] = r.GetAnsibleManagementNetwork(instance, instanceRole)
 	host.Vars["networks"] = r.GetAnsibleNetworks(instance, instanceRole)
 
@@ -406,14 +389,6 @@ func (r *OpenStackDataPlaneNodeReconciler) GetAnsiblePort(instance *dataplanev1b
 	return strconv.Itoa(instanceRole.Spec.NodeTemplate.AnsiblePort)
 }
 
-// GetAnsibleManaged returns the string (from boolean) value from the template unless it is set in the node
-func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleManaged(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
-	if instance.Spec.Node.Managed {
-		return strconv.FormatBool(instance.Spec.Node.Managed)
-	}
-	return strconv.FormatBool(instanceRole.Spec.NodeTemplate.Managed)
-}
-
 // GetAnsibleManagementNetwork returns the string value from the template unless it is set in the node
 func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleManagementNetwork(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
 	if instance.Spec.Node.ManagementNetwork != "" {
@@ -477,4 +452,10 @@ func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleSSHPrivateKeySecret(instanc
 		return instance.Spec.Node.AnsibleSSHPrivateKeySecret
 	}
 	return instanceRole.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
+}
+
+// GetServices returns the list of services for the node's role
+// Note that these are not inherited from NodeTemplate.
+func (r *OpenStackDataPlaneNodeReconciler) GetServices(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) []string {
+	return instanceRole.Spec.Services
 }

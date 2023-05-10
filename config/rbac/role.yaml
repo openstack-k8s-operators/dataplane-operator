@@ -18,6 +18,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - baremetal.openstack.org
+  resources:
+  - openstackbaremetalsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - batch
   resources:
   - jobs
@@ -140,6 +152,32 @@ rules:
   - dataplane.openstack.org
   resources:
   - openstackdataplanes/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplaneservices
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplaneservices/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplaneservices/status
   verbs:
   - get
   - patch

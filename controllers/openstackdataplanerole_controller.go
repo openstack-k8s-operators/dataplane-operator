@@ -43,6 +43,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 )
 
 // OpenStackDataPlaneRoleReconciler reconciles a OpenStackDataPlaneRole object
@@ -57,6 +58,7 @@ type OpenStackDataPlaneRoleReconciler struct {
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneroles/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneroles/finalizers,verbs=update
 //+kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=baremetal.openstack.org,resources=openstackbaremetalsets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=nova.openstack.org,resources=novaexternalcomputes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete;
@@ -101,6 +103,35 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
+	// Always patch the instance status when exiting this function so we can
+	// persist any changes.
+	defer func() {
+		// update the overall status condition if service is ready
+		if instance.IsReady() {
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneRoleReadyMessage)
+		} else {
+			// something is not ready so reset the Ready condition
+			instance.Status.Conditions.MarkUnknown(
+				condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage)
+			// and recalculate it based on the state of the rest of the conditions
+			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
+		}
+		err := helper.PatchInstance(ctx, instance)
+		if err != nil {
+			r.Log.Error(_err, "PatchInstance error")
+			_err = err
+			return
+		}
+	}()
+
+	// Initialize Status
+	if instance.Status.Conditions == nil {
+		instance.InitConditions()
+		// Register overall status immediately to have an early feedback e.g.
+		// in the cli
+		return ctrl.Result{}, nil
+	}
+
 	if len(instance.Spec.DataPlane) > 0 {
 		if instance.ObjectMeta.Labels == nil {
 			instance.ObjectMeta.Labels = make(map[string]string)
@@ -110,6 +141,14 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	} else if instance.ObjectMeta.Labels != nil {
 		r.Log.Info(fmt.Sprintf("Removing label %s", "openstackdataplane"))
 		delete(instance.ObjectMeta.Labels, "openstackdataplane")
+	}
+
+	// Reconcile BaremetalSet if required
+	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
+		err := r.ReconcileBaremetalSet(ctx, instance, helper)
+		if err != nil {
+			return ctrl.Result{RequeueAfter: time.Second * 10}, err
+		}
 	}
 
 	nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{}
@@ -148,27 +187,6 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
-	// Always patch the instance status when exiting this function so we can
-	// persist any changes.
-	defer func() {
-		// update the overall status condition if service is ready
-		if instance.IsReady() {
-			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneRoleReadyMessage)
-		} else {
-			// something is not ready so reset the Ready condition
-			instance.Status.Conditions.MarkUnknown(
-				condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage)
-			// and recalculate it based on the state of the rest of the conditions
-			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
-		}
-		err := helper.PatchInstance(ctx, instance)
-		if err != nil {
-			r.Log.Error(_err, "PatchInstance error")
-			_err = err
-			return
-		}
-	}()
-
 	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 	_, result, err = secret.VerifySecret(
 		ctx,
@@ -181,31 +199,6 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	)
 	if err != nil {
 		return result, err
-	}
-
-	// Initialize Status
-	if instance.Status.Conditions == nil {
-		instance.Status.Conditions = condition.Conditions{}
-
-		cl := condition.CreateList(
-			condition.UnknownCondition(dataplanev1beta1.ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.InstallOSReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.ConfigureOSReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.RunOSReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.ConfigureCephClientReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.InstallOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.ConfigureOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.RunOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-		)
-
-		instance.Status.Conditions.Init(&cl)
-
-		instance.Status.Deployed = false
-
-		// Register overall status immediately to have an early feedback e.g.
-		// in the cli
-		return ctrl.Result{}, nil
 	}
 
 	r.Log.Info("Role", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
@@ -227,7 +220,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		r.Log.Info("Set ReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.RequestedReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneRoleReadyWaitingMessage))
 
-		deployResult, err := deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, roleConfigMap, &instance.Status, instance.GetAnsibleEESpec())
+		deployResult, err := deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, roleConfigMap, &instance.Status, instance.GetAnsibleEESpec(), instance.Spec.Services)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -283,6 +276,43 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// ReconcileBaremetalSet Reconcile OpenStackBaremetalSet
+func (r *OpenStackDataPlaneRoleReconciler) ReconcileBaremetalSet(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneRole, helper *helper.Helper,
+) error {
+	baremetalSet := &baremetalv1.OpenStackBaremetalSet{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.Name,
+			Namespace: instance.Namespace,
+		},
+	}
+
+	helper.GetLogger().Info("Reconciling BaremetalSet")
+	_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), baremetalSet, func() error {
+		instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec)
+		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), baremetalSet, helper.GetScheme())
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		instance.Status.Conditions.MarkFalse(
+			dataplanev1beta1.RoleBareMetalProvisionReadyCondition,
+			condition.ErrorReason, condition.SeverityError,
+			dataplanev1beta1.RoleBaremetalProvisionErrorMessage)
+		return err
+	}
+
+	// Wait for BaremetalSet to be ready, else try reconciling again
+	if !baremetalSet.IsReady() {
+		return fmt.Errorf("BaremetalSets not yet ready")
+	}
+	instance.Status.Conditions.MarkTrue(
+		dataplanev1beta1.RoleBareMetalProvisionReadyCondition,
+		dataplanev1beta1.RoleBaremetalProvisionReadyMessage)
+	return nil
 }
 
 // GenerateInventory yields a parsed Inventory
@@ -355,6 +385,7 @@ func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) er
 		For(&dataplanev1beta1.OpenStackDataPlaneRole{}).
 		Owns(&v1alpha1.OpenStackAnsibleEE{}).
 		Owns(&novav1beta1.NovaExternalCompute{}).
+		Owns(&baremetalv1.OpenStackBaremetalSet{}).
 		Owns(&corev1.ConfigMap{}).
 		Complete(r)
 }
@@ -367,9 +398,6 @@ func resolveAnsibleVars(node *dataplanev1beta1.NodeSection, host *ansible.Host, 
 	}
 	if node.AnsiblePort > 0 {
 		ansibleVarsData["ansible_port"] = node.AnsiblePort
-	}
-	if node.Managed {
-		ansibleVarsData["managed"] = node.Managed
 	}
 	if node.ManagementNetwork != "" {
 		ansibleVarsData["management_network"] = node.ManagementNetwork

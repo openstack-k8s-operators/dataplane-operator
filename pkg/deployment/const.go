@@ -18,9 +18,6 @@ package deployment
 
 const (
 
-	// ConfigureNetworkLabel for ConfigureNetwork OpenStackAnsibleEE
-	ConfigureNetworkLabel = "dataplane-deployment-configure-network"
-
 	// ValidateNetworkLabel for ValidateNetwork OpenStackAnsibleEE
 	ValidateNetworkLabel = "dataplane-deployment-validate-network"
 
