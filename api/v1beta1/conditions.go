@@ -70,6 +70,9 @@ const (
 	// ServiceErrorMessage error
 	ServiceErrorMessage = "Service error occurred %s"
 
+	// SetupReadyCondition - Overall setup condition
+	SetupReadyCondition condition.Type = "SetupReady"
+
 	// ConfigureNetworkReadyCondition Status=True condition indicates if the
 	// network configuration is finished and successful.
 	ConfigureNetworkReadyCondition condition.Type = "ConfigureNetworkReady"

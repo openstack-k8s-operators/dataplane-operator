@@ -3,8 +3,8 @@ module github.com/openstack-k8s-operators/dataplane-operator/api
 go 1.19
 
 require (
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230420182422-a15a0625dc00
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230420182422-a15a0625dc00
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230509160151-f9e64d8f4f38
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230509160151-f9e64d8f4f38
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230419203517-e2dc6bc77bae
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230506130220-9b7e3a72d236
 	k8s.io/api v0.26.3
@@ -48,8 +48,6 @@ require (
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	go.uber.org/atomic v1.9.0 // indirect
-	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1 // indirect
 	golang.org/x/sys v0.7.0 // indirect

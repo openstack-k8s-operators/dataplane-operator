@@ -103,14 +103,16 @@ func init() {
 
 // IsReady - returns true if the DataPlane is ready
 func (instance OpenStackDataPlaneRole) IsReady() bool {
-	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
+	return instance.Status.Conditions.IsTrue(condition.DeploymentReadyCondition)
 }
 
 // InitConditions - Initializes Status Conditons
-func (instance OpenStackDataPlaneRole) InitConditions() {
+func (instance *OpenStackDataPlaneRole) InitConditions() {
 	instance.Status.Conditions = condition.Conditions{}
 
 	cl := condition.CreateList(
+		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(InstallOSReadyCondition, condition.InitReason, condition.InitReason),
