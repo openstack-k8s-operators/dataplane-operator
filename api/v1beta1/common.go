@@ -96,7 +96,7 @@ type DeployStrategySection struct {
 	// DeployIdentifier is a generated UUID set as input on OpenStackAnsibleEE resources
 	// so that the OpenStackAnsibleEE controller can determine job input uniqueness.
 	// It is generated on each new deploy request (when DeployStrategy.Deploy is changed to true).
-	DeployIdentifier string `json:"deployIdentifier"`
+	DeployIdentifier string `json:"deployIdentifier,omitempty"`
 }
 
 // NetworkConfigSection is a specification of the Network configuration details

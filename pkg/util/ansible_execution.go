@@ -64,7 +64,8 @@ func AnsibleExecution(
 				Name:      executionName,
 				Namespace: obj.GetNamespace(),
 				Labels: map[string]string{
-					label: string(obj.GetUID()),
+					label:              string(obj.GetUID()),
+					"deployIdentifier": aeeSpec.DeployIdentifier,
 				},
 			},
 		}

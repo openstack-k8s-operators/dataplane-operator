@@ -40,7 +40,7 @@ DeployStrategySection for fields controlling the deployment
 | ansibleTags | AnsibleTags for ansible execution | string | false |
 | ansibleLimit | AnsibleLimit for ansible execution | string | false |
 | ansibleSkipTags | AnsibleSkipTags for ansible execution | string | false |
-| deployIdentifier | DeployIdentifier is a generated UUID set as input on OpenStackAnsibleEE resources so that the OpenStackAnsibleEE controller can determine job input uniqueness. It is generated on each new deploy request (when DeployStrategy.Deploy is changed to true). | string | true |
+| deployIdentifier | DeployIdentifier is a generated UUID set as input on OpenStackAnsibleEE resources so that the OpenStackAnsibleEE controller can determine job input uniqueness. It is generated on each new deploy request (when DeployStrategy.Deploy is changed to true). | string | false |
 
 [Back to Custom Resources](#custom-resources)
 

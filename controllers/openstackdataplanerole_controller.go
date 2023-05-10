@@ -212,26 +212,15 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	if instance.Spec.DeployStrategy.Deploy {
 
 		// create deployIdentifier
-		// if len(instance.Spec.DeployStrategy.DeployIdentifier) == 0 {
-		// 	newIdentifier := dataplanev1beta1.GenerateDeployIdentifier()
-		// 	instance.Spec.DeployStrategy.DeployIdentifier = newIdentifier
-		// 	err = r.Update(ctx, instance)
-		// 	if err != nil {
-		// 		return ctrl.Result{}, err
-		// 	}
-		// 	r.Log.Info("DeployIdentifier updated to: ", "identifier", newIdentifier)
-		// }
 		if len(instance.Spec.DeployStrategy.DeployIdentifier) == 0 {
-			_, err = controllerutil.CreateOrUpdate(ctx, r.Client, instance, func() error {
-				newIdentifier := dataplanev1beta1.GenerateDeployIdentifier()
-				instance.Spec.DeployStrategy.DeployIdentifier = newIdentifier
-				r.Log.Info("DeployIdentifier updated to: ", "identifier", instance.Spec.DeployStrategy.DeployIdentifier)
-				return nil
-			})
+			patch := client.MergeFrom(instance.DeepCopy())
+			newIdentifier := dataplanev1beta1.GenerateDeployIdentifier()
+			instance.Spec.DeployStrategy.DeployIdentifier = newIdentifier
+			err = r.Client.Patch(ctx, instance, patch)
 			if err != nil {
 				return ctrl.Result{}, err
 			}
-
+			r.Log.Info("DeployIdentifier updated to: ", "identifier", newIdentifier)
 		}
 
 		r.Log.Info("Starting DataPlaneRole deploy")
@@ -270,11 +259,18 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		}
 
 		// Explicitly set instance.Spec.Deploy = false
+		// Explicitly set instance.Spec.DeployStrategy.DeployIdentifier = ""
 		// We don't want another deploy triggered by any reconcile request, it should
 		// only be triggered when the user (or another controller) specifically
 		// sets it to true.
+		patch := client.MergeFrom(instance.DeepCopy())
 		r.Log.Info("Set DeployStrategy.Deploy to false")
 		instance.Spec.DeployStrategy.Deploy = false
+		instance.Spec.DeployStrategy.DeployIdentifier = ""
+		err = r.Client.Patch(ctx, instance, patch)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 
 	}
 

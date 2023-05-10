@@ -56,7 +56,6 @@ spec:
                     type: string
                 required:
                 - deploy
-                - deployIdentifier
                 type: object
               nodes:
                 additionalProperties:
@@ -78,7 +77,6 @@ spec:
                           type: string
                       required:
                       - deploy
-                      - deployIdentifier
                       type: object
                     env:
                       items:
@@ -951,7 +949,6 @@ spec:
                           type: string
                       required:
                       - deploy
-                      - deployIdentifier
                       type: object
                     env:
                       items:
