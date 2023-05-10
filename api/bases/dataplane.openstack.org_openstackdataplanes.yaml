@@ -906,6 +906,14 @@ spec:
                             template:
                               type: string
                           type: object
+                        networkData:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
                         networks:
                           items:
                             properties:
@@ -915,6 +923,14 @@ spec:
                                 type: string
                             type: object
                           type: array
+                        userData:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
                       type: object
                     openStackAnsibleEERunnerImage:
                       default: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
@@ -1913,6 +1929,14 @@ spec:
                             template:
                               type: string
                           type: object
+                        networkData:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
                         networks:
                           items:
                             properties:
@@ -1922,6 +1946,14 @@ spec:
                                 type: string
                             type: object
                           type: array
+                        userData:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
                       type: object
                     openStackAnsibleEERunnerImage:
                       default: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest

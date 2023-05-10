@@ -385,7 +385,8 @@ func buildBMHHostMap(instance *dataplanev1beta1.OpenStackDataPlane,
 		if !instance.Spec.Roles[roleName].PreProvisioned {
 			instanceSpec := baremetalv1.InstanceSpec{}
 			instanceSpec.CtlPlaneIP = node.Spec.AnsibleHost
-			// (TODO) Populate node specific userdata and networkdata
+			instanceSpec.UserData = node.Spec.Node.UserData
+			instanceSpec.NetworkData = node.Spec.Node.NetworkData
 			roleManagedHostMap[roleName][node.Spec.HostName] = instanceSpec
 
 		}
