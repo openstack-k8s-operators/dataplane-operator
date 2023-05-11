@@ -166,10 +166,8 @@ func (instance OpenStackDataPlaneNode) GetAnsibleEESpec(role OpenStackDataPlaneR
 	} else {
 		aee.OpenStackAnsibleEERunnerImage = role.Spec.OpenStackAnsibleEERunnerImage
 	}
-	if len(instance.Spec.DeployStrategy.DeployIdentifier) > 0 {
-		aee.DeployIdentifier = instance.Spec.DeployStrategy.DeployIdentifier
-	} else {
-		aee.DeployIdentifier = role.Spec.DeployStrategy.DeployIdentifier
+	if len(instance.Status.DeployIdentifier) > 0 {
+		aee.DeployIdentifier = instance.Status.DeployIdentifier
 	}
 	return aee
 }

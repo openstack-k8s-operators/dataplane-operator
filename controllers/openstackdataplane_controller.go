@@ -277,7 +277,7 @@ func createOrPatchDataPlaneResources(ctx context.Context, instance *dataplanev1b
 
 	if len(nodes.Items) < len(instance.Spec.Nodes) {
 		// All dataplane nodes are not created yet, requeue the request
-		err = fmt.Errorf("All nodes not yet created, requeueing")
+		err = fmt.Errorf("all nodes not yet created, requeueing")
 		return ctrl.Result{}, err
 	}
 

@@ -1088,6 +1088,10 @@ spec:
                   - type
                   type: object
                 type: array
+              deploy:
+                type: boolean
+              deployIdentifier:
+                type: string
               deployed:
                 type: boolean
             type: object
