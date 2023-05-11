@@ -94,7 +94,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	defer func() {
 		// update the overall status condition if service is ready
 		if instance.IsReady() {
-			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage)
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneReadyMessage)
 		} else {
 			// something is not ready so reset the Ready condition
 			instance.Status.Conditions.MarkUnknown(
@@ -132,7 +132,8 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	shouldRequeue := false
 	if instance.Spec.DeployStrategy.Deploy {
 		r.Log.Info("Starting DataPlane deploy")
-		r.Log.Info("Set ReadyCondition false")
+		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
 		roles := &dataplanev1beta1.OpenStackDataPlaneRoleList{}
 
 		listOpts := []client.ListOption{
@@ -150,7 +151,6 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 			return ctrl.Result{}, err
 		}
 
-		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneReadyWaitingMessage))
 		for _, role := range roles.Items {
 			logger.Info("DataPlane deploy", "role.Name", role.Name)
 			if role.Spec.DataPlane != instance.Name {
@@ -178,7 +178,6 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 				mirroredCondition := role.Status.Conditions.Mirror(condition.ReadyCondition)
 				if mirroredCondition != nil {
 					r.Log.Info("Role", "Status", mirroredCondition.Message, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-					instance.Status.Conditions.Set(mirroredCondition)
 					if condition.IsError(mirroredCondition) {
 						deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+mirroredCondition.Message)
 					}
@@ -192,7 +191,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 		err = fmt.Errorf(fmt.Sprintf("DeployDataplane error(s): %s", deployErrors))
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			condition.ReadyCondition,
+			condition.DeploymentReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityError,
 			dataplanev1beta1.DataPlaneErrorMessage,
@@ -204,8 +203,9 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
 	}
 	if instance.Spec.DeployStrategy.Deploy && len(deployErrors) == 0 {
-		r.Log.Info("Set ReadyCondition true")
-		instance.Status.Conditions.Set(condition.TrueCondition(condition.ReadyCondition, dataplanev1beta1.DataPlaneReadyMessage))
+		instance.Status.Deployed = true
+		r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
+		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
 	}
 
 	// Set DeploymentReadyCondition to False if it was unknown.
@@ -221,6 +221,14 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// only be triggered when the user (or another controller) specifically
 	// sets it to true.
 	instance.Spec.DeployStrategy.Deploy = false
+
+	// Set DeploymentReadyCondition to False if it was unknown.
+	// Handles the case where the Node is created with
+	// DeployStrategy.Deploy=false.
+	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
+		r.Log.Info("Set DeploymentReadyCondition false")
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
+	}
 
 	instance.Status.Conditions.MarkTrue(dataplanev1beta1.SetupReadyCondition, condition.ReadyMessage)
 
