@@ -75,6 +75,7 @@ type OpenStackDataPlaneNodeReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
+
 	r.Log = log.FromContext(ctx)
 	r.Log.Info("Reconciling Node")
 
@@ -103,6 +104,11 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
+	instanceRole, err := r.GetInstanceRole(ctx, instance)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	if len(instance.Spec.Role) > 0 {
 		if instance.ObjectMeta.Labels == nil {
 			instance.ObjectMeta.Labels = make(map[string]string)
@@ -112,25 +118,6 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	} else if instance.ObjectMeta.Labels != nil {
 		r.Log.Info(fmt.Sprintf("Removing label %s", "openstackdataplanerole"))
 		delete(instance.ObjectMeta.Labels, "openstackdataplanerole")
-	}
-
-	instanceRole, err := r.GetInstanceRole(ctx, instance)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	ansibleSSHPrivateKeySecret := r.GetAnsibleSSHPrivateKeySecret(instance, instanceRole)
-	_, result, err = secret.VerifySecret(
-		ctx,
-		types.NamespacedName{Namespace: instance.Namespace, Name: ansibleSSHPrivateKeySecret},
-		[]string{
-			"ssh-privatekey",
-		},
-		r.Client,
-		time.Duration(5)*time.Second,
-	)
-	if err != nil {
-		return result, err
 	}
 
 	// Always patch the instance status when exiting this function so we can
@@ -146,6 +133,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 			// and recalculate it based on the state of the rest of the conditions
 			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
+
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
 			r.Log.Error(_err, "PatchInstance error")
@@ -156,27 +144,28 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 	// Initialize Status
 	if instance.Status.Conditions == nil {
-		instance.Status.Conditions = condition.Conditions{}
-
-		cl := condition.CreateList(
-			condition.UnknownCondition(dataplanev1beta1.ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.InstallOSReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.ConfigureOSReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.RunOSReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.ConfigureCephClientReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.InstallOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.ConfigureOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-			condition.UnknownCondition(dataplanev1beta1.RunOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-		)
-
-		instance.Status.Conditions.Init(&cl)
-
-		instance.Status.Deployed = false
-
+		instance.InitConditions()
 		// Register overall status immediately to have an early feedback e.g.
 		// in the cli
 		return ctrl.Result{}, nil
+	}
+
+	if instance.Status.Conditions.IsUnknown(dataplanev1beta1.SetupReadyCondition) {
+		instance.Status.Conditions.MarkFalse(dataplanev1beta1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
+	}
+
+	ansibleSSHPrivateKeySecret := r.GetAnsibleSSHPrivateKeySecret(instance, instanceRole)
+	_, result, err = secret.VerifySecret(
+		ctx,
+		types.NamespacedName{Namespace: instance.Namespace, Name: ansibleSSHPrivateKeySecret},
+		[]string{
+			"ssh-privatekey",
+		},
+		r.Client,
+		time.Duration(5)*time.Second,
+	)
+	if err != nil {
+		return result, err
 	}
 
 	// check if provided network attachments exist
@@ -223,6 +212,11 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 			r.Log.Info("DeployIdentifier updated to: ", "identifier", newIdentifier)
 		}
 
+
+		r.Log.Info("Starting DataPlaneNode deploy")
+		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
+
 		nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{
 			Items: []dataplanev1beta1.OpenStackDataPlaneNode{*instance},
 		}
@@ -244,8 +238,8 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		}
 
 		instance.Status.Deployed = true
-		r.Log.Info("Set ReadyCondition true")
-		instance.Status.Conditions.Set(condition.TrueCondition(condition.ReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage))
+		r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
+		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
 
 		// Explicitly set instance.Spec.Deploy = false
 		// Explicitly set instance.Spec.DeployStrategy.DeployIdentifier = ""
@@ -263,13 +257,16 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 	}
 
-	// Set ReadyCondition to False if it was unknown.
+	// Set DeploymentReadyCondition to False if it was unknown.
 	// Handles the case where the Node is created with
 	// DeployStrategy.Deploy=false.
-	if instance.Status.Conditions.IsUnknown(condition.ReadyCondition) {
-		r.Log.Info("Set ReadyCondition false")
-		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneNodeReadyWaitingMessage))
+	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
+		r.Log.Info("Set DeploymentReadyCondition false")
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
 	}
+
+	instance.Status.Conditions.MarkTrue(dataplanev1beta1.SetupReadyCondition, condition.ReadyMessage)
+
 	return result, nil
 }
 

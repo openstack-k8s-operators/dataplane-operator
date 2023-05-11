@@ -19,7 +19,7 @@ package v1beta1
 import (
 	"fmt"
 
-	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -92,7 +92,29 @@ func init() {
 
 // IsReady - returns true if the DataPlane is ready
 func (instance OpenStackDataPlaneNode) IsReady() bool {
-	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
+	return instance.Status.Conditions.IsTrue(condition.DeploymentReadyCondition)
+}
+
+// InitConditions - Initializes Status Conditons
+func (instance *OpenStackDataPlaneNode) InitConditions() {
+	instance.Status.Conditions = condition.Conditions{}
+
+	cl := condition.CreateList(
+		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(InstallOSReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(ConfigureOSReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(RunOSReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(ConfigureCephClientReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(InstallOpenStackReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(ConfigureOpenStackReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(RunOpenStackReadyCondition, condition.InitReason, condition.InitReason),
+	)
+
+	instance.Status.Conditions.Init(&cl)
+	instance.Status.Deployed = false
 }
 
 // Validate - validates the shared data between node and role

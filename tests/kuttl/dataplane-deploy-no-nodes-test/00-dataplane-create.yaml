@@ -6,4 +6,6 @@ spec:
   deployStrategy:
       deploy: false
   roles:
-    edpm-compute-no-nodes: {}
+    edpm-compute-no-nodes:
+      nodeTemplate:
+        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret

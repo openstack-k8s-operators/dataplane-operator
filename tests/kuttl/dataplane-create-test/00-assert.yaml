@@ -6,6 +6,22 @@ metadata:
 spec:
   deployStrategy:
     deploy: False
+status:
+  conditions:
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
+    type: Ready
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
+    type: DeploymentReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneRole
@@ -128,9 +144,10 @@ spec:
   openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
 status:
   conditions:
-  - message: Init
-    reason: Init
-    status: Unknown
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
     type: Ready
   - message: Init
     reason: Init
@@ -148,6 +165,11 @@ status:
     reason: Init
     status: Unknown
     type: ConfigureOpenStackReady
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
+    type: DeploymentReady
   - message: Init
     reason: Init
     status: Unknown
@@ -159,11 +181,19 @@ status:
   - message: Init
     reason: Init
     status: Unknown
+    type: RoleBaremetalProvisionReady
+  - message: Init
+    reason: Init
+    status: Unknown
     type: RunOSReady
   - message: Init
     reason: Init
     status: Unknown
     type: RunOpenStackReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
   - message: Init
     reason: Init
     status: Unknown
@@ -200,9 +230,10 @@ spec:
   role: edpm-compute
 status:
   conditions:
-  - message: Init
-    reason: Init
-    status: Unknown
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
     type: Ready
   - message: Init
     reason: Init
@@ -220,6 +251,11 @@ status:
     reason: Init
     status: Unknown
     type: ConfigureOpenStackReady
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
+    type: DeploymentReady
   - message: Init
     reason: Init
     status: Unknown
@@ -236,6 +272,10 @@ status:
     reason: Init
     status: Unknown
     type: RunOpenStackReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
   - message: Init
     reason: Init
     status: Unknown
@@ -272,9 +312,10 @@ spec:
   role: edpm-compute
 status:
   conditions:
-  - message: Init
-    reason: Init
-    status: Unknown
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
     type: Ready
   - message: Init
     reason: Init
@@ -292,6 +333,11 @@ status:
     reason: Init
     status: Unknown
     type: ConfigureOpenStackReady
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
+    type: DeploymentReady
   - message: Init
     reason: Init
     status: Unknown
@@ -308,6 +354,10 @@ status:
     reason: Init
     status: Unknown
     type: RunOpenStackReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
   - message: Init
     reason: Init
     status: Unknown
@@ -484,7 +534,6 @@ data:
                 internal_api_ip: 172.17.0.100
                 internal_api_mtu: 1500
                 internal_api_vlan_id: 20
-                managed: "false"
                 management_network: ctlplane
                 networks: []
                 networks_lower:
@@ -581,7 +630,6 @@ data:
                 internal_api_ip: 172.17.0.101
                 internal_api_mtu: 1500
                 internal_api_vlan_id: 20
-                managed: "false"
                 management_network: ctlplane
                 networks: []
                 networks_lower:
