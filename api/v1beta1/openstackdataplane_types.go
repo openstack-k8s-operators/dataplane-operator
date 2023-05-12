@@ -81,7 +81,7 @@ func init() {
 
 // IsReady - returns true if service is ready to serve requests
 func (instance OpenStackDataPlane) IsReady() bool {
-	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
+	return instance.Status.Conditions.IsTrue(condition.DeploymentReadyCondition)
 }
 
 // InitConditions - Initializes Status Conditons

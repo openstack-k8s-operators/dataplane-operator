@@ -61,13 +61,6 @@ func Deploy(
 	var deployLabel string
 	var foundService dataplanev1beta1.OpenStackDataPlaneService
 
-	// Set ReadyCondition to requested
-	status.Conditions.Set(condition.FalseCondition(
-		condition.ReadyCondition,
-		condition.RequestedReason,
-		condition.SeverityInfo,
-		dataplanev1beta1.DataPlaneNodeReadyWaitingMessage))
-
 	// (slagle) For the prototype, we deploy all the composable services first
 	for _, service := range services {
 		log.Info("Deploying service", "service", service)
