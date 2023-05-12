@@ -29,6 +29,7 @@ import (
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -283,15 +284,11 @@ func createOrPatchDataPlaneResources(ctx context.Context, instance *dataplanev1b
 	}
 
 	if len(nodes.Items) < len(instance.Spec.Nodes) {
-		// All dataplane nodes are not created yet, requeue the request
-		err = fmt.Errorf("All nodes not yet created, requeueing")
-		return ctrl.Result{}, err
+		util.LogForObject(helper, "All nodes not yet created, requeueing", instance)
+		return ctrl.Result{RequeueAfter: time.Second * 10}, nil
 	}
 
-	err = buildBMHHostMap(instance, nodes, roleManagedHostMap)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
+	buildBMHHostMap(instance, nodes, roleManagedHostMap)
 
 	// Patch the role again to provision the nodes
 	err = createOrPatchDataPlaneRoles(ctx, instance, helper, roleManagedHostMap)
@@ -344,14 +341,21 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 	client := helper.GetClient()
 	logger := helper.GetLogger()
 	for roleName, roleSpec := range instance.Spec.Roles {
-		logger.Info("CreateDataPlaneRole", "roleName", roleName)
 		role := &dataplanev1beta1.OpenStackDataPlaneRole{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      roleName,
 				Namespace: instance.Namespace,
 			},
 		}
-		_, err := controllerutil.CreateOrPatch(ctx, client, role, func() error {
+		err := client.Get(
+			ctx, types.NamespacedName{Name: roleName, Namespace: instance.Namespace}, role)
+
+		if err != nil && !k8s_errors.IsNotFound(err) {
+			return err
+		}
+
+		logger.Info("Create Or Patch DataPlaneRole", "roleName", roleName)
+		_, err = controllerutil.CreateOrPatch(ctx, client, role, func() error {
 			// role.Spec.DeployStrategy is explicitly omitted. Otherwise, it
 			// could get reset to False, and if the DataPlane deploy sets it to
 			// True, the DataPlane and DataPlaneRole controllers will be stuck
@@ -362,10 +366,11 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 			role.Spec.OpenStackAnsibleEERunnerImage = roleSpec.OpenStackAnsibleEERunnerImage
 			role.Spec.Env = roleSpec.Env
 			role.Spec.Services = roleSpec.Services
-			role.Spec.BaremetalSetTemplate = roleSpec.BaremetalSetTemplate
 			hostMap, ok := roleManagedHostMap[roleName]
 			if ok {
-				role.Spec.BaremetalSetTemplate.BaremetalHosts = hostMap
+				bmsTemplate := roleSpec.BaremetalSetTemplate.DeepCopy()
+				bmsTemplate.BaremetalHosts = hostMap
+				role.Spec.BaremetalSetTemplate = *bmsTemplate
 			}
 			err := controllerutil.SetControllerReference(instance, role, helper.GetScheme())
 			if err != nil {
@@ -383,7 +388,7 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 // buildBMHHostMap  Build managed host map for all roles
 func buildBMHHostMap(instance *dataplanev1beta1.OpenStackDataPlane,
 	nodes *dataplanev1beta1.OpenStackDataPlaneNodeList,
-	roleManagedHostMap map[string]map[string]baremetalv1.InstanceSpec) error {
+	roleManagedHostMap map[string]map[string]baremetalv1.InstanceSpec) {
 	for _, node := range nodes.Items {
 		labels := node.GetObjectMeta().GetLabels()
 		roleName, ok := labels["openstackdataplanerole"]
@@ -405,5 +410,4 @@ func buildBMHHostMap(instance *dataplanev1beta1.OpenStackDataPlane,
 
 		}
 	}
-	return nil
 }
