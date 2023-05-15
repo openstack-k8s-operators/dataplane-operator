@@ -46,6 +46,10 @@ import (
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 )
 
+const (
+	bmProvisionRetryDelay = time.Second * 60
+)
+
 // OpenStackDataPlaneRoleReconciler reconciles a OpenStackDataPlaneRole object
 type OpenStackDataPlaneRoleReconciler struct {
 	client.Client
@@ -151,9 +155,11 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 
 	// Reconcile BaremetalSet if required
 	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
-		err := r.ReconcileBaremetalSet(ctx, instance, helper)
+		ctrlResult, err := r.ReconcileBaremetalSet(ctx, instance, helper)
 		if err != nil {
-			return ctrl.Result{RequeueAfter: time.Second * 10}, err
+			return ctrlResult, err
+		} else if (ctrlResult != ctrl.Result{}) {
+			return ctrlResult, nil
 		}
 	}
 
@@ -269,7 +275,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 
 // ReconcileBaremetalSet Reconcile OpenStackBaremetalSet
 func (r *OpenStackDataPlaneRoleReconciler) ReconcileBaremetalSet(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneRole, helper *helper.Helper,
-) error {
+) (ctrl.Result, error) {
 	baremetalSet := &baremetalv1.OpenStackBaremetalSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.Name,
@@ -291,17 +297,18 @@ func (r *OpenStackDataPlaneRoleReconciler) ReconcileBaremetalSet(ctx context.Con
 			dataplanev1beta1.RoleBareMetalProvisionReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
 			dataplanev1beta1.RoleBaremetalProvisionErrorMessage)
-		return err
+		return ctrl.Result{}, err
 	}
 
-	// Wait for BaremetalSet to be ready, else try reconciling again
+	// Check if baremetalSet is ready
 	if !baremetalSet.IsReady() {
-		return fmt.Errorf("BaremetalSets not yet ready")
+		util.LogForObject(helper, "BaremetalSet not ready, Requeueing", instance)
+		return ctrl.Result{RequeueAfter: bmProvisionRetryDelay}, nil
 	}
 	instance.Status.Conditions.MarkTrue(
 		dataplanev1beta1.RoleBareMetalProvisionReadyCondition,
 		dataplanev1beta1.RoleBaremetalProvisionReadyMessage)
-	return nil
+	return ctrl.Result{}, nil
 }
 
 // GenerateInventory yields a parsed Inventory
