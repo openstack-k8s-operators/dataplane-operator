@@ -984,6 +984,9 @@ spec:
                           items:
                             type: string
                           type: array
+                        cloudUserName:
+                          default: cloud-admin
+                          type: string
                         ctlplaneGateway:
                           type: string
                         ctlplaneInterface:
@@ -1063,7 +1066,13 @@ spec:
                           type: object
                           x-kubernetes-map-type: atomic
                         passwordSecret:
-                          type: string
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
                         provisionServerName:
                           type: string
                         rhelImageUrl:
@@ -1077,6 +1086,7 @@ spec:
                           type: object
                           x-kubernetes-map-type: atomic
                       required:
+                      - cloudUserName
                       - ctlplaneGateway
                       - ctlplaneInterface
                       - ctlplaneNetmask
