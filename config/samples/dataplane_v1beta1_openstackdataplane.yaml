@@ -53,8 +53,8 @@ spec:
         ctlplaneNetmask: 255.255.255.0
         bmhNamespace: openstack
         domainName: osptest.openstack.org
+      preProvisioned: true
       nodeTemplate:
-        managed: false
         managementNetwork: ctlplane
         ansibleUser: root
         ansiblePort: 22
