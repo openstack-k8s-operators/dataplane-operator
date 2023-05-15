@@ -29,6 +29,7 @@ import (
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -94,7 +95,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	defer func() {
 		// update the overall status condition if service is ready
 		if instance.IsReady() {
-			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage)
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneReadyMessage)
 		} else {
 			// something is not ready so reset the Ready condition
 			instance.Status.Conditions.MarkUnknown(
@@ -133,7 +134,8 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	if instance.Spec.DeployStrategy.Deploy {
 
 		r.Log.Info("Starting DataPlane deploy")
-		r.Log.Info("Set ReadyCondition false")
+		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
 		roles := &dataplanev1beta1.OpenStackDataPlaneRoleList{}
 
 		listOpts := []client.ListOption{
@@ -151,7 +153,6 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 			return ctrl.Result{}, err
 		}
 
-		instance.Status.Conditions.Set(condition.FalseCondition(condition.ReadyCondition, condition.InitReason, condition.SeverityInfo, dataplanev1beta1.DataPlaneReadyWaitingMessage))
 		for _, role := range roles.Items {
 			logger.Info("DataPlane deploy", "role.Name", role.Name)
 			if role.Spec.DataPlane != instance.Name {
@@ -179,7 +180,6 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 				mirroredCondition := role.Status.Conditions.Mirror(condition.ReadyCondition)
 				if mirroredCondition != nil {
 					r.Log.Info("Role", "Status", mirroredCondition.Message, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-					instance.Status.Conditions.Set(mirroredCondition)
 					if condition.IsError(mirroredCondition) {
 						deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+mirroredCondition.Message)
 					}
@@ -193,7 +193,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 		err = fmt.Errorf(fmt.Sprintf("DeployDataplane error(s): %s", deployErrors))
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			condition.ReadyCondition,
+			condition.DeploymentReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityError,
 			dataplanev1beta1.DataPlaneErrorMessage,
@@ -205,8 +205,9 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
 	}
 	if instance.Spec.DeployStrategy.Deploy && len(deployErrors) == 0 {
-		r.Log.Info("Set ReadyCondition true")
-		instance.Status.Conditions.Set(condition.TrueCondition(condition.ReadyCondition, dataplanev1beta1.DataPlaneReadyMessage))
+		instance.Status.Deployed = true
+		r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
+		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
 	}
 
 	// Set DeploymentReadyCondition to False if it was unknown.
@@ -222,6 +223,14 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// only be triggered when the user (or another controller) specifically
 	// sets it to true.
 	instance.Spec.DeployStrategy.Deploy = false
+
+	// Set DeploymentReadyCondition to False if it was unknown.
+	// Handles the case where the Node is created with
+	// DeployStrategy.Deploy=false.
+	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
+		r.Log.Info("Set DeploymentReadyCondition false")
+		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
+	}
 
 	instance.Status.Conditions.MarkTrue(dataplanev1beta1.SetupReadyCondition, condition.ReadyMessage)
 
@@ -276,15 +285,11 @@ func createOrPatchDataPlaneResources(ctx context.Context, instance *dataplanev1b
 	}
 
 	if len(nodes.Items) < len(instance.Spec.Nodes) {
-		// All dataplane nodes are not created yet, requeue the request
-		err = fmt.Errorf("all nodes not yet created, requeueing")
-		return ctrl.Result{}, err
+		util.LogForObject(helper, "All nodes not yet created, requeueing", instance)
+		return ctrl.Result{RequeueAfter: time.Second * 10}, nil
 	}
 
-	err = buildBMHHostMap(instance, nodes, roleManagedHostMap)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
+	buildBMHHostMap(instance, nodes, roleManagedHostMap)
 
 	// Patch the role again to provision the nodes
 	err = createOrPatchDataPlaneRoles(ctx, instance, helper, roleManagedHostMap)
@@ -337,14 +342,21 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 	client := helper.GetClient()
 	logger := helper.GetLogger()
 	for roleName, roleSpec := range instance.Spec.Roles {
-		logger.Info("CreateDataPlaneRole", "roleName", roleName)
 		role := &dataplanev1beta1.OpenStackDataPlaneRole{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      roleName,
 				Namespace: instance.Namespace,
 			},
 		}
-		_, err := controllerutil.CreateOrPatch(ctx, client, role, func() error {
+		err := client.Get(
+			ctx, types.NamespacedName{Name: roleName, Namespace: instance.Namespace}, role)
+
+		if err != nil && !k8s_errors.IsNotFound(err) {
+			return err
+		}
+
+		logger.Info("Create Or Patch DataPlaneRole", "roleName", roleName)
+		_, err = controllerutil.CreateOrPatch(ctx, client, role, func() error {
 			// role.Spec.DeployStrategy is explicitly omitted. Otherwise, it
 			// could get reset to False, and if the DataPlane deploy sets it to
 			// True, the DataPlane and DataPlaneRole controllers will be stuck
@@ -355,10 +367,11 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 			role.Spec.OpenStackAnsibleEERunnerImage = roleSpec.OpenStackAnsibleEERunnerImage
 			role.Spec.Env = roleSpec.Env
 			role.Spec.Services = roleSpec.Services
-			role.Spec.BaremetalSetTemplate = roleSpec.BaremetalSetTemplate
 			hostMap, ok := roleManagedHostMap[roleName]
 			if ok {
-				role.Spec.BaremetalSetTemplate.BaremetalHosts = hostMap
+				bmsTemplate := roleSpec.BaremetalSetTemplate.DeepCopy()
+				bmsTemplate.BaremetalHosts = hostMap
+				role.Spec.BaremetalSetTemplate = *bmsTemplate
 			}
 			err := controllerutil.SetControllerReference(instance, role, helper.GetScheme())
 			if err != nil {
@@ -376,7 +389,7 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 // buildBMHHostMap  Build managed host map for all roles
 func buildBMHHostMap(instance *dataplanev1beta1.OpenStackDataPlane,
 	nodes *dataplanev1beta1.OpenStackDataPlaneNodeList,
-	roleManagedHostMap map[string]map[string]baremetalv1.InstanceSpec) error {
+	roleManagedHostMap map[string]map[string]baremetalv1.InstanceSpec) {
 	for _, node := range nodes.Items {
 		labels := node.GetObjectMeta().GetLabels()
 		roleName, ok := labels["openstackdataplanerole"]
@@ -398,5 +411,4 @@ func buildBMHHostMap(instance *dataplanev1beta1.OpenStackDataPlane,
 
 		}
 	}
-	return nil
 }
