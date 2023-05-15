@@ -362,10 +362,10 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 			role.Spec.OpenStackAnsibleEERunnerImage = roleSpec.OpenStackAnsibleEERunnerImage
 			role.Spec.Env = roleSpec.Env
 			role.Spec.Services = roleSpec.Services
-			role.Spec.BaremetalSetTemplate = roleSpec.BaremetalSetTemplate
 			hostMap, ok := roleManagedHostMap[roleName]
 			if ok {
 				role.Spec.BaremetalSetTemplate.BaremetalHosts = hostMap
+				role.Spec.BaremetalSetTemplate = roleSpec.BaremetalSetTemplate
 			}
 			err := controllerutil.SetControllerReference(instance, role, helper.GetScheme())
 			if err != nil {
