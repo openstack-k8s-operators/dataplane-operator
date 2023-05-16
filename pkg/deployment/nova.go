@@ -33,6 +33,8 @@ import (
 // DeployNovaExternalCompute deploys the nova compute configuration and services
 func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj client.Object, owner client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneStatus, aeeSpec dataplanev1beta1.AnsibleEESpec) (*novav1beta1.NovaExternalCompute, error) {
 
+	var deployBool bool = true
+
 	log := helper.GetLogger()
 	log.Info(fmt.Sprintf("NovaExternalCompute deploy for %s", obj.GetName()))
 
@@ -53,7 +55,7 @@ func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj c
 		// We need to call the default ctor to get the unspecified fields defaulted according to the CRD defaults
 		// as otherwise golang would defaul those field to the golang empty value instead.
 		novaExternalCompute.Spec = novav1beta1.NewNovaExternalComputeSpec(inventoryConfigMap, sshKeySecret)
-		novaExternalCompute.Spec.Deploy = true
+		novaExternalCompute.Spec.Deploy = &deployBool
 		novaExternalCompute.Spec.NetworkAttachments = aeeSpec.NetworkAttachments
 		novaExternalCompute.Spec.AnsibleEEContainerImage = aeeSpec.OpenStackAnsibleEERunnerImage
 
