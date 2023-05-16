@@ -58,6 +58,7 @@ func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj c
 		novaExternalCompute.Spec.Deploy = &deployBool
 		novaExternalCompute.Spec.NetworkAttachments = aeeSpec.NetworkAttachments
 		novaExternalCompute.Spec.AnsibleEEContainerImage = aeeSpec.OpenStackAnsibleEERunnerImage
+		// novaExternalCompute.Spec.ExtraMounts = aeeSpec.Mount(sshKeySecret, inventoryConfigMap)
 
 		err := controllerutil.SetControllerReference(owner, novaExternalCompute, helper.GetScheme())
 		if err != nil {

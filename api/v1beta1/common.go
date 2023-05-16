@@ -164,3 +164,66 @@ type AnsibleEESpec struct {
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
 }
+
+// Mount extra volumes
+func (m *AnsibleEESpec) Mount(sshKeySecret string, inventoryConfigMap string) []storage.VolMounts {
+	ansibleEEMounts := storage.VolMounts{}
+	sshKeyVolume := corev1.Volume{
+		Name: "ssh-key",
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: sshKeySecret,
+				Items: []corev1.KeyToPath{
+					{
+						Key:  "ssh-privatekey",
+						Path: "ssh_key",
+					},
+				},
+			},
+		},
+	}
+	sshKeyMount := corev1.VolumeMount{
+		Name:      "ssh-key",
+		MountPath: "/runner/env/ssh_key",
+		SubPath:   "ssh_key",
+	}
+
+	inventoryVolume := corev1.Volume{
+		Name: "inventory",
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: inventoryConfigMap,
+				},
+				Items: []corev1.KeyToPath{
+					{
+						Key:  "inventory",
+						Path: "inventory",
+					},
+					{
+						Key:  "network",
+						Path: "network",
+					},
+				},
+			},
+		},
+	}
+	inventoryMount := corev1.VolumeMount{
+		Name:      "inventory",
+		MountPath: "/runner/inventory/hosts",
+		SubPath:   "inventory",
+	}
+	networkConfigMount := corev1.VolumeMount{
+		Name:      "inventory",
+		MountPath: "/runner/network/nic-config-template",
+		SubPath:   "network",
+	}
+
+	ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, sshKeyVolume)
+	ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, inventoryVolume)
+	ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, sshKeyMount)
+	ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, inventoryMount)
+	ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, networkConfigMount)
+
+	return append(m.ExtraMounts, []storage.VolMounts{ansibleEEMounts}...)
+}

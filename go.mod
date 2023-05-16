@@ -12,7 +12,6 @@ require (
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.0.0-20230510145530-3c8e9179fb6e
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230510145530-3c8e9179fb6e
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230510145530-3c8e9179fb6e
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230515133652-de58358505e8
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230511195906-07c2e0aa9a63
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230515124247-64ada8525f98
@@ -54,6 +53,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230510145530-3c8e9179fb6e // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.14.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect

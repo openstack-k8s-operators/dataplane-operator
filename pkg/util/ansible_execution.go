@@ -23,7 +23,6 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
-	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -33,7 +32,6 @@ import (
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
@@ -89,65 +87,7 @@ func AnsibleExecution(
 		// TODO(slagle): Handle either play or role being specified
 		ansibleEE.Spec.Role = &role
 
-		ansibleEEMounts := storage.VolMounts{}
-		sshKeyVolume := corev1.Volume{
-			Name: "ssh-key",
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: sshKeySecret,
-					Items: []corev1.KeyToPath{
-						{
-							Key:  "ssh-privatekey",
-							Path: "ssh_key",
-						},
-					},
-				},
-			},
-		}
-		sshKeyMount := corev1.VolumeMount{
-			Name:      "ssh-key",
-			MountPath: "/runner/env/ssh_key",
-			SubPath:   "ssh_key",
-		}
-
-		inventoryVolume := corev1.Volume{
-			Name: "inventory",
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: inventoryConfigMap,
-					},
-					Items: []corev1.KeyToPath{
-						{
-							Key:  "inventory",
-							Path: "inventory",
-						},
-						{
-							Key:  "network",
-							Path: "network",
-						},
-					},
-				},
-			},
-		}
-		inventoryMount := corev1.VolumeMount{
-			Name:      "inventory",
-			MountPath: "/runner/inventory/hosts",
-			SubPath:   "inventory",
-		}
-		networkConfigMount := corev1.VolumeMount{
-			Name:      "inventory",
-			MountPath: "/runner/network/nic-config-template",
-			SubPath:   "network",
-		}
-
-		ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, sshKeyVolume)
-		ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, inventoryVolume)
-		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, sshKeyMount)
-		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, inventoryMount)
-		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, networkConfigMount)
-
-		ansibleEE.Spec.ExtraMounts = append(aeeSpec.ExtraMounts, []storage.VolMounts{ansibleEEMounts}...)
+		ansibleEE.Spec.ExtraMounts = aeeSpec.Mount(sshKeySecret, inventoryConfigMap)
 		ansibleEE.Spec.Env = aeeSpec.Env
 
 		err := controllerutil.SetControllerReference(obj, ansibleEE, helper.GetScheme())
