@@ -29,6 +29,10 @@ type OpenStackDataPlaneServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	Label string `json:"label,omitempty"`
 
+	// Play is the playbook contents that ansible will run on execution.
+	// If both Play and Role are specified, Play takes precedence
+	Play string `json:"play,omitempty"`
+
 	// Role is the description of an Ansible Role
 	// +kubebuilder:validation:Optional
 	Role *ansibleeev1alpha1.Role `json:"role,omitempty"`
