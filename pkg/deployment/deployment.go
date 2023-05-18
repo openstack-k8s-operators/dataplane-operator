@@ -385,6 +385,7 @@ func Deploy(
 		)
 		if err != nil {
 			novaErrors = append(novaErrors, err)
+			continue
 		}
 		novaExternalComputes = append(novaExternalComputes, novaExternalCompute)
 		novaReadyCondition := novaExternalCompute.Status.Conditions.Get(condition.ReadyCondition)
