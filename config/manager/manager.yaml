@@ -12,12 +12,11 @@ metadata:
   namespace: system
   labels:
     control-plane: controller-manager
-    app.kubernetes.io/name: dataplane-operator
-    app.kubernetes.io/component: dataplane
+    openstack.org/operator-name: dataplane
 spec:
   selector:
     matchLabels:
-      control-plane: controller-manager
+      openstack.org/operator-name: dataplane
   replicas: 1
   template:
     metadata:
@@ -25,8 +24,7 @@ spec:
         kubectl.kubernetes.io/default-container: manager
       labels:
         control-plane: controller-manager
-        app.kubernetes.io/name: dataplane-operator
-        app.kubernetes.io/component: dataplane
+        openstack.org/operator-name: dataplane
     spec:
       securityContext:
         runAsNonRoot: true
