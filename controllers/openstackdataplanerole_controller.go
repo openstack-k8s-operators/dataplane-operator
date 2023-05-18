@@ -213,23 +213,21 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return result, err
 	}
 
-	if instance.Spec.DeployStrategy.Deploy {
-		instance.Status.Deploy = true
-	}
-
 	r.Log.Info("Role", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
-	if instance.Status.Deploy {
+	if instance.Spec.DeployStrategy.Deploy {
+
 
 		// create deployIdentifier
 		if len(instance.Spec.DeployStrategy.DeployIdentifier) == 0 {
-			if len(instance.Status.DeployIdentifier) == 0 {
-				newIdentifier := dataplanev1beta1.GenerateDeployIdentifier()
-				instance.Status.DeployIdentifier = newIdentifier
+			patch := client.MergeFrom(instance.DeepCopy())
+			newIdentifier := dataplanev1beta1.GenerateDeployIdentifier()
+			instance.Spec.DeployStrategy.DeployIdentifier = newIdentifier
+			err = r.Client.Patch(ctx, instance, patch)
+			if err != nil {
+				return ctrl.Result{}, err
 			}
-		} else {
-			instance.Status.DeployIdentifier = instance.Spec.DeployStrategy.DeployIdentifier
+			r.Log.Info("DeployIdentifier updated to: ", "identifier", newIdentifier)
 		}
-		r.Log.Info("DeployIdentifier updated to: ", "identifier", instance.Status.DeployIdentifier)
 
 		r.Log.Info("Starting DataPlaneRole deploy")
 		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
@@ -267,15 +265,19 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 			}
 		}
 
-		// Explicitly set instance.Status.Deploy = false
-		// Explicitly set instance.Status.DeployIdentifier = ""
+		// Explicitly set instance.Spec.Deploy = false
+		// Explicitly set instance.Spec.DeployStrategy.DeployIdentifier = ""
 		// We don't want another deploy triggered by any reconcile request, it should
 		// only be triggered when the user (or another controller) specifically
 		// sets it to true.
-		r.Log.Info("Set Deploy to false")
-		instance.Status.Deploy = false
-		r.Log.Info("Set DeployIdentifier to empty value")
-		instance.Status.DeployIdentifier = ""
+		patch := client.MergeFrom(instance.DeepCopy())
+		r.Log.Info("Set DeployStrategy.Deploy to false")
+		instance.Spec.DeployStrategy.Deploy = false
+		instance.Spec.DeployStrategy.DeployIdentifier = ""
+		err = r.Client.Patch(ctx, instance, patch)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 
 	}
 

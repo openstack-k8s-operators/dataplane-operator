@@ -181,7 +181,7 @@ func (instance OpenStackDataPlaneRole) GetAnsibleEESpec() AnsibleEESpec {
 		AnsibleLimit:                  instance.Spec.DeployStrategy.AnsibleLimit,
 		AnsibleSkipTags:               instance.Spec.DeployStrategy.AnsibleSkipTags,
 		ExtraMounts:                   instance.Spec.NodeTemplate.ExtraMounts,
-		DeployIdentifier:              instance.Status.DeployIdentifier,
+		DeployIdentifier:              instance.Spec.DeployStrategy.DeployIdentifier,
 		Env:                           instance.Spec.Env,
 	}
 }
