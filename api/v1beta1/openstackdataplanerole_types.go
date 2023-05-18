@@ -113,18 +113,28 @@ func (instance *OpenStackDataPlaneRole) InitConditions() {
 	cl := condition.CreateList(
 		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(ConfigureNetworkReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(InstallOSReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(ConfigureOSReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(RunOSReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(ConfigureCephClientReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(InstallOpenStackReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(ConfigureOpenStackReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(RunOpenStackReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(RoleBareMetalProvisionReadyCondition, condition.InitReason, condition.InitReason),
 	)
 
+	haveCephSecret := false
+	for _, extraMount := range instance.Spec.NodeTemplate.ExtraMounts {
+		if extraMount.ExtraVolType == "Ceph" {
+			haveCephSecret = true
+			break
+		}
+	}
+
+	if haveCephSecret {
+		cl.Set(condition.UnknownCondition(ConfigureCephClientReadyCondition, condition.InitReason, condition.InitReason))
+
+	}
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.Deployed = false
 }
