@@ -86,7 +86,9 @@ func AnsibleExecution(
 			ansibleEE.Spec.CmdLine = strings.TrimSpace(cmdLineArguments.String())
 		}
 
-		// TODO(slagle): Handle either play or role being specified
+		if len(play) > 0 {
+			ansibleEE.Spec.Play = play
+		}
 		ansibleEE.Spec.Role = &role
 
 		ansibleEEMounts := storage.VolMounts{}

@@ -29,6 +29,8 @@ spec:
             properties:
               label:
                 type: string
+              play:
+                type: string
               role:
                 properties:
                   any_errors_fatal:
