@@ -93,5 +93,9 @@ status:
   - message: Init
     reason: Init
     status: Unknown
-    type: ValidateNetworkReady
+    type: configure-network service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: validate-network service ready
 ---

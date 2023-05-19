@@ -64,19 +64,6 @@ const (
 	// SetupReadyCondition - Overall setup condition
 	SetupReadyCondition condition.Type = "SetupReady"
 
-	// ValidateNetworkReadyCondition Status=True condition indicates if the
-	// network validation is finished and successful.
-	ValidateNetworkReadyCondition condition.Type = "ValidateNetworkReady"
-
-	// ValidateNetworkReadyMessage ready
-	ValidateNetworkReadyMessage = "ValidateNetwork ready"
-
-	// ValidateNetworkReadyWaitingMessage not yet ready
-	ValidateNetworkReadyWaitingMessage = "ValidateNetwork not yet ready"
-
-	// ValidateNetworkErrorMessage error
-	ValidateNetworkErrorMessage = "ValidateNetwork error occurred %s"
-
 	// InstallOSReadyCondition Status=True condition indicates if the
 	// OS configuration is finished and successful.
 	InstallOSReadyCondition condition.Type = "InstallOSReady"

@@ -86,10 +86,10 @@ status:
     reason: Ready
     status: "True"
     type: SetupReady
-  - message: ValidateNetwork ready
+  - message: validate-network service ready
     reason: Ready
     status: "True"
-    type: ValidateNetworkReady
+    type: validate-network service ready
   - message: configure-network service ready
     reason: Ready
     status: "True"

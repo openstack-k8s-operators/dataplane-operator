@@ -189,7 +189,11 @@ status:
   - message: Init
     reason: Init
     status: Unknown
-    type: ValidateNetworkReady
+    type: configure-network service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: validate-network service ready
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNode
@@ -263,7 +267,11 @@ status:
   - message: Init
     reason: Init
     status: Unknown
-    type: ValidateNetworkReady
+    type: configure-network service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: validate-network service ready
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNode
@@ -337,7 +345,11 @@ status:
   - message: Init
     reason: Init
     status: Unknown
-    type: ValidateNetworkReady
+    type: configure-network service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: validate-network service ready
 ---
 apiVersion: v1
 kind: ConfigMap

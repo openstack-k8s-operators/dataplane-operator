@@ -109,7 +109,6 @@ func (instance *OpenStackDataPlaneRole) InitConditions() {
 	cl := condition.CreateList(
 		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(InstallOSReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(ConfigureOSReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(RunOSReadyCondition, condition.InitReason, condition.InitReason),
@@ -118,6 +117,13 @@ func (instance *OpenStackDataPlaneRole) InitConditions() {
 		condition.UnknownCondition(RunOpenStackReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(RoleBareMetalProvisionReadyCondition, condition.InitReason, condition.InitReason),
 	)
+
+	if instance.Spec.NodeTemplate.Services != nil {
+		for _, service := range *instance.Spec.NodeTemplate.Services {
+			readyCondition := condition.Type(fmt.Sprintf(ServiceReadyCondition, service))
+			cl = append(cl, *condition.UnknownCondition(readyCondition, condition.InitReason, condition.InitReason))
+		}
+	}
 
 	haveCephSecret := false
 	for _, extraMount := range instance.Spec.NodeTemplate.ExtraMounts {
