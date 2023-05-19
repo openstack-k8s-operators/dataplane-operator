@@ -1055,6 +1055,19 @@ spec:
                           type: string
                       type: object
                     type: array
+                  nova:
+                    properties:
+                      cellName:
+                        default: cell1
+                        type: string
+                      customServiceConfig:
+                        type: string
+                      deploy:
+                        type: boolean
+                      novaInstance:
+                        default: nova
+                        type: string
+                    type: object
                   userData:
                     properties:
                       name:

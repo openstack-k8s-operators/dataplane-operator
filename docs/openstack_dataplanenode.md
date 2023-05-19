@@ -10,6 +10,7 @@
 * [NetworkConfigSection](#networkconfigsection)
 * [NetworksSection](#networkssection)
 * [NodeSection](#nodesection)
+* [NovaTemplate](#novatemplate)
 * [OpenStackDataPlaneNodeList](#openstackdataplanenodelist)
 * [OpenStackDataPlaneNodeSpec](#openstackdataplanenodespec)
 
@@ -81,6 +82,20 @@ NodeSection is a specification of the node attributes
 | extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | true |
 | userData | UserData  node specific user-data | *corev1.SecretReference | false |
 | networkData | NetworkData  node specific network-data | *corev1.SecretReference | false |
+| nova | NovaTemplate specifies the parameters for the compute service deployment on the EDPM node. If it is specified both in OpenstackDataPlaneRole and the OpenstackDataPlaneNode for the same EDPM node then the configuration in OpenstackDataPlaneNode will be used and the configuration in the OpenstackDataPlaneRole will be ignored. If this is defined in neither then compute service(s) will not be deployed on the EDPM node. | *[NovaTemplate](#novatemplate) | true |
+
+[Back to Custom Resources](#custom-resources)
+
+#### NovaTemplate
+
+NovaTemplate specifies the parameters for the compute service deployment on the EDPM node.
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| cellName | CellName is the name of nova cell the compute(s) should be connected to | string | true |
+| novaInstance | NovaInstance is the name of the Nova CR that represents the deployment the compute(s) belongs to. You can query the name of the Nova CRs in you system via `oc get Nova -o jsonpath='{.items[*].metadata.name}'` | string | true |
+| customServiceConfig | CustomServiceConfig - customize the nova-compute service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/nova/nova.conf.d directory as 02-nova-override.conf file. | string | true |
+| deploy | Deploy true means the compute service(s) are allowed to be changed on the EDPM node(s) if necessary. If set to false then only the pre-requisite data (e.g. config maps) will be generated but no actual modification on the compute node(s) itself will happen. | *bool | true |
 
 [Back to Custom Resources](#custom-resources)
 

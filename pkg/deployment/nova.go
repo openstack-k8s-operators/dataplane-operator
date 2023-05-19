@@ -24,6 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	"github.com/imdario/mergo"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
@@ -31,17 +32,25 @@ import (
 )
 
 // DeployNovaExternalCompute deploys the nova compute configuration and services
-func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj client.Object, owner client.Object, sshKeySecret string, inventoryConfigMap string, status *dataplanev1beta1.OpenStackDataPlaneStatus, aeeSpec dataplanev1beta1.AnsibleEESpec) (*novav1beta1.NovaExternalCompute, error) {
-
-	var deployBool bool = true
-
+func DeployNovaExternalCompute(
+	ctx context.Context,
+	helper *helper.Helper,
+	node *dataplanev1beta1.OpenStackDataPlaneNode,
+	owner client.Object,
+	sshKeySecret string,
+	inventoryConfigMap string,
+	status *dataplanev1beta1.OpenStackDataPlaneStatus,
+	aeeSpec dataplanev1beta1.AnsibleEESpec,
+	template dataplanev1beta1.NovaTemplate,
+) (*novav1beta1.NovaExternalCompute, error) {
 	log := helper.GetLogger()
-	log.Info(fmt.Sprintf("NovaExternalCompute deploy for %s", obj.GetName()))
+
+	log.Info("NovaExternalCompute deploy", "OpenStackControlPlaneNode", node.Name, "novaTemplate", template)
 
 	novaExternalCompute := &novav1beta1.NovaExternalCompute{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      obj.GetName(),
-			Namespace: obj.GetNamespace(),
+			Name:      node.GetName(),
+			Namespace: node.GetNamespace(),
 		},
 	}
 
@@ -49,13 +58,19 @@ func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj c
 		if novaExternalCompute.ObjectMeta.Labels == nil {
 			novaExternalCompute.ObjectMeta.Labels = make(map[string]string)
 		}
-		log.Info(fmt.Sprintf("NovaExternalCompute: Adding label %s=%s", "openstackdataplanenode", obj.GetName()))
-		novaExternalCompute.ObjectMeta.Labels["openstackdataplanenode"] = obj.GetName()
+		log.Info(fmt.Sprintf("NovaExternalCompute: Adding label %s=%s", "openstackdataplanenode", node.GetName()))
+		novaExternalCompute.ObjectMeta.Labels["openstackdataplanenode"] = node.GetName()
 
 		// We need to call the default ctor to get the unspecified fields defaulted according to the CRD defaults
-		// as otherwise golang would defaul those field to the golang empty value instead.
+		// as otherwise golang would default those field to the golang empty value instead.
 		novaExternalCompute.Spec = novav1beta1.NewNovaExternalComputeSpec(inventoryConfigMap, sshKeySecret)
-		novaExternalCompute.Spec.Deploy = &deployBool
+		novaExternalCompute.Spec.CellName = template.CellName
+		novaExternalCompute.Spec.NovaInstance = template.NovaInstance
+		novaExternalCompute.Spec.CustomServiceConfig = template.CustomServiceConfig
+		// NOTE(gibi): if DeployStrategy.Deploy is false but Nova.Deploy is true
+		// then we never reach this point, so the Deploy true will not be passed
+		// to NovaExternalCompute
+		novaExternalCompute.Spec.Deploy = template.Deploy
 		novaExternalCompute.Spec.NetworkAttachments = aeeSpec.NetworkAttachments
 		novaExternalCompute.Spec.AnsibleEEContainerImage = aeeSpec.OpenStackAnsibleEERunnerImage
 
@@ -73,4 +88,32 @@ func DeployNovaExternalCompute(ctx context.Context, helper *helper.Helper, obj c
 
 	return novaExternalCompute, nil
 
+}
+
+// getNovaTemplate returns the NovaTemplate instance to be used. The NovaTemplate
+// in the OpenStackDataPlaneNode if defined takes precedence over the NovaTemplate
+// in the OpenStackDataPlaneRole.
+func getNovaTemplate(
+	node *dataplanev1beta1.OpenStackDataPlaneNode,
+	role *dataplanev1beta1.OpenStackDataPlaneRole,
+) (*dataplanev1beta1.NovaTemplate, error) {
+	if node.Spec.Node.Nova == nil {
+		return role.Spec.NodeTemplate.Nova, nil
+	}
+
+	if node.Spec.Node.Nova != nil && role.Spec.NodeTemplate.Nova != nil {
+		return mergeNovaTemplates(
+			*node.Spec.Node.Nova, *role.Spec.NodeTemplate.Nova)
+	}
+
+	return node.Spec.Node.Nova, nil
+}
+
+func mergeNovaTemplates(
+	node dataplanev1beta1.NovaTemplate,
+	role dataplanev1beta1.NovaTemplate,
+) (*dataplanev1beta1.NovaTemplate, error) {
+	merged := node.DeepCopy()
+	err := mergo.Merge(merged, role)
+	return merged, err
 }
