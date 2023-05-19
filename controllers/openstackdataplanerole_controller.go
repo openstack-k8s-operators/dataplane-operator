@@ -216,13 +216,12 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	r.Log.Info("Role", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
 
-
 		// create deployIdentifier
 		if len(instance.Spec.DeployStrategy.DeployIdentifier) == 0 {
-			patch := client.MergeFrom(instance.DeepCopy())
+			// patch := client.MergeFrom(instance.DeepCopy())
 			newIdentifier := dataplanev1beta1.GenerateDeployIdentifier()
 			instance.Spec.DeployStrategy.DeployIdentifier = newIdentifier
-			err = r.Client.Patch(ctx, instance, patch)
+			err = r.Client.Update(ctx, instance)
 			if err != nil {
 				return ctrl.Result{}, err
 			}
@@ -270,11 +269,11 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		// We don't want another deploy triggered by any reconcile request, it should
 		// only be triggered when the user (or another controller) specifically
 		// sets it to true.
-		patch := client.MergeFrom(instance.DeepCopy())
+		// patch := client.MergeFrom(instance.DeepCopy())
 		r.Log.Info("Set DeployStrategy.Deploy to false")
 		instance.Spec.DeployStrategy.Deploy = false
 		instance.Spec.DeployStrategy.DeployIdentifier = ""
-		err = r.Client.Patch(ctx, instance, patch)
+		err = r.Client.Update(ctx, instance)
 		if err != nil {
 			return ctrl.Result{}, err
 		}

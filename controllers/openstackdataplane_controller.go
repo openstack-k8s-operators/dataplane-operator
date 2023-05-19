@@ -72,9 +72,11 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected.
 			// For additional cleanup logic use finalizers. Return and don't requeue.
+			logger.Info("DataPlane instance not found, probably deleted before reconciled. Nothing to do.")
 			return ctrl.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
+		logger.Error(err, "Failed to read the DataPlane instance.")
 		return ctrl.Result{}, err
 	}
 
@@ -83,11 +85,11 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		r.Client,
 		r.Kclient,
 		r.Scheme,
-		logger,
+		r.Log,
 	)
 	if err != nil {
 		// helper might be nil, so can't use util.LogErrorForObject since it requires helper as first arg
-		r.Log.Error(err, fmt.Sprintf("unable to acquire helper for OpenStackDataPlane %s", instance.Name))
+		r.Log.Error(err, fmt.Sprintf("unable to acquire lib-common helper for OpenStackDataPlane %s", instance.Name))
 		return ctrl.Result{}, err
 	}
 
@@ -222,7 +224,12 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// We don't want another deploy triggered by any reconcile request, it should
 	// only be triggered when the user (or another controller) specifically
 	// sets it to true.
+	r.Log.Info("Set DeployStrategy.Deploy to false")
 	instance.Spec.DeployStrategy.Deploy = false
+	err = r.Client.Update(ctx, instance)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
 	// Set DeploymentReadyCondition to False if it was unknown.
 	// Handles the case where the Node is created with
