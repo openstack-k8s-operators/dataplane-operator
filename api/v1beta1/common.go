@@ -72,6 +72,15 @@ type NodeSection struct {
 	// NetworkData  node specific network-data
 	// +kubebuilder:validation:Optional
 	NetworkData *corev1.SecretReference `json:"networkData,omitempty"`
+
+	// NovaTemplate specifies the parameters for the compute service deployment
+	// on the EDPM node. If it is specified both in OpenstackDataPlaneRole and
+	// the OpenstackDataPlaneNode for the same EDPM node then the configuration
+	// in OpenstackDataPlaneNode will be used and the configuration in the
+	// OpenstackDataPlaneRole will be ignored. If this is defined in neither
+	// then compute service(s) will not be deployed on the EDPM node.
+	// +kubebuilder:validation:Optional
+	Nova *NovaTemplate `json:"nova"`
 }
 
 // DeployStrategySection for fields controlling the deployment
@@ -163,4 +172,35 @@ type AnsibleEESpec struct {
 	ExtraMounts []storage.VolMounts `json:"extraMounts"`
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
+}
+
+// NovaTemplate specifies the parameters for the compute service deployment on
+// the EDPM node.
+type NovaTemplate struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=cell1
+	// CellName is the name of nova cell the compute(s) should be connected to
+	CellName string `json:"cellName"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=nova
+	// NovaInstance is the name of the Nova CR that represents the deployment
+	// the compute(s) belongs to.
+	// You can query the name of the Nova CRs in you system via
+	// `oc get Nova -o jsonpath='{.items[*].metadata.name}'`
+	NovaInstance string `json:"novaInstance"`
+
+	// +kubebuilder:validation:Optional
+	// CustomServiceConfig - customize the nova-compute service config using
+	// this parameter to change service defaults, or overwrite rendered
+	// information using raw OpenStack config format. The content gets added to
+	// to /etc/nova/nova.conf.d directory as 02-nova-override.conf file.
+	CustomServiceConfig string `json:"customServiceConfig"`
+
+	// +kubebuilder:validation:Optional
+	// Deploy true means the compute service(s) are allowed to be changed on
+	// the EDPM node(s) if necessary. If set to false then only the
+	// pre-requisite data (e.g. config maps) will be generated but no actual
+	// modification on the compute node(s) itself will happen.
+	Deploy *bool `json:"deploy"`
 }
