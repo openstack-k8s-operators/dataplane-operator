@@ -1,0 +1,9 @@
+---
+- project:
+    name: openstack-k8s-operators/dataplane-operator
+    github-check:
+      jobs:
+        - dataplane-operator-content-provider
+        - dataplane-operator-crc-podified-edpm-deployment:
+            dependencies:
+              - dataplane-operator-content-provider
