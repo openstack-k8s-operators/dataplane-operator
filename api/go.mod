@@ -3,10 +3,10 @@ module github.com/openstack-k8s-operators/dataplane-operator/api
 go 1.19
 
 require (
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230510145530-3c8e9179fb6e
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230510145530-3c8e9179fb6e
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230511195906-07c2e0aa9a63
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230515124247-64ada8525f98
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230522113906-6f4206cbf317
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230522113906-6f4206cbf317
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230522113410-a62dabe74af9
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230518053009-43a436586a6c
 	k8s.io/api v0.26.3
 	k8s.io/apimachinery v0.26.3
 	sigs.k8s.io/controller-runtime v0.14.6
