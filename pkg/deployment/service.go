@@ -26,11 +26,16 @@ import (
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
 // DeployService service deployment
 func DeployService(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec, foundService dataplanev1beta1.OpenStackDataPlaneService) error {
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, foundService.Spec.Label, sshKeySecret, inventoryConfigMap, foundService.Spec.Play, *foundService.Spec.Role, aeeSpec)
+	role := ansibleeev1alpha1.Role{}
+	if foundService.Spec.Role != nil {
+		role = *foundService.Spec.Role
+	}
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, foundService.Spec.Label, sshKeySecret, inventoryConfigMap, foundService.Spec.Play, role, aeeSpec)
 	if err != nil {
 		helper.GetLogger().Error(err, fmt.Sprintf("Unable to execute Ansible for %s", foundService.Name))
 		return err
