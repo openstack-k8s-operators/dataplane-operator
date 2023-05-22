@@ -48,15 +48,6 @@ const (
 	// DataPlaneErrorMessage error
 	DataPlaneErrorMessage = "DataPlane error occurred %s"
 
-	// DataPlaneServiceReadyMessage ready
-	DataPlaneServiceReadyMessage = "DataPlaneService ready"
-
-	// DataPlaneServiceReadyWaitingMessage ready
-	DataPlaneServiceReadyWaitingMessage = "DataPlaneService not yet ready"
-
-	// DataPlaneServiceErrorMessage error
-	DataPlaneServiceErrorMessage = "DataPlaneService error occurred %s"
-
 	// ServiceReadyCondition Status=True condition indicates if the
 	// service is finished and successful.
 	ServiceReadyCondition string = "%s service ready"
