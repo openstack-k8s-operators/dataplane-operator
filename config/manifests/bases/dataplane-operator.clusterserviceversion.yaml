@@ -150,7 +150,7 @@ spec:
       version: v1beta1
     - description: OpenStackDataPlaneService is the Schema for the openstackdataplaneservices
         API
-      displayName: Open Stack Data Plane Service
+      displayName: OpenStack Data Plane Service
       kind: OpenStackDataPlaneService
       name: openstackdataplaneservices.dataplane.openstack.org
       statusDescriptors:
