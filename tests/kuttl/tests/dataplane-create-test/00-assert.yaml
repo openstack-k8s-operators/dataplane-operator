@@ -46,6 +46,8 @@ spec:
     value: "True"
   - name: ANSIBLE_VERBOSITY
     value: "2"
+  - name: "ANSIBLE_CALLBACKS_ENABLED"
+    value: "profile_tasks"
   nodeTemplate:
     ansiblePort: 22
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
