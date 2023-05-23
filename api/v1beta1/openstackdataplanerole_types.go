@@ -66,10 +66,6 @@ type OpenStackDataPlaneRoleSpec struct {
 	// +kubebuilder:default="quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
 	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
 	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage"`
-
-	// +kubebuilder:validation:Optional
-	// Services list
-	Services []string `json:"services,omitempty"`
 }
 
 //+kubebuilder:object:root=true

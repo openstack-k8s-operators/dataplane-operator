@@ -134,6 +134,15 @@ func (in *NodeSection) DeepCopyInto(out *NodeSection) {
 		*out = new(v1.SecretReference)
 		**out = **in
 	}
+	if in.Services != nil {
+		in, out := &in.Services, &out.Services
+		*out = new([]string)
+		if **in != nil {
+			in, out := *in, *out
+			*out = make([]string, len(*in))
+			copy(*out, *in)
+		}
+	}
 	if in.Nova != nil {
 		in, out := &in.Nova, &out.Nova
 		*out = new(NovaTemplate)
@@ -392,11 +401,6 @@ func (in *OpenStackDataPlaneRoleSpec) DeepCopyInto(out *OpenStackDataPlaneRoleSp
 	out.DeployStrategy = in.DeployStrategy
 	if in.NetworkAttachments != nil {
 		in, out := &in.NetworkAttachments, &out.NetworkAttachments
-		*out = make([]string, len(*in))
-		copy(*out, *in)
-	}
-	if in.Services != nil {
-		in, out := &in.Services, &out.Services
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}

@@ -917,6 +917,10 @@ spec:
                         default: nova
                         type: string
                     type: object
+                  services:
+                    items:
+                      type: string
+                    type: array
                   userData:
                     properties:
                       name:
