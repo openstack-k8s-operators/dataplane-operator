@@ -140,6 +140,7 @@ func RunOpenStack(ctx context.Context, helper *helper.Helper, obj client.Object,
 		Strategy:       "linear",
 		GatherFacts:    false,
 		AnyErrorsFatal: true,
+		Become:         true,
 		Tasks:          dataplaneutil.PopulateTasks(tasks),
 	}
 

@@ -64,19 +64,6 @@ const (
 	// SetupReadyCondition - Overall setup condition
 	SetupReadyCondition condition.Type = "SetupReady"
 
-	// ConfigureNetworkReadyCondition Status=True condition indicates if the
-	// network configuration is finished and successful.
-	ConfigureNetworkReadyCondition condition.Type = "ConfigureNetworkReady"
-
-	// ConfigureNetworkReadyMessage ready
-	ConfigureNetworkReadyMessage = "ConfigureNetwork ready"
-
-	// ConfigureNetworkReadyWaitingMessage not yet ready
-	ConfigureNetworkReadyWaitingMessage = "ConfigureNetwork not yet ready"
-
-	// ConfigureNetworkErrorMessage error
-	ConfigureNetworkErrorMessage = "ConfigureNetwork error occurred %s"
-
 	// ValidateNetworkReadyCondition Status=True condition indicates if the
 	// network validation is finished and successful.
 	ValidateNetworkReadyCondition condition.Type = "ValidateNetworkReady"

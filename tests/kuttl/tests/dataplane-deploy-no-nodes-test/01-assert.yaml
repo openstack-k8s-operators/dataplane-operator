@@ -46,14 +46,6 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: ConfigureCephClientReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: ConfigureNetworkReady
   - message: ConfigureOS ready
     reason: Ready
     status: "True"
