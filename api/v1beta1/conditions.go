@@ -64,45 +64,6 @@ const (
 	// SetupReadyCondition - Overall setup condition
 	SetupReadyCondition condition.Type = "SetupReady"
 
-	// InstallOSReadyCondition Status=True condition indicates if the
-	// OS configuration is finished and successful.
-	InstallOSReadyCondition condition.Type = "InstallOSReady"
-
-	// InstallOSReadyMessage ready
-	InstallOSReadyMessage = "InstallOS ready"
-
-	// InstallOSReadyWaitingMessage not yet ready
-	InstallOSReadyWaitingMessage = "InstallOS not yet ready"
-
-	// InstallOSErrorMessage error
-	InstallOSErrorMessage = "InstallOS error occurred %s"
-
-	// ConfigureOSReadyCondition Status=True condition indicates if the
-	// OS configuration is finished and successful.
-	ConfigureOSReadyCondition condition.Type = "ConfigureOSReady"
-
-	// ConfigureOSReadyMessage ready
-	ConfigureOSReadyMessage = "ConfigureOS ready"
-
-	// ConfigureOSReadyWaitingMessage not yet ready
-	ConfigureOSReadyWaitingMessage = "ConfigureOS not yet ready"
-
-	// ConfigureOSErrorMessage error
-	ConfigureOSErrorMessage = "ConfigureOS error occurred %s"
-
-	// RunOSReadyCondition Status=True condition indicates if the
-	// OS configuration is finished and successful.
-	RunOSReadyCondition condition.Type = "RunOSReady"
-
-	// RunOSReadyMessage ready
-	RunOSReadyMessage = "RunOS ready"
-
-	// RunOSReadyWaitingMessage not yet ready
-	RunOSReadyWaitingMessage = "RunOS not yet ready"
-
-	// RunOSErrorMessage error
-	RunOSErrorMessage = "RunOS error occurred %s"
-
 	// ConfigureCephClientReadyCondition Status=True condition indicates if the
 	// Ceph client configuration is finished and successful.
 	ConfigureCephClientReadyCondition condition.Type = "ConfigureCephClientReady"

@@ -56,6 +56,9 @@ spec:
         services:
           - configure-network
           - validate-network
+          - configure-os
+          - install-os
+          - run-os
         # Defining the novaTemplate here means the nodes in this role are
         # computes
         nova: {}

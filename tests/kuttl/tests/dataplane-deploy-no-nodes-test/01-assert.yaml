@@ -46,10 +46,6 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: ConfigureOS ready
-    reason: Ready
-    status: "True"
-    type: ConfigureOSReady
   - message: ConfigureOpenStack ready
     reason: Ready
     status: "True"
@@ -58,10 +54,6 @@ status:
     reason: Ready
     status: "True"
     type: DeploymentReady
-  - message: InstallOS ready
-    reason: Ready
-    status: "True"
-    type: InstallOSReady
   - message: InstallOpenStack ready
     reason: Ready
     status: "True"
@@ -74,10 +66,6 @@ status:
     reason: Init
     status: Unknown
     type: RoleBaremetalProvisionReady
-  - message: RunOS ready
-    reason: Ready
-    status: "True"
-    type: RunOSReady
   - message: RunOpenStack ready
     reason: Ready
     status: "True"
@@ -86,14 +74,26 @@ status:
     reason: Ready
     status: "True"
     type: SetupReady
-  - message: validate-network service ready
-    reason: Ready
-    status: "True"
-    type: validate-network service ready
   - message: configure-network service ready
     reason: Ready
     status: "True"
     type: configure-network service ready
+  - message: configure-os service ready
+    reason: Ready
+    status: "True"
+    type: configure-os service ready
+  - message: install-os service ready
+    reason: Ready
+    status: "True"
+    type: install-os service ready
+  - message: run-os service ready
+    reason: Ready
+    status: "True"
+    type: run-os service ready
+  - message: validate-network service ready
+    reason: Ready
+    status: "True"
+    type: validate-network service ready
   deployed: true
 ---
 apiVersion: ansibleee.openstack.org/v1alpha1
@@ -538,13 +538,13 @@ spec:
     - import_role:
         name: osp.edpm.edpm_chrony
         tasks_from: online.yml
-      name: Run edpm_chrony (online)
+      name: Run edpm_chrony (Online)
       tags:
       - edpm_chrony
     - import_role:
         name: osp.edpm.edpm_chrony
         tasks_from: sync.yml
-      name: Run edpm_chrony (sync)
+      name: Run edpm_chrony (Sync)
       tags:
       - edpm_chrony
     - import_role:

@@ -56,10 +56,6 @@ status:
   - message: Init
     reason: Init
     status: Unknown
-    type: ConfigureOSReady
-  - message: Init
-    reason: Init
-    status: Unknown
     type: ConfigureOpenStackReady
   - message: Deployment not started
     reason: NotRequested
@@ -69,19 +65,11 @@ status:
   - message: Init
     reason: Init
     status: Unknown
-    type: InstallOSReady
-  - message: Init
-    reason: Init
-    status: Unknown
     type: InstallOpenStackReady
   - message: Init
     reason: Init
     status: Unknown
     type: RoleBaremetalProvisionReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: RunOSReady
   - message: Init
     reason: Init
     status: Unknown
@@ -94,6 +82,18 @@ status:
     reason: Init
     status: Unknown
     type: configure-network service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: configure-os service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: install-os service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: run-os service ready
   - message: Init
     reason: Init
     status: Unknown
