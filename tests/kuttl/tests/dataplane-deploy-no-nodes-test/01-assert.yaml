@@ -46,18 +46,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: ConfigureOpenStack ready
-    reason: Ready
-    status: "True"
-    type: ConfigureOpenStackReady
   - message: Deployment completed
     reason: Ready
     status: "True"
     type: DeploymentReady
-  - message: InstallOpenStack ready
-    reason: Ready
-    status: "True"
-    type: InstallOpenStackReady
   - message: NovaComputeReady ready
     reason: Ready
     status: "True"
@@ -66,10 +58,6 @@ status:
     reason: Init
     status: Unknown
     type: RoleBaremetalProvisionReady
-  - message: RunOpenStack ready
-    reason: Ready
-    status: "True"
-    type: RunOpenStackReady
   - message: Setup complete
     reason: Ready
     status: "True"
@@ -354,6 +342,18 @@ spec:
       name: Install edpm_ovn
       tags:
       - edpm_ovn
+    - name: Install edpm_logrotate_crond
+      import_role:
+        name: osp.edpm.edpm_logrotate_crond
+        tasks_from: install.yml
+      tags:
+        - edpm_logrotate_crond
+    - name: Install edpm_iscsid
+      import_role:
+        name: osp.edpm.edpm_iscsid
+        tasks_from: install.yml
+      tags:
+        - edpm_iscsid
   uid: 1001
 status:
   JobStatus: Succeeded
@@ -460,6 +460,30 @@ spec:
       name: Configure edpm_ovn
       tags:
       - edpm_ovn
+    - name: Configure edpm_ssh_known_hosts
+      import_role:
+        name: osp.edpm.edpm_ssh_known_hosts
+        tasks_from: main.yml
+      tags:
+        - edpm_ssh_known_hosts
+    - name: Configure edpm_logrotate_crond
+      import_role:
+        name: osp.edpm.edpm_logrotate_crond
+        tasks_from: configure.yml
+      tags:
+        - edpm_logrotate_crond
+    - name: Configure edpm_iscsid
+      import_role:
+        name: osp.edpm.edpm_iscsid
+        tasks_from: configure.yml
+      tags:
+        - edpm_iscsid
+    - name: Configure nftables
+      import_role:
+        name: osp.edpm.edpm_nftables
+        tasks_from: configure.yml
+      tags:
+        - edpm_firewall
   uid: 1001
 status:
   JobStatus: Succeeded
@@ -559,6 +583,25 @@ spec:
       name: Run edpm_ovn
       tags:
       - edpm_ovn
+    - name: Apply nftables configuration
+      import_role:
+        name: osp.edpm.edpm_nftables
+        tasks_from: run.yml
+      when: deploy_edpm_openstack_run_firewall|default(true)|bool
+      tags:
+        - edpm_firewall
+    - name: Run edpm_logrotate_crond
+      import_role:
+        name: osp.edpm.edpm_logrotate_crond
+        tasks_from: run.yml
+      tags:
+        - edpm_logrotate_crond
+    - name: Run edpm_iscsid
+      import_role:
+        name: osp.edpm.edpm_iscsid
+        tasks_from: run.yml
+      tags:
+        - edpm_iscsid
   uid: 1001
 status:
   JobStatus: Succeeded

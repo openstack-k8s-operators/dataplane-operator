@@ -102,9 +102,6 @@ func (instance *OpenStackDataPlaneNode) InitConditions(instanceRole *OpenStackDa
 	cl := condition.CreateList(
 		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(InstallOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(ConfigureOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(RunOpenStackReadyCondition, condition.InitReason, condition.InitReason),
 	)
 
 	var services *[]string

@@ -28,8 +28,8 @@ func DefaultDataplaneNoNodesTemplate(name types.NamespacedName) *dataplanev1.Ope
 				"edpm-compute-no-nodes": {
 					NodeTemplate: dataplanev1.NodeSection{
 						AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
+						Services:                   &[]string{"configure-network", "validate-network", "install-os", "configure-os", "run-os"},
 					},
-					Services: []string{"configure-network"},
 				},
 			},
 		},

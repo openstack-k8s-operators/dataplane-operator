@@ -53,10 +53,6 @@ status:
     severity: Info
     status: "False"
     type: Ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: ConfigureOpenStackReady
   - message: Deployment not started
     reason: NotRequested
     severity: Info
@@ -65,15 +61,7 @@ status:
   - message: Init
     reason: Init
     status: Unknown
-    type: InstallOpenStackReady
-  - message: Init
-    reason: Init
-    status: Unknown
     type: RoleBaremetalProvisionReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: RunOpenStackReady
   - message: Setup complete
     reason: Ready
     status: "True"

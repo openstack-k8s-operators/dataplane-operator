@@ -46,3 +46,15 @@ spec:
           tasks_from: "install.yml"
         tags:
           - "edpm_ovn"
+      - name: "Install edpm_logrotate_crond"
+        import_role:
+          name: "osp.edpm.edpm_logrotate_crond"
+          tasks_from: "install.yml"
+        tags:
+          - "edpm_logrotate_crond"
+      - name: "Install edpm_iscsid"
+        import_role:
+          name: "osp.edpm.edpm_iscsid"
+          tasks_from: "install.yml"
+        tags:
+          - "edpm_iscsid"

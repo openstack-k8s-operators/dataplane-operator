@@ -77,45 +77,6 @@ const (
 	// ConfigureCephClientErrorMessage error
 	ConfigureCephClientErrorMessage = "ConfigureCephClient error occurred %s"
 
-	// InstallOpenStackReadyCondition Status=True condition indicates if the
-	// OpenStack configuration is finished and successful.
-	InstallOpenStackReadyCondition condition.Type = "InstallOpenStackReady"
-
-	// InstallOpenStackReadyMessage ready
-	InstallOpenStackReadyMessage = "InstallOpenStack ready"
-
-	// InstallOpenStackReadyWaitingMessage not yet ready
-	InstallOpenStackReadyWaitingMessage = "InstallOpenStack not yet ready"
-
-	// InstallOpenStackErrorMessage error
-	InstallOpenStackErrorMessage = "InstallOpenStack error occurred %s"
-
-	// ConfigureOpenStackReadyCondition Status=True condition indicates if the
-	// OpenStack configuration is finished and successful.
-	ConfigureOpenStackReadyCondition condition.Type = "ConfigureOpenStackReady"
-
-	// ConfigureOpenStackReadyMessage ready
-	ConfigureOpenStackReadyMessage = "ConfigureOpenStack ready"
-
-	// ConfigureOpenStackReadyWaitingMessage not yet ready
-	ConfigureOpenStackReadyWaitingMessage = "ConfigureOpenStack not yet ready"
-
-	// ConfigureOpenStackErrorMessage error
-	ConfigureOpenStackErrorMessage = "ConfigureOpenStack error occurred %s"
-
-	// RunOpenStackReadyCondition Status=True condition indicates if the
-	// OpenStack configuration is finished and successful.
-	RunOpenStackReadyCondition condition.Type = "RunOpenStackReady"
-
-	// RunOpenStackReadyMessage ready
-	RunOpenStackReadyMessage = "RunOpenStack ready"
-
-	// RunOpenStackReadyWaitingMessage not yet ready
-	RunOpenStackReadyWaitingMessage = "RunOpenStack not yet ready"
-
-	// RunOpenStackErrorMessage error
-	RunOpenStackErrorMessage = "RunOpenStack error occurred %s"
-
 	// NovaComputeReadyCondition Status=True condition indicates nova-compute
 	// has been deployed and is ready
 	NovaComputeReadyCondition condition.Type = "NovaComputeReady"

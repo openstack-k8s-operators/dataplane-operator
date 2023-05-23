@@ -46,3 +46,22 @@ spec:
           tasks_from: "run.yml"
         tags:
           - "edpm_ovn"
+      - name: "Apply nftables configuration"
+        import_role:
+          name: "osp.edpm.edpm_nftables"
+          tasks_from: "run.yml"
+        when: "deploy_edpm_openstack_run_firewall|default(true)|bool"
+        tags:
+          - "edpm_firewall"
+      - name: "Run edpm_logrotate_crond"
+        import_role:
+          name: "osp.edpm.edpm_logrotate_crond"
+          tasks_from: "run.yml"
+        tags:
+          - "edpm_logrotate_crond"
+      - name: "Run edpm_iscsid"
+        import_role:
+          name: "osp.edpm.edpm_iscsid"
+          tasks_from: "run.yml"
+        tags:
+          - "edpm_iscsid"

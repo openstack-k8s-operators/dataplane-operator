@@ -109,9 +109,6 @@ func (instance *OpenStackDataPlaneRole) InitConditions() {
 	cl := condition.CreateList(
 		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(InstallOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(ConfigureOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(RunOpenStackReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(RoleBareMetalProvisionReadyCondition, condition.InitReason, condition.InitReason),
 	)
 
