@@ -47,6 +47,8 @@ type OpenStackDataPlaneServiceStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+// +kubebuilder:resource:shortName=osdpservice;osdpservices
+//+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane Service"
 
 // OpenStackDataPlaneService is the Schema for the openstackdataplaneservices API
 type OpenStackDataPlaneService struct {
