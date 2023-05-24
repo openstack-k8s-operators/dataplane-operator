@@ -108,9 +108,14 @@ vet: gowork ## Run go vet against code.
 	go vet ./...
 	go vet ./api/...
 
+PROCS?=$(shell expr $(shell nproc --ignore 2) / 2)
+PROC_CMD = --procs ${PROCS}
+
 .PHONY: test
-test: manifests generate fmt vet envtest ## Run tests.
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go test -v ./... -coverprofile cover.out
+test: manifests generate fmt vet envtest ginkgo ## Run tests.
+	go test -v ./pkg/... ./controllers/... ./api/... -coverprofile cover.out
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" \
+	$(GINKGO) --trace --cover --coverprofile cover.out --covermode=atomic --randomize-all ${PROC_CMD} $(GINKGO_ARGS) ./tests/functional/...
 
 ##@ Build
 
@@ -182,6 +187,7 @@ KUSTOMIZE ?= $(LOCALBIN)/kustomize
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 CRD_MARKDOWN ?= $(LOCALBIN)/crd-to-markdown
+GINKGO ?= $(LOCALBIN)/ginkgo
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v3.8.7
@@ -208,6 +214,11 @@ $(CRD_MARKDOWN): $(LOCALBIN)
 envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
 $(ENVTEST): $(LOCALBIN)
 	test -s $(LOCALBIN)/setup-envtest || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+
+.PHONY: ginkgo
+ginkgo: $(GINKGO) ## Download ginkgo locally if necessary.
+$(GINKGO): $(LOCALBIN)
+	test -s $(LOCALBIN)/ginkgo || GOBIN=$(LOCALBIN) go install github.com/onsi/ginkgo/v2/ginkgo
 
 .PHONY: bundle
 bundle: manifests kustomize ## Generate bundle manifests and metadata, then validate generated files.
