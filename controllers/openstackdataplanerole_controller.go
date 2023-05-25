@@ -239,18 +239,6 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
 		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
 
-		for _, node := range nodes.Items {
-			if !node.IsReady() {
-				_, err := controllerutil.CreateOrPatch(ctx, r.Client, &node, func() error {
-					node.Status.Deployed = true
-					return nil
-				})
-				if err != nil {
-					return ctrl.Result{}, err
-				}
-			}
-		}
-
 		// Explicitly set instance.Spec.Deploy = false
 		// We don't want another deploy triggered by any reconcile request, it should
 		// only be triggered when the user (or another controller) specifically
