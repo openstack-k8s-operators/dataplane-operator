@@ -141,7 +141,6 @@ spec:
       hosts_entry: []
     managementNetwork: ctlplane
     networkConfig: {}
-  openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
 status:
   conditions:
   - message: Deployment not started
@@ -210,7 +209,6 @@ spec:
       tenant_ip: 172.19.0.100
       fqdn_internal_api: edpm-compute-0.example.com
     networkConfig: {}
-  openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   role: edpm-compute
 status:
   conditions:
@@ -276,7 +274,6 @@ spec:
       tenant_ip: 172.19.0.101
       fqdn_internal_api: edpm-compute-1.example.com
     networkConfig: {}
-  openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   role: edpm-compute
 status:
   conditions:

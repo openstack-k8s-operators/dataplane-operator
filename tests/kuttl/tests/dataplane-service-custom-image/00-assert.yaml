@@ -1,0 +1,148 @@
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlane
+metadata:
+  name: openstack-edpm-no-nodes
+  namespace: openstack
+spec:
+  deployStrategy:
+    deploy: true
+  roles:
+    edpm-compute-no-nodes:
+      nodeTemplate:
+        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+        services:
+        - custom-image-service
+status:
+  conditions:
+  - message: Deployment in progress
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: Ready
+  - message: Deployment in progress
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: DeploymentReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
+  deployed: true
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneRole
+metadata:
+  labels:
+    openstackdataplane: openstack-edpm-no-nodes
+  name: edpm-compute-no-nodes
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlane
+    name: openstack-edpm-no-nodes
+spec:
+  dataPlane: openstack-edpm-no-nodes
+  deployStrategy:
+    deploy: true
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    networkConfig: {}
+    services:
+    - custom-image-service
+status:
+  conditions:
+  - message: custom-image-service service not yet ready
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: Ready
+  - message: Deployment in progress
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: DeploymentReady
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: RoleBaremetalProvisionReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
+  - message: custom-image-service service not yet ready
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: custom-image-service service ready
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: dataplane-deployment-custom-image-service-edpm-compute-no-nodes
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneRole
+    name: edpm-compute-no-nodes
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    - mountPath: /runner/network/nic-config-template
+      name: inventory
+      subPath: network
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - configMap:
+        items:
+        - key: inventory
+          path: inventory
+        - key: network
+          path: network
+        name: dataplanerole-edpm-compute-no-nodes
+      name: inventory
+  image: example.com/repo/runner-image:latest
+  name: openstackansibleee
+  restartPolicy: Never
+  roles:
+    any_errors_fatal: true
+    become: false
+    gather_facts: false
+    hosts: all
+    name: test role
+    strategy: linear
+    tasks:
+    - import_role:
+        name: test role
+      name: test task
+  uid: 1001
+status:
+  JobStatus: Running
+  conditions:
+  - message: AnsibleExecutionJob is running
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: Ready
+  - message: AnsibleExecutionJob is running
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: AnsibleExecutionJobReady

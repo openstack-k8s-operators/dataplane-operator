@@ -1,0 +1,30 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-image-service
+spec:
+  label: dataplane-deployment-custom-image-service
+  openStackAnsibleEERunnerImage: example.com/repo/runner-image:latest
+  role:
+    name: "test role"
+    hosts: "all"
+    strategy: "linear"
+    tasks:
+      - name: "test task"
+        import_role:
+          name: "test role"
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlane
+metadata:
+  name: openstack-edpm-no-nodes
+spec:
+  deployStrategy:
+      deploy: true
+  roles:
+    edpm-compute-no-nodes:
+      nodeTemplate:
+        services:
+          - custom-image-service
+        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+---

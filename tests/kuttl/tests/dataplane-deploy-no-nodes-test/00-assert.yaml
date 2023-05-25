@@ -9,7 +9,14 @@ spec:
     deploy: false
   roles:
     edpm-compute-no-nodes:
-      openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+      nodeTemplate:
+        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+        services:
+          - configure-network
+          - validate-network
+          - install-os
+          - configure-os
+          - run-os
 status:
   conditions:
   - message: Deployment not started

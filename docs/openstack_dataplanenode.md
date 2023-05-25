@@ -134,6 +134,5 @@ OpenStackDataPlaneNodeSpec defines the desired state of OpenStackDataPlaneNode
 | env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
 | deployStrategy | DeployStrategy section to control how the node is deployed | [DeployStrategySection](#deploystrategysection) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |
-| openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | true |
 
 [Back to Custom Resources](#custom-resources)
