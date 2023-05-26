@@ -172,6 +172,8 @@ spec:
                     x-kubernetes-map-type: atomic
                   provisionServerName:
                     type: string
+                  provisioningInterface:
+                    type: string
                   rhelImageUrl:
                     type: string
                   userData:
