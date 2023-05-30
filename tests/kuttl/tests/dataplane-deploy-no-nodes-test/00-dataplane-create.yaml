@@ -12,6 +12,6 @@ spec:
         services:
           - configure-network
           - validate-network
-          - configure-os
           - install-os
+          - configure-os
           - run-os
