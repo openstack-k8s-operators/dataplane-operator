@@ -74,8 +74,9 @@ type NodeSection struct {
 	NetworkData *corev1.SecretReference `json:"networkData,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={configure-network,validate-network,install-os,configure-os,run-os}
 	// Services list
-	Services *[]string `json:"services,omitempty"`
+	Services *[]string `json:"services"`
 
 	// NovaTemplate specifies the parameters for the compute service deployment
 	// on the EDPM node. If it is specified both in OpenstackDataPlaneRole and

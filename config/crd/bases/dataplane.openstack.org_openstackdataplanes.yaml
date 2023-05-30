@@ -937,6 +937,12 @@ spec:
                               type: string
                           type: object
                         services:
+                          default:
+                          - configure-network
+                          - validate-network
+                          - install-os
+                          - configure-os
+                          - run-os
                           items:
                             type: string
                           type: array
@@ -1989,6 +1995,12 @@ spec:
                               type: string
                           type: object
                         services:
+                          default:
+                          - configure-network
+                          - validate-network
+                          - install-os
+                          - configure-os
+                          - run-os
                           items:
                             type: string
                           type: array
