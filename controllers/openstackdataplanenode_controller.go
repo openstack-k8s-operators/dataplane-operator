@@ -36,6 +36,7 @@ import (
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
+	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	nad "github.com/openstack-k8s-operators/lib-common/modules/common/networkattachment"
@@ -199,52 +200,59 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	// all setup tasks complete, mark SetupReadyCondition True
 	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
 
-	r.Log.Info("Node", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Node.Namespace", instance.Namespace, "Node.Name", instance.Name)
-	if instance.Spec.DeployStrategy.Deploy {
-		r.Log.Info("Starting DataPlaneNode deploy")
-		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
-		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
-		nodes := &dataplanev1.OpenStackDataPlaneNodeList{
-			Items: []dataplanev1.OpenStackDataPlaneNode{*instance},
-		}
-		deployResult, err := deployment.Deploy(
-			ctx, helper, instance, nodes,
-			ansibleSSHPrivateKeySecret, nodeConfigMap,
-			&instance.Status, instance.GetAnsibleEESpec(*instanceRole),
-			deployment.GetServices(instance, instanceRole), instanceRole)
-		if err != nil {
-			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
-			instance.Status.Conditions.Set(condition.FalseCondition(
-				condition.ReadyCondition,
-				condition.ErrorReason,
-				condition.SeverityError,
-				dataplanev1.DataPlaneNodeErrorMessage,
-				err.Error()))
-			return ctrl.Result{}, err
-		}
-		if deployResult != nil {
-			result = *deployResult
-			return result, nil
-		}
+	r.Log.Info("Node", "Node.Namespace", instance.Namespace, "Node.Name", instance.Name)
+	_, unsafeToExecute := dataplaneutil.CheckDeployProtectionAnnotation(instance, redeployProtectionAnnotation)
 
-		instance.Status.Deployed = true
-		r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
-		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
-
-		// Explicitly set instance.Spec.Deploy = false
-		// We don't want another deploy triggered by any reconcile request, it
-		// should only be triggered when the user (or another controller)
-		// specifically sets it to true.
-		instance.Spec.DeployStrategy.Deploy = false
-
+	if unsafeToExecute {
+		r.Log.Info("This node currently has the deployProtection annotation, which will prevent further task execution")
+		return ctrl.Result{Requeue: false}, nil
 	}
 
+	r.Log.Info("Starting DataPlaneNode deploy")
+	r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
+	instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
+	nodes := &dataplanev1.OpenStackDataPlaneNodeList{
+		Items: []dataplanev1.OpenStackDataPlaneNode{*instance},
+	}
+	deployResult, err := deployment.Deploy(
+		ctx, helper, instance, nodes,
+		ansibleSSHPrivateKeySecret, nodeConfigMap,
+		&instance.Status, instance.GetAnsibleEESpec(*instanceRole),
+		deployment.GetServices(instance, instanceRole), instanceRole)
+	if err != nil {
+		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			condition.ReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			dataplanev1.DataPlaneNodeErrorMessage,
+			err.Error()))
+		return ctrl.Result{}, err
+	}
+	if deployResult != nil {
+		result = *deployResult
+		return result, nil
+	}
+
+	instance.Status.Deployed = true
+	r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
+	instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
+
 	// Set DeploymentReadyCondition to False if it was unknown.
-	// Handles the case where the Node is created with
-	// DeployStrategy.Deploy=false.
+	// If the status is Unknown at this point. We will return to avoid setting the
+	// redeployProtectionAnnotaton
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
 		r.Log.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
+		return ctrl.Result{}, nil
+	}
+
+	// We don't want another deploy triggered by any reconcile request, it
+	// should only be triggered when the user (or another controller)
+	// specifically clears this annotation and requests it.
+	if instance.Status.Conditions.AllSubConditionIsTrue() {
+		r.Log.Info("Setting deploy protection annotation")
+		instance.ObjectMeta.SetAnnotations(redeployProtectionAnnotation)
 	}
 
 	return result, nil

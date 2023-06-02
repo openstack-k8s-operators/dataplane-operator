@@ -200,11 +200,6 @@ spec:
                     type: string
                   ansibleTags:
                     type: string
-                  deploy:
-                    default: true
-                    type: boolean
-                required:
-                - deploy
                 type: object
               env:
                 items:

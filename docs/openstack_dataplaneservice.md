@@ -37,7 +37,6 @@ DeployStrategySection for fields controlling the deployment
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| deploy | Deploy boolean to trigger ansible execution | bool | true |
 | ansibleTags | AnsibleTags for ansible execution | string | false |
 | ansibleLimit | AnsibleLimit for ansible execution | string | false |
 | ansibleSkipTags | AnsibleSkipTags for ansible execution | string | false |

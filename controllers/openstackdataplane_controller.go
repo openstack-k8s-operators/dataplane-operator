@@ -24,6 +24,7 @@ import (
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
+	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
@@ -47,6 +48,15 @@ type OpenStackDataPlaneReconciler struct {
 	Kclient kubernetes.Interface
 	Scheme  *runtime.Scheme
 	Log     logr.Logger
+}
+
+const redeployProtectionAnnotationName string = "edpm.openstack.org/deploy-protection"
+
+// redeployProtectionAnnoation provides protection against eroneous Ansible exections. This annotation
+// should be explicitly cleared by any controller or user who wishes to re-run a Ansible execution against
+// a node that has already been deployed.
+var redeployProtectionAnnotation = map[string]string{
+	redeployProtectionAnnotationName: "true",
 }
 
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanes,verbs=get;list;watch;create;update;patch;delete
@@ -128,6 +138,13 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// all setup tasks complete, mark SetupReadyCondition True
 	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
 
+	// Check to see if the OpenStackDataPlane has the redeployProtectionAnnotation. If it does, we will exit the Reconcile here.
+	_, unsafeToExecute := dataplaneutil.CheckDeployProtectionAnnotation(instance, redeployProtectionAnnotation)
+	if unsafeToExecute {
+		r.Log.Info("This OpenStackDataPlane object currently has the deployProtection annotation, which will prevent further task execution")
+		return ctrl.Result{Requeue: false}, nil
+	}
+
 	ctrlResult, err := createOrPatchDataPlaneResources(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -137,60 +154,56 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	var deployErrors []string
 	shouldRequeue := false
-	if instance.Spec.DeployStrategy.Deploy {
-		r.Log.Info("Starting DataPlane deploy")
-		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
-		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
-		roles := &dataplanev1.OpenStackDataPlaneRoleList{}
 
-		listOpts := []client.ListOption{
-			client.InNamespace(instance.GetNamespace()),
-		}
-		labelSelector := map[string]string{
-			"openstackdataplane": instance.Name,
-		}
-		if len(labelSelector) > 0 {
-			labels := client.MatchingLabels(labelSelector)
-			listOpts = append(listOpts, labels)
-		}
-		err = r.Client.List(ctx, roles, listOpts...)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+	r.Log.Info("Starting DataPlane deploy")
+	r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
+	instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
+	roles := &dataplanev1.OpenStackDataPlaneRoleList{}
 
-		for _, role := range roles.Items {
-			logger.Info("DataPlane deploy", "role.Name", role.Name)
-			if role.Spec.DataPlane != instance.Name {
-				err = fmt.Errorf("role %s: role.DataPlane does not match with role.Label", role.Name)
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.GetNamespace()),
+	}
+	labelSelector := map[string]string{
+		"openstackdataplane": instance.Name,
+	}
+	if len(labelSelector) > 0 {
+		labels := client.MatchingLabels(labelSelector)
+		listOpts = append(listOpts, labels)
+	}
+	err = r.Client.List(ctx, roles, listOpts...)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	for _, role := range roles.Items {
+		logger.Info("DataPlane deploy", "role.Name", role.Name)
+		if role.Spec.DataPlane != instance.Name {
+			err = fmt.Errorf("role %s: role.DataPlane does not match with role.Label", role.Name)
+			deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
+		}
+		r.Log.Info("Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+		_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), &role, func() error {
+			r.Log.Info("Reconciling Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+			helper.GetLogger().Info("CreateOrPatch", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+			if err != nil {
 				deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
 			}
-			r.Log.Info("Role", "DeployStrategy.Deploy", role.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-			if !role.Spec.DeployStrategy.Deploy {
-				_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), &role, func() error {
-					r.Log.Info("Reconciling Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-					helper.GetLogger().Info("CreateOrPatch Role.DeployStrategy.Deploy", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-					role.Spec.DeployStrategy.Deploy = instance.Spec.DeployStrategy.Deploy
-					if err != nil {
-						deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
-					}
-					return nil
-				})
-				if err != nil {
-					deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
+			return nil
+		})
+		if err != nil {
+			deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
+		}
+		if !role.IsReady() {
+			r.Log.Info("Role", "IsReady", role.IsReady(), "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+			shouldRequeue = true
+			mirroredCondition := role.Status.Conditions.Mirror(condition.ReadyCondition)
+			if mirroredCondition != nil {
+				r.Log.Info("Role", "Status", mirroredCondition.Message, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+				if condition.IsError(mirroredCondition) {
+					deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+mirroredCondition.Message)
 				}
 			}
-			if !role.IsReady() {
-				r.Log.Info("Role", "IsReady", role.IsReady(), "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-				shouldRequeue = true
-				mirroredCondition := role.Status.Conditions.Mirror(condition.ReadyCondition)
-				if mirroredCondition != nil {
-					r.Log.Info("Role", "Status", mirroredCondition.Message, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-					if condition.IsError(mirroredCondition) {
-						deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+mirroredCondition.Message)
-					}
-				}
 
-			}
 		}
 	}
 
@@ -209,33 +222,26 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		r.Log.Info("one or more roles aren't ready, requeueing")
 		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
 	}
-	if instance.Spec.DeployStrategy.Deploy && len(deployErrors) == 0 {
+	if len(deployErrors) == 0 {
 		instance.Status.Deployed = true
 		r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
 		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
 	}
 
 	// Set DeploymentReadyCondition to False if it was unknown.
-	// Handles the case where the DataPlane is created with
-	// DeployStrategy.Deploy=false.
+	// If the status is Unknown at this point. We will return to avoid setting the
+	// redeployProtectionAnnotaton
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
 		r.Log.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
+		return ctrl.Result{}, nil
 	}
 
-	// Explicitly set instance.Spec.Deploy = false
-	// We don't want another deploy triggered by any reconcile request, it should
-	// only be triggered when the user (or another controller) specifically
-	// sets it to true.
-	instance.Spec.DeployStrategy.Deploy = false
-
-	// Set DeploymentReadyCondition to False if it was unknown.
-	// Handles the case where the Node is created with
-	// DeployStrategy.Deploy=false.
-	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
-		r.Log.Info("Set DeploymentReadyCondition false")
-		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
-	}
+	// We don't want another deploy triggered by any reconcile request, it
+	// should only be triggered when the user (or another controller)
+	// specifically clears this annotation and requests it.
+	r.Log.Info("Setting deploy protection annotation")
+	instance.ObjectMeta.SetAnnotations(redeployProtectionAnnotation)
 
 	return ctrl.Result{}, nil
 }
@@ -330,7 +336,21 @@ func createOrPatchDataPlaneNodes(ctx context.Context, instance *dataplanev1.Open
 				Namespace: instance.Namespace,
 			},
 		}
-		_, err := controllerutil.CreateOrPatch(ctx, client, node, func() error {
+
+		err := client.Get(
+			ctx, types.NamespacedName{Name: nodeName, Namespace: instance.Namespace}, node)
+
+		if err != nil && !k8s_errors.IsNotFound(err) {
+			return err
+		}
+
+		_, err = controllerutil.CreateOrPatch(ctx, client, node, func() error {
+			annotations, annotationExists := dataplaneutil.CheckDeployProtectionAnnotation(node, redeployProtectionAnnotation)
+			if annotationExists {
+				logger.Info("removing redeployProtectionAnnotation from Node", "nodeName", nodeName)
+				delete(annotations, redeployProtectionAnnotationName)
+				node.ObjectMeta.Annotations = annotations
+			}
 			nodeSpec.DeepCopyInto(&node.Spec)
 			err := controllerutil.SetControllerReference(instance, node, helper.GetScheme())
 			if err != nil {
@@ -368,10 +388,12 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 
 		logger.Info("Create Or Patch DataPlaneRole", "roleName", roleName)
 		_, err = controllerutil.CreateOrPatch(ctx, client, role, func() error {
-			// role.Spec.DeployStrategy is explicitly omitted. Otherwise, it
-			// could get reset to False, and if the DataPlane deploy sets it to
-			// True, the DataPlane and DataPlaneRole controllers will be stuck
-			// looping trying to reconcile.
+			annotations, annotationExists := dataplaneutil.CheckDeployProtectionAnnotation(role, redeployProtectionAnnotation)
+			if annotationExists {
+				logger.Info("removing redeployProtectionAnnotation from Role", "roleName", roleName)
+				delete(annotations, redeployProtectionAnnotationName)
+				role.ObjectMeta.Annotations = annotations
+			}
 			role.Spec.DataPlane = instance.Name
 			role.Spec.NodeTemplate = roleSpec.NodeTemplate
 			role.Spec.NetworkAttachments = roleSpec.NetworkAttachments

@@ -85,12 +85,6 @@ type NodeSection struct {
 
 // DeployStrategySection for fields controlling the deployment
 type DeployStrategySection struct {
-
-	// +kubebuilder:default=true
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Deploy boolean to trigger ansible execution
-	Deploy bool `json:"deploy"`
-
 	// +kubebuilder:validation:Optional
 	// AnsibleTags for ansible execution
 	AnsibleTags string `json:"ansibleTags,omitempty"`

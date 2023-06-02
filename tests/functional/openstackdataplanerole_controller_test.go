@@ -26,7 +26,7 @@ import (
 
 var _ = Describe("Dataplane Role Test", func() {
 	var dataplaneRoleName types.NamespacedName
-
+	var serviceList []string = []string{"configure-network", "validate-network", "install-os", "configure-os", "run-os"}
 	BeforeEach(func() {
 		dataplaneRoleName = types.NamespacedName{
 			Name:      "edpm-compute-no-nodes",
@@ -42,7 +42,7 @@ var _ = Describe("Dataplane Role Test", func() {
 		})
 		It("should have the Spec fields initialized", func() {
 			dataplaneRoleInstance := GetDataplaneRole(dataplaneRoleName)
-			Expect(dataplaneRoleInstance.Spec.DeployStrategy.Deploy).Should(BeFalse())
+			Expect(dataplaneRoleInstance.Spec.Services).Should(Equal(serviceList))
 		})
 
 		It("should have the Status fields initialized", func() {

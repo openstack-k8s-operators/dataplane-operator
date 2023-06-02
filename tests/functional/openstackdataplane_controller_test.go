@@ -46,7 +46,7 @@ var _ = Describe("Dataplane Test", func() {
 		})
 		It("should have the Spec fields initialized", func() {
 			dataplaneInstance := GetDataplane(dataplaneName)
-			Expect(dataplaneInstance.Spec.DeployStrategy.Deploy).Should(BeFalse())
+			Expect(dataplaneInstance.Spec.DeployStrategy.AnsibleTags).Should(Equal(""))
 		})
 
 		It("should have the Status fields initialized", func() {
@@ -57,7 +57,6 @@ var _ = Describe("Dataplane Test", func() {
 		It("Should have created a OpenStackDataplaneRole", func() {
 			dataplaneRoleInstance := GetDataplaneRole(dataplaneRoleName)
 			Expect(dataplaneRoleInstance).NotTo(BeNil())
-			Expect(dataplaneRoleInstance.Spec.DeployStrategy.Deploy).Should(BeFalse())
 			Expect(dataplaneRoleInstance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret).Should(Equal("dataplane-ansible-ssh-private-key-secret"))
 		})
 	})

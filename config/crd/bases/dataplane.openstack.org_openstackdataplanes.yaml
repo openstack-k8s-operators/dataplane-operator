@@ -49,11 +49,6 @@ spec:
                     type: string
                   ansibleTags:
                     type: string
-                  deploy:
-                    default: true
-                    type: boolean
-                required:
-                - deploy
                 type: object
               nodes:
                 additionalProperties:
@@ -68,11 +63,6 @@ spec:
                           type: string
                         ansibleTags:
                           type: string
-                        deploy:
-                          default: true
-                          type: boolean
-                      required:
-                      - deploy
                       type: object
                     env:
                       items:
@@ -1124,11 +1114,6 @@ spec:
                           type: string
                         ansibleTags:
                           type: string
-                        deploy:
-                          default: true
-                          type: boolean
-                      required:
-                      - deploy
                       type: object
                     env:
                       items:

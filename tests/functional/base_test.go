@@ -21,9 +21,6 @@ func DefaultDataplaneNoNodesTemplate(name types.NamespacedName) *dataplanev1.Ope
 			Namespace: name.Namespace,
 		},
 		Spec: dataplanev1.OpenStackDataPlaneSpec{
-			DeployStrategy: dataplanev1.DeployStrategySection{
-				Deploy: false,
-			},
 			Roles: map[string]dataplanev1.OpenStackDataPlaneRoleSpec{
 				"edpm-compute-no-nodes": {
 					Services: []string{"configure-network", "validate-network", "install-os", "configure-os", "run-os"},
@@ -53,11 +50,6 @@ func DefaultDataplaneRoleNoNodesTemplate(name types.NamespacedName) *dataplanev1
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "edpm-compute-no-nodes",
 			Namespace: name.Namespace,
-		},
-		Spec: dataplanev1.OpenStackDataPlaneRoleSpec{
-			DeployStrategy: dataplanev1.DeployStrategySection{
-				Deploy: false,
-			},
 		},
 	}
 }
