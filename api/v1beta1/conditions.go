@@ -64,58 +64,6 @@ const (
 	// SetupReadyCondition - Overall setup condition
 	SetupReadyCondition condition.Type = "SetupReady"
 
-	// ValidateNetworkReadyCondition Status=True condition indicates if the
-	// network validation is finished and successful.
-	ValidateNetworkReadyCondition condition.Type = "ValidateNetworkReady"
-
-	// ValidateNetworkReadyMessage ready
-	ValidateNetworkReadyMessage = "ValidateNetwork ready"
-
-	// ValidateNetworkReadyWaitingMessage not yet ready
-	ValidateNetworkReadyWaitingMessage = "ValidateNetwork not yet ready"
-
-	// ValidateNetworkErrorMessage error
-	ValidateNetworkErrorMessage = "ValidateNetwork error occurred %s"
-
-	// InstallOSReadyCondition Status=True condition indicates if the
-	// OS configuration is finished and successful.
-	InstallOSReadyCondition condition.Type = "InstallOSReady"
-
-	// InstallOSReadyMessage ready
-	InstallOSReadyMessage = "InstallOS ready"
-
-	// InstallOSReadyWaitingMessage not yet ready
-	InstallOSReadyWaitingMessage = "InstallOS not yet ready"
-
-	// InstallOSErrorMessage error
-	InstallOSErrorMessage = "InstallOS error occurred %s"
-
-	// ConfigureOSReadyCondition Status=True condition indicates if the
-	// OS configuration is finished and successful.
-	ConfigureOSReadyCondition condition.Type = "ConfigureOSReady"
-
-	// ConfigureOSReadyMessage ready
-	ConfigureOSReadyMessage = "ConfigureOS ready"
-
-	// ConfigureOSReadyWaitingMessage not yet ready
-	ConfigureOSReadyWaitingMessage = "ConfigureOS not yet ready"
-
-	// ConfigureOSErrorMessage error
-	ConfigureOSErrorMessage = "ConfigureOS error occurred %s"
-
-	// RunOSReadyCondition Status=True condition indicates if the
-	// OS configuration is finished and successful.
-	RunOSReadyCondition condition.Type = "RunOSReady"
-
-	// RunOSReadyMessage ready
-	RunOSReadyMessage = "RunOS ready"
-
-	// RunOSReadyWaitingMessage not yet ready
-	RunOSReadyWaitingMessage = "RunOS not yet ready"
-
-	// RunOSErrorMessage error
-	RunOSErrorMessage = "RunOS error occurred %s"
-
 	// ConfigureCephClientReadyCondition Status=True condition indicates if the
 	// Ceph client configuration is finished and successful.
 	ConfigureCephClientReadyCondition condition.Type = "ConfigureCephClientReady"
@@ -128,45 +76,6 @@ const (
 
 	// ConfigureCephClientErrorMessage error
 	ConfigureCephClientErrorMessage = "ConfigureCephClient error occurred %s"
-
-	// InstallOpenStackReadyCondition Status=True condition indicates if the
-	// OpenStack configuration is finished and successful.
-	InstallOpenStackReadyCondition condition.Type = "InstallOpenStackReady"
-
-	// InstallOpenStackReadyMessage ready
-	InstallOpenStackReadyMessage = "InstallOpenStack ready"
-
-	// InstallOpenStackReadyWaitingMessage not yet ready
-	InstallOpenStackReadyWaitingMessage = "InstallOpenStack not yet ready"
-
-	// InstallOpenStackErrorMessage error
-	InstallOpenStackErrorMessage = "InstallOpenStack error occurred %s"
-
-	// ConfigureOpenStackReadyCondition Status=True condition indicates if the
-	// OpenStack configuration is finished and successful.
-	ConfigureOpenStackReadyCondition condition.Type = "ConfigureOpenStackReady"
-
-	// ConfigureOpenStackReadyMessage ready
-	ConfigureOpenStackReadyMessage = "ConfigureOpenStack ready"
-
-	// ConfigureOpenStackReadyWaitingMessage not yet ready
-	ConfigureOpenStackReadyWaitingMessage = "ConfigureOpenStack not yet ready"
-
-	// ConfigureOpenStackErrorMessage error
-	ConfigureOpenStackErrorMessage = "ConfigureOpenStack error occurred %s"
-
-	// RunOpenStackReadyCondition Status=True condition indicates if the
-	// OpenStack configuration is finished and successful.
-	RunOpenStackReadyCondition condition.Type = "RunOpenStackReady"
-
-	// RunOpenStackReadyMessage ready
-	RunOpenStackReadyMessage = "RunOpenStack ready"
-
-	// RunOpenStackReadyWaitingMessage not yet ready
-	RunOpenStackReadyWaitingMessage = "RunOpenStack not yet ready"
-
-	// RunOpenStackErrorMessage error
-	RunOpenStackErrorMessage = "RunOpenStack error occurred %s"
 
 	// NovaComputeReadyCondition Status=True condition indicates nova-compute
 	// has been deployed and is ready

@@ -149,14 +149,6 @@ status:
     severity: Info
     status: "False"
     type: Ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: ConfigureOSReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: ConfigureOpenStackReady
   - message: Deployment not started
     reason: NotRequested
     severity: Info
@@ -165,23 +157,7 @@ status:
   - message: Init
     reason: Init
     status: Unknown
-    type: InstallOSReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: InstallOpenStackReady
-  - message: Init
-    reason: Init
-    status: Unknown
     type: RoleBaremetalProvisionReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: RunOSReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: RunOpenStackReady
   - message: Setup complete
     reason: Ready
     status: "True"
@@ -189,7 +165,23 @@ status:
   - message: Init
     reason: Init
     status: Unknown
-    type: ValidateNetworkReady
+    type: configure-network service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: configure-os service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: install-os service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: run-os service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: validate-network service ready
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNode
@@ -215,7 +207,7 @@ spec:
       ctlplane_ip: 192.168.122.100
       internal_api_ip: 172.17.0.100
       storage_ip: 172.18.0.100
-      tenant_ip: 172.10.0.100
+      tenant_ip: 172.19.0.100
       fqdn_internal_api: edpm-compute-0.example.com
     networkConfig: {}
   openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
@@ -227,35 +219,11 @@ status:
     severity: Info
     status: "False"
     type: Ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: ConfigureOSReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: ConfigureOpenStackReady
   - message: Deployment not started
     reason: NotRequested
     severity: Info
     status: "False"
     type: DeploymentReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: InstallOSReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: InstallOpenStackReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: RunOSReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: RunOpenStackReady
   - message: Setup complete
     reason: Ready
     status: "True"
@@ -263,7 +231,23 @@ status:
   - message: Init
     reason: Init
     status: Unknown
-    type: ValidateNetworkReady
+    type: configure-network service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: configure-os service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: install-os service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: run-os service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: validate-network service ready
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNode
@@ -289,7 +273,7 @@ spec:
       ctlplane_ip: 192.168.122.101
       internal_api_ip: 172.17.0.101
       storage_ip: 172.18.0.101
-      tenant_ip: 172.10.0.101
+      tenant_ip: 172.19.0.101
       fqdn_internal_api: edpm-compute-1.example.com
     networkConfig: {}
   openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
@@ -301,35 +285,11 @@ status:
     severity: Info
     status: "False"
     type: Ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: ConfigureOSReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: ConfigureOpenStackReady
   - message: Deployment not started
     reason: NotRequested
     severity: Info
     status: "False"
     type: DeploymentReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: InstallOSReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: InstallOpenStackReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: RunOSReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: RunOpenStackReady
   - message: Setup complete
     reason: Ready
     status: "True"
@@ -337,7 +297,23 @@ status:
   - message: Init
     reason: Init
     status: Unknown
-    type: ValidateNetworkReady
+    type: configure-network service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: configure-os service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: install-os service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: run-os service ready
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: validate-network service ready
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -432,14 +408,14 @@ data:
                 fqdn_internal_api: edpm-compute-0.example.com
                 internal_api_ip: 172.17.0.100
                 storage_ip: 172.18.0.100
-                tenant_ip: 172.10.0.100
+                tenant_ip: 172.19.0.100
             edpm-compute-1:
                 ansible_host: 192.168.122.101
                 ctlplane_ip: 192.168.122.101
                 fqdn_internal_api: edpm-compute-1.example.com
                 internal_api_ip: 172.17.0.101
                 storage_ip: 172.18.0.101
-                tenant_ip: 172.10.0.101
+                tenant_ip: 172.19.0.101
   network: ""
 ---
 apiVersion: v1
@@ -533,7 +509,7 @@ data:
                 storage_vlan_id: 21
                 tenant_cidr: "24"
                 tenant_host_routes: []
-                tenant_ip: 172.10.0.100
+                tenant_ip: 172.19.0.100
                 tenant_mtu: 1500
                 tenant_vlan_id: 22
   network: ""
@@ -629,7 +605,7 @@ data:
                 storage_vlan_id: 21
                 tenant_cidr: "24"
                 tenant_host_routes: []
-                tenant_ip: 172.10.0.101
+                tenant_ip: 172.19.0.101
                 tenant_mtu: 1500
                 tenant_vlan_id: 22
   network: ""

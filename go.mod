@@ -7,7 +7,7 @@ replace github.com/openstack-k8s-operators/dataplane-operator/api => ./api
 require (
 	github.com/go-logr/logr v1.2.4
 	github.com/google/uuid v1.3.0
-	github.com/imdario/mergo v0.3.15
+	github.com/imdario/mergo v0.3.16
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
 	github.com/onsi/ginkgo/v2 v2.9.5
 	github.com/onsi/gomega v1.27.7
@@ -18,7 +18,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.0.0-20230523095909-db05945b0b1e
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230523154806-b03835b62112
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230523171900-dd4d0945d2d1
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230523132617-b59d182dccc3
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230524141327-a53b273227de
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.3
 	k8s.io/apimachinery v0.26.3

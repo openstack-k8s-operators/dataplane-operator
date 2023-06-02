@@ -96,20 +96,27 @@ func (instance OpenStackDataPlaneNode) IsReady() bool {
 }
 
 // InitConditions - Initializes Status Conditons
-func (instance *OpenStackDataPlaneNode) InitConditions() {
+func (instance *OpenStackDataPlaneNode) InitConditions(instanceRole *OpenStackDataPlaneRole) {
 	instance.Status.Conditions = condition.Conditions{}
 
 	cl := condition.CreateList(
 		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(ValidateNetworkReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(InstallOSReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(ConfigureOSReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(RunOSReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(InstallOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(ConfigureOpenStackReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(RunOpenStackReadyCondition, condition.InitReason, condition.InitReason),
 	)
+
+	var services *[]string
+	if instance.Spec.Node.Services != nil {
+		services = instance.Spec.Node.Services
+	} else {
+		services = instanceRole.Spec.NodeTemplate.Services
+	}
+
+	if services != nil {
+		for _, service := range *services {
+			readyCondition := condition.Type(fmt.Sprintf(ServiceReadyCondition, service))
+			cl = append(cl, *condition.UnknownCondition(readyCondition, condition.InitReason, condition.InitReason))
+		}
+	}
 
 	haveCephSecret := false
 	for _, extraMount := range instance.Spec.Node.ExtraMounts {

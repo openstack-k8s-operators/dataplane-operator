@@ -172,6 +172,8 @@ spec:
                     x-kubernetes-map-type: atomic
                   provisionServerName:
                     type: string
+                  provisioningInterface:
+                    type: string
                   rhelImageUrl:
                     type: string
                   userData:
@@ -1068,6 +1070,16 @@ spec:
                         default: nova
                         type: string
                     type: object
+                  services:
+                    default:
+                    - configure-network
+                    - validate-network
+                    - install-os
+                    - configure-os
+                    - run-os
+                    items:
+                      type: string
+                    type: array
                   userData:
                     properties:
                       name:
@@ -1082,10 +1094,6 @@ spec:
                 type: string
               preProvisioned:
                 type: boolean
-              services:
-                items:
-                  type: string
-                type: array
             type: object
           status:
             properties:

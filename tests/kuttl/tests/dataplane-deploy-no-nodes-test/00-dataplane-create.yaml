@@ -9,5 +9,9 @@ spec:
     edpm-compute-no-nodes:
       nodeTemplate:
         ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-      services:
-        - configure-network
+        services:
+          - configure-network
+          - validate-network
+          - install-os
+          - configure-os
+          - run-os
