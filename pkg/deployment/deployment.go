@@ -76,6 +76,7 @@ func Deploy(
 		readyWaitingMessage = fmt.Sprintf(dataplanev1beta1.ServiceReadyWaitingMessage, deployName)
 		readyMessage = fmt.Sprintf(dataplanev1beta1.ServiceReadyMessage, deployName)
 		readyErrorMessage = dataplanev1beta1.ServiceErrorMessage
+		aeeSpec.OpenStackAnsibleEERunnerImage = foundService.Spec.OpenStackAnsibleEERunnerImage
 		err = ConditionalDeploy(
 			ctx,
 			helper,

@@ -207,6 +207,9 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return result, err
 	}
 
+	// all setup tasks complete, mark SetupReadyCondition True
+	instance.Status.Conditions.MarkTrue(dataplanev1beta1.SetupReadyCondition, condition.ReadyMessage)
+
 	r.Log.Info("Role", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
 		r.Log.Info("Starting DataPlaneRole deploy")
@@ -261,8 +264,6 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		r.Log.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
 	}
-
-	instance.Status.Conditions.MarkTrue(dataplanev1beta1.SetupReadyCondition, condition.ReadyMessage)
 
 	return ctrl.Result{}, nil
 }

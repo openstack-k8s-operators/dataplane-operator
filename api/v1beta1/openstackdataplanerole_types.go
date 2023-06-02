@@ -61,11 +61,6 @@ type OpenStackDataPlaneRoleSpec struct {
 	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
 	// which allows to connect the ansibleee runner to the given network
 	NetworkAttachments []string `json:"networkAttachments"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default="quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
-	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
-	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage"`
 }
 
 //+kubebuilder:object:root=true
@@ -181,12 +176,11 @@ func (instance OpenStackDataPlaneRole) Validate(nodes []OpenStackDataPlaneNode) 
 // GetAnsibleEESpec - get the fields that will be passed to AEE
 func (instance OpenStackDataPlaneRole) GetAnsibleEESpec() AnsibleEESpec {
 	return AnsibleEESpec{
-		NetworkAttachments:            instance.Spec.NetworkAttachments,
-		OpenStackAnsibleEERunnerImage: instance.Spec.OpenStackAnsibleEERunnerImage,
-		AnsibleTags:                   instance.Spec.DeployStrategy.AnsibleTags,
-		AnsibleLimit:                  instance.Spec.DeployStrategy.AnsibleLimit,
-		AnsibleSkipTags:               instance.Spec.DeployStrategy.AnsibleSkipTags,
-		ExtraMounts:                   instance.Spec.NodeTemplate.ExtraMounts,
-		Env:                           instance.Spec.Env,
+		NetworkAttachments: instance.Spec.NetworkAttachments,
+		AnsibleTags:        instance.Spec.DeployStrategy.AnsibleTags,
+		AnsibleLimit:       instance.Spec.DeployStrategy.AnsibleLimit,
+		AnsibleSkipTags:    instance.Spec.DeployStrategy.AnsibleSkipTags,
+		ExtraMounts:        instance.Spec.NodeTemplate.ExtraMounts,
+		Env:                instance.Spec.Env,
 	}
 }
