@@ -936,6 +936,16 @@ spec:
                               default: nova
                               type: string
                           type: object
+                        services:
+                          default:
+                          - configure-network
+                          - validate-network
+                          - install-os
+                          - configure-os
+                          - run-os
+                          items:
+                            type: string
+                          type: array
                         userData:
                           properties:
                             name:
@@ -1984,6 +1994,16 @@ spec:
                               default: nova
                               type: string
                           type: object
+                        services:
+                          default:
+                          - configure-network
+                          - validate-network
+                          - install-os
+                          - configure-os
+                          - run-os
+                          items:
+                            type: string
+                          type: array
                         userData:
                           properties:
                             name:
@@ -1998,10 +2018,6 @@ spec:
                       type: string
                     preProvisioned:
                       type: boolean
-                    services:
-                      items:
-                        type: string
-                      type: array
                   type: object
                 type: object
             type: object

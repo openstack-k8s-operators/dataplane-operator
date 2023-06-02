@@ -36,8 +36,6 @@ spec:
         deploy: false
   roles:
     edpm-compute:
-      services:
-        - configure-network
       env:
         - name: ANSIBLE_FORCE_COLOR
           value: "True"
@@ -55,6 +53,12 @@ spec:
         domainName: osptest.openstack.org
       preProvisioned: true
       nodeTemplate:
+        services:
+          - configure-network
+          - validate-network
+          - install-os
+          - configure-os
+          - run-os
         # Defining the novaTemplate here means the nodes in this role are
         # computes
         nova: {}

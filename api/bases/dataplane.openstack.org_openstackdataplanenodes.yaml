@@ -917,6 +917,16 @@ spec:
                         default: nova
                         type: string
                     type: object
+                  services:
+                    default:
+                    - configure-network
+                    - validate-network
+                    - install-os
+                    - configure-os
+                    - run-os
+                    items:
+                      type: string
+                    type: array
                   userData:
                     properties:
                       name:

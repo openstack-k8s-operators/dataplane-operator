@@ -1,0 +1,23 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  labels:
+    app.kubernetes.io/name: openstackdataplaneservice
+    app.kubernetes.io/instance: openstackdataplaneservice-validate-network
+    app.kubernetes.io/part-of: dataplane-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: dataplane-operator
+  name: validate-network
+spec:
+  label: dataplane-deployment-validate-network
+  role:
+    name: "osp.edpm.edpm_nodes_validation"
+    hosts: "all"
+    strategy: "linear"
+    tasks:
+      - name: "import edpm_nodes_validation"
+        import_role:
+          name: "osp.edpm.edpm_nodes_validation"
+          tasks_from: "main.yml"
+        tags:
+          - "edpm_nodes_validation"

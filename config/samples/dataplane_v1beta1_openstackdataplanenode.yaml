@@ -7,6 +7,12 @@ spec:
   hostName: openstackdataplanenode-sample.localdomain
   ansibleHost: 192.168.122.18
   node:
+    services:
+      - configure-network
+      - validate-network
+      - install-os
+      - configure-os
+      - run-os
     networks:
       - network: ctlplane
         fixedIP: 192.168.122.18
