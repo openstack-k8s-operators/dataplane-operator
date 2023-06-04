@@ -959,9 +959,6 @@ spec:
                           type: object
                           x-kubernetes-map-type: atomic
                       type: object
-                    openStackAnsibleEERunnerImage:
-                      default: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
-                      type: string
                     role:
                       type: string
                   type: object
@@ -2019,9 +2016,6 @@ spec:
                           type: object
                           x-kubernetes-map-type: atomic
                       type: object
-                    openStackAnsibleEERunnerImage:
-                      default: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
-                      type: string
                     preProvisioned:
                       type: boolean
                   type: object

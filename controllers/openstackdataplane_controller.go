@@ -125,6 +125,9 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.Conditions.MarkFalse(dataplanev1beta1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 	}
 
+	// all setup tasks complete, mark SetupReadyCondition True
+	instance.Status.Conditions.MarkTrue(dataplanev1beta1.SetupReadyCondition, condition.ReadyMessage)
+
 	ctrlResult, err := createOrPatchDataPlaneResources(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -239,8 +242,6 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		r.Log.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
 	}
-
-	instance.Status.Conditions.MarkTrue(dataplanev1beta1.SetupReadyCondition, condition.ReadyMessage)
 
 	return ctrl.Result{}, nil
 }
@@ -372,7 +373,6 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 			role.Spec.DataPlane = instance.Name
 			role.Spec.NodeTemplate = roleSpec.NodeTemplate
 			role.Spec.NetworkAttachments = roleSpec.NetworkAttachments
-			role.Spec.OpenStackAnsibleEERunnerImage = roleSpec.OpenStackAnsibleEERunnerImage
 			role.Spec.Env = roleSpec.Env
 			role.Spec.NodeTemplate.Services = roleSpec.NodeTemplate.Services
 			hostMap, ok := roleManagedHostMap[roleName]

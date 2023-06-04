@@ -137,7 +137,7 @@ type NetworksSection struct {
 }
 
 // UniqueSpecFields - the array of fields that must be unique between role and nodes
-var UniqueSpecFields = []string{"OpenStackAnsibleEERunnerImage", "NetworkAttachments"}
+var UniqueSpecFields = []string{"NetworkAttachments"}
 
 // AssertUniquenessBetween - compare specs for uniqueness
 func AssertUniquenessBetween(spec interface{}, otherSpec interface{}, suffix string) []string {

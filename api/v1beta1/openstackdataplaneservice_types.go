@@ -36,6 +36,11 @@ type OpenStackDataPlaneServiceSpec struct {
 	// Role is the description of an Ansible Role
 	// +kubebuilder:validation:Optional
 	Role *ansibleeev1alpha1.Role `json:"role,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
+	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
+	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage"`
 }
 
 // OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService
