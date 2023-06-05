@@ -33,7 +33,10 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
@@ -125,6 +128,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	defer func() {
 		// update the overall status condition if service is ready
 		if instance.IsReady() || instanceRole.IsReady() {
+			instance.Status.Deployed = true
 			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneNodeReadyMessage)
 		} else {
 			// something is not ready so reset the Ready condition
@@ -249,8 +253,40 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneNodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	roleWatcher := handler.EnqueueRequestsFromMapFunc(func(obj client.Object) []reconcile.Request {
+		var namespace string = obj.GetNamespace()
+		var roleName string = obj.GetName()
+		result := []reconcile.Request{}
+
+		// Get all nodes for the role
+		nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{}
+
+		listOpts := []client.ListOption{
+			client.InNamespace(namespace),
+		}
+		labelSelector := map[string]string{
+			"openstackdataplanerole": roleName,
+		}
+		labels := client.MatchingLabels(labelSelector)
+		listOpts = append(listOpts, labels)
+		err := r.Client.List(context.Background(), nodes, listOpts...)
+		if err != nil {
+			r.Log.Error(err, "Unable to retrieve Node CRs %v")
+			return nil
+		}
+		for _, node := range nodes.Items {
+			name := client.ObjectKey{
+				Namespace: namespace,
+				Name:      node.Name,
+			}
+			result = append(result, reconcile.Request{NamespacedName: name})
+		}
+		return result
+	})
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1beta1.OpenStackDataPlaneNode{}).
+		Watches(&source.Kind{Type: &dataplanev1beta1.OpenStackDataPlaneRole{}}, roleWatcher).
 		Owns(&v1alpha1.OpenStackAnsibleEE{}).
 		Owns(&novav1beta1.NovaExternalCompute{}).
 		Owns(&corev1.ConfigMap{}).
