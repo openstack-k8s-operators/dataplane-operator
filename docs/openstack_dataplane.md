@@ -52,5 +52,6 @@ OpenStackDataPlaneStatus defines the observed state of OpenStackDataPlaneNode
 | ----- | ----------- | ------ | -------- |
 | conditions | Conditions | condition.Conditions | false |
 | deployed | Deployed | bool | false |
+| deployIdentifier | DeployIdentifier | string | false |
 
 [Back to Custom Resources](#custom-resources)

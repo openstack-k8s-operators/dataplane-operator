@@ -48,6 +48,10 @@ type OpenStackDataPlaneStatus struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Deployed
 	Deployed bool `json:"deployed,omitempty" optional:"true"`
+
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:text"}
+	// DeployIdentifier
+	DeployIdentifier string `json:"deployIdentifier,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true

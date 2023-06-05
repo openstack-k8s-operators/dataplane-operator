@@ -43,3 +43,6 @@ site/
 # kuttl files
 kubeconfig
 kuttl-test-dataplane.json
+
+# dlv debugger
+__debug_bin

@@ -139,6 +139,24 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	shouldRequeue := false
 	if instance.Spec.DeployStrategy.Deploy {
 
+		if len(instance.Status.DeployIdentifier) == 0 {
+			if len(instance.Spec.DeployStrategy.DeployIdentifier) == 0 {
+				instance.Spec.DeployStrategy.DeployIdentifier = dataplanev1beta1.GenerateDeployIdentifier()
+				err = r.Client.Update(ctx, instance)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+				r.Log.Info("DeployIdentifier updated to: ", "identifier", instance.Spec.DeployStrategy.DeployIdentifier)
+			}
+			instance.Status.DeployIdentifier = instance.Spec.DeployStrategy.DeployIdentifier
+		} else {
+			if instance.Status.DeployIdentifier != instance.Spec.DeployStrategy.DeployIdentifier {
+				r.Log.Info("The deployment in progress is different than the one requested: ",
+					"status", "spec", instance.Status.DeployIdentifier, instance.Spec.DeployStrategy.DeployIdentifier)
+				return ctrl.Result{}, nil
+			}
+		}
+
 		r.Log.Info("Starting DataPlane deploy")
 		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
@@ -166,31 +184,36 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 				deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
 			}
 			r.Log.Info("Role", "DeployStrategy.Deploy", role.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-			if !role.Spec.DeployStrategy.Deploy {
-				_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), &role, func() error {
-					r.Log.Info("Reconciling Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-					helper.GetLogger().Info("CreateOrPatch Role.DeployStrategy.Deploy", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-					role.Spec.DeployStrategy.Deploy = instance.Spec.DeployStrategy.Deploy
+			// fmt.Printf("role deployidentifier: %s\n", role.Spec.DeployStrategy.DeployIdentifier)
+			// fmt.Printf("instance deployidentifier: %s\n", instance.Spec.DeployStrategy.DeployIdentifier)
+			if role.IsReady() && role.Spec.DeployStrategy.DeployIdentifier == instance.Spec.DeployStrategy.DeployIdentifier {
+				r.Log.Info("Role successfully deployed", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+			} else {
+				if !role.Spec.DeployStrategy.Deploy {
+					_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), &role, func() error {
+						r.Log.Info("Reconciling Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+						helper.GetLogger().Info("CreateOrPatch Role.DeployStrategy.Deploy", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+						role.Spec.DeployStrategy = instance.Spec.DeployStrategy
+						if err != nil {
+							deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
+						}
+						return nil
+					})
 					if err != nil {
 						deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
 					}
-					return nil
-				})
-				if err != nil {
-					deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
 				}
-			}
-			if !role.IsReady() {
-				r.Log.Info("Role", "IsReady", role.IsReady(), "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-				shouldRequeue = true
-				mirroredCondition := role.Status.Conditions.Mirror(condition.ReadyCondition)
-				if mirroredCondition != nil {
-					r.Log.Info("Role", "Status", mirroredCondition.Message, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-					if condition.IsError(mirroredCondition) {
-						deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+mirroredCondition.Message)
+				if !role.IsReady() {
+					r.Log.Info("Role", "IsReady", role.IsReady(), "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+					shouldRequeue = true
+					mirroredCondition := role.Status.Conditions.Mirror(condition.ReadyCondition)
+					if mirroredCondition != nil {
+						r.Log.Info("Role", "Status", mirroredCondition.Message, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+						if condition.IsError(mirroredCondition) {
+							deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+mirroredCondition.Message)
+						}
 					}
 				}
-
 			}
 		}
 	}

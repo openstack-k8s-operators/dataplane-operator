@@ -1116,6 +1116,8 @@ spec:
                   - type
                   type: object
                 type: array
+              deployIdentifier:
+                type: string
               deployed:
                 type: boolean
             type: object

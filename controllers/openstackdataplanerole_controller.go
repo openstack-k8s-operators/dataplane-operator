@@ -213,16 +213,22 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	r.Log.Info("Role", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
 
-		// create deployIdentifier
-		if len(instance.Spec.DeployStrategy.DeployIdentifier) == 0 {
-			// patch := client.MergeFrom(instance.DeepCopy())
-			newIdentifier := dataplanev1beta1.GenerateDeployIdentifier()
-			instance.Spec.DeployStrategy.DeployIdentifier = newIdentifier
-			err = r.Client.Update(ctx, instance)
-			if err != nil {
-				return ctrl.Result{}, err
+		if len(instance.Status.DeployIdentifier) == 0 {
+			if len(instance.Spec.DeployStrategy.DeployIdentifier) == 0 {
+				instance.Spec.DeployStrategy.DeployIdentifier = dataplanev1beta1.GenerateDeployIdentifier()
+				err = r.Client.Update(ctx, instance)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+				r.Log.Info("DeployIdentifier updated to: ", "identifier", instance.Spec.DeployStrategy.DeployIdentifier)
 			}
-			r.Log.Info("DeployIdentifier updated to: ", "identifier", newIdentifier)
+			instance.Status.DeployIdentifier = instance.Spec.DeployStrategy.DeployIdentifier
+		} else {
+			if instance.Status.DeployIdentifier != instance.Spec.DeployStrategy.DeployIdentifier {
+				r.Log.Info("The deployment in progress is different than the one requested: ",
+					"status", "spec", instance.Status.DeployIdentifier, instance.Spec.DeployStrategy.DeployIdentifier)
+				return ctrl.Result{}, nil
+			}
 		}
 
 		r.Log.Info("Starting DataPlaneRole deploy")
@@ -270,6 +276,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		r.Log.Info("Set DeployStrategy.Deploy to false")
 		instance.Spec.DeployStrategy.Deploy = false
 		instance.Spec.DeployStrategy.DeployIdentifier = ""
+		instance.Status.DeployIdentifier = ""
 		err = r.Client.Update(ctx, instance)
 		if err != nil {
 			return ctrl.Result{}, err
