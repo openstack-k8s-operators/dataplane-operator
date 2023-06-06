@@ -63,7 +63,7 @@ type OpenStackDataPlaneReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
-	logger := log.FromContext(ctx)
+	r.Log = log.FromContext(ctx)
 
 	// Fetch the OpenStackDataPlane instance
 	instance := &dataplanev1beta1.OpenStackDataPlane{}
@@ -73,11 +73,11 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected.
 			// For additional cleanup logic use finalizers. Return and don't requeue.
-			logger.Info("DataPlane instance not found, probably deleted before reconciled. Nothing to do.")
+			r.Log.Info("DataPlane instance not found, probably deleted before reconciled. Nothing to do.")
 			return ctrl.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
-		logger.Error(err, "Failed to read the DataPlane instance.")
+		r.Log.Error(err, "Failed to read the DataPlane instance.")
 		return ctrl.Result{}, err
 	}
 
@@ -178,7 +178,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		}
 
 		for _, role := range roles.Items {
-			logger.Info("DataPlane deploy", "role.Name", role.Name)
+			r.Log.Info("DataPlane deploy", "role.Name", role.Name)
 			if role.Spec.DataPlane != instance.Name {
 				err = fmt.Errorf("role %s: role.DataPlane does not match with role.Label", role.Name)
 				deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
@@ -189,7 +189,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 			if role.IsReady() && role.Spec.DeployStrategy.DeployIdentifier == instance.Spec.DeployStrategy.DeployIdentifier {
 				r.Log.Info("Role successfully deployed", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
 			} else {
-				if !role.Spec.DeployStrategy.Deploy {
+				if !role.Spec.DeployStrategy.Deploy && role.Status.DeployIdentifier != instance.Spec.DeployStrategy.DeployIdentifier {
 					_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), &role, func() error {
 						r.Log.Info("Reconciling Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
 						helper.GetLogger().Info("CreateOrPatch Role.DeployStrategy.Deploy", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
