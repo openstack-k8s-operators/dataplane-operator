@@ -34,6 +34,7 @@ nav:
   - Architecture: architecture.md
   - Design: design.md
   - Inheritance: inheritance.md
+  - Deploying a DataPlane: deploying.md
   - Contributing: contributing.md
 markdown_extensions:
   - toc:

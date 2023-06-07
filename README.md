@@ -11,6 +11,8 @@ contributors, running the operator, building the documentation, etc.
 
 See [design](design.md) for details about the dataplane design.
 
+[Deploying a DataPlane](deploying.md) documents how to deploy a dataplane.
+
 The documentation source is kept within the dataplane-operator repo in the
 [docs](https://github.com/openstack-k8s-operators/dataplane-operator/tree/main/docs) directory. The full
 generated documentation from that source is available at
