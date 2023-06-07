@@ -94,6 +94,7 @@ manifests: gowork controller-gen crd-to-markdown ## Generate WebhookConfiguratio
 	$(CRD_MARKDOWN) -f api/v1beta1/openstackdataplane_types.go -n OpenStackDataPlane > docs/openstack_dataplane.md
 	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplanenode_types.go -n OpenStackDataPlaneNode > docs/openstack_dataplanenode.md
 	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplanerole_types.go -n OpenStackDataPlaneRole > docs/openstack_dataplanerole.md
+	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplanerole_types.go -n OpenStackDataPlaneService > docs/openstack_dataplaneservice.md
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.

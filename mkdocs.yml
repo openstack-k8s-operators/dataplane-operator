@@ -30,6 +30,7 @@ nav:
       - OpenStackDataPlane: openstack_dataplane.md
       - OpenStackDataPlaneNode: openstack_dataplanenode.md
       - OpenStackDataPlaneRole: openstack_dataplanerole.md
+      - OpenStackDataPlaneService: openstack_dataplaneservice.md
   - Architecture: architecture.md
   - Design: design.md
   - Inheritance: inheritance.md
