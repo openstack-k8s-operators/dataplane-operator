@@ -3,13 +3,13 @@ kind: OpenStackDataPlaneRole
 metadata:
   name: openstackdataplanerole-sample
 spec:
+  services:
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - run-os
   nodeTemplate:
-    services:
-      - configure-network
-      - validate-network
-      - install-os
-      - configure-os
-      - run-os
     networkConfig:
       template: templates/net_config_bridge.j2
     managed: false

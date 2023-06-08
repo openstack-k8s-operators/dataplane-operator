@@ -7,12 +7,6 @@ spec:
   hostName: edpm-compute-0
   ansibleHost: 192.168.122.100
   node:
-    services:
-      - configure-network
-      - validate-network
-      - install-os
-      - configure-os
-      - run-os
     nova: {}
     ansibleVars: |
       tenant_ip: 192.168.24.100

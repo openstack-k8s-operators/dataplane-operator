@@ -3,13 +3,13 @@ kind: OpenStackDataPlaneRole
 metadata:
   name: edpm-compute
 spec:
+  services:
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - run-os
   nodeTemplate:
-    services:
-      - configure-network
-      - validate-network
-      - install-os
-      - configure-os
-      - run-os
     nova: {}
     managed: false
     managementNetwork: ctlplane

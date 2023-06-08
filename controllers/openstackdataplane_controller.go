@@ -366,7 +366,7 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 			role.Spec.NodeTemplate = roleSpec.NodeTemplate
 			role.Spec.NetworkAttachments = roleSpec.NetworkAttachments
 			role.Spec.Env = roleSpec.Env
-			role.Spec.NodeTemplate.Services = roleSpec.NodeTemplate.Services
+			role.Spec.Services = roleSpec.Services
 			hostMap, ok := roleManagedHostMap[roleName]
 			if ok {
 				bmsTemplate := roleSpec.BaremetalSetTemplate.DeepCopy()

@@ -212,7 +212,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{
 			Items: []dataplanev1beta1.OpenStackDataPlaneNode{*instance},
 		}
-		deployResult, err := deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, nodeConfigMap, &instance.Status, instance.GetAnsibleEESpec(*instanceRole), *r.GetServices(instance, instanceRole), instanceRole)
+		deployResult, err := deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, nodeConfigMap, &instance.Status, instance.GetAnsibleEESpec(*instanceRole), r.GetServices(instance, instanceRole), instanceRole)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -465,9 +465,7 @@ func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleSSHPrivateKeySecret(instanc
 }
 
 // GetServices returns the list of services for the node's role
-func (r *OpenStackDataPlaneNodeReconciler) GetServices(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) *[]string {
-	if instance.Spec.Node.Services != nil {
-		return instance.Spec.Node.Services
-	}
-	return instanceRole.Spec.NodeTemplate.Services
+// Note that these are not inherited from NodeTemplate.
+func (r *OpenStackDataPlaneNodeReconciler) GetServices(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) []string {
+	return instanceRole.Spec.Services
 }

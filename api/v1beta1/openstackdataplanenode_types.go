@@ -99,15 +99,8 @@ func (instance *OpenStackDataPlaneNode) InitConditions(instanceRole *OpenStackDa
 		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
 	)
 
-	var services *[]string
-	if instance.Spec.Node.Services != nil {
-		services = instance.Spec.Node.Services
-	} else {
-		services = instanceRole.Spec.NodeTemplate.Services
-	}
-
-	if services != nil {
-		for _, service := range *services {
+	if instanceRole.Spec.Services != nil {
+		for _, service := range instanceRole.Spec.Services {
 			readyCondition := condition.Type(fmt.Sprintf(ServiceReadyCondition, service))
 			cl = append(cl, *condition.UnknownCondition(readyCondition, condition.InitReason, condition.InitReason))
 		}
