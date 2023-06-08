@@ -71,8 +71,11 @@ func AnsibleExecution(
 	}
 
 	_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), ansibleEE, func() error {
-		ansibleEE.Spec.Image = aeeSpec.OpenStackAnsibleEERunnerImage
+		ansibleEE.Spec = ansibleeev1alpha1.NewOpenStackAnsibleEE("openstackansibleee")
 		ansibleEE.Spec.NetworkAttachments = aeeSpec.NetworkAttachments
+		if len(aeeSpec.OpenStackAnsibleEERunnerImage) > 0 {
+			ansibleEE.Spec.Image = aeeSpec.OpenStackAnsibleEERunnerImage
+		}
 		if len(aeeSpec.AnsibleTags) > 0 {
 			fmt.Fprintf(&cmdLineArguments, "--tags %s ", aeeSpec.AnsibleTags)
 		}
