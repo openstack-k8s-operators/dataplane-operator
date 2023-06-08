@@ -11,8 +11,8 @@ spec:
     edpm-compute-no-nodes:
       nodeTemplate:
         ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-        services:
-        - custom-image-service
+      services:
+      - custom-image-service
 status:
   conditions:
   - message: Deployment in progress
@@ -48,11 +48,11 @@ spec:
   dataPlane: openstack-edpm-no-nodes
   deployStrategy:
     deploy: true
+  services:
+  - custom-image-service
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     networkConfig: {}
-    services:
-    - custom-image-service
 status:
   conditions:
   - message: custom-image-service service not yet ready

@@ -61,6 +61,11 @@ type OpenStackDataPlaneRoleSpec struct {
 	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
 	// which allows to connect the ansibleee runner to the given network
 	NetworkAttachments []string `json:"networkAttachments"`
+
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={configure-network,validate-network,install-os,configure-os,run-os}
+	// Services list
+	Services []string `json:"services"`
 }
 
 //+kubebuilder:object:root=true
@@ -107,8 +112,8 @@ func (instance *OpenStackDataPlaneRole) InitConditions() {
 		condition.UnknownCondition(RoleBareMetalProvisionReadyCondition, condition.InitReason, condition.InitReason),
 	)
 
-	if instance.Spec.NodeTemplate.Services != nil {
-		for _, service := range *instance.Spec.NodeTemplate.Services {
+	if instance.Spec.Services != nil {
+		for _, service := range instance.Spec.Services {
 			readyCondition := condition.Type(fmt.Sprintf(ServiceReadyCondition, service))
 			cl = append(cl, *condition.UnknownCondition(readyCondition, condition.InitReason, condition.InitReason))
 		}

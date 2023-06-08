@@ -24,7 +24,7 @@ spec:
   roles:
     edpm-compute-no-nodes:
       nodeTemplate:
-        services:
-          - custom-image-service
         ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+      services:
+        - custom-image-service
 ---

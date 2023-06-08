@@ -26,9 +26,9 @@ func DefaultDataplaneNoNodesTemplate(name types.NamespacedName) *dataplanev1.Ope
 			},
 			Roles: map[string]dataplanev1.OpenStackDataPlaneRoleSpec{
 				"edpm-compute-no-nodes": {
+					Services: []string{"configure-network", "validate-network", "install-os", "configure-os", "run-os"},
 					NodeTemplate: dataplanev1.NodeSection{
 						AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-						Services:                   &[]string{"configure-network", "validate-network", "install-os", "configure-os", "run-os"},
 					},
 				},
 			},

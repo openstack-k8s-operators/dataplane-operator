@@ -52,13 +52,13 @@ spec:
         bmhNamespace: openstack
         domainName: osptest.openstack.org
       preProvisioned: true
+      services:
+        - configure-network
+        - validate-network
+        - install-os
+        - configure-os
+        - run-os
       nodeTemplate:
-        services:
-          - configure-network
-          - validate-network
-          - install-os
-          - configure-os
-          - run-os
         # Defining the novaTemplate here means the nodes in this role are
         # computes and they will have Ceph RBD config overrides
         nova:
