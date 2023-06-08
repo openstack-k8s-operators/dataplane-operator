@@ -1,6 +1,7 @@
 
 ### Custom Resources
 
+* [OpenStackDataPlaneService](#openstackdataplaneservice)
 
 ### Sub Resources
 
@@ -10,9 +11,9 @@
 * [NetworksSection](#networkssection)
 * [NodeSection](#nodesection)
 * [NovaTemplate](#novatemplate)
-* [OpenStackDataPlaneRole](#openstackdataplanerole)
-* [OpenStackDataPlaneRoleList](#openstackdataplanerolelist)
-* [OpenStackDataPlaneRoleSpec](#openstackdataplanerolespec)
+* [OpenStackDataPlaneServiceList](#openstackdataplaneservicelist)
+* [OpenStackDataPlaneServiceSpec](#openstackdataplaneservicespec)
+* [OpenStackDataPlaneServiceStatus](#openstackdataplaneservicestatus)
 
 #### AnsibleEESpec
 
@@ -80,7 +81,6 @@ NodeSection is a specification of the node attributes
 | extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | true |
 | userData | UserData  node specific user-data | *corev1.SecretReference | false |
 | networkData | NetworkData  node specific network-data | *corev1.SecretReference | false |
-| services | Services list | *[]string | true |
 | nova | NovaTemplate specifies the parameters for the compute service deployment on the EDPM node. If it is specified both in OpenstackDataPlaneRole and the OpenstackDataPlaneNode for the same EDPM node then the configuration in OpenstackDataPlaneNode will be used and the configuration in the OpenstackDataPlaneRole will be ignored. If this is defined in neither then compute service(s) will not be deployed on the EDPM node. | *[NovaTemplate](#novatemplate) | true |
 
 [Back to Custom Resources](#custom-resources)
@@ -98,41 +98,48 @@ NovaTemplate specifies the parameters for the compute service deployment on the 
 
 [Back to Custom Resources](#custom-resources)
 
-#### OpenStackDataPlaneRole
+#### OpenStackDataPlaneService
 
-OpenStackDataPlaneRole is the Schema for the openstackdataplaneroles API
+OpenStackDataPlaneService is the Schema for the openstackdataplaneservices API
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | metadata |  | metav1.ObjectMeta | false |
-| spec |  | [OpenStackDataPlaneRoleSpec](#openstackdataplanerolespec) | false |
-| status |  | OpenStackDataPlaneStatus | false |
+| spec |  | [OpenStackDataPlaneServiceSpec](#openstackdataplaneservicespec) | false |
+| status |  | [OpenStackDataPlaneServiceStatus](#openstackdataplaneservicestatus) | false |
 
 [Back to Custom Resources](#custom-resources)
 
-#### OpenStackDataPlaneRoleList
+#### OpenStackDataPlaneServiceList
 
-OpenStackDataPlaneRoleList contains a list of OpenStackDataPlaneRole
+OpenStackDataPlaneServiceList contains a list of OpenStackDataPlaneService
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | metadata |  | metav1.ListMeta | false |
-| items |  | [][OpenStackDataPlaneRole](#openstackdataplanerole) | true |
+| items |  | [][OpenStackDataPlaneService](#openstackdataplaneservice) | true |
 
 [Back to Custom Resources](#custom-resources)
 
-#### OpenStackDataPlaneRoleSpec
+#### OpenStackDataPlaneServiceSpec
 
-OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
+OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| dataPlane | DataPlane name of OpenStackDataPlane for this role | string | false |
-| baremetalSetTemplate | BaremetalSetTemplate Template for BaremetalSet for the Role | baremetalv1.OpenStackBaremetalSetSpec | false |
-| nodeTemplate | NodeTemplate - node attributes specific to this roles | [NodeSection](#nodesection) | false |
-| preProvisioned | \n\nPreProvisioned - Whether the nodes are actually pre-provisioned (True) or should be preprovisioned (False) | bool | false |
-| env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
-| deployStrategy | DeployStrategy section to control how the node is deployed | [DeployStrategySection](#deploystrategysection) | false |
-| networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |
+| label | Label to use for service | string | false |
+| play | Play is the playbook contents that ansible will run on execution. If both Play and Role are specified, Play takes precedence | string | false |
+| role | Role is the description of an Ansible Role | *ansibleeev1alpha1.Role | false |
+| openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | false |
+
+[Back to Custom Resources](#custom-resources)
+
+#### OpenStackDataPlaneServiceStatus
+
+OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| conditions | Conditions | condition.Conditions | false |
 
 [Back to Custom Resources](#custom-resources)

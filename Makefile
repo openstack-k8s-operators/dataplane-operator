@@ -94,7 +94,7 @@ manifests: gowork controller-gen crd-to-markdown ## Generate WebhookConfiguratio
 	$(CRD_MARKDOWN) -f api/v1beta1/openstackdataplane_types.go -n OpenStackDataPlane > docs/openstack_dataplane.md
 	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplanenode_types.go -n OpenStackDataPlaneNode > docs/openstack_dataplanenode.md
 	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplanerole_types.go -n OpenStackDataPlaneRole > docs/openstack_dataplanerole.md
-	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplanerole_types.go -n OpenStackDataPlaneService > docs/openstack_dataplaneservice.md
+	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplaneservice_types.go -n OpenStackDataPlaneService > docs/openstack_dataplaneservice.md
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
@@ -189,11 +189,13 @@ CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 CRD_MARKDOWN ?= $(LOCALBIN)/crd-to-markdown
 GINKGO ?= $(LOCALBIN)/ginkgo
+KUTTL ?= $(LOCALBIN)/kubectl-kuttl
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v3.8.7
 CONTROLLER_TOOLS_VERSION ?= v0.10.0
 CRD_MARKDOWN_VERSION ?= v0.0.3
+KUTTL_VERSION ?= 0.15.0
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize
@@ -225,6 +227,16 @@ $(ENVTEST): $(LOCALBIN)
 ginkgo: $(GINKGO) ## Download ginkgo locally if necessary.
 $(GINKGO): $(LOCALBIN)
 	test -s $(LOCALBIN)/ginkgo || GOBIN=$(LOCALBIN) go install github.com/onsi/ginkgo/v2/ginkgo
+
+.PHONY: kuttl-test
+kuttl-test: ## Run kuttl tests
+	$(LOCALBIN)/kubectl-kuttl test --config kuttl-test.yaml tests/kuttl/tests $(KUTTL_ARGS)
+
+.PHONY: kuttl
+kuttl: $(KUTTL) ## Download kubectl-kuttl locally if necessary.
+$(KUTTL): $(LOCALBIN)
+	test -s $(LOCALBIN)/kubectl-kuttl || curl -L -o $(LOCALBIN)/kubectl-kuttl https://github.com/kudobuilder/kuttl/releases/download/v$(KUTTL_VERSION)/kubectl-kuttl_$(KUTTL_VERSION)_linux_x86_64
+	chmod +x $(LOCALBIN)/kubectl-kuttl
 
 .PHONY: bundle
 bundle: manifests kustomize ## Generate bundle manifests and metadata, then validate generated files.

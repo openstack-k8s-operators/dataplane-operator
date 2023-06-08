@@ -82,6 +82,78 @@ The tests can be run with the following command:
 make test
 ```
 
+The `test` target runs the
+[EnvTest](https://book.kubebuilder.io/reference/envtest.html) tests with
+[Ginkgo](https://onsi.github.io/ginkgo/). These tools will be installed by the
+`test` if needed.
+
+`EnvTest` tests are under the
+[`tests/functional`](https://github.com/openstack-k8s-operators/dataplane-operator/tree/main/tests/functional)
+directory in dataplane-operator.
+
+### Running kuttl tests
+
+The kuttl tests require a running cluster with
+[openstack-ansibleee-operator](https://github.com/openstack-k8s-operators/openstack-ansibleee-operator)
+running in the cluster.
+
+kuttl tests are under the
+['tests/kuttl/tests'](https://github.com/openstack-k8s-operators/dataplane-operator/tree/main/tests/kuttl/tests)
+in dataplane-operator.
+
+#### From install_yamls
+
+The kuttl tests are run from the
+[install_yamls](https://github.com/openstack-k8s-operators/install_yamls)
+repository by the CI jobs.
+
+Running from `install_yamls`:
+
+```sh
+cd install_yamls
+# Set environment variables if needed to use a specific repo and branch of dataplane-operator
+export DATAPLANE_REPO=https://github.com/openstack-k8s-operators/dataplane-operator.git
+export DATAPLANE_BRANCH=main
+make dataplane_kuttl
+```
+
+#### From dataplane-operator
+
+The kuttl tests can also be run directly from the dataplane-operator checkout.
+When running from a dataplane-operator checkout, `kubectl-kuttl` must be
+installed. The `kubectl-kuttl` command can be installed from
+[kuttl releases](https://github.com/kudobuilder/kuttl/releases), or using the
+Makefile target `kuttl`:
+
+```sh
+make kuttl
+```
+
+Then, run the operator from a checkout:
+
+```sh
+make run
+```
+
+Execute the kuttl tests:
+
+```sh
+make kuttl-test
+```
+
+Run a single test if desired:
+
+```sh
+make kuttl-test KUTTL_ARGS="--test dataplane-deploy-no-nodes"
+```
+
+Skip the test resource delete, which will leave the test resources created in the
+cluster, and can be useful for debugging failed tests:
+
+```sh
+make kuttl-test KUTTL_ARGS="--test dataplane-deploy-no-nodes --skip-delete"
+```
+
 ## Contributing to documentation
 
 ### Rendering documentation locally
