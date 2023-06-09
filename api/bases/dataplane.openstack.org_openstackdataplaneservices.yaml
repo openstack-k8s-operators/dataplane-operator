@@ -33,7 +33,6 @@ spec:
               label:
                 type: string
               openStackAnsibleEERunnerImage:
-                default: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
                 type: string
               play:
                 type: string

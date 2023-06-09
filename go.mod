@@ -17,7 +17,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230601090817-30a4a761a756
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.0.0-20230601090817-30a4a761a756
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230602160508-608af8fcbb9b
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230602163853-caf143e55ca3
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230607204311-ef5f0ccf77e7
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230524141327-a53b273227de
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.3
