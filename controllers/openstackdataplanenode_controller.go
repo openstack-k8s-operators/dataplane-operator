@@ -19,20 +19,16 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/go-logr/logr"
-	yaml "gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -40,7 +36,6 @@ import (
 
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
-	"github.com/openstack-k8s-operators/lib-common/modules/ansible"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	nad "github.com/openstack-k8s-operators/lib-common/modules/common/networkattachment"
@@ -158,7 +153,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		instance.Status.Conditions.MarkFalse(dataplanev1beta1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 	}
 
-	ansibleSSHPrivateKeySecret := r.GetAnsibleSSHPrivateKeySecret(instance, instanceRole)
+	ansibleSSHPrivateKeySecret := deployment.GetAnsibleSSHPrivateKeySecret(instance, instanceRole)
 	_, result, err = secret.VerifySecret(
 		ctx,
 		types.NamespacedName{Namespace: instance.Namespace, Name: ansibleSSHPrivateKeySecret},
@@ -195,7 +190,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		}
 	}
 
-	nodeConfigMap, err := r.GenerateInventory(ctx, instance, instanceRole)
+	nodeConfigMap, err := deployment.GenerateNodeInventory(ctx, helper, instance, instanceRole)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
 		return ctrl.Result{}, err
@@ -212,7 +207,11 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{
 			Items: []dataplanev1beta1.OpenStackDataPlaneNode{*instance},
 		}
-		deployResult, err := deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, nodeConfigMap, &instance.Status, instance.GetAnsibleEESpec(*instanceRole), r.GetServices(instance, instanceRole), instanceRole)
+		deployResult, err := deployment.Deploy(
+			ctx, helper, instance, nodes,
+			ansibleSSHPrivateKeySecret, nodeConfigMap,
+			&instance.Status, instance.GetAnsibleEESpec(*instanceRole),
+			deployment.GetServices(instance, instanceRole), instanceRole)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(
@@ -293,79 +292,6 @@ func (r *OpenStackDataPlaneNodeReconciler) SetupWithManager(mgr ctrl.Manager) er
 		Complete(r)
 }
 
-// GenerateInventory yields a parsed Inventory
-func (r *OpenStackDataPlaneNodeReconciler) GenerateInventory(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) (string, error) {
-	var (
-		err      error
-		hostName string
-	)
-
-	inventory := ansible.MakeInventory()
-	all := inventory.AddGroup("all")
-	host := all.AddHost(instance.Name)
-
-	networkConfig := r.GetAnsibleNetworkConfig(instance, instanceRole)
-
-	if networkConfig.Template != "" {
-		host.Vars["edpm_network_config_template"] = deployment.NicConfigTemplateFile
-	}
-
-	host.Vars["ansible_user"] = r.GetAnsibleUser(instance, instanceRole)
-	host.Vars["ansible_port"] = r.GetAnsiblePort(instance, instanceRole)
-	host.Vars["management_network"] = r.GetAnsibleManagementNetwork(instance, instanceRole)
-	host.Vars["networks"] = r.GetAnsibleNetworks(instance, instanceRole)
-
-	if instance.Spec.AnsibleHost == "" {
-		hostName = instance.Spec.HostName
-	} else {
-		hostName = instance.Spec.AnsibleHost
-	}
-	host.Vars["ansible_host"] = hostName
-
-	ansibleVarsData, err := r.GetAnsibleVars(instance, instanceRole)
-	if err != nil {
-		return "", err
-	}
-	for key, value := range ansibleVarsData {
-		host.Vars[key] = value
-	}
-
-	configMapName := fmt.Sprintf("dataplanenode-%s", instance.Name)
-	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapName,
-			Namespace: instance.Namespace,
-			Labels:    instance.ObjectMeta.Labels,
-		},
-	}
-
-	_, err = controllerutil.CreateOrUpdate(ctx, r.Client, cm, func() error {
-		cm.TypeMeta = metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "ConfigMap",
-		}
-		cm.ObjectMeta = metav1.ObjectMeta{
-			Name:      configMapName,
-			Namespace: instance.Namespace,
-			Labels:    instance.ObjectMeta.Labels,
-		}
-		invData, err := inventory.MarshalYAML()
-		if err != nil {
-			return err
-		}
-		cm.Data = map[string]string{
-			"inventory": string(invData),
-			"network":   string(networkConfig.Template),
-		}
-		return nil
-	})
-	if err != nil {
-		return configMapName, err
-	}
-
-	return configMapName, nil
-}
-
 // GetInstanceRole returns the role of a node based on the node's role name
 func (r *OpenStackDataPlaneNodeReconciler) GetInstanceRole(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneNode) (*dataplanev1beta1.OpenStackDataPlaneRole, error) {
 	// Use the instances's role name to get its role object
@@ -381,91 +307,4 @@ func (r *OpenStackDataPlaneNodeReconciler) GetInstanceRole(ctx context.Context, 
 		}
 	}
 	return instanceRole, err
-}
-
-// GetAnsibleUser returns the string value from the template unless it is set in the node
-func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleUser(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
-	if instance.Spec.Node.AnsibleUser != "" {
-		return instance.Spec.Node.AnsibleUser
-	}
-	return instanceRole.Spec.NodeTemplate.AnsibleUser
-}
-
-// GetAnsiblePort returns the string value from the template unless it is set in the node
-func (r *OpenStackDataPlaneNodeReconciler) GetAnsiblePort(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
-	if instance.Spec.Node.AnsiblePort > 0 {
-		return strconv.Itoa(instance.Spec.Node.AnsiblePort)
-	}
-	return strconv.Itoa(instanceRole.Spec.NodeTemplate.AnsiblePort)
-}
-
-// GetAnsibleManagementNetwork returns the string value from the template unless it is set in the node
-func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleManagementNetwork(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
-	if instance.Spec.Node.ManagementNetwork != "" {
-		return instance.Spec.Node.ManagementNetwork
-	}
-	return instanceRole.Spec.NodeTemplate.ManagementNetwork
-}
-
-// GetAnsibleNetworkConfig returns a JSON string value from the template unless it is set in the node
-func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleNetworkConfig(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) dataplanev1beta1.NetworkConfigSection {
-	if instance.Spec.Node.NetworkConfig.Template != "" {
-		return instance.Spec.Node.NetworkConfig
-	}
-	return instanceRole.Spec.NodeTemplate.NetworkConfig
-}
-
-// GetAnsibleNetworks returns a JSON string mapping fixedIP and/or network name to their valules
-func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleNetworks(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) []dataplanev1beta1.NetworksSection {
-	if len(instance.Spec.Node.Networks) > 0 {
-		return instance.Spec.Node.Networks
-	}
-	return instanceRole.Spec.NodeTemplate.Networks
-}
-
-// GetAnsibleVars returns a map of strings representing ansible vars which were merged from the role template vars and node vars
-func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleVars(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) (map[string]interface{}, error) {
-	// Merge the ansibleVars from the role into the value set on the node.
-	// Top level keys set on the node ansibleVars should override top level keys from the role AnsibleVars.
-	// However, there is no "deep" merge of values. Only top level keys are compared for merging
-
-	// Unmarshal the YAML strings into two maps
-	var role, node map[string]interface{}
-	roleYamlError := yaml.Unmarshal([]byte(instanceRole.Spec.NodeTemplate.AnsibleVars), &role)
-	if roleYamlError != nil {
-		r.Log.Error(roleYamlError, fmt.Sprintf("Failed to unmarshal YAML data from role AnsibleVars '%s'", instanceRole.Spec.NodeTemplate.AnsibleVars))
-		return nil, roleYamlError
-	}
-	nodeYamlError := yaml.Unmarshal([]byte(instance.Spec.Node.AnsibleVars), &node)
-	if nodeYamlError != nil {
-		r.Log.Error(nodeYamlError, fmt.Sprintf("Failed to unmarshal YAML data from node AnsibleVars '%s'", instance.Spec.Node.AnsibleVars))
-		return nil, nodeYamlError
-	}
-
-	if role == nil && node != nil {
-		return node, nil
-	}
-	if role != nil && node == nil {
-		return role, nil
-	}
-
-	// Merge the two maps
-	for k, v := range node {
-		role[k] = v
-	}
-	return role, nil
-}
-
-// GetAnsibleSSHPrivateKeySecret returns the secret name holding the private SSH key
-func (r *OpenStackDataPlaneNodeReconciler) GetAnsibleSSHPrivateKeySecret(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) string {
-	if instance.Spec.Node.AnsibleSSHPrivateKeySecret != "" {
-		return instance.Spec.Node.AnsibleSSHPrivateKeySecret
-	}
-	return instanceRole.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
-}
-
-// GetServices returns the list of services for the node's role
-// Note that these are not inherited from NodeTemplate.
-func (r *OpenStackDataPlaneNodeReconciler) GetServices(instance *dataplanev1beta1.OpenStackDataPlaneNode, instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) []string {
-	return instanceRole.Spec.Services
 }

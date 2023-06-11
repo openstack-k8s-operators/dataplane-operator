@@ -19,9 +19,11 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
@@ -290,7 +292,15 @@ func createOrPatchDataPlaneResources(ctx context.Context, instance *dataplanev1b
 		return ctrl.Result{RequeueAfter: time.Second * 10}, nil
 	}
 
-	buildBMHHostMap(instance, nodes, roleManagedHostMap)
+	// Order the nodes based on Name
+	sort.SliceStable(nodes.Items, func(i, j int) bool {
+		return nodes.Items[i].Name < nodes.Items[j].Name
+	})
+
+	err = deployment.BuildBMHHostMap(ctx, helper, instance, nodes, roleManagedHostMap)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
 	// Patch the role again to provision the nodes
 	err = createOrPatchDataPlaneRoles(ctx, instance, helper, roleManagedHostMap)
@@ -384,31 +394,4 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 		}
 	}
 	return nil
-}
-
-// buildBMHHostMap  Build managed host map for all roles
-func buildBMHHostMap(instance *dataplanev1beta1.OpenStackDataPlane,
-	nodes *dataplanev1beta1.OpenStackDataPlaneNodeList,
-	roleManagedHostMap map[string]map[string]baremetalv1.InstanceSpec) {
-	for _, node := range nodes.Items {
-		labels := node.GetObjectMeta().GetLabels()
-		roleName, ok := labels["openstackdataplanerole"]
-		if !ok {
-			// Node does not have a label
-			continue
-		}
-		if roleManagedHostMap[roleName] == nil {
-			roleManagedHostMap[roleName] = make(map[string]baremetalv1.InstanceSpec)
-		}
-		// Using AnsibleHost (assuming it to be the ctlplane ip atm)
-		// Once IPAM has been implemented use that
-		if !instance.Spec.Roles[roleName].PreProvisioned {
-			instanceSpec := baremetalv1.InstanceSpec{}
-			instanceSpec.CtlPlaneIP = node.Spec.AnsibleHost
-			instanceSpec.UserData = node.Spec.Node.UserData
-			instanceSpec.NetworkData = node.Spec.Node.NetworkData
-			roleManagedHostMap[roleName][node.Spec.HostName] = instanceSpec
-
-		}
-	}
 }

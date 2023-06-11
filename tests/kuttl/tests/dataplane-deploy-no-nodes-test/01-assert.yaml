@@ -58,6 +58,14 @@ status:
     reason: Init
     status: Unknown
     type: RoleBaremetalProvisionReady
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: RoleDNSDataReady
+  - message: Init
+    reason: Init
+    status: Unknown
+    type: RoleIPReservationReady
   - message: Setup complete
     reason: Ready
     status: "True"
