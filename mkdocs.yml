@@ -36,7 +36,7 @@ nav:
   - Inheritance: inheritance.md
   - Deploying a DataPlane:
       - deploying.md
-      - composable-services.md
+      - composable_services.md
   - Contributing: contributing.md
 markdown_extensions:
   - toc:
