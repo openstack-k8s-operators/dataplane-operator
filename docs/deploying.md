@@ -206,6 +206,9 @@ To understand what variables are available for each service, see the
 documentation in the [Create
 OpenStackDataPlaneServices](#create-openstackdataplaneservices) section.
 
+Common configurations that can be enabled with `ansibleVars` are also
+documented at [Common Configurations](common_configurations.md).
+
 Some of the ansible variables will need to be set based on values from the
 controlplane that is already deployed. This set of ansible variables and the
 `oc` command that can be used to get their values are shown below.

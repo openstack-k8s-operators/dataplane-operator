@@ -37,6 +37,7 @@ nav:
   - Deploying a DataPlane:
       - deploying.md
       - composable_services.md
+      - common_configurations.md
   - Contributing: contributing.md
 markdown_extensions:
   - toc:
