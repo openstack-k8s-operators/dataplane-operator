@@ -46,7 +46,7 @@ repos:
       exclude: ^vendor
     - id: no-commit-to-branch
     - id: trailing-whitespace
-      exclude: ^vendor
+      exclude: ^vendor|^docs
 
 - repo: https://github.com/golangci/golangci-lint
   rev: v1.52.2
