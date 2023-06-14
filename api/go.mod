@@ -6,7 +6,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230601090817-30a4a761a756
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230601090817-30a4a761a756
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230607204311-ef5f0ccf77e7
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230524141327-a53b273227de
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230613114155-df8e635a042c
 	k8s.io/api v0.26.3
 	k8s.io/apimachinery v0.26.3
 	sigs.k8s.io/controller-runtime v0.14.6

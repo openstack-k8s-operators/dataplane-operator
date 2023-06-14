@@ -229,8 +229,8 @@ github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-202306010908
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230601090817-30a4a761a756 h1:2qBaepC3G4LSq6mD7GqgvQEsBTzstTbqYGEO15DzEYg=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230601090817-30a4a761a756/go.mod h1:7sbo6DydOwpl8Ex1atTbXIrWYvZ++eSOJ0Z6RphJJ44=
 github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230607204311-ef5f0ccf77e7 h1:NSRBcS+fBNVf20q94HgJyyiltmu/eHXIzo/ZmIe8euM=
-github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230524141327-a53b273227de h1:k1KIvOYZboCp57r++YLom3y3a693nqHkQSfiP4Fe8X8=
-github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230524141327-a53b273227de/go.mod h1:FOwZQb1fb5Wzfo2O+PD4zXc9qIZ0co3Dqu40xkzmd8Q=
+github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230613114155-df8e635a042c h1:S2TZh32AnNi5q8T8eLcGQ5t1BlnkBcEbCeNs63OJyYg=
+github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230613114155-df8e635a042c/go.mod h1:FOwZQb1fb5Wzfo2O+PD4zXc9qIZ0co3Dqu40xkzmd8Q=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
