@@ -12,19 +12,19 @@ repository.
 
 ## Initial bootstrap command
 
-**Variable**: `edpm_boostrap_command`  
+**Variable**: `edpm_bootstrap_command`  
 **Type**: `string`  
 **Role**: [edpm_bootstrap](https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles/edpm_bootstrap)
 
-The `edpm_boostrap_command` variable can be used to pass a shell command(s) that
+The `edpm_bootstrap_command` variable can be used to pass a shell command(s) that
 will be executed as early as possible in the deployment as part of the
 `configure-network` service. If the `services` list is customized with services
 that execute prior to `configure-network` then the command(s) specified by
 `edpm_bootstrap_command` would run after the custom services.
 
-### Using `edpm_boostrap_command` for system registration
+### Using `edpm_bootstrap_command` for system registration
 
-`edpm_boostrap_command` can be used to perform system registration in order to
+`edpm_bootstrap_command` can be used to perform system registration in order to
 enable needed package repositories. Choose a registration method (either Portal
 or Satellite) and refer to the provided links below for instructions to create
 the registration commands.
