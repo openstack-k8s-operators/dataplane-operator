@@ -38,6 +38,18 @@ The default list of services as they will appear on the `services` field on an
 If the `services` field is ommitted from the `OpenStackDataPlaneRole` spec,
 then the above list will be used.
 
+The default list of services are reconciled during role reconciliation if the
+service is in the role's service list.
+
+---
+** NOTE **
+
+Do not create a custom service with the same name as one of the default
+services. The default service will overwrite the custom service with the same
+name during role reconciliation.
+
+---
+
 ## Interacting with the `OpenStackDataPlaneService` API
 
 The list of services available to be used by the dataplane can be seen by

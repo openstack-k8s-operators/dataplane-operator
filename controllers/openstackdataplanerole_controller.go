@@ -19,6 +19,9 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"os"
+	"path"
+	"strings"
 	"time"
 
 	yaml "gopkg.in/yaml.v3"
@@ -57,6 +60,9 @@ type OpenStackDataPlaneRoleReconciler struct {
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneroles,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneroles/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneroles/finalizers,verbs=update
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices/finalizers,verbs=update
 //+kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=baremetal.openstack.org,resources=openstackbaremetalsets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=nova.openstack.org,resources=novaexternalcomputes,verbs=get;list;watch;create;update;patch;delete
@@ -136,6 +142,11 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 
 	if instance.Status.Conditions.IsUnknown(dataplanev1beta1.SetupReadyCondition) {
 		instance.Status.Conditions.MarkFalse(dataplanev1beta1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
+	}
+
+	err = r.EnsureServices(ctx, helper, instance)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
 	if len(instance.Spec.DataPlane) > 0 {
@@ -292,6 +303,96 @@ func (r *OpenStackDataPlaneRoleReconciler) ReconcileBaremetalSet(ctx context.Con
 		dataplanev1beta1.RoleBareMetalProvisionReadyCondition,
 		dataplanev1beta1.RoleBaremetalProvisionReadyMessage)
 	return nil, nil
+}
+
+// ServiceYAML struct for service YAML unmarshalling
+type ServiceYAML struct {
+	Kind     string
+	Metadata yaml.Node
+	Spec     yaml.Node
+}
+
+// EnsureServices - ensure the OpenStackDataPlaneServices exist
+func (r *OpenStackDataPlaneRoleReconciler) EnsureServices(ctx context.Context, helper *helper.Helper, instance *dataplanev1beta1.OpenStackDataPlaneRole) error {
+	servicesPath, found := os.LookupEnv("OPERATOR_SERVICES")
+	if !found {
+		servicesPath = "config/services"
+		os.Setenv("OPERATOR_SERVICES", servicesPath)
+		util.LogForObject(
+			helper, "OPERATOR_SERVICES not set in env when reconciling ", instance,
+			"defaulting to ", servicesPath)
+	}
+
+	r.Log.Info("Ensuring services", "servicesPath", servicesPath)
+	services, err := os.ReadDir(servicesPath)
+	if err != nil {
+		return err
+	}
+
+	for _, service := range services {
+
+		servicePath := path.Join(servicesPath, service.Name())
+
+		if !strings.HasSuffix(service.Name(), ".yaml") {
+			r.Log.Info("Skipping ensuring service from file without .yaml suffix", "file", service.Name())
+			continue
+		}
+
+		data, _ := os.ReadFile(servicePath)
+		var serviceObj ServiceYAML
+		err = yaml.Unmarshal(data, &serviceObj)
+		if err != nil {
+			r.Log.Info("Service YAML file Unmarshal error", "service YAML file", servicePath)
+			return err
+		}
+
+		if serviceObj.Kind != "OpenStackDataPlaneService" {
+			r.Log.Info("Skipping ensuring service since kind is not OpenStackDataPlaneService", "file", servicePath, "Kind", serviceObj.Kind)
+			continue
+		}
+
+		serviceObjMeta := &metav1.ObjectMeta{}
+		err = serviceObj.Metadata.Decode(serviceObjMeta)
+		if err != nil {
+			r.Log.Info("Service Metadata decode error")
+			return err
+		}
+
+		roleContainsService := false
+		for _, roleServiceName := range instance.Spec.Services {
+			if roleServiceName == serviceObjMeta.Name {
+				roleContainsService = true
+				break
+			}
+		}
+		if !roleContainsService {
+			r.Log.Info("Skipping ensure service since it is not a service on this role", "service", serviceObjMeta.Name)
+			continue
+		}
+
+		serviceObjSpec := &dataplanev1beta1.OpenStackDataPlaneServiceSpec{}
+		err = serviceObj.Spec.Decode(serviceObjSpec)
+		if err != nil {
+			r.Log.Info("Service Spec decode error")
+			return err
+		}
+
+		ensureService := &dataplanev1beta1.OpenStackDataPlaneService{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      serviceObjMeta.Name,
+				Namespace: instance.Namespace,
+			},
+		}
+		_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), ensureService, func() error {
+			ensureService.Spec = *serviceObjSpec
+			return nil
+		})
+		if err != nil {
+			return fmt.Errorf("Error ensuring service: %w", err)
+		}
+	}
+
+	return nil
 }
 
 // GenerateInventory yields a parsed Inventory

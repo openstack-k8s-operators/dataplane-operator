@@ -73,63 +73,6 @@ Verify the secret was created:
 
     oc describe secret dataplane-ansible-ssh-private-key-secret
 
-### Create OpenStackDataPlaneServices
-
-A dataplane is configured with a set of services that define with Ansible roles
-and task files are executed to complete the deployment. The dataplane-operator
-has a default list of services that are deployed by default (unless the
-`services` field is overridden). The services are provided within the
-[config/services](https://github.com/openstack-k8s-operators/dataplane-operator/tree/main/config/services)
-directory and must be created with `oc`. Specify the path to where
-dataplane-operator is checked out and create the services.
-
-    oc create -f dataplane-operator/config/services
-
-Verify the services were created.
-
-    oc get openstackdataplaneservice
-
-The output should be similar to:
-
-    NAME                AGE
-    configure-network   6d7h
-    configure-os        6d6h
-    install-os          6d6h
-    run-os              6d6h
-    validate-network    6d6h
-
-Each service uses the
-[`role`](https://openstack-k8s-operators.github.io/openstack-ansibleee-operator/openstack_ansibleee/#role)
-field from the `OpenStackAnsibleEE` CRD provided
-by
-[openstack-ansibleee-operator](https://github.com/openstack-k8s-operators/openstack-ansibleee-operator)
-to define the Ansible roles and task files that are executed as part of that
-service.
-
-For example, the list of roles for the `install-os` service can be seen by
-describing the resource.
-
-    oc describe openstackdataplaneservice install-os
-
-Any role listed in the `osp.edpm` namespace is provided by the
-[edpm-ansible](https://github.com/openstack-k8s-operators/edpm-ansible)
-project. Within that project, the ansible variables that can be used to
-configure the role are documented.
-
-For example, in the describe output for the `install-os` service, the
-`osp.edpm.edpm_sshd` role is seen.
-
-	import_role:
-	  Name:        osp.edpm.edpm_sshd
-	  tasks_from:  install.yml
-	Name:          Install edpm_sshd
-	Tags:
-	  edpm_sshd
-
-The ansible variables that configure the
-behavior of the `osp.edpm.edpm_sshd` role are available at
-<https://github.com/openstack-k8s-operators/edpm-ansible/blob/main/roles/edpm_sshd/tasks/main.yml>.
-
 ### Create OpenStackDataPlane
 
 This document will cover writing the `YAML` document for an
@@ -343,6 +286,76 @@ The output should be similar to:
 	NAME             STATUS   MESSAGE
 	edpm-compute-0   False    Deployment not started
 	edpm-compute-1   False    Deployment not started
+
+### Understanding OpenStackDataPlaneServices
+
+A dataplane is configured with a set of services that define the Ansible roles
+and task files that are executed to complete the deployment. The
+dataplane-operator has a default list of services that are deployed by default
+(unless the `services` field is overridden). The default services are provided
+within the
+[config/services](https://github.com/openstack-k8s-operators/dataplane-operator/tree/main/config/services)
+directory.
+
+Each service is a custom resource of type
+[OpenStackDataPlaneService](openstack_dataplaneservice.md). The services will
+be created and updated automatically during OpenStackDataPlaneRole reconciliation.
+
+See [Composable Services](composable_services.md) for further documentation
+about services and customizing services.
+
+Verify the services were created.
+
+    oc get openstackdataplaneservice
+
+The output should be similar to:
+
+    NAME                AGE
+    configure-network   6d7h
+    configure-os        6d6h
+    install-os          6d6h
+    run-os              6d6h
+    validate-network    6d6h
+
+Each service uses the
+[`role`](https://openstack-k8s-operators.github.io/openstack-ansibleee-operator/openstack_ansibleee/#role)
+field from the `OpenStackAnsibleEE` CRD provided
+by
+[openstack-ansibleee-operator](https://github.com/openstack-k8s-operators/openstack-ansibleee-operator)
+to define the Ansible roles and task files that are executed as part of that
+service.
+
+For example, the list of roles for the `install-os` service can be seen by
+describing the resource.
+
+    oc describe openstackdataplaneservice install-os
+
+Any role listed in the `osp.edpm` namespace is provided by the
+[edpm-ansible](https://github.com/openstack-k8s-operators/edpm-ansible)
+project. Within that project, the ansible variables that can be used to
+configure the role are documented.
+
+For example, in the describe output for the `install-os` service, the
+`osp.edpm.edpm_sshd` role is seen.
+
+	import_role:
+	  Name:        osp.edpm.edpm_sshd
+	  tasks_from:  install.yml
+	Name:          Install edpm_sshd
+	Tags:
+	  edpm_sshd
+
+The ansible variables that configure the
+behavior of the `osp.edpm.edpm_sshd` role are available at
+<https://github.com/openstack-k8s-operators/edpm-ansible/blob/main/roles/edpm_sshd/tasks/main.yml>.
+
+---
+** NOTE **
+
+If the default provided services are edited, those edits will be lost after any
+further role reconciliations.
+
+---
 
 ### Deploy the dataplane.
 

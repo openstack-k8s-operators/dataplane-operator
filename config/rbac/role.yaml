@@ -161,9 +161,27 @@ rules:
   resources:
   - openstackdataplaneservices
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
   - watch
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplaneservices/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplaneservices/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - k8s.cni.cncf.io
   resources:

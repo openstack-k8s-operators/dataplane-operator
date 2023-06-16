@@ -28,6 +28,8 @@ RUN if [ ! -f $CACHITO_ENV_FILE ]; then go mod download ; fi
 # Build manager
 RUN if [ -f $CACHITO_ENV_FILE ] ; then source $CACHITO_ENV_FILE ; fi ; CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} GO111MODULE=on go build ${GO_BUILD_EXTRA_ARGS} -a -o ${DEST_ROOT}/manager main.go
 
+RUN cp -r config/services ${DEST_ROOT}/services
+
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM $OPERATOR_BASE_IMAGE
@@ -58,12 +60,16 @@ LABEL com.redhat.component="${IMAGE_COMPONENT}" \
 ### DO NOT EDIT LINES ABOVE
 
 ENV USER_UID=$USER_ID \
-    OPERATOR_TEMPLATES=/usr/share/dataplane-operator/templates/
+    OPERATOR_TEMPLATES=/usr/share/dataplane-operator/templates/ \
+    OPERATOR_SERVICES=/usr/share/dataplane-operator/services/
 
 WORKDIR /
 
 # Install operator binary to WORKDIR
 COPY --from=builder ${DEST_ROOT}/manager .
+
+# Install services
+COPY --from=builder ${DEST_ROOT}/services ${OPERATOR_SERVICES}
 
 USER $USER_ID
 
