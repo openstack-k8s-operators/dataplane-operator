@@ -101,11 +101,11 @@ spec:
       edpm_nodes_validation_validate_controllers_icmp: false
       edpm_nodes_validation_validate_gateway_icmp: false
 
-      edpm_ovn_metadata_agent_default_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
+      edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
       edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
-      edpm_ovn_metadata_agent_metadata_agent_default_nova_metadata_host: 127.0.0.1
-      edpm_ovn_metadata_agent_metadata_agent_default_metadata_proxy_shared_secret: 12345678
-      edpm_ovn_metadata_agent_default_bind_host: 127.0.0.1
+      edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
+      edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
+      edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
       edpm_chrony_ntp_servers:
       - clock.redhat.com
       - clock2.redhat.com
@@ -353,11 +353,11 @@ data:
             edpm_ovn_controller_agent_image: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
             edpm_ovn_dbs:
                 - 192.168.24.1
-            edpm_ovn_metadata_agent_default_bind_host: 127.0.0.1
-            edpm_ovn_metadata_agent_default_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
+            edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
+            edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
             edpm_ovn_metadata_agent_image: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
-            edpm_ovn_metadata_agent_metadata_agent_default_metadata_proxy_shared_secret: 12345678
-            edpm_ovn_metadata_agent_metadata_agent_default_nova_metadata_host: 127.0.0.1
+            edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
+            edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
             edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
             edpm_selinux_mode: enforcing
             edpm_sshd_allowed_ranges:
@@ -459,11 +459,11 @@ data:
                 edpm_ovn_controller_agent_image: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
                 edpm_ovn_dbs:
                     - 192.168.24.1
-                edpm_ovn_metadata_agent_default_bind_host: 127.0.0.1
-                edpm_ovn_metadata_agent_default_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
+                edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
+                edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
                 edpm_ovn_metadata_agent_image: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
-                edpm_ovn_metadata_agent_metadata_agent_default_metadata_proxy_shared_secret: 12345678
-                edpm_ovn_metadata_agent_metadata_agent_default_nova_metadata_host: 127.0.0.1
+                edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
+                edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
                 edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
                 edpm_selinux_mode: enforcing
                 edpm_sshd_allowed_ranges:
@@ -555,11 +555,11 @@ data:
                 edpm_ovn_controller_agent_image: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
                 edpm_ovn_dbs:
                     - 192.168.24.1
-                edpm_ovn_metadata_agent_default_bind_host: 127.0.0.1
-                edpm_ovn_metadata_agent_default_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
+                edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
+                edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
                 edpm_ovn_metadata_agent_image: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
-                edpm_ovn_metadata_agent_metadata_agent_default_metadata_proxy_shared_secret: 12345678
-                edpm_ovn_metadata_agent_metadata_agent_default_nova_metadata_host: 127.0.0.1
+                edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
+                edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
                 edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
                 edpm_selinux_mode: enforcing
                 edpm_sshd_allowed_ranges:
