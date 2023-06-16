@@ -131,6 +131,8 @@ In some cases, it may be necessary to customize the image used by the
 ansible-runner execution environment in order to add additional ansible content
 that might be needed (such as ansible roles or modules).
 
+##### Building a new custom ansible-runner image
+
 Write a `Containerfile` that adds the needed custom content to the default
 image:
 
@@ -154,6 +156,14 @@ In the `OpenStackDataPlaneService` YAML, specify the custom image for the
       label: dataplane-deployment-hello-world
       openstackAnsibleEEImage: quay.io/example_user/my_custom_role:latest
       ...
+
+##### Using ExtraMounts
+
+The `ExtraMounts` field in the
+[`NodeSection`](https://openstack-k8s-operators.github.io/dataplane-operator/openstack_dataplanerole/#nodesection)
+field can be used to mount custom content into the ansible-runner image. In
+some cases, this is a simpler method to customize the image than having to
+build an entirely new image.
 
 ### Enabling a custom service
 
