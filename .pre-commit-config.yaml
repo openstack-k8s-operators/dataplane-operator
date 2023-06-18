@@ -1,6 +1,11 @@
 repos:
 - repo: local
   hooks:
+    - id: gotidy
+      name: gotidy
+      language: system
+      entry: make
+      args: ["tidy"]
     - id: make-manifests
       name: make-manifests
       language: system
