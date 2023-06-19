@@ -162,6 +162,8 @@ spec:
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
+                  osImage:
+                    type: string
                   passwordSecret:
                     properties:
                       name:
@@ -173,8 +175,6 @@ spec:
                   provisionServerName:
                     type: string
                   provisioningInterface:
-                    type: string
-                  rhelImageUrl:
                     type: string
                   userData:
                     properties:
