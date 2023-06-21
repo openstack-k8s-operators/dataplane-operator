@@ -39,3 +39,16 @@ spec:
       edpm_ovn_metadata_agent_image: "{{ registry_name }}/{{ registry_namespace }}/openstack-neutron-metadata-agent-ovn:{{ image_tag }}"
   deployStrategy:
     deploy: false
+  ceilometerCompute:
+    serviceAccount: telemetry-operator-telemetry
+    dataplaneSSHSecret: dataplane-ansible-ssh-private-key-secret
+    dataplaneInventoryConfigMap: dataplanerole-edpm-compute
+    initImage: quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified
+    computeImage: quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified
+    playbook: osp.edpm.deploy_edpm_telemetry_ceilometer.yml
+  infraCompute:
+    serviceAccount: telemetry-operator-telemetry
+    dataplaneSSHSecret: dataplane-ansible-ssh-private-key-secret
+    dataplaneInventoryConfigMap: dataplanerole-edpm-compute
+    nodeExporterImage: quay.io/prometheus/node-exporter:v1.5.0
+    playbook: osp.edpm.deploy_edpm_telemetry_infra.yml

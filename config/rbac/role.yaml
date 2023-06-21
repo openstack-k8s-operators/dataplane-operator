@@ -202,3 +202,27 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - telemetry.openstack.org
+  resources:
+  - ceilometercomputes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - telemetry.openstack.org
+  resources:
+  - infracomputes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch

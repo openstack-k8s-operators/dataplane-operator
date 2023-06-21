@@ -173,3 +173,7 @@ spec:
           hosts_entry: []
       deployStrategy:
         deploy: false
+      ceilometerCompute:
+        playbook: osp.edpm.deploy_edpm_telemetry_ceilometer.yml
+      infraCompute:
+        playbook: osp.edpm.deploy_edpm_telemetry_infra.yml

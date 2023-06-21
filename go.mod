@@ -19,6 +19,7 @@ require (
 	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230616123447-48c9264e2c33
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230612175620-ea563267160e
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230619033923-b51a7994eafe
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.0.0-20230620145026-835ae3776d5e
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.3
 	k8s.io/apimachinery v0.26.3

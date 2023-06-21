@@ -207,6 +207,12 @@ func Deploy(
 	log.Info("All NovaExternalCompute ReadyConditions are true")
 	status.Conditions.Set(condition.TrueCondition(dataplanev1beta1.NovaComputeReadyCondition, dataplanev1beta1.NovaComputeReadyMessage))
 
+	err = DeployTelemetry(ctx, role, helper, inventoryConfigMap, sshKeySecret)
+	if err != nil {
+		log.Error(err, "Failed to deploy Telemetry")
+		return &ctrl.Result{}, err
+	}
+
 	return nil, nil
 
 }

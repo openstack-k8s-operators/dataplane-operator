@@ -37,6 +37,7 @@ import (
 	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
@@ -57,6 +58,7 @@ func init() {
 	utilruntime.Must(networkv1.AddToScheme(scheme))
 	utilruntime.Must(novav1beta1.AddToScheme(scheme))
 	utilruntime.Must(baremetalv1.AddToScheme(scheme))
+	utilruntime.Must(telemetryv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

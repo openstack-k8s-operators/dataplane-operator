@@ -47,6 +47,7 @@ import (
 	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 )
 
 // OpenStackDataPlaneRoleReconciler reconciles a OpenStackDataPlaneRole object
@@ -66,6 +67,8 @@ type OpenStackDataPlaneRoleReconciler struct {
 //+kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=baremetal.openstack.org,resources=openstackbaremetalsets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=nova.openstack.org,resources=novaexternalcomputes,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=telemetry.openstack.org,resources=ceilometercomputes,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=telemetry.openstack.org,resources=infracomputes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
@@ -466,6 +469,8 @@ func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) er
 		Owns(&v1alpha1.OpenStackAnsibleEE{}).
 		Owns(&novav1beta1.NovaExternalCompute{}).
 		Owns(&baremetalv1.OpenStackBaremetalSet{}).
+		Owns(&telemetryv1.CeilometerCompute{}).
+		Owns(&telemetryv1.InfraCompute{}).
 		Owns(&corev1.ConfigMap{}).
 		Complete(r)
 }

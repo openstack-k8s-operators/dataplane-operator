@@ -373,6 +373,8 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 				bmsTemplate.BaremetalHosts = hostMap
 				role.Spec.BaremetalSetTemplate = *bmsTemplate
 			}
+			role.Spec.CeilometerCompute = roleSpec.CeilometerCompute
+			role.Spec.InfraCompute = roleSpec.InfraCompute
 			err := controllerutil.SetControllerReference(instance, role, helper.GetScheme())
 			if err != nil {
 				return err

@@ -24,6 +24,7 @@ import (
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -66,6 +67,14 @@ type OpenStackDataPlaneRoleSpec struct {
 	// +kubebuilder:default={configure-network,validate-network,install-os,configure-os,run-os}
 	// Services list
 	Services []string `json:"services"`
+
+	// +kubebuilder:validation:Required
+	// CeilometerCompute - Spec definition for the CeilometerCompute service of this dataplane deployment
+	CeilometerCompute telemetryv1.CeilometerComputeSpec `json:"ceilometerCompute"`
+
+	// +kubebuilder:validation:Required
+	// InfraCompute - Spec definition for the InfraCompute service of this dataplane deployment
+	InfraCompute telemetryv1.InfraComputeSpec `json:"infraCompute"`
 }
 
 //+kubebuilder:object:root=true

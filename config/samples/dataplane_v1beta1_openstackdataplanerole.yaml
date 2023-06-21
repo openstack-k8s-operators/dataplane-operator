@@ -16,3 +16,7 @@ spec:
     managementNetwork: ctlplane
     ansibleUser: root
     ansiblePort: 22
+    ceilometerCompute:
+      playbook: osp.edpm.deploy_edpm_telemetry_ceilometer.yml
+    infraCompute:
+      playbook: osp.edpm.deploy_edpm_telemetry_infra.yml

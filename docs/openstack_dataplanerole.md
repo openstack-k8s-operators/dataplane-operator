@@ -134,5 +134,7 @@ OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
 | deployStrategy | DeployStrategy section to control how the node is deployed | [DeployStrategySection](#deploystrategysection) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |
 | services | Services list | []string | true |
+| ceilometerCompute | CeilometerCompute - Spec definition for the CeilometerCompute service of this dataplane deployment | telemetryv1.CeilometerComputeSpec | true |
+| infraCompute | InfraCompute - Spec definition for the InfraCompute service of this dataplane deployment | telemetryv1.InfraComputeSpec | true |
 
 [Back to Custom Resources](#custom-resources)
