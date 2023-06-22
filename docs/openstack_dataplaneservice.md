@@ -8,7 +8,6 @@
 * [AnsibleEESpec](#ansibleeespec)
 * [DeployStrategySection](#deploystrategysection)
 * [NetworkConfigSection](#networkconfigsection)
-* [NetworksSection](#networkssection)
 * [NodeSection](#nodesection)
 * [NovaTemplate](#novatemplate)
 * [OpenStackDataPlaneServiceList](#openstackdataplaneservicelist)
@@ -50,18 +49,7 @@ NetworkConfigSection is a specification of the Network configuration details
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| template | Template - Contains a Ansible j2 nic config template to use when applying node network configuration | string | false |
-
-[Back to Custom Resources](#custom-resources)
-
-#### NetworksSection
-
-NetworksSection is a specification of the network attributes
-
-| Field | Description | Scheme | Required |
-| ----- | ----------- | ------ | -------- |
-| network | Network - Network name to configure | string | false |
-| fixedIP | FixedIP - Specific IP address to use for this network | string | false |
+| template | Template - Contains a Ansible j2 nic config template to use when applying node network configuration | string | true |
 
 [Back to Custom Resources](#custom-resources)
 
@@ -71,10 +59,10 @@ NodeSection is a specification of the node attributes
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | false |
-| networks | Networks - Instance networks | [][NetworksSection](#networkssection) | false |
-| managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
-| ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
+| networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | true |
+| networks | Networks - Instance networks | []infranetworkv1.IPSetNetwork | false |
+| managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | true |
+| ansibleUser | AnsibleUser SSH user for Ansible connection | string | true |
 | ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
 | ansibleVars | AnsibleVars for configuring ansible | string | false |
 | ansibleSSHPrivateKeySecret | AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey: <base64 encoded private key contents> https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets | string | true |

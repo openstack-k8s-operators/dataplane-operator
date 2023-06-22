@@ -191,6 +191,76 @@ rules:
   - list
   - watch
 - apiGroups:
+  - network.openstack.org
+  resources:
+  - dnsdata
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - dnsdata/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - dnsdata/status
+  verbs:
+  - get
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - dnsmasqs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - dnsmasqs/status
+  verbs:
+  - get
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - ipsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - ipsets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - ipsets/status
+  verbs:
+  - get
+- apiGroups:
+  - network.openstack.org
+  resources:
+  - netconfigs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - nova.openstack.org
   resources:
   - novaexternalcomputes

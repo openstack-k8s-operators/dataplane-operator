@@ -93,6 +93,7 @@ const (
 	// RoleBareMetalProvisionReadyCondition Status=True condition indicates
 	// all baremetal nodes provisioned for the Role.
 	RoleBareMetalProvisionReadyCondition condition.Type = "RoleBaremetalProvisionReady"
+
 	// RoleBaremetalProvisionReadyMessage ready
 	RoleBaremetalProvisionReadyMessage = "RoleBaremetalProvisionReady ready"
 
@@ -101,4 +102,31 @@ const (
 
 	// RoleBaremetalProvisionErrorMessage error
 	RoleBaremetalProvisionErrorMessage = "RoleBaremetalProvisionReady error occurred"
+
+	// RoleIPReservationReadyCondition Status=True condition indicates
+	// IPSets reserved for all nodes in a Role.
+	RoleIPReservationReadyCondition condition.Type = "RoleIPReservationReady"
+
+	// RoleIPReservationReadyMessage ready
+	RoleIPReservationReadyMessage = "RoleIPReservationReady ready"
+
+	// RoleIPReservationReadyWaitingMessage not yet ready
+	RoleIPReservationReadyWaitingMessage = "RoleIPReservationReady not yet ready"
+
+	// RoleIPReservationReadyErrorMessage error
+	RoleIPReservationReadyErrorMessage = "RoleIPReservationReady error occurred"
+
+	// RoleDNSDataReadyCondition Status=True condition indicates
+	// DNSData created for the Role.
+	RoleDNSDataReadyCondition condition.Type = "RoleDNSDataReady"
+
+	// RoleDNSDataReadyMessage ready
+	RoleDNSDataReadyMessage = "RoleDNSDataReady ready"
+
+	// RoleDNSDataReadyWaitingMessage not yet ready
+	RoleDNSDataReadyWaitingMessage = "RoleDNSDataReady not yet ready"
+
+	// RoleDNSDataReadyErrorMessage error
+	RoleDNSDataReadyErrorMessage = "RoleDNSDataReady error occurred"
+
 )

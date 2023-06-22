@@ -18,6 +18,9 @@ package deployment
 
 const (
 
+	// CtlPlaneNetwork - default CtlPlane Network Name in NetConfig
+	CtlPlaneNetwork = "CtlPlane"
+
 	// ValidateNetworkLabel for ValidateNetwork OpenStackAnsibleEE
 	ValidateNetworkLabel = "dataplane-deployment-validate-network"
 

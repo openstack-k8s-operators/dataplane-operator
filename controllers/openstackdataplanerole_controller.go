@@ -19,27 +19,22 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"os"
-	"path"
-	"strings"
+	"sort"
 	"time"
 
-	yaml "gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
-	"github.com/openstack-k8s-operators/lib-common/modules/ansible"
+	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
@@ -66,10 +61,19 @@ type OpenStackDataPlaneRoleReconciler struct {
 //+kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=baremetal.openstack.org,resources=openstackbaremetalsets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=nova.openstack.org,resources=novaexternalcomputes,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete;
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete;
-// +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
-// +kubebuilder:rbac:groups=k8s.cni.cncf.io,resources=network-attachment-definitions,verbs=get;list;watch
+//+kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete;
+//+kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete;
+//+kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
+//+kubebuilder:rbac:groups=k8s.cni.cncf.io,resources=network-attachment-definitions,verbs=get;list;watch
+//+kubebuilder:rbac:groups=network.openstack.org,resources=ipsets,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=network.openstack.org,resources=ipsets/status,verbs=get
+//+kubebuilder:rbac:groups=network.openstack.org,resources=ipsets/finalizers,verbs=update
+//+kubebuilder:rbac:groups=network.openstack.org,resources=netconfigs,verbs=get;list;watch
+//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsmasqs,verbs=get;list;watch
+//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsmasqs/status,verbs=get
+//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/status,verbs=get
+//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -144,11 +148,13 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		instance.Status.Conditions.MarkFalse(dataplanev1beta1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 	}
 
-	err = r.EnsureServices(ctx, helper, instance)
+	// Ensure Services
+	err = deployment.EnsureServices(ctx, helper, instance)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
+	// Add/Remove openstackdataplane Label
 	if len(instance.Spec.DataPlane) > 0 {
 		if instance.ObjectMeta.Labels == nil {
 			instance.ObjectMeta.Labels = make(map[string]string)
@@ -160,14 +166,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		delete(instance.ObjectMeta.Labels, "openstackdataplane")
 	}
 
-	// Reconcile BaremetalSet if required
-	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
-		ctrlResult, err := r.ReconcileBaremetalSet(ctx, instance, helper)
-		if err != nil || ctrlResult != nil {
-			return *ctrlResult, err
-		}
-	}
-
+	// Get List of Nodes with matching Role Label
 	nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{}
 
 	listOpts := []client.ListOption{
@@ -184,26 +183,49 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	nodeNames := ""
-	for _, node := range nodes.Items {
-		if node.Spec.Role != instance.Name {
-			err = fmt.Errorf("node %s: node.Role does not match with node.Label", node.Name)
-			return ctrl.Result{}, err
-		}
-		nodeNames = nodeNames + node.Name + ","
-	}
-	r.Log.Info("Role", "Nodes", nodeNames, "Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
+
+	// Order the nodes based on Name
+	sort.SliceStable(nodes.Items, func(i, j int) bool {
+		return nodes.Items[i].Name < nodes.Items[j].Name
+	})
+
+	// Validate NodeSpecs
 	err = instance.Validate(nodes.Items)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
-	roleConfigMap, err := r.GenerateInventory(ctx, instance, nodes.Items)
+	// Ensure IPSets Required for Nodes
+	allIPSets, isReady, err := deployment.EnsureIPSets(ctx, helper, instance, nodes)
+	if err != nil || !isReady {
+		return ctrl.Result{}, err
+	}
+
+	// Ensure DNSData Required for Nodes
+	dnsAddresses, isReady, err := deployment.EnsureDNSData(ctx, helper,
+		instance, nodes, allIPSets)
+	if err != nil || !isReady {
+		return ctrl.Result{}, err
+	}
+
+	// Reconcile BaremetalSet if required
+	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
+		isReady, err := deployment.DeployBaremetalSet(ctx, helper, instance,
+			nodes, allIPSets, dnsAddresses)
+		if err != nil || !isReady {
+			return ctrl.Result{}, err
+		}
+	}
+
+	// Generate Role Inventory
+	roleConfigMap, err := deployment.GenerateRoleInventory(ctx, helper, instance,
+		nodes.Items, allIPSets, dnsAddresses)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
 		return ctrl.Result{}, err
 	}
 
+	// Verify Ansible SSH Secret
 	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 	_, result, err = secret.VerifySecret(
 		ctx,
@@ -267,198 +289,6 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	return ctrl.Result{}, nil
 }
 
-// ReconcileBaremetalSet Reconcile OpenStackBaremetalSet
-func (r *OpenStackDataPlaneRoleReconciler) ReconcileBaremetalSet(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneRole, helper *helper.Helper,
-) (*ctrl.Result, error) {
-	baremetalSet := &baremetalv1.OpenStackBaremetalSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Name,
-			Namespace: instance.Namespace,
-		},
-	}
-
-	helper.GetLogger().Info("Reconciling BaremetalSet")
-	_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), baremetalSet, func() error {
-		instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec)
-		err := controllerutil.SetControllerReference(helper.GetBeforeObject(), baremetalSet, helper.GetScheme())
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	if err != nil {
-		instance.Status.Conditions.MarkFalse(
-			dataplanev1beta1.RoleBareMetalProvisionReadyCondition,
-			condition.ErrorReason, condition.SeverityError,
-			dataplanev1beta1.RoleBaremetalProvisionErrorMessage)
-		return &ctrl.Result{}, err
-	}
-
-	// Check if baremetalSet is ready
-	if !baremetalSet.IsReady() {
-		util.LogForObject(helper, "BaremetalSet not ready, Requeueing", instance)
-		return &ctrl.Result{}, nil
-	}
-	instance.Status.Conditions.MarkTrue(
-		dataplanev1beta1.RoleBareMetalProvisionReadyCondition,
-		dataplanev1beta1.RoleBaremetalProvisionReadyMessage)
-	return nil, nil
-}
-
-// ServiceYAML struct for service YAML unmarshalling
-type ServiceYAML struct {
-	Kind     string
-	Metadata yaml.Node
-	Spec     yaml.Node
-}
-
-// EnsureServices - ensure the OpenStackDataPlaneServices exist
-func (r *OpenStackDataPlaneRoleReconciler) EnsureServices(ctx context.Context, helper *helper.Helper, instance *dataplanev1beta1.OpenStackDataPlaneRole) error {
-	servicesPath, found := os.LookupEnv("OPERATOR_SERVICES")
-	if !found {
-		servicesPath = "config/services"
-		os.Setenv("OPERATOR_SERVICES", servicesPath)
-		util.LogForObject(
-			helper, "OPERATOR_SERVICES not set in env when reconciling ", instance,
-			"defaulting to ", servicesPath)
-	}
-
-	r.Log.Info("Ensuring services", "servicesPath", servicesPath)
-	services, err := os.ReadDir(servicesPath)
-	if err != nil {
-		return err
-	}
-
-	for _, service := range services {
-
-		servicePath := path.Join(servicesPath, service.Name())
-
-		if !strings.HasSuffix(service.Name(), ".yaml") {
-			r.Log.Info("Skipping ensuring service from file without .yaml suffix", "file", service.Name())
-			continue
-		}
-
-		data, _ := os.ReadFile(servicePath)
-		var serviceObj ServiceYAML
-		err = yaml.Unmarshal(data, &serviceObj)
-		if err != nil {
-			r.Log.Info("Service YAML file Unmarshal error", "service YAML file", servicePath)
-			return err
-		}
-
-		if serviceObj.Kind != "OpenStackDataPlaneService" {
-			r.Log.Info("Skipping ensuring service since kind is not OpenStackDataPlaneService", "file", servicePath, "Kind", serviceObj.Kind)
-			continue
-		}
-
-		serviceObjMeta := &metav1.ObjectMeta{}
-		err = serviceObj.Metadata.Decode(serviceObjMeta)
-		if err != nil {
-			r.Log.Info("Service Metadata decode error")
-			return err
-		}
-
-		roleContainsService := false
-		for _, roleServiceName := range instance.Spec.Services {
-			if roleServiceName == serviceObjMeta.Name {
-				roleContainsService = true
-				break
-			}
-		}
-		if !roleContainsService {
-			r.Log.Info("Skipping ensure service since it is not a service on this role", "service", serviceObjMeta.Name)
-			continue
-		}
-
-		serviceObjSpec := &dataplanev1beta1.OpenStackDataPlaneServiceSpec{}
-		err = serviceObj.Spec.Decode(serviceObjSpec)
-		if err != nil {
-			r.Log.Info("Service Spec decode error")
-			return err
-		}
-
-		ensureService := &dataplanev1beta1.OpenStackDataPlaneService{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceObjMeta.Name,
-				Namespace: instance.Namespace,
-			},
-		}
-		_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), ensureService, func() error {
-			ensureService.Spec = *serviceObjSpec
-			return nil
-		})
-		if err != nil {
-			return fmt.Errorf("Error ensuring service: %w", err)
-		}
-	}
-
-	return nil
-}
-
-// GenerateInventory yields a parsed Inventory
-func (r *OpenStackDataPlaneRoleReconciler) GenerateInventory(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlaneRole, nodes []dataplanev1beta1.OpenStackDataPlaneNode) (string, error) {
-	var (
-		err      error
-		hostName string
-	)
-
-	inventory := ansible.MakeInventory()
-	roleNameGroup := inventory.AddGroup(instance.Name)
-	err = resolveAnsibleVars(&instance.Spec.NodeTemplate, &ansible.Host{}, &roleNameGroup)
-	if err != nil {
-		return "", err
-	}
-
-	for _, node := range nodes {
-		host := roleNameGroup.AddHost(node.Name)
-		if node.Spec.AnsibleHost == "" {
-			hostName = node.Spec.HostName
-		} else {
-			hostName = node.Spec.AnsibleHost
-		}
-		host.Vars["ansible_host"] = hostName
-		err = resolveAnsibleVars(&node.Spec.Node, &host, &ansible.Group{})
-		if err != nil {
-			return "", err
-		}
-	}
-
-	configMapName := fmt.Sprintf("dataplanerole-%s", instance.Name)
-	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapName,
-			Namespace: instance.Namespace,
-			Labels:    instance.ObjectMeta.Labels,
-		},
-	}
-
-	_, err = controllerutil.CreateOrUpdate(ctx, r.Client, cm, func() error {
-		cm.TypeMeta = metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "ConfigMap",
-		}
-		cm.ObjectMeta = metav1.ObjectMeta{
-			Name:      configMapName,
-			Namespace: instance.Namespace,
-			Labels:    instance.ObjectMeta.Labels,
-		}
-		invData, err := inventory.MarshalYAML()
-		if err != nil {
-			return err
-		}
-		cm.Data = map[string]string{
-			"inventory": string(invData),
-			"network":   string(instance.Spec.NodeTemplate.NetworkConfig.Template),
-		}
-		return nil
-	})
-	if err != nil {
-		return configMapName, err
-	}
-
-	return configMapName, nil
-}
-
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
@@ -466,45 +296,8 @@ func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) er
 		Owns(&v1alpha1.OpenStackAnsibleEE{}).
 		Owns(&novav1beta1.NovaExternalCompute{}).
 		Owns(&baremetalv1.OpenStackBaremetalSet{}).
+		Owns(&infranetworkv1.IPSet{}).
+		Owns(&infranetworkv1.DNSData{}).
 		Owns(&corev1.ConfigMap{}).
 		Complete(r)
-}
-
-func resolveAnsibleVars(node *dataplanev1beta1.NodeSection, host *ansible.Host, group *ansible.Group) error {
-	ansibleVarsData := make(map[string]interface{})
-
-	if node.AnsibleUser != "" {
-		ansibleVarsData["ansible_user"] = node.AnsibleUser
-	}
-	if node.AnsiblePort > 0 {
-		ansibleVarsData["ansible_port"] = node.AnsiblePort
-	}
-	if node.ManagementNetwork != "" {
-		ansibleVarsData["management_network"] = node.ManagementNetwork
-	}
-	if node.NetworkConfig.Template != "" {
-		ansibleVarsData["edpm_network_config_template"] = deployment.NicConfigTemplateFile
-	}
-	if len(node.Networks) > 0 {
-		ansibleVarsData["networks"] = node.Networks
-	}
-
-	err := yaml.Unmarshal([]byte(node.AnsibleVars), ansibleVarsData)
-	if err != nil {
-		return err
-	}
-
-	if host.Vars != nil {
-		for key, value := range ansibleVarsData {
-			host.Vars[key] = value
-		}
-	}
-
-	if group.Vars != nil {
-		for key, value := range ansibleVarsData {
-			group.Vars[key] = value
-		}
-	}
-
-	return nil
 }

@@ -904,6 +904,7 @@ spec:
                         networkConfig:
                           properties:
                             template:
+                              default: templates/single_nic_vlans/single_nic_vlans.j2
                               type: string
                           type: object
                         networkData:
@@ -917,10 +918,19 @@ spec:
                         networks:
                           items:
                             properties:
+                              defaultRoute:
+                                type: boolean
                               fixedIP:
                                 type: string
-                              network:
+                              name:
+                                pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
                                 type: string
+                              subnetName:
+                                pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
+                                type: string
+                            required:
+                            - name
+                            - subnetName
                             type: object
                           type: array
                         nova:
@@ -944,6 +954,8 @@ spec:
                               type: string
                           type: object
                           x-kubernetes-map-type: atomic
+                      required:
+                      - ansibleSSHPrivateKeySecret
                       type: object
                     role:
                       type: string
@@ -1949,6 +1961,7 @@ spec:
                         networkConfig:
                           properties:
                             template:
+                              default: templates/single_nic_vlans/single_nic_vlans.j2
                               type: string
                           type: object
                         networkData:
@@ -1962,10 +1975,19 @@ spec:
                         networks:
                           items:
                             properties:
+                              defaultRoute:
+                                type: boolean
                               fixedIP:
                                 type: string
-                              network:
+                              name:
+                                pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
                                 type: string
+                              subnetName:
+                                pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
+                                type: string
+                            required:
+                            - name
+                            - subnetName
                             type: object
                           type: array
                         nova:
@@ -1989,6 +2011,8 @@ spec:
                               type: string
                           type: object
                           x-kubernetes-map-type: atomic
+                      required:
+                      - ansibleSSHPrivateKeySecret
                       type: object
                     preProvisioned:
                       type: boolean

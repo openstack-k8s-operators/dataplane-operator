@@ -19,6 +19,7 @@ package v1beta1
 import (
 	"reflect"
 
+	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -29,19 +30,19 @@ type NodeSection struct {
 	// +kubebuilder:validation:Optional
 	// NetworkConfig - Network configuration details. Contains os-net-config
 	// related properties.
-	NetworkConfig NetworkConfigSection `json:"networkConfig,omitempty"`
+	NetworkConfig NetworkConfigSection `json:"networkConfig"`
 
 	// +kubebuilder:validation:Optional
 	// Networks - Instance networks
-	Networks []NetworksSection `json:"networks,omitempty"`
+	Networks []infranetworkv1.IPSetNetwork `json:"networks,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// ManagementNetwork - Name of network to use for management (SSH/Ansible)
-	ManagementNetwork string `json:"managementNetwork,omitempty"`
+	ManagementNetwork string `json:"managementNetwork"`
 
 	// +kubebuilder:validation:Optional
 	// AnsibleUser SSH user for Ansible connection
-	AnsibleUser string `json:"ansibleUser,omitempty"`
+	AnsibleUser string `json:"ansibleUser"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
@@ -52,7 +53,7 @@ type NodeSection struct {
 	// AnsibleVars for configuring ansible
 	AnsibleVars string `json:"ansibleVars,omitempty"`
 
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
 	// AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH
 	// key for connecting to node. Must be of the form:
@@ -108,21 +109,10 @@ type DeployStrategySection struct {
 type NetworkConfigSection struct {
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default="templates/single_nic_vlans/single_nic_vlans.j2"
 	// Template - Contains a Ansible j2 nic config template to use when applying node
 	// network configuration
-	Template string `json:"template,omitempty" yaml:"template,omitempty"`
-}
-
-// NetworksSection is a specification of the network attributes
-type NetworksSection struct {
-
-	// +kubebuilder:validation:Optional
-	// Network - Network name to configure
-	Network string `json:"network,omitempty" yaml:"network,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// FixedIP - Specific IP address to use for this network
-	FixedIP string `json:"fixedIP,omitempty" yaml:"fixedIP,omitempty"`
+	Template string `json:"template" yaml:"template"`
 }
 
 // UniqueSpecFields - the array of fields that must be unique between role and nodes
