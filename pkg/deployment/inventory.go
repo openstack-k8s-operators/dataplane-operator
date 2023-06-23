@@ -25,13 +25,11 @@ import (
 	"strings"
 
 	yaml "gopkg.in/yaml.v3"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/ansible"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	utils "github.com/openstack-k8s-operators/lib-common/modules/common/util"
 )
@@ -99,40 +97,29 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 		}
 	}
 
+	invData, err := inventory.MarshalYAML()
+	if err != nil {
+		utils.LogErrorForObject(helper, err, "Could not parse Role inventory", instance)
+		return "", err
+	}
+	cmData := map[string]string{
+		"inventory": string(invData),
+		"network":   string(instance.Spec.NodeTemplate.NetworkConfig.Template),
+	}
 	configMapName := fmt.Sprintf("dataplanerole-%s", instance.Name)
-	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapName,
-			Namespace: instance.Namespace,
-			Labels:    instance.ObjectMeta.Labels,
+	cms := []utils.Template{
+		// ConfigMap
+		{
+			Name:         configMapName,
+			Namespace:    instance.Namespace,
+			Type:         utils.TemplateTypeNone,
+			InstanceType: instance.Kind,
+			CustomData:   cmData,
+			Labels:       instance.ObjectMeta.Labels,
 		},
 	}
-
-	_, err = controllerutil.CreateOrUpdate(ctx, helper.GetClient(), cm, func() error {
-		cm.TypeMeta = metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "ConfigMap",
-		}
-		cm.ObjectMeta = metav1.ObjectMeta{
-			Name:      configMapName,
-			Namespace: instance.Namespace,
-			Labels:    instance.ObjectMeta.Labels,
-		}
-		invData, err := inventory.MarshalYAML()
-		if err != nil {
-			return err
-		}
-		cm.Data = map[string]string{
-			"inventory": string(invData),
-			"network":   string(instance.Spec.NodeTemplate.NetworkConfig.Template),
-		}
-		return nil
-	})
-	if err != nil {
-		return configMapName, err
-	}
-
-	return configMapName, nil
+	err = configmap.EnsureConfigMaps(ctx, helper, instance, cms, nil)
+	return configMapName, err
 }
 
 // GetAnsibleSSHPrivateKeySecret returns the secret name holding the private SSH key
@@ -184,40 +171,29 @@ func GenerateNodeInventory(ctx context.Context, helper *helper.Helper,
 		host.Vars[key] = value
 	}
 
+	invData, err := inventory.MarshalYAML()
+	if err != nil {
+		utils.LogErrorForObject(helper, err, "Could not Parse node inventory", instance)
+		return "", err
+	}
+	cmData := map[string]string{
+		"inventory": string(invData),
+		"network":   string(networkConfig.Template),
+	}
 	configMapName := fmt.Sprintf("dataplanenode-%s", instance.Name)
-	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapName,
-			Namespace: instance.Namespace,
-			Labels:    instance.ObjectMeta.Labels,
+	cms := []utils.Template{
+		// ConfigMap
+		{
+			Name:         configMapName,
+			Namespace:    instance.Namespace,
+			Type:         utils.TemplateTypeNone,
+			InstanceType: instance.Kind,
+			CustomData:   cmData,
+			Labels:       instance.ObjectMeta.Labels,
 		},
 	}
-
-	_, err = controllerutil.CreateOrUpdate(ctx, helper.GetClient(), cm, func() error {
-		cm.TypeMeta = metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "ConfigMap",
-		}
-		cm.ObjectMeta = metav1.ObjectMeta{
-			Name:      configMapName,
-			Namespace: instance.Namespace,
-			Labels:    instance.ObjectMeta.Labels,
-		}
-		invData, err := inventory.MarshalYAML()
-		if err != nil {
-			return err
-		}
-		cm.Data = map[string]string{
-			"inventory": string(invData),
-			"network":   string(networkConfig.Template),
-		}
-		return nil
-	})
-	if err != nil {
-		return configMapName, err
-	}
-
-	return configMapName, nil
+	err = configmap.EnsureConfigMaps(ctx, helper, instance, cms, nil)
+	return configMapName, err
 }
 
 // getAnsibleUser returns the string value from the template unless it is set in the node
@@ -247,7 +223,7 @@ func getAnsibleManagementNetwork(
 	return instanceRole.Spec.NodeTemplate.ManagementNetwork
 }
 
-// GetAnsibleNetworkConfig returns a JSON string value from the template unless it is set in the node
+// getAnsibleNetworkConfig returns a JSON string value from the template unless it is set in the node
 func getAnsibleNetworkConfig(instance *dataplanev1beta1.OpenStackDataPlaneNode,
 	instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) dataplanev1beta1.NetworkConfigSection {
 	if instance.Spec.Node.NetworkConfig.Template != "" {
@@ -256,7 +232,7 @@ func getAnsibleNetworkConfig(instance *dataplanev1beta1.OpenStackDataPlaneNode,
 	return instanceRole.Spec.NodeTemplate.NetworkConfig
 }
 
-// GetAnsibleNetworks returns a JSON string mapping fixedIP and/or network name to their valules
+// getAnsibleNetworks returns a JSON string mapping fixedIP and/or network name to their valules
 func getAnsibleNetworks(instance *dataplanev1beta1.OpenStackDataPlaneNode,
 	instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) []infranetworkv1.IPSetNetwork {
 	if len(instance.Spec.Node.Networks) > 0 {
