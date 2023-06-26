@@ -28,9 +28,20 @@ Sample output when the default list of services:
 	dataplane-deployment-run-os-edpm-compute                                   True     AnsibleExecutionJob complete
 	dataplane-deployment-validate-network-edpm-compute                         True     AnsibleExecutionJob complete
 
+Querying for pods with the OpenStackAnsibleEE label
+
+	oc get pods -l app=openstackansibleee
+
+Sample output:
+
+	dataplane-deployment-configure-network-edpm-compute-j6r4l   0/1     Completed           0          3m36s
+	dataplane-deployment-validate-network-edpm-compute-6g7n9    0/1     Pending             0          0s
+	dataplane-deployment-validate-network-edpm-compute-6g7n9    0/1     ContainerCreating   0          11s
+	dataplane-deployment-validate-network-edpm-compute-6g7n9    1/1     Running             0          13s
+
 Querying for jobs, shows the corresponding job for each OpenStackAnsibleEE resource:
 
-	oc get jobs
+	oc get jobs -l app=openstackansibleee
 
 Sample output:
 
