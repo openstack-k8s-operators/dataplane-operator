@@ -64,7 +64,7 @@ spec:
             nova_libvirt_network: internal_api
           edpm_chrony_ntp_servers:
             - clock.redhat.com
-          growvols_args: '/var=100%'
+          growvols_args: '/var=80%'
           # edpm_network_config
           # Default nic config template for a EDPM compute node
           # These vars are edpm_network_config role vars
