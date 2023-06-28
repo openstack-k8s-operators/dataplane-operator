@@ -935,8 +935,6 @@ spec:
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
-                required:
-                - ansibleSSHPrivateKeySecret
                 type: object
               role:
                 type: string
