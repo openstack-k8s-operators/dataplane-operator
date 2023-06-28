@@ -71,7 +71,6 @@ func AnsibleExecution(
 	}
 
 	_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), ansibleEE, func() error {
-		ansibleEE.Spec = ansibleeev1alpha1.NewOpenStackAnsibleEE("openstackansibleee")
 		ansibleEE.Spec.NetworkAttachments = aeeSpec.NetworkAttachments
 		if len(aeeSpec.OpenStackAnsibleEERunnerImage) > 0 {
 			ansibleEE.Spec.Image = aeeSpec.OpenStackAnsibleEERunnerImage
