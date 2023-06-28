@@ -12,14 +12,14 @@ require (
 	github.com/onsi/ginkgo/v2 v2.11.0
 	github.com/onsi/gomega v1.27.8
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-00010101000000-000000000000
-	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230622122724-8503e53378d6
-	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.0.0-20230613062027-d886a7879256
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230613062027-d886a7879256
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230613062027-d886a7879256
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.0.0-20230613062027-d886a7879256
-	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230616123447-48c9264e2c33
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230612175620-ea563267160e
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230619033923-b51a7994eafe
+	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230626141355-6d8b643fb532
+	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.0.0-20230627132558-cd98c8b86310
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230627132558-cd98c8b86310
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230627132558-cd98c8b86310
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.0.0-20230627132558-cd98c8b86310
+	github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230627071330-769bb7a67de3
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230620085730-fddf65f65f88
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230626134559-c08170fb5cff
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.3
 	k8s.io/apimachinery v0.26.3
@@ -51,8 +51,8 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
-	github.com/metal3-io/baremetal-operator/apis v0.2.0 // indirect
-	github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.1.2 // indirect
+	github.com/metal3-io/baremetal-operator/apis v0.3.1 // indirect
+	github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.2.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -66,6 +66,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect

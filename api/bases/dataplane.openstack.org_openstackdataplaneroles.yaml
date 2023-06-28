@@ -89,6 +89,7 @@ spec:
                   ctlplaneInterface:
                     type: string
                   ctlplaneNetmask:
+                    default: 255.255.255.0
                     type: string
                   deploymentSSHSecret:
                     type: string
@@ -186,11 +187,8 @@ spec:
                     x-kubernetes-map-type: atomic
                 required:
                 - cloudUserName
-                - ctlplaneGateway
                 - ctlplaneInterface
-                - ctlplaneNetmask
                 - deploymentSSHSecret
-                - domainName
                 type: object
               dataPlane:
                 type: string
