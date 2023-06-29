@@ -61,8 +61,8 @@ spec:
       #
       # These vars are for the network config templates themselves and are
       # considered EDPM network defaults.
-      neutron_physical_bridge_name: br-ex
-      neutron_public_interface_name: eth0
+      edpm_network_config_bridge_name: br-ex
+      edpm_network_config_interface_name: eth0
       ctlplane_mtu: 1500
       ctlplane_subnet_cidr: 24
       ctlplane_gateway_ip: 192.168.122.1
@@ -310,8 +310,8 @@ data:
                 InternalApi: internal_api
                 Storage: storage
                 Tenant: tenant
-            neutron_physical_bridge_name: br-ex
-            neutron_public_interface_name: eth0
+            edpm_network_config_bridge_name: br-ex
+            edpm_network_config_interface_name: eth0
             registry_url: quay.io/podified-antelope-centos9
             role_networks:
                 - InternalApi
@@ -413,8 +413,8 @@ data:
                     InternalApi: internal_api
                     Storage: storage
                     Tenant: tenant
-                neutron_physical_bridge_name: br-ex
-                neutron_public_interface_name: eth0
+                edpm_network_config_bridge_name: br-ex
+                edpm_network_config_interface_name: eth0
                 registry_url: quay.io/podified-antelope-centos9
                 role_networks:
                     - InternalApi
@@ -503,8 +503,8 @@ data:
                     InternalApi: internal_api
                     Storage: storage
                     Tenant: tenant
-                neutron_physical_bridge_name: br-ex
-                neutron_public_interface_name: eth0
+                edpm_network_config_bridge_name: br-ex
+                edpm_network_config_interface_name: eth0
                 registry_url: quay.io/podified-antelope-centos9
                 role_networks:
                     - InternalApi

@@ -15,8 +15,8 @@ spec:
       tenant_ip: 192.168.24.100
       edpm_network_config_template: templates/net_config_bridge.j2
       edpm_network_config_hide_sensitive_logs: false
-      neutron_physical_bridge_name: br-ex
-      neutron_public_interface_name: eth0
+      edpm_network_config_bridge_name: br-ex
+      edpm_network_config_interface_name: eth0
       ctlplane_dns_nameservers:
       - 192.168.122.1
       dns_search_domains: []

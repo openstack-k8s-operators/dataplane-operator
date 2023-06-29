@@ -134,7 +134,7 @@ metadata:
 spec:
   nodeTemplate:
     ansibleVars:
-      neutron_public_interface_name: eth0
+      edpm_network_config_interface_name: eth0
       edpm_chrony_ntp_servers:
         - clock.redhat.com
         - clock2.redhat.com
@@ -157,7 +157,7 @@ The `ConfigMap` containing the inventory would have the following
 vars:
 
 ```yaml
-      neutron_public_interface_name: eth0
+      edpm_network_config_interface_name: eth0
       tenant_ip: 192.168.24.100
       edpm_chrony_ntp_servers:
         - clock.redhat.com
