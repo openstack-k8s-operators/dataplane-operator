@@ -39,10 +39,7 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1beta1.OpenStackDataPlaneRole,
 	nodes []dataplanev1beta1.OpenStackDataPlaneNode,
 	allIPSets map[string]infranetworkv1.IPSet, dnsAddresses []string) (string, error) {
-	var (
-		err      error
-		hostName string
-	)
+	var err error
 
 	inventory := ansible.MakeInventory()
 	roleNameGroup := inventory.AddGroup(instance.Name)
@@ -53,18 +50,17 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 
 	for _, node := range nodes {
 		host := roleNameGroup.AddHost(node.Name)
-		if node.Spec.AnsibleHost == "" {
-			hostName = node.Spec.HostName
-		} else {
-			hostName = node.Spec.AnsibleHost
-		}
-		host.Vars["ansible_host"] = hostName
+		// We'll override ansible_host if we're using IPAM
+		host.Vars["ansible_host"] = node.Spec.AnsibleHost
 		ipSet, ok := allIPSets[node.Name]
 		if ok {
 			for _, res := range ipSet.Status.Reservation {
 				// Build the vars for ips/routes etc
 				switch n := res.Network; n {
 				case CtlPlaneNetwork:
+					if node.Spec.AnsibleHost == "" {
+						host.Vars["ansible_host"] = res.Address
+					}
 					host.Vars["ctlplane_ip"] = res.Address
 					_, ipnet, err := net.ParseCIDR(res.Cidr)
 					if err == nil {

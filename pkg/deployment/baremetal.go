@@ -49,7 +49,11 @@ func DeployBaremetalSet(
 		instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec)
 		for _, node := range nodes.Items {
 			ipSet, ok := ipSets[node.Name]
-			instanceSpec := baremetalSet.Spec.BaremetalHosts[node.Name]
+			hostName := node.Spec.HostName
+			if hostName == "" {
+				hostName = node.Name
+			}
+			instanceSpec := baremetalSet.Spec.BaremetalHosts[hostName]
 			if !ok {
 				utils.LogForObject(helper, "IPAM Not configured for use, skipping", instance)
 				instanceSpec.CtlPlaneIP = node.Spec.AnsibleHost
@@ -66,7 +70,7 @@ func DeployBaremetalSet(
 					}
 				}
 			}
-			baremetalSet.Spec.BaremetalHosts[node.Name] = instanceSpec
+			baremetalSet.Spec.BaremetalHosts[hostName] = instanceSpec
 
 		}
 		err := controllerutil.SetControllerReference(
@@ -110,10 +114,14 @@ func BuildBMHHostMap(ctx context.Context, helper *helper.Helper,
 		}
 
 		if !instance.Spec.Roles[roleName].PreProvisioned {
+			hostName := node.Spec.HostName
+			if hostName == "" {
+				hostName = node.Name
+			}
 			instanceSpec := baremetalv1.InstanceSpec{}
 			instanceSpec.UserData = node.Spec.Node.UserData
 			instanceSpec.NetworkData = node.Spec.Node.NetworkData
-			roleManagedHostMap[roleName][node.Spec.HostName] = instanceSpec
+			roleManagedHostMap[roleName][hostName] = instanceSpec
 
 		}
 	}
