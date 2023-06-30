@@ -87,8 +87,7 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 					dnsRecord := infranetworkv1.DNSHost{}
 					dnsRecord.IP = res.Address
 					var fqdnNames []string
-					fqdnName := strings.Join([]string{hostName,
-						strings.ToLower(string(res.Network)), res.DNSDomain}, ".")
+					fqdnName := strings.Join([]string{hostName, res.DNSDomain}, ".")
 					fqdnNames = append(fqdnNames, fqdnName)
 					dnsRecord.Hostnames = fqdnNames
 					allDNSRecords = append(allDNSRecords, dnsRecord)
