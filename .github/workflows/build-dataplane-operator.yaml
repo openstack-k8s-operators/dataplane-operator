@@ -1,4 +1,4 @@
-name: OpenStackDataPlane Operator image builder
+name: DataPlane Operator image builder
 
 on:
   workflow_dispatch:
