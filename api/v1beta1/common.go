@@ -38,11 +38,11 @@ type NodeSection struct {
 
 	// +kubebuilder:validation:Optional
 	// ManagementNetwork - Name of network to use for management (SSH/Ansible)
-	ManagementNetwork string `json:"managementNetwork"`
+	ManagementNetwork string `json:"managementNetwork,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// AnsibleUser SSH user for Ansible connection
-	AnsibleUser string `json:"ansibleUser"`
+	AnsibleUser string `json:"ansibleUser,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
@@ -63,8 +63,7 @@ type NodeSection struct {
 
 	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default={}
-	ExtraMounts []storage.VolMounts `json:"extraMounts"`
+	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 
 	// UserData  node specific user-data
 	// +kubebuilder:validation:Optional
@@ -81,7 +80,7 @@ type NodeSection struct {
 	// OpenstackDataPlaneRole will be ignored. If this is defined in neither
 	// then compute service(s) will not be deployed on the EDPM node.
 	// +kubebuilder:validation:Optional
-	Nova *NovaTemplate `json:"nova"`
+	Nova *NovaTemplate `json:"nova,omitempty"`
 }
 
 // DeployStrategySection for fields controlling the deployment
@@ -142,7 +141,7 @@ type AnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
 	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
 	// which allows to connect the ansibleee runner to the given network
-	NetworkAttachments []string `json:"networkAttachments"`
+	NetworkAttachments []string `json:"networkAttachments,omitempty"`
 	// +kubebuilder:validation:Optional
 	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
 	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty"`
@@ -157,8 +156,7 @@ type AnsibleEESpec struct {
 	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
 	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default={}
-	ExtraMounts []storage.VolMounts `json:"extraMounts"`
+	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
 }
@@ -184,9 +182,10 @@ type NovaTemplate struct {
 	// this parameter to change service defaults, or overwrite rendered
 	// information using raw OpenStack config format. The content gets added to
 	// to /etc/nova/nova.conf.d directory as 02-nova-override.conf file.
-	CustomServiceConfig string `json:"customServiceConfig"`
+	CustomServiceConfig string `json:"customServiceConfig,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
 	// Deploy true means the compute service(s) are allowed to be changed on
 	// the EDPM node(s) if necessary. If set to false then only the
 	// pre-requisite data (e.g. config maps) will be generated but no actual

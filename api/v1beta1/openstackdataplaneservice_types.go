@@ -20,7 +20,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
-	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
 // OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService
@@ -35,7 +35,7 @@ type OpenStackDataPlaneServiceSpec struct {
 
 	// Role is the description of an Ansible Role
 	// +kubebuilder:validation:Optional
-	Role *ansibleeev1alpha1.Role `json:"role,omitempty"`
+	Role *ansibleeev1.Role `json:"role,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image

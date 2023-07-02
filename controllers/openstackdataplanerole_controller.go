@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
-	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -90,7 +90,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	r.Log.Info("Reconciling Role")
 
 	// Fetch the OpenStackDataPlaneRole instance
-	instance := &dataplanev1beta1.OpenStackDataPlaneRole{}
+	instance := &dataplanev1.OpenStackDataPlaneRole{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
@@ -119,7 +119,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	defer func() {
 		// update the overall status condition if service is ready
 		if instance.IsReady() {
-			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneRoleReadyMessage)
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1.DataPlaneRoleReadyMessage)
 		} else {
 			// something is not ready so reset the Ready condition
 			instance.Status.Conditions.MarkUnknown(
@@ -144,8 +144,8 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, nil
 	}
 
-	if instance.Status.Conditions.IsUnknown(dataplanev1beta1.SetupReadyCondition) {
-		instance.Status.Conditions.MarkFalse(dataplanev1beta1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
+	if instance.Status.Conditions.IsUnknown(dataplanev1.SetupReadyCondition) {
+		instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 	}
 
 	// Ensure Services
@@ -167,7 +167,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	}
 
 	// Get List of Nodes with matching Role Label
-	nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{}
+	nodes := &dataplanev1.OpenStackDataPlaneNodeList{}
 
 	listOpts := []client.ListOption{
 		client.InNamespace(instance.GetNamespace()),
@@ -227,21 +227,23 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 
 	// Verify Ansible SSH Secret
 	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
-	_, result, err = secret.VerifySecret(
-		ctx,
-		types.NamespacedName{Namespace: instance.Namespace, Name: ansibleSSHPrivateKeySecret},
-		[]string{
-			"ssh-privatekey",
-		},
-		r.Client,
-		time.Duration(5)*time.Second,
-	)
-	if err != nil {
-		return result, err
+	if ansibleSSHPrivateKeySecret != "" {
+		_, result, err = secret.VerifySecret(
+			ctx,
+			types.NamespacedName{Namespace: instance.Namespace, Name: ansibleSSHPrivateKeySecret},
+			[]string{
+				"ssh-privatekey",
+			},
+			r.Client,
+			time.Duration(5)*time.Second,
+		)
+		if err != nil {
+			return result, err
+		}
 	}
 
 	// all setup tasks complete, mark SetupReadyCondition True
-	instance.Status.Conditions.MarkTrue(dataplanev1beta1.SetupReadyCondition, condition.ReadyMessage)
+	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
 
 	r.Log.Info("Role", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
@@ -256,7 +258,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 				condition.ReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityWarning,
-				dataplanev1beta1.DataPlaneRoleErrorMessage,
+				dataplanev1.DataPlaneRoleErrorMessage,
 				err.Error()))
 			return ctrl.Result{}, err
 		}
@@ -292,7 +294,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&dataplanev1beta1.OpenStackDataPlaneRole{}).
+		For(&dataplanev1.OpenStackDataPlaneRole{}).
 		Owns(&v1alpha1.OpenStackAnsibleEE{}).
 		Owns(&novav1beta1.NovaExternalCompute{}).
 		Owns(&baremetalv1.OpenStackBaremetalSet{}).

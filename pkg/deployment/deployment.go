@@ -24,7 +24,7 @@ import (
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -34,20 +34,20 @@ import (
 )
 
 // deployFuncDef so we can pass a function to ConditionalDeploy
-type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string, dataplanev1beta1.AnsibleEESpec, dataplanev1beta1.OpenStackDataPlaneService) error
+type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string, dataplanev1.AnsibleEESpec, dataplanev1.OpenStackDataPlaneService) error
 
 // Deploy function encapsulating primary deloyment handling
 func Deploy(
 	ctx context.Context,
 	helper *helper.Helper,
 	obj client.Object,
-	nodes *dataplanev1beta1.OpenStackDataPlaneNodeList,
+	nodes *dataplanev1.OpenStackDataPlaneNodeList,
 	sshKeySecret string,
 	inventoryConfigMap string,
-	status *dataplanev1beta1.OpenStackDataPlaneStatus,
-	aeeSpec dataplanev1beta1.AnsibleEESpec,
+	status *dataplanev1.OpenStackDataPlaneStatus,
+	aeeSpec dataplanev1.AnsibleEESpec,
 	services []string,
-	role *dataplanev1beta1.OpenStackDataPlaneRole,
+	role *dataplanev1.OpenStackDataPlaneRole,
 ) (*ctrl.Result, error) {
 
 	log := helper.GetLogger()
@@ -60,7 +60,7 @@ func Deploy(
 	var deployFunc deployFuncDef
 	var deployName string
 	var deployLabel string
-	var foundService dataplanev1beta1.OpenStackDataPlaneService
+	var foundService dataplanev1.OpenStackDataPlaneService
 
 	// (slagle) For the prototype, we deploy all the composable services first
 	for _, service := range services {
@@ -72,10 +72,10 @@ func Deploy(
 		deployFunc = DeployService
 		deployName = foundService.Name
 		deployLabel = foundService.Spec.Label
-		readyCondition = condition.Type(fmt.Sprintf(dataplanev1beta1.ServiceReadyCondition, service))
-		readyWaitingMessage = fmt.Sprintf(dataplanev1beta1.ServiceReadyWaitingMessage, deployName)
-		readyMessage = fmt.Sprintf(dataplanev1beta1.ServiceReadyMessage, deployName)
-		readyErrorMessage = dataplanev1beta1.ServiceErrorMessage
+		readyCondition = condition.Type(fmt.Sprintf(dataplanev1.ServiceReadyCondition, service))
+		readyWaitingMessage = fmt.Sprintf(dataplanev1.ServiceReadyWaitingMessage, deployName)
+		readyMessage = fmt.Sprintf(dataplanev1.ServiceReadyMessage, deployName)
+		readyErrorMessage = dataplanev1.ServiceErrorMessage
 		aeeSpec.OpenStackAnsibleEERunnerImage = foundService.Spec.OpenStackAnsibleEERunnerImage
 		err = ConditionalDeploy(
 			ctx,
@@ -111,10 +111,10 @@ func Deploy(
 	if !haveCephSecret {
 		log.Info("Skipping execution of Ansible for ConfigureCephClient because extraMounts does not have an extraVolType of Ceph.")
 	} else {
-		readyCondition = dataplanev1beta1.ConfigureCephClientReadyCondition
-		readyWaitingMessage = dataplanev1beta1.ConfigureCephClientReadyWaitingMessage
-		readyMessage = dataplanev1beta1.ConfigureCephClientReadyMessage
-		readyErrorMessage = dataplanev1beta1.ConfigureCephClientErrorMessage
+		readyCondition = dataplanev1.ConfigureCephClientReadyCondition
+		readyWaitingMessage = dataplanev1.ConfigureCephClientReadyWaitingMessage
+		readyMessage = dataplanev1.ConfigureCephClientReadyMessage
+		readyErrorMessage = dataplanev1.ConfigureCephClientErrorMessage
 		deployFunc = ConfigureCephClient
 		deployName = "ConfigureCephClient"
 		deployLabel = ConfigureCephClientLabel
@@ -205,7 +205,7 @@ func Deploy(
 	}
 
 	log.Info("All NovaExternalCompute ReadyConditions are true")
-	status.Conditions.Set(condition.TrueCondition(dataplanev1beta1.NovaComputeReadyCondition, dataplanev1beta1.NovaComputeReadyMessage))
+	status.Conditions.Set(condition.TrueCondition(dataplanev1.NovaComputeReadyCondition, dataplanev1.NovaComputeReadyMessage))
 
 	return nil, nil
 
@@ -219,7 +219,7 @@ func ConditionalDeploy(
 	obj client.Object,
 	sshKeySecret string,
 	inventoryConfigMap string,
-	status *dataplanev1beta1.OpenStackDataPlaneStatus,
+	status *dataplanev1.OpenStackDataPlaneStatus,
 	readyCondition condition.Type,
 	readyMessage string,
 	readyWaitingMessage string,
@@ -227,8 +227,8 @@ func ConditionalDeploy(
 	deployFunc deployFuncDef,
 	deployName string,
 	deployLabel string,
-	aeeSpec dataplanev1beta1.AnsibleEESpec,
-	foundService dataplanev1beta1.OpenStackDataPlaneService,
+	aeeSpec dataplanev1.AnsibleEESpec,
+	foundService dataplanev1.OpenStackDataPlaneService,
 ) error {
 
 	var err error

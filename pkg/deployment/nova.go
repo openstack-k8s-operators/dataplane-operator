@@ -25,7 +25,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/imdario/mergo"
-	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
@@ -35,13 +35,13 @@ import (
 func DeployNovaExternalCompute(
 	ctx context.Context,
 	helper *helper.Helper,
-	node *dataplanev1beta1.OpenStackDataPlaneNode,
+	node *dataplanev1.OpenStackDataPlaneNode,
 	owner client.Object,
 	sshKeySecret string,
 	inventoryConfigMap string,
-	status *dataplanev1beta1.OpenStackDataPlaneStatus,
-	aeeSpec dataplanev1beta1.AnsibleEESpec,
-	template dataplanev1beta1.NovaTemplate,
+	status *dataplanev1.OpenStackDataPlaneStatus,
+	aeeSpec dataplanev1.AnsibleEESpec,
+	template dataplanev1.NovaTemplate,
 ) (*novav1beta1.NovaExternalCompute, error) {
 	log := helper.GetLogger()
 
@@ -94,9 +94,9 @@ func DeployNovaExternalCompute(
 // in the OpenStackDataPlaneNode if defined takes precedence over the NovaTemplate
 // in the OpenStackDataPlaneRole.
 func getNovaTemplate(
-	node *dataplanev1beta1.OpenStackDataPlaneNode,
-	role *dataplanev1beta1.OpenStackDataPlaneRole,
-) (*dataplanev1beta1.NovaTemplate, error) {
+	node *dataplanev1.OpenStackDataPlaneNode,
+	role *dataplanev1.OpenStackDataPlaneRole,
+) (*dataplanev1.NovaTemplate, error) {
 	if node.Spec.Node.Nova == nil {
 		return role.Spec.NodeTemplate.Nova, nil
 	}
@@ -110,9 +110,9 @@ func getNovaTemplate(
 }
 
 func mergeNovaTemplates(
-	node dataplanev1beta1.NovaTemplate,
-	role dataplanev1beta1.NovaTemplate,
-) (*dataplanev1beta1.NovaTemplate, error) {
+	node dataplanev1.NovaTemplate,
+	role dataplanev1.NovaTemplate,
+) (*dataplanev1.NovaTemplate, error) {
 	merged := node.DeepCopy()
 	err := mergo.Merge(merged, role)
 	return merged, err

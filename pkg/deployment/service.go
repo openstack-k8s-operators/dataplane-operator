@@ -29,11 +29,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
 // ServiceYAML struct for service YAML unmarshalling
@@ -44,8 +44,8 @@ type ServiceYAML struct {
 }
 
 // DeployService service deployment
-func DeployService(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec, foundService dataplanev1beta1.OpenStackDataPlaneService) error {
-	role := ansibleeev1alpha1.Role{}
+func DeployService(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1.AnsibleEESpec, foundService dataplanev1.OpenStackDataPlaneService) error {
+	role := ansibleeev1.Role{}
 	if foundService.Spec.Role != nil {
 		role = *foundService.Spec.Role
 	}
@@ -61,23 +61,23 @@ func DeployService(ctx context.Context, helper *helper.Helper, obj client.Object
 
 // GetServices returns the list of services for the node's role
 // Note that these are not inherited from NodeTemplate.
-func GetServices(instance *dataplanev1beta1.OpenStackDataPlaneNode,
-	instanceRole *dataplanev1beta1.OpenStackDataPlaneRole) []string {
+func GetServices(instance *dataplanev1.OpenStackDataPlaneNode,
+	instanceRole *dataplanev1.OpenStackDataPlaneRole) []string {
 	return instanceRole.Spec.Services
 }
 
 // GetService return service
-func GetService(ctx context.Context, helper *helper.Helper, service string) (dataplanev1beta1.OpenStackDataPlaneService, error) {
+func GetService(ctx context.Context, helper *helper.Helper, service string) (dataplanev1.OpenStackDataPlaneService, error) {
 	client := helper.GetClient()
 	beforeObj := helper.GetBeforeObject()
 	namespace := beforeObj.GetNamespace()
-	foundService := &dataplanev1beta1.OpenStackDataPlaneService{}
+	foundService := &dataplanev1.OpenStackDataPlaneService{}
 	err := client.Get(ctx, types.NamespacedName{Name: service, Namespace: namespace}, foundService)
 	return *foundService, err
 }
 
 // EnsureServices - ensure the OpenStackDataPlaneServices exist
-func EnsureServices(ctx context.Context, helper *helper.Helper, instance *dataplanev1beta1.OpenStackDataPlaneRole) error {
+func EnsureServices(ctx context.Context, helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneRole) error {
 	servicesPath, found := os.LookupEnv("OPERATOR_SERVICES")
 	if !found {
 		servicesPath = "config/services"
@@ -134,14 +134,14 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 			continue
 		}
 
-		serviceObjSpec := &dataplanev1beta1.OpenStackDataPlaneServiceSpec{}
+		serviceObjSpec := &dataplanev1.OpenStackDataPlaneServiceSpec{}
 		err = serviceObj.Spec.Decode(serviceObjSpec)
 		if err != nil {
 			helper.GetLogger().Info("Service Spec decode error")
 			return err
 		}
 
-		ensureService := &dataplanev1beta1.OpenStackDataPlaneService{
+		ensureService := &dataplanev1.OpenStackDataPlaneService{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      serviceObjMeta.Name,
 				Namespace: instance.Namespace,

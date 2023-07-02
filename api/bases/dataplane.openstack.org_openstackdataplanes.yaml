@@ -941,6 +941,7 @@ spec:
                             customServiceConfig:
                               type: string
                             deploy:
+                              default: true
                               type: boolean
                             novaInstance:
                               default: nova
@@ -1994,6 +1995,7 @@ spec:
                             customServiceConfig:
                               type: string
                             deploy:
+                              default: true
                               type: boolean
                             novaInstance:
                               default: nova

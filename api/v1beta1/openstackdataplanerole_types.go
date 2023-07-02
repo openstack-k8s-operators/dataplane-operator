@@ -57,7 +57,7 @@ type OpenStackDataPlaneRoleSpec struct {
 	// +kubebuilder:validation:Optional
 	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
 	// which allows to connect the ansibleee runner to the given network
-	NetworkAttachments []string `json:"networkAttachments"`
+	NetworkAttachments []string `json:"networkAttachments,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default={configure-network,validate-network,install-os,configure-os,run-os}

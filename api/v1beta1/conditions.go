@@ -128,5 +128,4 @@ const (
 
 	// RoleDNSDataReadyErrorMessage error
 	RoleDNSDataReadyErrorMessage = "RoleDNSDataReady error occurred"
-
 )

@@ -21,14 +21,14 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
-	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
 // ConfigureCephClient ensures the Ceph client configuration files are on data plane nodes
-func ConfigureCephClient(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1beta1.AnsibleEESpec, foundService dataplanev1beta1.OpenStackDataPlaneService) error {
+func ConfigureCephClient(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1.AnsibleEESpec, foundService dataplanev1.OpenStackDataPlaneService) error {
 
 	tasks := []dataplaneutil.Task{
 		{
@@ -39,7 +39,7 @@ func ConfigureCephClient(ctx context.Context, helper *helper.Helper, obj client.
 		},
 	}
 
-	role := ansibleeev1alpha1.Role{
+	role := ansibleeev1.Role{
 		Name:     "Deploy EDPM Ceph client",
 		Hosts:    "all",
 		Strategy: "linear",
