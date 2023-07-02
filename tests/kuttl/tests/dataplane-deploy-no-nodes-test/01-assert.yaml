@@ -143,17 +143,17 @@ spec:
     strategy: linear
     tasks:
     - import_role:
-        name: osp.edpm.edpm_bootstrap
-        tasks_from: bootstrap.yml
-      name: Install edpm_bootstrap
-      tags:
-      - edpm_bootstrap
-    - import_role:
         name: osp.edpm.edpm_growvols
         tasks_from: main.yml
       name: Grow volumes
       tags:
       - edpm_growvols
+    - import_role:
+        name: osp.edpm.edpm_bootstrap
+        tasks_from: bootstrap.yml
+      name: Install edpm_bootstrap
+      tags:
+      - edpm_bootstrap
     - import_role:
         name: osp.edpm.edpm_kernel
         tasks_from: main.yml
