@@ -130,15 +130,6 @@ spec:
       edpm_sshd_allowed_ranges: ['192.168.122.0/24']
       # SELinux module
       edpm_selinux_mode: enforcing
-      edpm_hosts_entries_undercloud_hosts_entries: []
-      # edpm_hosts_entries role
-      edpm_hosts_entries_extra_hosts_entries:
-      - 172.17.0.80 glance-internal.openstack.svc neutron-internal.openstack.svc cinder-internal.openstack.svc nova-internal.openstack.svc placement-internal.openstack.svc keystone-internal.openstack.svc
-      - 172.17.0.85 rabbitmq.openstack.svc
-      - 172.17.0.86 rabbitmq-cell1.openstack.svc
-      edpm_hosts_entries_vip_hosts_entries: []
-      hosts_entries: []
-      hosts_entry: []
     managementNetwork: ctlplane
     networkConfig: {}
 status:
@@ -344,12 +335,6 @@ data:
             edpm_chrony_ntp_servers:
                 - clock.redhat.com
                 - clock2.redhat.com
-            edpm_hosts_entries_extra_hosts_entries:
-                - 172.17.0.80 glance-internal.openstack.svc neutron-internal.openstack.svc cinder-internal.openstack.svc nova-internal.openstack.svc placement-internal.openstack.svc keystone-internal.openstack.svc
-                - 172.17.0.85 rabbitmq.openstack.svc
-                - 172.17.0.86 rabbitmq-cell1.openstack.svc
-            edpm_hosts_entries_undercloud_hosts_entries: []
-            edpm_hosts_entries_vip_hosts_entries: []
             edpm_iscsid_image: quay.io/podified-antelope-centos9/openstack-iscsid:current-podified
             edpm_logrotate_crond_image: quay.io/podified-antelope-centos9/openstack-cron:current-podified
             edpm_network_config_hide_sensitive_logs: false
@@ -377,8 +362,6 @@ data:
             external_mtu: 1500
             external_vlan_id: 44
             gather_facts: false
-            hosts_entries: []
-            hosts_entry: []
             internal_api_cidr: "24"
             internal_api_host_routes: []
             internal_api_mtu: 1500
@@ -450,12 +433,6 @@ data:
                 edpm_chrony_ntp_servers:
                     - clock.redhat.com
                     - clock2.redhat.com
-                edpm_hosts_entries_extra_hosts_entries:
-                    - 172.17.0.80 glance-internal.openstack.svc neutron-internal.openstack.svc cinder-internal.openstack.svc nova-internal.openstack.svc placement-internal.openstack.svc keystone-internal.openstack.svc
-                    - 172.17.0.85 rabbitmq.openstack.svc
-                    - 172.17.0.86 rabbitmq-cell1.openstack.svc
-                edpm_hosts_entries_undercloud_hosts_entries: []
-                edpm_hosts_entries_vip_hosts_entries: []
                 edpm_iscsid_image: quay.io/podified-antelope-centos9/openstack-iscsid:current-podified
                 edpm_logrotate_crond_image: quay.io/podified-antelope-centos9/openstack-cron:current-podified
                 edpm_network_config_hide_sensitive_logs: false
@@ -484,8 +461,6 @@ data:
                 external_vlan_id: 44
                 fqdn_internal_api: edpm-compute-0.example.com
                 gather_facts: false
-                hosts_entries: []
-                hosts_entry: []
                 internal_api_cidr: "24"
                 internal_api_host_routes: []
                 internal_api_ip: 172.17.0.100
@@ -546,12 +521,6 @@ data:
                 edpm_chrony_ntp_servers:
                     - clock.redhat.com
                     - clock2.redhat.com
-                edpm_hosts_entries_extra_hosts_entries:
-                    - 172.17.0.80 glance-internal.openstack.svc neutron-internal.openstack.svc cinder-internal.openstack.svc nova-internal.openstack.svc placement-internal.openstack.svc keystone-internal.openstack.svc
-                    - 172.17.0.85 rabbitmq.openstack.svc
-                    - 172.17.0.86 rabbitmq-cell1.openstack.svc
-                edpm_hosts_entries_undercloud_hosts_entries: []
-                edpm_hosts_entries_vip_hosts_entries: []
                 edpm_iscsid_image: quay.io/podified-antelope-centos9/openstack-iscsid:current-podified
                 edpm_logrotate_crond_image: quay.io/podified-antelope-centos9/openstack-cron:current-podified
                 edpm_network_config_hide_sensitive_logs: false
@@ -580,8 +549,6 @@ data:
                 external_vlan_id: 44
                 fqdn_internal_api: edpm-compute-1.example.com
                 gather_facts: false
-                hosts_entries: []
-                hosts_entry: []
                 internal_api_cidr: "24"
                 internal_api_host_routes: []
                 internal_api_ip: 172.17.0.101

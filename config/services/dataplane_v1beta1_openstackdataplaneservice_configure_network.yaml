@@ -46,12 +46,6 @@ spec:
           tasks_from: "kernelargs.yml"
         tags:
           - "edpm_kernel"
-      - name: "Configure Hosts Entries"
-        import_role:
-          name: "osp.edpm.edpm_hosts_entries"
-          tasks_from: "main.yml"
-        tags:
-          - "edpm_hosts_entries"
       - name: "import edpm_network_config"
         import_role:
           name: "osp.edpm.edpm_network_config"
