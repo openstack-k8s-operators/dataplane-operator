@@ -63,6 +63,7 @@ func DeployBaremetalSet(
 						instanceSpec.CtlPlaneIP = res.Address
 						baremetalSet.Spec.CtlplaneGateway = *res.Gateway
 						baremetalSet.Spec.BootstrapDNS = dnsAddresses
+						baremetalSet.Spec.DNSSearchDomains = []string{res.DNSDomain}
 						_, ipNet, err := net.ParseCIDR(res.Cidr)
 						if err == nil {
 							baremetalSet.Spec.CtlplaneNetmask = net.IP(ipNet.Mask).String()
