@@ -247,8 +247,8 @@ github.com/openstack-k8s-operators/lib-common/modules/test v0.0.0-20230627132558
 github.com/openstack-k8s-operators/lib-common/modules/test v0.0.0-20230627132558-cd98c8b86310/go.mod h1:lZeuyHRYpGyl1pYIs0xuq8KP35tNUy2E83hSToxduq4=
 github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230630161935-e43995668618 h1:9t+cfo/5xo9MxpbF5uIItD49Xlq6fD0W4evI/Ht6gXE=
 github.com/openstack-k8s-operators/nova-operator/api v0.0.0-20230630161935-e43995668618/go.mod h1:qZZZhgs5n6sh8ll7iLHGbgFcv1u5mfYjDIl4vIC0Fy0=
-github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230629133004-c405d130fda9 h1:fX6O3pGA8xIK/qOcUbDTmG+jbz7Kl0dUUEPVvdFlRyU=
-github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230629133004-c405d130fda9/go.mod h1:e4hw70sdvXG8anfBSGq5VMq11h52aN/TI3HYxjPyDGE=
+github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230703060743-b069a928c1a9 h1:2MC3SkujEhtOhoFWEqfrPlCdidrI7Kiw4kroUZjRonI=
+github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-20230703060743-b069a928c1a9/go.mod h1:e4hw70sdvXG8anfBSGq5VMq11h52aN/TI3HYxjPyDGE=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230628022350-7fb9cc9405de h1:EUdmBPE8dc4KaWh2OYwNYpFTbc3lYQusG4UX30tfEvA=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.0.0-20230628022350-7fb9cc9405de/go.mod h1:JTCJLOYuhAr5GZiPzctpcOTh3IvqJn6RvvbiTMRoUQ4=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
