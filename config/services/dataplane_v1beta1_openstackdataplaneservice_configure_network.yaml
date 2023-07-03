@@ -16,18 +16,18 @@ spec:
     hosts: "all"
     strategy: "linear"
     tasks:
-      - name: "Install edpm_bootstrap"
-        import_role:
-          name: "osp.edpm.edpm_bootstrap"
-          tasks_from: "bootstrap.yml"
-        tags:
-          - "edpm_bootstrap"
       - name: "Grow volumes"
         import_role:
           name: "osp.edpm.edpm_growvols"
           tasks_from: "main.yml"
         tags:
           - "edpm_growvols"
+      - name: "Install edpm_bootstrap"
+        import_role:
+          name: "osp.edpm.edpm_bootstrap"
+          tasks_from: "bootstrap.yml"
+        tags:
+          - "edpm_bootstrap"
       - name: "Install edpm_kernel"
         import_role:
           name: "osp.edpm.edpm_kernel"
