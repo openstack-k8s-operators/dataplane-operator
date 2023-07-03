@@ -30,6 +30,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
+	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -251,10 +252,12 @@ func ConditionalDeploy(
 		log.Info(fmt.Sprintf("Condition %s unknown", readyCondition))
 		return nil
 
-	} else if status.Conditions.IsFalse(readyCondition) {
-		ansibleEEJob, err := dataplaneutil.GetAnsibleExecutionJob(ctx, helper, obj, deployLabel)
+	}
+
+	if status.Conditions.IsFalse(readyCondition) {
+		ansibleEE, err := dataplaneutil.GetAnsibleExecution(ctx, helper, obj, deployLabel)
 		if err != nil && k8s_errors.IsNotFound(err) {
-			log.Info(fmt.Sprintf("%s OpenStackAnsibleEE Job not yet found", readyCondition))
+			log.Info(fmt.Sprintf("%s OpenStackAnsibleEE not yet found", readyCondition))
 			return nil
 		} else if err != nil {
 			log.Error(err, fmt.Sprintf("Error getting ansibleEE job for %s", deployName))
@@ -265,14 +268,29 @@ func ConditionalDeploy(
 				readyErrorMessage,
 				err.Error()))
 			return err
-		} else if ansibleEEJob.Status.Succeeded > 0 {
+		}
+
+		if ansibleEE.Status.JobStatus == ansibleeev1alpha1.JobStatusSucceeded {
 			log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 			status.Conditions.Set(condition.TrueCondition(
 				readyCondition,
 				readyMessage))
-		} else if ansibleEEJob.Status.Failed > 0 {
+			return nil
+		}
+
+		if ansibleEE.Status.JobStatus == ansibleeev1alpha1.JobStatusRunning || ansibleEE.Status.JobStatus == ansibleeev1alpha1.JobStatusPending {
+			log.Info(fmt.Sprintf("AnsibleEE job is not yet completed: Execution: %s, Status: %s", ansibleEE.Name, ansibleEE.Status.JobStatus))
+			status.Conditions.Set(condition.FalseCondition(
+				readyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				readyWaitingMessage))
+			return nil
+		}
+
+		if ansibleEE.Status.JobStatus == ansibleeev1alpha1.JobStatusFailed {
 			log.Info(fmt.Sprintf("Condition %s error", readyCondition))
-			err = fmt.Errorf("failed: job.name %s job.namespace %s", ansibleEEJob.Name, ansibleEEJob.Namespace)
+			err = fmt.Errorf("Execution.name %s Execution.namespace %s Execution.status.jobstatus: %s", ansibleEE.Name, ansibleEE.Namespace, ansibleEE.Status.JobStatus)
 			status.Conditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.ErrorReason,
@@ -280,9 +298,6 @@ func ConditionalDeploy(
 				readyErrorMessage,
 				err.Error()))
 			return err
-		} else {
-			log.Info(fmt.Sprintf("Condition %s not yet ready", readyCondition))
-			return nil
 		}
 
 	}

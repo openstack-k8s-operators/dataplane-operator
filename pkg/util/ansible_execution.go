@@ -22,11 +22,9 @@ import (
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -205,23 +203,4 @@ func GetAnsibleExecution(ctx context.Context, helper *helper.Helper, obj client.
 
 	return ansibleEE, nil
 
-}
-
-// GetAnsibleExecutionJob returns OpenStackAnsibleEE Job for given label
-func GetAnsibleExecutionJob(ctx context.Context, helper *helper.Helper, obj client.Object, label string) (*batchv1.Job, error) {
-
-	foundJob := &batchv1.Job{}
-	ansibleEE, err := GetAnsibleExecution(ctx, helper, obj, label)
-	if err != nil {
-		return foundJob, err
-	} else if ansibleEE == nil {
-		return foundJob, fmt.Errorf("OpenStackAnsibleEE not found with label %s=%s", label, obj.GetUID())
-	}
-
-	err = helper.GetClient().Get(ctx, types.NamespacedName{Name: ansibleEE.Name, Namespace: ansibleEE.Namespace}, foundJob)
-	if err != nil {
-		return foundJob, err
-	}
-
-	return foundJob, nil
 }
