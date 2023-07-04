@@ -42,7 +42,7 @@ The default list of services are reconciled during role reconciliation if the
 service is in the role's service list.
 
 ---
-** NOTE **
+**NOTE**
 
 Do not create a custom service with the same name as one of the default
 services. The default service will overwrite the custom service with the same

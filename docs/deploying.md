@@ -82,12 +82,10 @@ with `oc` as the last step.
 Start the `YAML` document in an `openstack-edpm.yaml` file and give the
 dataplane a name.
 
-
     apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlane
     metadata:
       name: openstack-edpm
-
 
 Begin writing the dataplane spec. Initially, a `deployStrategy` field will be
 added to the spec that contains `deploy: false`. This allows for creating
@@ -156,22 +154,22 @@ Some of the ansible variables will need to be set based on values from the
 controlplane that is already deployed. This set of ansible variables and the
 `oc` command that can be used to get their values are shown below.
 
-	export EDPM_OVN_METADATA_AGENT_TRANSPORT_URL=$(oc get secret rabbitmq-transport-url-neutron-neutron-transport -o json | jq -r .data.transport_url | base64 -d)
-	export EDPM_OVN_METADATA_AGENT_SB_CONNECTION=$(oc get ovndbcluster ovndbcluster-sb -o json | jq -r .status.dbAddress)
-	export EDPM_OVN_METADATA_AGENT_NOVA_METADATA_HOST=$(oc get svc nova-metadata-internal -o json |jq -r '.status.loadBalancer.ingress[0].ip')
-	export EDPM_OVN_METADATA_AGENT_PROXY_SHARED_SECRET=$(oc get secret osp-secret -o json | jq -r .data.MetadataSecret  | base64 -d)
-	export EDPM_OVN_METADATA_AGENT_BIND_HOST=127.0.0.1
-	export EDPM_OVN_DBS=$(oc get ovndbcluster ovndbcluster-sb -o json | jq -r '.status.networkAttachments."openstack/internalapi"[0]')
+ export EDPM_OVN_METADATA_AGENT_TRANSPORT_URL=$(oc get secret rabbitmq-transport-url-neutron-neutron-transport -o json | jq -r .data.transport_url | base64 -d)
+ export EDPM_OVN_METADATA_AGENT_SB_CONNECTION=$(oc get ovndbcluster ovndbcluster-sb -o json | jq -r .status.dbAddress)
+ export EDPM_OVN_METADATA_AGENT_NOVA_METADATA_HOST=$(oc get svc nova-metadata-internal -o json |jq -r '.status.loadBalancer.ingress[0].ip')
+ export EDPM_OVN_METADATA_AGENT_PROXY_SHARED_SECRET=$(oc get secret osp-secret -o json | jq -r .data.MetadataSecret  | base64 -d)
+ export EDPM_OVN_METADATA_AGENT_BIND_HOST=127.0.0.1
+ export EDPM_OVN_DBS=$(oc get ovndbcluster ovndbcluster-sb -o json | jq -r '.status.networkAttachments."openstack/internalapi"[0]')
 
-	echo "
-	edpm_ovn_metadata_agent_DEFAULT_transport_url: ${EDPM_OVN_METADATA_AGENT_TRANSPORT_URL}
-	edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: ${EDPM_OVN_METADATA_AGENT_SB_CONNECTION}
-	edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: ${EDPM_OVN_METADATA_AGENT_NOVA_METADATA_HOST}
-	edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: ${EDPM_OVN_METADATA_AGENT_PROXY_SHARED_SECRET}
-	edpm_ovn_metadata_agent_DEFAULT_bind_host: ${EDPM_OVN_METADATA_AGENT_BIND_HOST}
-	edpm_ovn_dbs:
-	- ${EDPM_OVN_DBS}
-	"
+ echo "
+ edpm_ovn_metadata_agent_DEFAULT_transport_url: ${EDPM_OVN_METADATA_AGENT_TRANSPORT_URL}
+ edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: ${EDPM_OVN_METADATA_AGENT_SB_CONNECTION}
+ edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: ${EDPM_OVN_METADATA_AGENT_NOVA_METADATA_HOST}
+ edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: ${EDPM_OVN_METADATA_AGENT_PROXY_SHARED_SECRET}
+ edpm_ovn_metadata_agent_DEFAULT_bind_host: ${EDPM_OVN_METADATA_AGENT_BIND_HOST}
+ edpm_ovn_dbs:
+ - ${EDPM_OVN_DBS}
+ "
 
 Add the output to the `ansibleVars` field to configure the values on the
 role.
@@ -184,7 +182,7 @@ However, certain fields will need to be overridden given that they are specific
 to a node. In this example, `ansibleVars` has the node specific variables.
 
 ---
-** NOTE **
+**NOTE**
 
 In the case of `ansibleVars`, the value is merged with that of the value from
 the role. This makes it so that the entire value of `ansibleVars` from the role
@@ -195,7 +193,6 @@ values.
 
 With the nodes and the controlplane specific variables added, the full
 `openstack-datplane` `YAML` document looks like the following:
-
 
     apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlane
@@ -276,16 +273,16 @@ Verify that the dataplane, role, and nodes were created.
 
 The output should be similar to:
 
-	$ oc get openstackdataplane
-	NAME             STATUS   MESSAGE
-	openstack-edpm   False    Deployment not started
-	$ oc get openstackdataplanerole
-	NAME           STATUS   MESSAGE
-	edpm-compute   False    Deployment not started
-	$ oc get openstackdataplanenode
-	NAME             STATUS   MESSAGE
-	edpm-compute-0   False    Deployment not started
-	edpm-compute-1   False    Deployment not started
+ $ oc get openstackdataplane
+ NAME             STATUS   MESSAGE
+ openstack-edpm   False    Deployment not started
+ $ oc get openstackdataplanerole
+ NAME           STATUS   MESSAGE
+ edpm-compute   False    Deployment not started
+ $ oc get openstackdataplanenode
+ NAME             STATUS   MESSAGE
+ edpm-compute-0   False    Deployment not started
+ edpm-compute-1   False    Deployment not started
 
 ### Understanding OpenStackDataPlaneServices
 
@@ -338,26 +335,26 @@ configure the role are documented.
 For example, in the describe output for the `install-os` service, the
 `osp.edpm.edpm_sshd` role is seen.
 
-	import_role:
-	  Name:        osp.edpm.edpm_sshd
-	  tasks_from:  install.yml
-	Name:          Install edpm_sshd
-	Tags:
-	  edpm_sshd
+ import_role:
+   Name:        osp.edpm.edpm_sshd
+   tasks_from:  install.yml
+ Name:          Install edpm_sshd
+ Tags:
+   edpm_sshd
 
 The ansible variables that configure the
 behavior of the `osp.edpm.edpm_sshd` role are available at
 <https://github.com/openstack-k8s-operators/edpm-ansible/blob/main/roles/edpm_sshd/tasks/main.yml>.
 
 ---
-** NOTE **
+**NOTE**
 
 If the default provided services are edited, those edits will be lost after any
 further role reconciliations.
 
 ---
 
-### Deploy the dataplane.
+### Deploy the dataplane
 
 With the dataplane resources created, it can be seen from their status message
 that they have not yet been deployed. This means no ansible has been executed
@@ -378,16 +375,16 @@ With the deployment started, ansible will be executed to configure the nodes.
 When the deployment is complete, the status messages will change to indicate
 the deployment is ready.
 
-	$ oc get openstackdataplane
-	NAME             STATUS   MESSAGE
-	openstack-edpm   True    DataPlane Ready
-	$ oc get openstackdataplanerole
-	NAME           STATUS   MESSAGE
-	edpm-compute   True    DataPlaneRole Ready
-	$ oc get openstackdataplanenode
-	NAME             STATUS   MESSAGE
-	edpm-compute-0   True    DataPlaneNode Ready
-	edpm-compute-1   True    DataPlaneNode Ready
+ $ oc get openstackdataplane
+ NAME             STATUS   MESSAGE
+ openstack-edpm   True    DataPlane Ready
+ $ oc get openstackdataplanerole
+ NAME           STATUS   MESSAGE
+ edpm-compute   True    DataPlaneRole Ready
+ $ oc get openstackdataplanenode
+ NAME             STATUS   MESSAGE
+ edpm-compute-0   True    DataPlaneNode Ready
+ edpm-compute-1   True    DataPlaneNode Ready
 
 ### Understanding dataplane conditions
 

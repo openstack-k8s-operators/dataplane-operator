@@ -12,8 +12,8 @@ repository.
 
 ## Initial bootstrap command
 
-**Variable**: `edpm_bootstrap_command`  
-**Type**: `string`  
+**Variable**: `edpm_bootstrap_command`
+**Type**: `string`
 **Role**: [edpm_bootstrap](https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles/edpm_bootstrap)
 
 The `edpm_bootstrap_command` variable can be used to pass a shell command(s) that
