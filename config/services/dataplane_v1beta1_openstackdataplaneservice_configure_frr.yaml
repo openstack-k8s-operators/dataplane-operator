@@ -1,0 +1,18 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: configure-frr
+spec:
+  label: dataplane-deployment-configure-frr
+  role:
+    name: "Deploy EDPM FRR Configure"
+    hosts: "all"
+    strategy: "linear"
+    become: true
+    tasks:
+      - name: "Configure edpm_frr"
+        import_role:
+          name: "osp.edpm.edpm_frr"
+          tasks_from: "configure.yml"
+        tags:
+          - "edpm_frr"
