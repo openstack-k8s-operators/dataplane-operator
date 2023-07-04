@@ -13,10 +13,10 @@ software on the nodes.
 The dataplane-operator exposes the concepts of dataplanes, roles, nodes, and
 services as CRD's:
 
-* [OpenStackDataPlane](../config/crd/bases/dataplane.openstack.org_openstackdataplanes.yaml)
-* [OpenStackDataPlaneRole](../config/crd/bases/dataplane.openstack.org_openstackdataplaneroles.yaml)
-* [OpenStackDataPlaneNode](../config/crd/bases/dataplane.openstack.org_openstackdataplanenodes.yaml)
-* [OpenStackDataPlaneService](../config/crd/bases/dataplane.openstack.org_openstackdataplaneservices.yaml)
+* [OpenStackDataPlane](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplanes.yaml)
+* [OpenStackDataPlaneRole](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplaneroles.yaml)
+* [OpenStackDataPlaneNode](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplanenodes.yaml)
+* [OpenStackDataPlaneService](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplaneservices.yaml)
 
 Each node in a dataplane is represented by a corresponding
 OpenStackDataPlaneNode resource. A node must already be baremetal provisioned

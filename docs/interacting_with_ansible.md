@@ -21,44 +21,44 @@ retrieved from the API.
 
 Sample output when the default list of services:
 
-	NAME                                                  NETWORKATTACHMENTS   STATUS   MESSAGE
-	dataplane-deployment-configure-network-edpm-compute                        True     AnsibleExecutionJob complete
-	dataplane-deployment-configure-os-edpm-compute                             True     AnsibleExecutionJob complete
-	dataplane-deployment-install-os-edpm-compute                               True     AnsibleExecutionJob complete
-	dataplane-deployment-run-os-edpm-compute                                   True     AnsibleExecutionJob complete
-	dataplane-deployment-validate-network-edpm-compute                         True     AnsibleExecutionJob complete
+ NAME                                                  NETWORKATTACHMENTS   STATUS   MESSAGE
+ dataplane-deployment-configure-network-edpm-compute                        True     AnsibleExecutionJob complete
+ dataplane-deployment-configure-os-edpm-compute                             True     AnsibleExecutionJob complete
+ dataplane-deployment-install-os-edpm-compute                               True     AnsibleExecutionJob complete
+ dataplane-deployment-run-os-edpm-compute                                   True     AnsibleExecutionJob complete
+ dataplane-deployment-validate-network-edpm-compute                         True     AnsibleExecutionJob complete
 
 Querying for pods with the OpenStackAnsibleEE label
 
-	oc get pods -l app=openstackansibleee
+ oc get pods -l app=openstackansibleee
 
 Sample output:
 
-	dataplane-deployment-configure-network-edpm-compute-j6r4l   0/1     Completed           0          3m36s
-	dataplane-deployment-validate-network-edpm-compute-6g7n9    0/1     Pending             0          0s
-	dataplane-deployment-validate-network-edpm-compute-6g7n9    0/1     ContainerCreating   0          11s
-	dataplane-deployment-validate-network-edpm-compute-6g7n9    1/1     Running             0          13s
+ dataplane-deployment-configure-network-edpm-compute-j6r4l   0/1     Completed           0          3m36s
+ dataplane-deployment-validate-network-edpm-compute-6g7n9    0/1     Pending             0          0s
+ dataplane-deployment-validate-network-edpm-compute-6g7n9    0/1     ContainerCreating   0          11s
+ dataplane-deployment-validate-network-edpm-compute-6g7n9    1/1     Running             0          13s
 
 Querying for jobs, shows the corresponding job for each OpenStackAnsibleEE resource:
 
-	oc get jobs -l app=openstackansibleee
+ oc get jobs -l app=openstackansibleee
 
 Sample output:
 
-	NAME                                                  COMPLETIONS   DURATION   AGE
-	dataplane-deployment-configure-network-edpm-compute   1/1           8s         2m51s
-	dataplane-deployment-configure-os-edpm-compute        1/1           8s         2m27s
-	dataplane-deployment-install-os-edpm-compute          1/1           8s         2m35s
-	dataplane-deployment-run-os-edpm-compute              1/1           8s         2m19s
-	dataplane-deployment-validate-network-edpm-compute    1/1           8s         2m43s
+ NAME                                                  COMPLETIONS   DURATION   AGE
+ dataplane-deployment-configure-network-edpm-compute   1/1           8s         2m51s
+ dataplane-deployment-configure-os-edpm-compute        1/1           8s         2m27s
+ dataplane-deployment-install-os-edpm-compute          1/1           8s         2m35s
+ dataplane-deployment-run-os-edpm-compute              1/1           8s         2m19s
+ dataplane-deployment-validate-network-edpm-compute    1/1           8s         2m43s
 
 Using the job name, the corresponding pod can be retrieved:
 
-	oc get pods | grep dataplane-deployment-configure-network-edpm-compute
+ oc get pods | grep dataplane-deployment-configure-network-edpm-compute
 
 Sample output:
 
-	dataplane-deployment-configure-network-edpm-compute-2hshp   0/1     Completed            0                5m45s
+ dataplane-deployment-configure-network-edpm-compute-2hshp   0/1     Completed            0                5m45s
 
 Using the job name, the ansible logs can be retrieved:
 

@@ -1,4 +1,4 @@
-@startuml
+@startuml edpm
 actor "Human Operator" as user #blue;line:blue;line.bold;text:blue
 
 file "OpenStack Control Plane CR" as OCPCR #pink;line:red;line.bold;text:red

@@ -56,4 +56,3 @@ plugins:
       output_format: "svg"
   - search:
       lang: en
-      prebuild_index: true

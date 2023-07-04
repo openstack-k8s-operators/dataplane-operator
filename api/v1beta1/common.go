@@ -58,7 +58,7 @@ type NodeSection struct {
 	// AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH
 	// key for connecting to node. Must be of the form:
 	// Secret.data.ssh-privatekey: <base64 encoded private key contents>
-	// https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets
+	// <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>
 	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret,omitempty"`
 
 	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
