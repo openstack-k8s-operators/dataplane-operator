@@ -44,8 +44,6 @@ spec:
     value: "True"
   - name: ANSIBLE_ENABLE_TASK_DEBUGGER
     value: "True"
-  - name: ANSIBLE_VERBOSITY
-    value: "2"
   nodeTemplate:
     ansiblePort: 22
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret

@@ -41,8 +41,6 @@ spec:
           value: "True"
         - name: ANSIBLE_ENABLE_TASK_DEBUGGER
           value: "True"
-        - name: ANSIBLE_VERBOSITY
-          value: "2"
       baremetalSetTemplate:
         deploymentSSHSecret: dataplane-ansible-ssh-private-key-secret
         ctlplaneInterface: enp1s0
