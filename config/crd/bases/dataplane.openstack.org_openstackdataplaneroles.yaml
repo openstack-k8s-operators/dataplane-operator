@@ -1086,6 +1086,8 @@ spec:
                     type: object
                     x-kubernetes-map-type: atomic
                 type: object
+              openStackAnsibleEERunnerImage:
+                type: string
               preProvisioned:
                 type: boolean
               services:

@@ -148,6 +148,9 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 			},
 		}
 		_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), ensureService, func() error {
+			if len(instance.Spec.OpenStackAnsibleEERunnerImage) > 0 {
+				serviceObjSpec.OpenStackAnsibleEERunnerImage = instance.Spec.OpenStackAnsibleEERunnerImage
+			}
 			ensureService.Spec = *serviceObjSpec
 			return nil
 		})

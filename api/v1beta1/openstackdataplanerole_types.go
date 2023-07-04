@@ -63,6 +63,10 @@ type OpenStackDataPlaneRoleSpec struct {
 	// +kubebuilder:default={configure-network,validate-network,install-os,configure-os,run-os}
 	// Services list
 	Services []string `json:"services"`
+
+	// +kubebuilder:validation:Optional
+	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
+	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -180,11 +184,12 @@ func (instance OpenStackDataPlaneRole) Validate(nodes []OpenStackDataPlaneNode) 
 // GetAnsibleEESpec - get the fields that will be passed to AEE
 func (instance OpenStackDataPlaneRole) GetAnsibleEESpec() AnsibleEESpec {
 	return AnsibleEESpec{
-		NetworkAttachments: instance.Spec.NetworkAttachments,
-		AnsibleTags:        instance.Spec.DeployStrategy.AnsibleTags,
-		AnsibleLimit:       instance.Spec.DeployStrategy.AnsibleLimit,
-		AnsibleSkipTags:    instance.Spec.DeployStrategy.AnsibleSkipTags,
-		ExtraMounts:        instance.Spec.NodeTemplate.ExtraMounts,
-		Env:                instance.Spec.Env,
+		NetworkAttachments:            instance.Spec.NetworkAttachments,
+		OpenStackAnsibleEERunnerImage: instance.Spec.OpenStackAnsibleEERunnerImage,
+		AnsibleTags:                   instance.Spec.DeployStrategy.AnsibleTags,
+		AnsibleLimit:                  instance.Spec.DeployStrategy.AnsibleLimit,
+		AnsibleSkipTags:               instance.Spec.DeployStrategy.AnsibleSkipTags,
+		ExtraMounts:                   instance.Spec.NodeTemplate.ExtraMounts,
+		Env:                           instance.Spec.Env,
 	}
 }

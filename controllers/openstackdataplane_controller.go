@@ -375,6 +375,7 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 			role.Spec.DataPlane = instance.Name
 			role.Spec.NodeTemplate = roleSpec.NodeTemplate
 			role.Spec.NetworkAttachments = roleSpec.NetworkAttachments
+			role.Spec.OpenStackAnsibleEERunnerImage = roleSpec.OpenStackAnsibleEERunnerImage
 			role.Spec.Env = roleSpec.Env
 			role.Spec.Services = roleSpec.Services
 			hostMap, ok := roleManagedHostMap[roleName]
