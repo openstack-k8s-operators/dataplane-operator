@@ -202,7 +202,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	}
 
 	// Ensure DNSData Required for Nodes
-	dnsAddresses, isReady, err := deployment.EnsureDNSData(ctx, helper,
+	dnsAddresses, ctlplaneSearchDomain, isReady, err := deployment.EnsureDNSData(ctx, helper,
 		instance, nodes, allIPSets)
 	if err != nil || !isReady {
 		return ctrl.Result{}, err
@@ -245,13 +245,25 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	// all setup tasks complete, mark SetupReadyCondition True
 	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
 
-	r.Log.Info("Role", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
+	r.Log.Info("Role", "DeployStrategy", instance.Spec.DeployStrategy.Deploy,
+		"Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
 		r.Log.Info("Starting DataPlaneRole deploy")
 		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
-		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
-
-		deployResult, err := deployment.Deploy(ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret, roleConfigMap, &instance.Status, instance.GetAnsibleEESpec(), instance.Spec.Services, instance)
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			condition.DeploymentReadyCondition, condition.RequestedReason,
+			condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
+		ansibleEESpec := instance.GetAnsibleEESpec()
+		if dnsAddresses != nil && ctlplaneSearchDomain != "" {
+			ansibleEESpec.DNSConfig = &corev1.PodDNSConfig{
+				Nameservers: dnsAddresses,
+				Searches:    []string{ctlplaneSearchDomain},
+			}
+		}
+		deployResult, err := deployment.Deploy(
+			ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret,
+			roleConfigMap, &instance.Status, ansibleEESpec,
+			instance.Spec.Services, instance)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
 			instance.Status.Conditions.Set(condition.FalseCondition(

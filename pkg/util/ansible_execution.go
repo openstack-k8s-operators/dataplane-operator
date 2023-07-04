@@ -70,6 +70,9 @@ func AnsibleExecution(
 
 	_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), ansibleEE, func() error {
 		ansibleEE.Spec.NetworkAttachments = aeeSpec.NetworkAttachments
+		if aeeSpec.DNSConfig != nil {
+			ansibleEE.Spec.DNSConfig = aeeSpec.DNSConfig
+		}
 		if len(aeeSpec.OpenStackAnsibleEERunnerImage) > 0 {
 			ansibleEE.Spec.Image = aeeSpec.OpenStackAnsibleEERunnerImage
 		}

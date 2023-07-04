@@ -159,6 +159,8 @@ type AnsibleEESpec struct {
 	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
+	// DNSConfig for setting dnsservers
+	DNSConfig *corev1.PodDNSConfig `json:"dnsConfig,omitempty"`
 }
 
 // NovaTemplate specifies the parameters for the compute service deployment on

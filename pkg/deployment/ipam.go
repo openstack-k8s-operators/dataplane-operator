@@ -64,9 +64,10 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneRole,
 	nodes *dataplanev1.OpenStackDataPlaneNodeList,
-	allIPSets map[string]infranetworkv1.IPSet) error {
+	allIPSets map[string]infranetworkv1.IPSet) (string, error) {
 
 	var allDNSRecords []infranetworkv1.DNSHost
+	var ctlplaneSearchDomain string
 	// Build DNSData CR
 	for _, node := range nodes.Items {
 		nets := node.Spec.Node.Networks
@@ -86,6 +87,11 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 					fqdnNames = append(fqdnNames, fqdnName)
 					dnsRecord.Hostnames = fqdnNames
 					allDNSRecords = append(allDNSRecords, dnsRecord)
+					// Adding only ctlplane domain for ansibleee.
+					// TODO (rabi) This is not very efficient.
+					if res.Network == CtlPlaneNetwork && ctlplaneSearchDomain == "" {
+						ctlplaneSearchDomain = res.DNSDomain
+					}
 				}
 			}
 		}
@@ -99,15 +105,18 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 	}
 	_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), dnsData, func() error {
 		dnsData.Spec.Hosts = allDNSRecords
+		// TODO (rabi) DNSDataLabelSelectorValue can probably be
+		// used from dnsmasq(?)
+		dnsData.Spec.DNSDataLabelSelectorValue = "dnsdata"
 		// Set controller reference to the DataPlaneNode object
 		err := controllerutil.SetControllerReference(
 			helper.GetBeforeObject(), dnsData, helper.GetScheme())
 		return err
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return ctlplaneSearchDomain, nil
 
 }
 
@@ -115,7 +124,7 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneRole,
 	nodes *dataplanev1.OpenStackDataPlaneNodeList,
-	allIPSets map[string]infranetworkv1.IPSet) ([]string, bool, error) {
+	allIPSets map[string]infranetworkv1.IPSet) ([]string, string, bool, error) {
 
 	// Verify dnsmasq CR exists
 	dnsmasqList := &infranetworkv1.DNSMasqList{}
@@ -124,21 +133,22 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	}
 	err := helper.GetClient().List(ctx, dnsmasqList, listOpts...)
 	if err != nil {
-		return nil, false, err
+		return nil, "", false, err
 	}
 	if len(dnsmasqList.Items) == 0 {
 		util.LogForObject(helper, "No NetConfig CR exists yet, DNS Service won't be used", instance)
-		return nil, true, nil
+		return nil, "", true, nil
 	}
 
 	// Create or Patch DNSData
-	err = createOrPatchDNSData(ctx, helper, instance, nodes, allIPSets)
+	ctlplaneSearchDomain, err := createOrPatchDNSData(
+		ctx, helper, instance, nodes, allIPSets)
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.RoleDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
 			dataplanev1.RoleDNSDataReadyErrorMessage)
-		return nil, false, err
+		return nil, "", false, err
 	}
 
 	dnsData := &infranetworkv1.DNSData{
@@ -150,18 +160,18 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	key := client.ObjectKeyFromObject(dnsData)
 	err = helper.GetClient().Get(ctx, key, dnsData)
 	if err != nil {
-		return nil, false, err
+		return nil, "", false, err
 	}
 
 	if !dnsData.IsReady() {
 		util.LogForObject(helper, "DNSData not ready yet waiting", instance)
-		return nil, false, nil
+		return nil, "", false, nil
 	}
 	instance.Status.Conditions.MarkTrue(
 		dataplanev1.RoleDNSDataReadyCondition,
 		dataplanev1.RoleDNSDataReadyMessage)
 	dnsAddresses := dnsmasqList.Items[0].Status.DNSAddresses
-	return dnsAddresses, true, nil
+	return dnsAddresses, ctlplaneSearchDomain, true, nil
 }
 
 // reserveIPs Reserves IPs by creating IPSets

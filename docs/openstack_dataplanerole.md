@@ -26,6 +26,7 @@ AnsibleEESpec is a specification of the ansible EE attributes
 | ansibleSkipTags | AnsibleSkipTags for ansible execution | string | false |
 | extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | false |
 | env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
+| dnsConfig | DNSConfig for setting dnsservers | *corev1.PodDNSConfig | false |
 
 [Back to Custom Resources](#custom-resources)
 

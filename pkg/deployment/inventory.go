@@ -50,17 +50,19 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 
 	for _, node := range nodes {
 		host := roleNameGroup.AddHost(node.Name)
-		// We'll override ansible_host if we're using IPAM
-		host.Vars["ansible_host"] = node.Spec.AnsibleHost
+		var dnsSearchDomains []string
+		// Use if provided else use hostname
+		if node.Spec.AnsibleHost != "" {
+			host.Vars["ansible_host"] = node.Spec.AnsibleHost
+		} else {
+			host.Vars["ansible_host"] = node.Spec.HostName
+		}
 		ipSet, ok := allIPSets[node.Name]
 		if ok {
 			for _, res := range ipSet.Status.Reservation {
 				// Build the vars for ips/routes etc
 				switch n := res.Network; n {
 				case CtlPlaneNetwork:
-					if node.Spec.AnsibleHost == "" {
-						host.Vars["ansible_host"] = res.Address
-					}
 					host.Vars["ctlplane_ip"] = res.Address
 					_, ipnet, err := net.ParseCIDR(res.Cidr)
 					if err == nil {
@@ -71,6 +73,7 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 					host.Vars["gateway_ip"] = res.Gateway
 					host.Vars["ctlplane_dns_nameservers"] = dnsAddresses
 					host.Vars["ctlplane_host_routes"] = res.Routes
+					dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
 				default:
 					entry := toSnakeCase(string(n))
 					host.Vars[entry+"_ip"] = res.Address
@@ -83,7 +86,9 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 					host.Vars[entry+"_mtu"] = res.MTU
 					//host.Vars[string.Join(entry, "_gateway_ip")] = res.Gateway
 					host.Vars[entry+"_host_routes"] = res.Routes
+					dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
 				}
+				host.Vars["dns_search_domains"] = dnsSearchDomains
 			}
 		}
 
