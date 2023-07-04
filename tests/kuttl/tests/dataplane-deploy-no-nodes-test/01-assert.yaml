@@ -144,7 +144,6 @@ spec:
     tasks:
     - import_role:
         name: osp.edpm.edpm_growvols
-        tasks_from: main.yml
       name: Grow volumes
       tags:
       - edpm_growvols
@@ -156,13 +155,11 @@ spec:
       - edpm_bootstrap
     - import_role:
         name: osp.edpm.edpm_kernel
-        tasks_from: main.yml
       name: Install edpm_kernel
       tags:
       - edpm_kernel
     - import_role:
         name: osp.edpm.edpm_tuned
-        tasks_from: main.yml
       name: Import edpm_tuned
       tags:
       - edpm_tuned
@@ -174,7 +171,6 @@ spec:
       - edpm_kernel
     - import_role:
         name: osp.edpm.edpm_network_config
-        tasks_from: main.yml
       name: import edpm_network_config
       tags:
       - edpm_network_config
@@ -243,7 +239,6 @@ spec:
     tasks:
     - import_role:
         name: osp.edpm.edpm_nodes_validation
-        tasks_from: main.yml
       name: import edpm_nodes_validation
   uid: 1001
 status:
@@ -316,7 +311,6 @@ spec:
       - edpm_bootstrap
     - import_role:
         name: osp.edpm.edpm_kernel
-        tasks_from: main.yml
       name: Install edpm_kernel
       tags:
       - edpm_kernel
@@ -465,7 +459,6 @@ spec:
     - name: Configure edpm_ssh_known_hosts
       import_role:
         name: osp.edpm.edpm_ssh_known_hosts
-        tasks_from: main.yml
       tags:
         - edpm_ssh_known_hosts
     - name: Configure edpm_logrotate_crond
