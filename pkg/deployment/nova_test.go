@@ -6,19 +6,19 @@ import (
 	. "github.com/onsi/gomega"
 	"k8s.io/utils/pointer"
 
-	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 )
 
 func TestMergeNovaTemplates(t *testing.T) {
 	RegisterTestingT(t)
 
 	t.Run("No override", func(t *testing.T) {
-		node := dataplanev1beta1.NovaTemplate{
+		node := dataplanev1.NovaTemplate{
 			CustomServiceConfig: "foo=bar",
 			Deploy:              nil,
 		}
 
-		role := dataplanev1beta1.NovaTemplate{
+		role := dataplanev1.NovaTemplate{
 			CellName: "cell2",
 			Deploy:   pointer.Bool(false),
 		}
@@ -32,11 +32,11 @@ func TestMergeNovaTemplates(t *testing.T) {
 	})
 
 	t.Run("Override", func(t *testing.T) {
-		node := dataplanev1beta1.NovaTemplate{
+		node := dataplanev1.NovaTemplate{
 			CustomServiceConfig: "foo=bar",
 		}
 
-		role := dataplanev1beta1.NovaTemplate{
+		role := dataplanev1.NovaTemplate{
 			CustomServiceConfig: "baz=boo",
 		}
 
@@ -46,11 +46,11 @@ func TestMergeNovaTemplates(t *testing.T) {
 		Expect(merged.CustomServiceConfig).To(Equal("foo=bar"))
 	})
 	t.Run("Deploy override", func(t *testing.T) {
-		node := dataplanev1beta1.NovaTemplate{
+		node := dataplanev1.NovaTemplate{
 			Deploy: pointer.Bool(true),
 		}
 
-		role := dataplanev1beta1.NovaTemplate{
+		role := dataplanev1.NovaTemplate{
 			Deploy: pointer.Bool(false),
 		}
 
@@ -61,11 +61,11 @@ func TestMergeNovaTemplates(t *testing.T) {
 	})
 
 	t.Run("Deploy only in node", func(t *testing.T) {
-		node := dataplanev1beta1.NovaTemplate{
+		node := dataplanev1.NovaTemplate{
 			Deploy: pointer.Bool(true),
 		}
 
-		role := dataplanev1beta1.NovaTemplate{
+		role := dataplanev1.NovaTemplate{
 			Deploy: nil,
 		}
 

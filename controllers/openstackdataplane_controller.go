@@ -22,7 +22,7 @@ import (
 	"sort"
 	"time"
 
-	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -68,7 +68,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	logger := log.FromContext(ctx)
 
 	// Fetch the OpenStackDataPlane instance
-	instance := &dataplanev1beta1.OpenStackDataPlane{}
+	instance := &dataplanev1.OpenStackDataPlane{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if k8s_errors.IsNotFound(err) {
@@ -98,7 +98,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	defer func() {
 		// update the overall status condition if service is ready
 		if instance.IsReady() {
-			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1beta1.DataPlaneReadyMessage)
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1.DataPlaneReadyMessage)
 		} else {
 			// something is not ready so reset the Ready condition
 			instance.Status.Conditions.MarkUnknown(
@@ -121,12 +121,12 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, nil
 	}
 
-	if instance.Status.Conditions.IsUnknown(dataplanev1beta1.SetupReadyCondition) {
-		instance.Status.Conditions.MarkFalse(dataplanev1beta1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
+	if instance.Status.Conditions.IsUnknown(dataplanev1.SetupReadyCondition) {
+		instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 	}
 
 	// all setup tasks complete, mark SetupReadyCondition True
-	instance.Status.Conditions.MarkTrue(dataplanev1beta1.SetupReadyCondition, condition.ReadyMessage)
+	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
 
 	ctrlResult, err := createOrPatchDataPlaneResources(ctx, instance, helper)
 	if err != nil {
@@ -141,7 +141,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		r.Log.Info("Starting DataPlane deploy")
 		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
-		roles := &dataplanev1beta1.OpenStackDataPlaneRoleList{}
+		roles := &dataplanev1.OpenStackDataPlaneRoleList{}
 
 		listOpts := []client.ListOption{
 			client.InNamespace(instance.GetNamespace()),
@@ -201,7 +201,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 			condition.DeploymentReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityError,
-			dataplanev1beta1.DataPlaneErrorMessage,
+			dataplanev1.DataPlaneErrorMessage,
 			err.Error()))
 		return ctrl.Result{}, err
 	}
@@ -243,14 +243,14 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&dataplanev1beta1.OpenStackDataPlane{}).
-		Owns(&dataplanev1beta1.OpenStackDataPlaneNode{}).
-		Owns(&dataplanev1beta1.OpenStackDataPlaneRole{}).
+		For(&dataplanev1.OpenStackDataPlane{}).
+		Owns(&dataplanev1.OpenStackDataPlaneNode{}).
+		Owns(&dataplanev1.OpenStackDataPlaneRole{}).
 		Complete(r)
 }
 
 // createOrPatchDataPlaneResources -
-func createOrPatchDataPlaneResources(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) (ctrl.Result, error) {
+func createOrPatchDataPlaneResources(ctx context.Context, instance *dataplanev1.OpenStackDataPlane, helper *helper.Helper) (ctrl.Result, error) {
 	// create DataPlaneRoles
 	roleManagedHostMap := make(map[string]map[string]baremetalv1.InstanceSpec)
 	err := createOrPatchDataPlaneRoles(ctx, instance, helper, roleManagedHostMap)
@@ -259,7 +259,7 @@ func createOrPatchDataPlaneResources(ctx context.Context, instance *dataplanev1b
 			condition.ReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityError,
-			dataplanev1beta1.DataPlaneErrorMessage,
+			dataplanev1.DataPlaneErrorMessage,
 			err.Error())
 		return ctrl.Result{}, err
 	}
@@ -271,13 +271,13 @@ func createOrPatchDataPlaneResources(ctx context.Context, instance *dataplanev1b
 			condition.ReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityError,
-			dataplanev1beta1.DataPlaneNodeErrorMessage,
+			dataplanev1.DataPlaneNodeErrorMessage,
 			err.Error())
 		return ctrl.Result{}, err
 	}
 
 	// Get All Nodes
-	nodes := &dataplanev1beta1.OpenStackDataPlaneNodeList{}
+	nodes := &dataplanev1.OpenStackDataPlaneNodeList{}
 	listOpts := []client.ListOption{
 		client.InNamespace(instance.GetNamespace()),
 	}
@@ -309,7 +309,7 @@ func createOrPatchDataPlaneResources(ctx context.Context, instance *dataplanev1b
 			condition.ReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityError,
-			dataplanev1beta1.DataPlaneErrorMessage,
+			dataplanev1.DataPlaneErrorMessage,
 			err.Error())
 		return ctrl.Result{}, err
 	}
@@ -318,13 +318,13 @@ func createOrPatchDataPlaneResources(ctx context.Context, instance *dataplanev1b
 }
 
 // createOrPatchDataPlaneNodes Create or Patch DataPlaneNodes
-func createOrPatchDataPlaneNodes(ctx context.Context, instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper) error {
+func createOrPatchDataPlaneNodes(ctx context.Context, instance *dataplanev1.OpenStackDataPlane, helper *helper.Helper) error {
 	logger := helper.GetLogger()
 	client := helper.GetClient()
 
 	for nodeName, nodeSpec := range instance.Spec.Nodes {
 		logger.Info("CreateDataPlaneNode", "nodeName", nodeName)
-		node := &dataplanev1beta1.OpenStackDataPlaneNode{
+		node := &dataplanev1.OpenStackDataPlaneNode{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      nodeName,
 				Namespace: instance.Namespace,
@@ -348,12 +348,12 @@ func createOrPatchDataPlaneNodes(ctx context.Context, instance *dataplanev1beta1
 
 // createOrPatchDataPlaneRoles Create or Patch DataPlaneRole
 func createOrPatchDataPlaneRoles(ctx context.Context,
-	instance *dataplanev1beta1.OpenStackDataPlane, helper *helper.Helper,
+	instance *dataplanev1.OpenStackDataPlane, helper *helper.Helper,
 	roleManagedHostMap map[string]map[string]baremetalv1.InstanceSpec) error {
 	client := helper.GetClient()
 	logger := helper.GetLogger()
 	for roleName, roleSpec := range instance.Spec.Roles {
-		role := &dataplanev1beta1.OpenStackDataPlaneRole{
+		role := &dataplanev1.OpenStackDataPlaneRole{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      roleName,
 				Namespace: instance.Namespace,

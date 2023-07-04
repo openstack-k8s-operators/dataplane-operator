@@ -23,7 +23,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -33,8 +33,8 @@ import (
 
 // DeployBaremetalSet Deploy OpenStackBaremetalSet
 func DeployBaremetalSet(
-	ctx context.Context, helper *helper.Helper, instance *dataplanev1beta1.OpenStackDataPlaneRole,
-	nodes *dataplanev1beta1.OpenStackDataPlaneNodeList, ipSets map[string]infranetworkv1.IPSet,
+	ctx context.Context, helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneRole,
+	nodes *dataplanev1.OpenStackDataPlaneNodeList, ipSets map[string]infranetworkv1.IPSet,
 	dnsAddresses []string,
 ) (bool, error) {
 	baremetalSet := &baremetalv1.OpenStackBaremetalSet{
@@ -49,11 +49,7 @@ func DeployBaremetalSet(
 		instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec)
 		for _, node := range nodes.Items {
 			ipSet, ok := ipSets[node.Name]
-			hostName := node.Spec.HostName
-			if hostName == "" {
-				hostName = node.Name
-			}
-			instanceSpec := baremetalSet.Spec.BaremetalHosts[hostName]
+			instanceSpec := baremetalSet.Spec.BaremetalHosts[node.Spec.HostName]
 			if !ok {
 				utils.LogForObject(helper, "IPAM Not configured for use, skipping", instance)
 				instanceSpec.CtlPlaneIP = node.Spec.AnsibleHost
@@ -71,7 +67,7 @@ func DeployBaremetalSet(
 					}
 				}
 			}
-			baremetalSet.Spec.BaremetalHosts[hostName] = instanceSpec
+			baremetalSet.Spec.BaremetalHosts[node.Spec.HostName] = instanceSpec
 
 		}
 		err := controllerutil.SetControllerReference(
@@ -81,9 +77,9 @@ func DeployBaremetalSet(
 
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
-			dataplanev1beta1.RoleBareMetalProvisionReadyCondition,
+			dataplanev1.RoleBareMetalProvisionReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			dataplanev1beta1.RoleBaremetalProvisionErrorMessage)
+			dataplanev1.RoleBaremetalProvisionErrorMessage)
 		return false, err
 	}
 
@@ -93,15 +89,15 @@ func DeployBaremetalSet(
 		return false, nil
 	}
 	instance.Status.Conditions.MarkTrue(
-		dataplanev1beta1.RoleBareMetalProvisionReadyCondition,
-		dataplanev1beta1.RoleBaremetalProvisionReadyMessage)
+		dataplanev1.RoleBareMetalProvisionReadyCondition,
+		dataplanev1.RoleBaremetalProvisionReadyMessage)
 	return true, nil
 }
 
 // BuildBMHHostMap  Build managed host map for all roles
 func BuildBMHHostMap(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1beta1.OpenStackDataPlane,
-	nodes *dataplanev1beta1.OpenStackDataPlaneNodeList,
+	instance *dataplanev1.OpenStackDataPlane,
+	nodes *dataplanev1.OpenStackDataPlaneNodeList,
 	roleManagedHostMap map[string]map[string]baremetalv1.InstanceSpec) error {
 	for _, node := range nodes.Items {
 		labels := node.GetObjectMeta().GetLabels()
@@ -115,14 +111,10 @@ func BuildBMHHostMap(ctx context.Context, helper *helper.Helper,
 		}
 
 		if !instance.Spec.Roles[roleName].PreProvisioned {
-			hostName := node.Spec.HostName
-			if hostName == "" {
-				hostName = node.Name
-			}
 			instanceSpec := baremetalv1.InstanceSpec{}
 			instanceSpec.UserData = node.Spec.Node.UserData
 			instanceSpec.NetworkData = node.Spec.Node.NetworkData
-			roleManagedHostMap[roleName][hostName] = instanceSpec
+			roleManagedHostMap[roleName][node.Spec.HostName] = instanceSpec
 
 		}
 	}

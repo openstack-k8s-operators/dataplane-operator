@@ -17,7 +17,7 @@ limitations under the License.
 package util
 
 import (
-	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
 // Task defines the required data for import_role tasks
@@ -30,12 +30,12 @@ type Task struct {
 }
 
 // PopulateTasks creates Tasks
-func PopulateTasks(tasks []Task) []ansibleeev1alpha1.Task {
-	var populated []ansibleeev1alpha1.Task
+func PopulateTasks(tasks []Task) []ansibleeev1.Task {
+	var populated []ansibleeev1.Task
 	for _, task := range tasks {
-		aeeTask := ansibleeev1alpha1.Task{
+		aeeTask := ansibleeev1.Task{
 			Name: task.Name,
-			ImportRole: ansibleeev1alpha1.ImportRole{
+			ImportRole: ansibleeev1.ImportRole{
 				Name: task.RoleName,
 			},
 			Tags: task.Tags,

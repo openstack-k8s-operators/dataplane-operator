@@ -24,7 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -33,14 +33,14 @@ import (
 
 // EnsureIPSets Creates the IPSets
 func EnsureIPSets(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1beta1.OpenStackDataPlaneRole,
-	nodes *dataplanev1beta1.OpenStackDataPlaneNodeList) (map[string]infranetworkv1.IPSet, bool, error) {
+	instance *dataplanev1.OpenStackDataPlaneRole,
+	nodes *dataplanev1.OpenStackDataPlaneNodeList) (map[string]infranetworkv1.IPSet, bool, error) {
 	allIPSets, err := reserveIPs(ctx, helper, instance, nodes)
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
-			dataplanev1beta1.RoleIPReservationReadyCondition,
+			dataplanev1.RoleIPReservationReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			dataplanev1beta1.RoleIPReservationReadyErrorMessage)
+			dataplanev1.RoleIPReservationReadyErrorMessage)
 		return nil, false, err
 	}
 
@@ -54,16 +54,16 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 		}
 	}
 	instance.Status.Conditions.MarkTrue(
-		dataplanev1beta1.RoleIPReservationReadyCondition,
-		dataplanev1beta1.RoleIPReservationReadyMessage)
+		dataplanev1.RoleIPReservationReadyCondition,
+		dataplanev1.RoleIPReservationReadyMessage)
 	return allIPSets, true, nil
 
 }
 
 // createOrPatchDNSData builds the DNSData
 func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1beta1.OpenStackDataPlaneRole,
-	nodes *dataplanev1beta1.OpenStackDataPlaneNodeList,
+	instance *dataplanev1.OpenStackDataPlaneRole,
+	nodes *dataplanev1.OpenStackDataPlaneNodeList,
 	allIPSets map[string]infranetworkv1.IPSet) error {
 
 	var allDNSRecords []infranetworkv1.DNSHost
@@ -75,11 +75,6 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 		}
 
 		if len(nets) > 0 {
-			hostName := node.Spec.HostName
-			if hostName == "" {
-				hostName = node.Name
-
-			}
 			// Get IPSet
 			ipSet, ok := allIPSets[node.Name]
 			if ok {
@@ -87,7 +82,7 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 					dnsRecord := infranetworkv1.DNSHost{}
 					dnsRecord.IP = res.Address
 					var fqdnNames []string
-					fqdnName := strings.Join([]string{hostName, res.DNSDomain}, ".")
+					fqdnName := strings.Join([]string{node.Spec.HostName, res.DNSDomain}, ".")
 					fqdnNames = append(fqdnNames, fqdnName)
 					dnsRecord.Hostnames = fqdnNames
 					allDNSRecords = append(allDNSRecords, dnsRecord)
@@ -118,8 +113,8 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 
 // EnsureDNSData Ensures DNSData is created
 func EnsureDNSData(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1beta1.OpenStackDataPlaneRole,
-	nodes *dataplanev1beta1.OpenStackDataPlaneNodeList,
+	instance *dataplanev1.OpenStackDataPlaneRole,
+	nodes *dataplanev1.OpenStackDataPlaneNodeList,
 	allIPSets map[string]infranetworkv1.IPSet) ([]string, bool, error) {
 
 	// Verify dnsmasq CR exists
@@ -140,9 +135,9 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	err = createOrPatchDNSData(ctx, helper, instance, nodes, allIPSets)
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
-			dataplanev1beta1.RoleDNSDataReadyCondition,
+			dataplanev1.RoleDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			dataplanev1beta1.RoleDNSDataReadyErrorMessage)
+			dataplanev1.RoleDNSDataReadyErrorMessage)
 		return nil, false, err
 	}
 
@@ -163,16 +158,16 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 		return nil, false, nil
 	}
 	instance.Status.Conditions.MarkTrue(
-		dataplanev1beta1.RoleDNSDataReadyCondition,
-		dataplanev1beta1.RoleDNSDataReadyMessage)
+		dataplanev1.RoleDNSDataReadyCondition,
+		dataplanev1.RoleDNSDataReadyMessage)
 	dnsAddresses := dnsmasqList.Items[0].Status.DNSAddresses
 	return dnsAddresses, true, nil
 }
 
 // reserveIPs Reserves IPs by creating IPSets
 func reserveIPs(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1beta1.OpenStackDataPlaneRole,
-	nodes *dataplanev1beta1.OpenStackDataPlaneNodeList) (map[string]infranetworkv1.IPSet, error) {
+	instance *dataplanev1.OpenStackDataPlaneRole,
+	nodes *dataplanev1.OpenStackDataPlaneNodeList) (map[string]infranetworkv1.IPSet, error) {
 
 	// Verify NetConfig CRs exist
 	netConfigList := &infranetworkv1.NetConfigList{}
