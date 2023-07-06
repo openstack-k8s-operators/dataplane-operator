@@ -147,11 +147,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&dataplanev1.OpenStackDataPlane{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackDataPlane")
-		os.Exit(1)
-	}
-
 	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) != "false" {
 		if err = (&dataplanev1.OpenStackDataPlane{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackDataPlane")
