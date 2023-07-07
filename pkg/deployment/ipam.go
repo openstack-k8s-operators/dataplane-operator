@@ -136,8 +136,11 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 		return nil, "", false, err
 	}
 	if len(dnsmasqList.Items) == 0 {
-		util.LogForObject(helper, "No NetConfig CR exists yet, DNS Service won't be used", instance)
+		util.LogForObject(helper, "No DNSMasq CR exists yet, DNS Service won't be used", instance)
 		return nil, "", true, nil
+	} else if !dnsmasqList.Items[0].IsReady() {
+		util.LogForObject(helper, "DNSMasq service exists, but not ready yet ", instance)
+		return nil, "", false, nil
 	}
 
 	// Create or Patch DNSData

@@ -29,7 +29,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/go-logr/logr"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
@@ -305,6 +308,38 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	reconcileFunction := handler.EnqueueRequestsFromMapFunc(func(o client.Object) []reconcile.Request {
+		result := []reconcile.Request{}
+
+		// For each DNSMasq change event get the list of all
+		// OpenStackDataPlaneRole to trigger reconcile for the
+		// ones in the same namespace.
+		roles := &dataplanev1.OpenStackDataPlaneRoleList{}
+
+		listOpts := []client.ListOption{
+			client.InNamespace(o.GetNamespace()),
+		}
+		if err := r.Client.List(context.Background(), roles, listOpts...); err != nil {
+			r.Log.Error(err, "Unable to retrieve OpenStackDataPlaneRoleList %w")
+			return nil
+		}
+
+		// For each role instance create a reconcile request
+		for _, i := range roles.Items {
+			name := client.ObjectKey{
+				Namespace: o.GetNamespace(),
+				Name:      i.Name,
+			}
+			result = append(result, reconcile.Request{NamespacedName: name})
+		}
+		if len(result) > 0 {
+			r.Log.Info(fmt.Sprintf("Reconcile request for: %+v", result))
+
+			return result
+		}
+		return nil
+	})
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1.OpenStackDataPlaneRole{}).
 		Owns(&v1alpha1.OpenStackAnsibleEE{}).
@@ -313,5 +348,7 @@ func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) er
 		Owns(&infranetworkv1.IPSet{}).
 		Owns(&infranetworkv1.DNSData{}).
 		Owns(&corev1.ConfigMap{}).
+		Watches(&source.Kind{Type: &infranetworkv1.DNSMasq{}},
+			reconcileFunction).
 		Complete(r)
 }
