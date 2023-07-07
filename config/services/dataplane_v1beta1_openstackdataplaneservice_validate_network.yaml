@@ -18,6 +18,5 @@ spec:
       - name: "import edpm_nodes_validation"
         import_role:
           name: "osp.edpm.edpm_nodes_validation"
-          tasks_from: "main.yml"
         tags:
           - "edpm_nodes_validation"

@@ -19,7 +19,6 @@ spec:
       - name: "Install edpm_kernel"
         import_role:
           name: "osp.edpm.edpm_kernel"
-          tasks_from: "main.yml"
         tags:
           - "edpm_kernel"
       - name: "Install edpm_podman"

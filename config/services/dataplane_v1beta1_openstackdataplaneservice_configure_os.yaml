@@ -55,7 +55,6 @@ spec:
       - name: "Configure edpm_ssh_known_hosts"
         import_role:
           name: "osp.edpm.edpm_ssh_known_hosts"
-          tasks_from: "main.yml"
         tags:
           - "edpm_ssh_known_hosts"
       - name: "Configure edpm_logrotate_crond"
