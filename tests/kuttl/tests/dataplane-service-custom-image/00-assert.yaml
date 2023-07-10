@@ -52,7 +52,6 @@ spec:
   - custom-image-service
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-    networkConfig: {}
 status:
   conditions:
   - message: custom-image-service service not yet ready

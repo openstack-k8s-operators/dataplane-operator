@@ -66,6 +66,7 @@ func (spec *OpenStackDataPlaneSpec) Default() {
 			roleSSHSecret := spec.Roles[node.Role].NodeTemplate.AnsibleSSHPrivateKeySecret
 			node.Node.AnsibleSSHPrivateKeySecret = roleSSHSecret
 		}
+		spec.Nodes[nodeName] = *node.DeepCopy()
 	}
 }
 

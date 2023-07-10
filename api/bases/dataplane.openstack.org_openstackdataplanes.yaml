@@ -904,7 +904,6 @@ spec:
                         networkConfig:
                           properties:
                             template:
-                              default: templates/single_nic_vlans/single_nic_vlans.j2
                               type: string
                           type: object
                         networkData:
@@ -1958,7 +1957,6 @@ spec:
                         networkConfig:
                           properties:
                             template:
-                              default: templates/single_nic_vlans/single_nic_vlans.j2
                               type: string
                           type: object
                         networkData:
