@@ -10,6 +10,7 @@
           image_base: dataplane
     irrelevant-files: &openstack_if
       - tests/kuttl
+      - netlify.toml
       - docs
       - containers/ci
       - .github/workflows
