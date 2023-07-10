@@ -60,5 +60,12 @@ var _ = Describe("Dataplane Test", func() {
 			Expect(dataplaneRoleInstance.Spec.DeployStrategy.Deploy).Should(BeFalse())
 			Expect(dataplaneRoleInstance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret).Should(Equal("dataplane-ansible-ssh-private-key-secret"))
 		})
+		It("dataplane should have a finalizer", func() {
+			// the reconciler loop adds the finalizer so we have to wait for
+			// it to run
+			Eventually(func() []string {
+				return GetDataplane(dataplaneName).Finalizers
+			}, timeout, interval).Should(ContainElement("OpenStackDataPlane"))
+		})
 	})
 })

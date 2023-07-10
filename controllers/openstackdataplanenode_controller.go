@@ -29,6 +29,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -141,6 +142,13 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		}
 	}()
 
+	// If the service object doesn't have our finalizer, add it.
+	controllerutil.AddFinalizer(instance, helper.GetFinalizer())
+	// Register the finalizer immediately to avoid orphaning resources on delete
+	if err := r.Update(ctx, instance); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	// Initialize Status
 	if instance.Status.Conditions == nil {
 		instance.InitConditions(instanceRole)
@@ -151,6 +159,11 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 	if instance.Status.Conditions.IsUnknown(dataplanev1.SetupReadyCondition) {
 		instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
+	}
+
+	// Handle service delete
+	if !instance.DeletionTimestamp.IsZero() {
+		return r.reconcileDelete(ctx, instance, helper)
 	}
 
 	ansibleSSHPrivateKeySecret := instance.Spec.Node.AnsibleSSHPrivateKeySecret
@@ -307,4 +320,14 @@ func (r *OpenStackDataPlaneNodeReconciler) GetInstanceRole(ctx context.Context, 
 		}
 	}
 	return instanceRole, err
+}
+
+func (r *OpenStackDataPlaneNodeReconciler) reconcileDelete(ctx context.Context, instance *dataplanev1.OpenStackDataPlaneNode, helper *helper.Helper) (ctrl.Result, error) {
+	r.Log.Info("Reconciling Service delete")
+
+	// Service is deleted so remove the finalizer.
+	controllerutil.RemoveFinalizer(instance, helper.GetFinalizer())
+	r.Log.Info("Reconciled Service delete successfully")
+
+	return ctrl.Result{}, nil
 }

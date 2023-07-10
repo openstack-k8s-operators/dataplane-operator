@@ -115,6 +115,13 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		}
 	}()
 
+	// If the service object doesn't have our finalizer, add it.
+	controllerutil.AddFinalizer(instance, helper.GetFinalizer())
+	// Register the finalizer immediately to avoid orphaning resources on delete
+	if err := r.Update(ctx, instance); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	if instance.Status.Conditions == nil {
 		instance.InitConditions()
 		// Register overall status immediately to have an early feedback e.g. in the cli
@@ -123,6 +130,11 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	if instance.Status.Conditions.IsUnknown(dataplanev1.SetupReadyCondition) {
 		instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
+	}
+
+	// Handle service delete
+	if !instance.DeletionTimestamp.IsZero() {
+		return r.reconcileDelete(ctx, instance, helper)
 	}
 
 	// all setup tasks complete, mark SetupReadyCondition True
@@ -394,4 +406,14 @@ func createOrPatchDataPlaneRoles(ctx context.Context,
 		}
 	}
 	return nil
+}
+
+func (r *OpenStackDataPlaneReconciler) reconcileDelete(ctx context.Context, instance *dataplanev1.OpenStackDataPlane, helper *helper.Helper) (ctrl.Result, error) {
+	r.Log.Info("Reconciling Service delete")
+
+	// Service is deleted so remove the finalizer.
+	controllerutil.RemoveFinalizer(instance, helper.GetFinalizer())
+	r.Log.Info("Reconciled Service delete successfully")
+
+	return ctrl.Result{}, nil
 }
