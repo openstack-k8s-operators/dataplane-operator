@@ -9,8 +9,28 @@ spec:
     deploy: false
   roles:
     edpm-compute-no-nodes:
+      baremetalSetTemplate:
+        automatedCleaningMode: metadata
+        bmhNamespace: openshift-machine-api
+        cloudUserName: ""
+        ctlplaneInterface: ""
+        ctlplaneNetmask: 255.255.255.0
+        deploymentSSHSecret: ""
+        hardwareReqs:
+          cpuReqs:
+            countReq: {}
+            mhzReq: {}
+          diskReqs:
+            gbReq: {}
+            ssdReq: {}
+          memReqs:
+            gbReq: {}
+      deployStrategy:
+        deploy: false
       nodeTemplate:
         ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+        networkConfig:
+          template: ""
       services:
         - configure-network
         - validate-network
@@ -48,11 +68,35 @@ metadata:
     kind: OpenStackDataPlane
     name: openstack-edpm-no-nodes
 spec:
+  baremetalSetTemplate:
+    automatedCleaningMode: metadata
+    bmhNamespace: openshift-machine-api
+    cloudUserName: ""
+    ctlplaneInterface: ""
+    ctlplaneNetmask: 255.255.255.0
+    deploymentSSHSecret: ""
+    hardwareReqs:
+      cpuReqs:
+        countReq: {}
+        mhzReq: {}
+      diskReqs:
+        gbReq: {}
+        ssdReq: {}
+      memReqs:
+        gbReq: {}
   dataPlane: openstack-edpm-no-nodes
   deployStrategy:
     deploy: false
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    networkConfig:
+      template: ""
+  services:
+  - configure-network
+  - validate-network
+  - install-os
+  - configure-os
+  - run-os
 status:
   conditions:
   - message: Deployment not started

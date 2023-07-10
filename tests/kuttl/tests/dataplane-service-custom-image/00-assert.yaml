@@ -9,8 +9,28 @@ spec:
     deploy: true
   roles:
     edpm-compute-no-nodes:
+      baremetalSetTemplate:
+        automatedCleaningMode: metadata
+        bmhNamespace: openshift-machine-api
+        cloudUserName: ""
+        ctlplaneInterface: ""
+        ctlplaneNetmask: 255.255.255.0
+        deploymentSSHSecret: ""
+        hardwareReqs:
+          cpuReqs:
+            countReq: {}
+            mhzReq: {}
+          diskReqs:
+            gbReq: {}
+            ssdReq: {}
+          memReqs:
+            gbReq: {}
+      deployStrategy:
+        deploy: false
       nodeTemplate:
         ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+        networkConfig:
+          template: ""
       services:
       - custom-image-service
 status:
@@ -45,14 +65,31 @@ metadata:
     kind: OpenStackDataPlane
     name: openstack-edpm-no-nodes
 spec:
+  baremetalSetTemplate:
+    automatedCleaningMode: metadata
+    bmhNamespace: openshift-machine-api
+    cloudUserName: ""
+    ctlplaneInterface: ""
+    ctlplaneNetmask: 255.255.255.0
+    deploymentSSHSecret: ""
+    hardwareReqs:
+      cpuReqs:
+        countReq: {}
+        mhzReq: {}
+      diskReqs:
+        gbReq: {}
+        ssdReq: {}
+      memReqs:
+        gbReq: {}
   dataPlane: openstack-edpm-no-nodes
   deployStrategy:
     deploy: true
-  services:
-  - custom-image-service
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-    networkConfig: {}
+    networkConfig:
+      template: ""
+  services:
+  - custom-image-service
 status:
   conditions:
   - message: custom-image-service service not yet ready
@@ -128,6 +165,7 @@ spec:
       name: inventory
   image: example.com/repo/runner-image:latest
   name: openstackansibleee
+  preserveJobs: false
   restartPolicy: Never
   roles:
     any_errors_fatal: true
