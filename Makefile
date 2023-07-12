@@ -369,3 +369,11 @@ SKIP_CERT ?=false
 run-with-webhook: manifests generate fmt vet ## Run a controller from your host.
 	/bin/bash hack/configure_local_webhook.sh
 	go run ./main.go
+
+.PHONY: docs
+docs: ## Build docs and preview it
+	python -m venv _venv
+	_venv/bin/pip install -r ./docs/doc_requirements.txt
+	mkdir -p ${HOME}/zuul-output/logs/docs # Directory to preview docs on CI log server
+	_venv/bin/mkdocs build -d ${HOME}/zuul-output/logs/docs --clean
+	rm -rf _venv
