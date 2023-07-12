@@ -49,7 +49,7 @@ NetworkConfigSection is a specification of the Network configuration details
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| template | Template - Contains a Ansible j2 nic config template to use when applying node network configuration | string | true |
+| template | Template - Contains a Ansible j2 nic config template to use when applying node network configuration | string | false |
 
 [Back to Custom Resources](#custom-resources)
 
@@ -59,7 +59,7 @@ NodeSection is a specification of the node attributes
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | true |
+| networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | false |
 | networks | Networks - Instance networks | []infranetworkv1.IPSetNetwork | false |
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
 | ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
