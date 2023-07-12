@@ -3,6 +3,7 @@ package functional
 import (
 	"github.com/onsi/gomega"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -53,11 +54,15 @@ func CreateDataplaneNodeSet(name types.NamespacedName, spec dataplanev1.OpenStac
 func DefaultDataPlaneNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
 	return dataplanev1.OpenStackDataPlaneNodeSetSpec{
 		DeployStrategy: dataplanev1.DeployStrategySection{
-			Deploy: true,
+			Deploy: false,
 		},
+		DataPlane:      "openstack-dataplane",
+		PreProvisioned: false,
 		NodeTemplate: dataplanev1.NodeTemplate{
 			Nodes: map[string]dataplanev1.NodeSection{
-				"edpm-compute-node-set": {},
+				"edpm-compute-node-set": {
+					HostName: "edpm-bm-compute-1",
+				},
 			},
 			Ansible: dataplanev1.AnsibleOpts{
 				AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
@@ -121,4 +126,22 @@ func GetDataplaneNodeSet(name types.NamespacedName) *dataplanev1.OpenStackDataPl
 		return nil
 	}, timeout, interval).Should(Succeed())
 	return instance
+}
+
+func DeleteNamespace(name string) {
+	ns := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
+	gomega.Expect(k8sClient.Delete(ctx, ns)).Should(gomega.Succeed())
+}
+
+func CreateSSHSecret(namespace string, name string) *corev1.Secret {
+	return th.CreateSecret(
+		types.NamespacedName{Namespace: namespace, Name: "ssh-key-secret"},
+		map[string][]byte{
+			"ssh-privatekey": []byte("blah"),
+		},
+	)
 }

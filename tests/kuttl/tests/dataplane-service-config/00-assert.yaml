@@ -7,8 +7,8 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneRole
-    name: edpm-compute-no-nodes
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm-ipam
 spec:
   backoffLimit: 6
   envConfigMapName: openstack-aee-default-env

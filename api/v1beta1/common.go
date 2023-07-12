@@ -34,7 +34,7 @@ type AnsibleOpts struct {
 	// AnsibleHost SSH host for Ansible connection
 	// +kubebuilder:validation:Optional
 	AnsibleHost string `json:"ansibleHost,omitempty"`
-	
+
 	// AnsiblePort SSH port for Ansible connection
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
@@ -47,6 +47,7 @@ type AnsibleOpts struct {
 
 }
 
+// NodeSection defines the top level attributes inherited by nodes in the CR.
 type NodeSection struct {
 
 	// HostName - node name
@@ -68,7 +69,7 @@ type NodeSection struct {
 
 	// Ansible is the group of Ansible related configuration options.
 	// +kubebuilder:validation:Optional
-	Ansible AnsibleOpts `json:"ansible,omitempty"` 
+	Ansible AnsibleOpts `json:"ansible,omitempty"`
 
 	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
 	// +kubebuilder:validation:Optional
@@ -83,7 +84,7 @@ type NodeSection struct {
 	NetworkData *corev1.SecretReference `json:"networkData,omitempty"`
 }
 
-// NodeTemplate is a specification of the node attributes
+// NodeTemplate is a specification of the node attributes that override top level attributes.
 type NodeTemplate struct {
 	// AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH
 	// key for connecting to node. Must be of the form:
@@ -118,7 +119,7 @@ type NodeTemplate struct {
 
 	// Ansible is the group of Ansible related configuration options.
 	// +kubebuilder:validation:Optional
-	Ansible AnsibleOpts `json:"ansible,omitempty"` 
+	Ansible AnsibleOpts `json:"ansible,omitempty"`
 
 	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
 	// +kubebuilder:validation:Optional

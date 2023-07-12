@@ -61,46 +61,6 @@ spec:
         path: deployStrategy.deploy
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: Deploy boolean to trigger ansible execution
-        displayName: Deploy
-        path: nodes.deployStrategy.deploy
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: AnsiblePort SSH port for Ansible connection
-        displayName: Ansible Port
-        path: nodes.node.ansiblePort
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:number
-      - description: 'AnsibleSSHPrivateKeySecret Private SSH Key secret containing
-          private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey:
-          <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>'
-        displayName: Ansible SSHPrivate Key Secret
-        path: nodes.node.ansibleSSHPrivateKeySecret
-        x-descriptors:
-        - urn:alm:descriptor:io.kubernetes:Secret
-      - description: Deploy boolean to trigger ansible execution
-        displayName: Deploy
-        path: roles.deployStrategy.deploy
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: AnsiblePort SSH port for Ansible connection
-        displayName: Ansible Port
-        path: roles.nodeTemplate.ansiblePort
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:number
-      - description: 'AnsibleSSHPrivateKeySecret Private SSH Key secret containing
-          private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey:
-          <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>'
-        displayName: Ansible SSHPrivate Key Secret
-        path: roles.nodeTemplate.ansibleSSHPrivateKeySecret
-        x-descriptors:
-        - urn:alm:descriptor:io.kubernetes:Secret
-      - description: PreProvisioned - Whether the nodes are actually pre-provisioned
-          (True) or should be preprovisioned (False)
-        displayName: Pre Provisioned
-        path: roles.preProvisioned
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       statusDescriptors:
       - description: Conditions
         displayName: Conditions

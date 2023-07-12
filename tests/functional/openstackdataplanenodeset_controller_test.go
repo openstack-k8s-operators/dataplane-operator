@@ -24,16 +24,11 @@ import (
 )
 
 var _ = Describe("Dataplane Role Test", func() {
-	var dataplaneName types.NamespacedName
-	var dataplaneRoleName types.NamespacedName
+	var dataplaneNodeSetName types.NamespacedName
 
 	BeforeEach(func() {
-		dataplaneRoleName = types.NamespacedName{
-			Name:      "edpm-compute-no-nodes",
-			Namespace: namespace,
-		}
-		dataplaneName = types.NamespacedName{
-			Name:      "dataplane-test",
+		dataplaneNodeSetName = types.NamespacedName{
+			Name:      "edpm-compute-nodeset",
 			Namespace: namespace,
 		}
 		err := os.Setenv("OPERATOR_TEMPLATES", "../../templates")
@@ -42,17 +37,21 @@ var _ = Describe("Dataplane Role Test", func() {
 
 	When("A Dataplane resorce is created", func() {
 		BeforeEach(func() {
-			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneRoleName, DefaultDataPlaneNodeSetSpec()))
-			DeferCleanup(th.DeleteInstance, CreateDataPlane(dataplaneName, DefaultDataPlaneSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec()))
 		})
 		It("should have the Spec fields initialized", func() {
-			dataplaneRoleInstance := GetDataplaneNodeSet(dataplaneRoleName)
-			Expect(dataplaneRoleInstance.Spec.DeployStrategy.Deploy).Should(BeFalse())
+			dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
+			Expect(dataplaneNodeSetInstance.Spec.DeployStrategy.Deploy).Should(BeFalse())
 		})
 
 		It("should have the Status fields initialized", func() {
-			dataplaneRoleInstance := GetDataplaneNodeSet(dataplaneRoleName)
-			Expect(dataplaneRoleInstance.Status.Deployed).Should(BeFalse())
+			dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
+			Expect(dataplaneNodeSetInstance.Status.Deployed).Should(BeFalse())
+		})
+
+		It("Should have a label", func() {
+			dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
+			Expect(dataplaneNodeSetInstance.ObjectMeta.Labels["openstackdataplane"]).Should(Equal("dataplane-test"))
 		})
 	})
 })

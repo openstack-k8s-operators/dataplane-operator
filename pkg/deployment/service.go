@@ -55,13 +55,6 @@ func DeployService(ctx context.Context, helper *helper.Helper, obj client.Object
 
 }
 
-// GetServices returns the list of services for the node's role
-// Note that these are not inherited from NodeTemplate.
-func GetServices(instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	instanceRole *dataplanev1.OpenStackDataPlaneNodeSet) []string {
-	return instanceRole.Spec.Services
-}
-
 // GetService return service
 func GetService(ctx context.Context, helper *helper.Helper, service string) (dataplanev1.OpenStackDataPlaneService, error) {
 	client := helper.GetClient()

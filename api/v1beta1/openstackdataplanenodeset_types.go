@@ -57,11 +57,6 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	DeployStrategy DeployStrategySection `json:"deployStrategy,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// NetworkConfig - Network configuration details. Contains os-net-config
-	// related properties.
-	NetworkConfig NetworkConfigSection `json:"networkConfig"`
-
-	// +kubebuilder:validation:Optional
 	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
 	// which allows to connect the ansibleee runner to the given network
 	NetworkAttachments []string `json:"networkAttachments,omitempty"`
@@ -75,7 +70,7 @@ type OpenStackDataPlaneNodeSetSpec struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane NodeSet"
-// +kubebuilder:resource:shortName=osdpnodeset;osdpnodesets
+// +kubebuilder:resource:shortName=osdpns;osdpnodeset;osdpnodesets
 //+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
 //+kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
 
@@ -114,14 +109,19 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(condition.InputReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(NodeSetBareMetalProvisionReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(NodeSetIPReservationReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(NodeSetDNSDataReadyCondition, condition.InitReason, condition.InitReason),
 	)
 
-	// Only set Baremetal condition for baremetal provisioning
-	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
-		cl = append(cl, *condition.UnknownCondition(NodeSetBareMetalProvisionReadyCondition, condition.InitReason, condition.InitReason))
+	// Only set Baremetal related conditions if we have baremetal hosts included in the
+ 	// baremetalSetTemplate.
+ 	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
+		bmConditionsList := []condition.Type{
+			NodeSetBareMetalProvisionReadyCondition,
+			NodeSetIPReservationReadyCondition,
+			NodeSetDNSDataReadyCondition,
+		}
+		for _, c := range bmConditionsList {
+			cl = append(cl, *condition.UnknownCondition(c, condition.InitReason, condition.InitReason))
+		}
 	}
 
 	if instance.Spec.Services != nil && instance.Spec.DeployStrategy.Deploy {
@@ -131,18 +131,6 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 		}
 	}
 
-	haveCephSecret := false
-	for _, extraMount := range instance.Spec.NodeTemplate.ExtraMounts {
-		if extraMount.ExtraVolType == "Ceph" {
-			haveCephSecret = true
-			break
-		}
-	}
-
-	if haveCephSecret {
-		cl.Set(condition.UnknownCondition(ConfigureCephClientReadyCondition, condition.InitReason, condition.InitReason))
-
-	}
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.Deployed = false
 }

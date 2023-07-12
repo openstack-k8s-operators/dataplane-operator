@@ -26,8 +26,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
-const errNoSSHKey = "SSH key not provided for Node %s"
-
 // log is for logging in this package.
 var openstackdataplanelog = logf.Log.WithName("openstackdataplane-resource")
 

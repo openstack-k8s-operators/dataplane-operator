@@ -1,7 +1,8 @@
+---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: openstack-edpm
+  name: openstack-edpm-ceph
 spec:
   env:
     - name: ANSIBLE_FORCE_COLOR
@@ -65,7 +66,6 @@ spec:
         service_net_map:
           nova_api_network: internal_api
           nova_libvirt_network: internal_api
-
         # edpm_network_config
         # Default nic config template for a EDPM compute node
         # These vars are edpm_network_config role vars
@@ -107,11 +107,9 @@ spec:
           InternalApi: internal_api
           Storage: storage
           Tenant: tenant
-
         # edpm_nodes_validation
         edpm_nodes_validation_validate_controllers_icmp: false
         edpm_nodes_validation_validate_gateway_icmp: false
-
         edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
         edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
         edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
@@ -120,13 +118,11 @@ spec:
         edpm_chrony_ntp_servers:
         - clock.redhat.com
         - clock2.redhat.com
-
         ctlplane_dns_nameservers:
         - 192.168.122.1
         dns_search_domains: []
         edpm_ovn_dbs:
         - 192.168.24.1
-
         gather_facts: false
         enable_debug: false
         # edpm firewall, change the allowed CIDR if needed

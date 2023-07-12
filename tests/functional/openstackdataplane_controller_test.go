@@ -45,6 +45,7 @@ var _ = Describe("Dataplane Test", func() {
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec()))
 			DeferCleanup(th.DeleteInstance, CreateDataPlane(dataplaneName, DefaultDataPlaneSpec()))
 		})
+
 		It("should have the Spec fields initialized", func() {
 			dataplaneInstance := GetDataplane(dataplaneName)
 			Expect(dataplaneInstance.Spec.DeployStrategy.Deploy).Should(BeTrue())
@@ -53,11 +54,6 @@ var _ = Describe("Dataplane Test", func() {
 		It("should have the Status fields initialized", func() {
 			dataplaneInstance := GetDataplane(dataplaneName)
 			Expect(dataplaneInstance.Status.Deployed).Should(BeFalse())
-		})
-
-		It("Should have put a label on the OpenStackDataPlaneNodeSet CR", func() {
-			dataplaneNodeSet := GetDataplaneNodeSet(dataplaneNodeSetName)
-			Expect(dataplaneNodeSet.ObjectMeta.Annotations["edpm.openstack.org/deploy"]).Should(Equal("true"))
 		})
 	})
 })

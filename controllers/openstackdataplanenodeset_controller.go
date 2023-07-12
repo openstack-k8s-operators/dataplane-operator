@@ -226,13 +226,22 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	// all our input checks out so report InputReady
 	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.InputReadyMessage)
 
+	// Check if nodes need to be provisioned and set the relevant BaremetalHost field.
+	nodeSetManagedHostMap := deployment.ManagedHostMap{}
+	err = deployment.BuildBMHHostMap(ctx, helper, instance, &nodeSetManagedHostMap)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	hostMap, ok := nodeSetManagedHostMap.HostMap[instance.ObjectMeta.Labels["openstackdataplane"]]
+	if ok {
+		bmsTemplate := instance.Spec.BaremetalSetTemplate.DeepCopy()
+		bmsTemplate.BaremetalHosts = hostMap
+		instance.Spec.BaremetalSetTemplate = *bmsTemplate
+	}
+
 	// Reconcile BaremetalSet if required
 	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
-		nodeSetManagedHostMap := make(map[string]map[string]baremetalv1.InstanceSpec)
-		err = deployment.BuildBMHHostMap(ctx, helper, instance, nodeSetManagedHostMap)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+
 		// Reset the NodeSetBareMetalProvisionReadyCondition to unknown
 		instance.Status.Conditions.MarkUnknown(dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 			condition.InitReason, condition.InitReason)
@@ -241,6 +250,10 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		if err != nil || !isReady {
 			return ctrl.Result{}, err
 		}
+	} else {
+		instance.Status.Conditions.Remove(dataplanev1.NodeSetBareMetalProvisionReadyCondition)
+		instance.Status.Conditions.Remove(dataplanev1.NodeSetDNSDataReadyCondition)
+		instance.Status.Conditions.Remove(dataplanev1.NodeSetIPReservationReadyCondition)
 	}
 
 	// TODO: if the input hash changes or the nodes in the role is updated we should
@@ -256,8 +269,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		// is already complete.
 		logger.Info("NodeSet already deployed", "instance", instance)
 		return ctrl.Result{}, nil
-	} else {
-		instance.Status.Conditions.Remove(dataplanev1.NodeSetBareMetalProvisionReadyCondition)
 	}
 
 	// Generate NodeSet Inventory
@@ -276,7 +287,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		"NodeSet.Namespace", instance.Namespace, "NodeSet.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
 		logger.Info("Deploying NodeSet: %s", instance.Name)
-		logger.Info("Starting DataPlaneNodeSet deploy")
 		logger.Info("Set Status.Deployed to false", "instance", instance)
 		instance.Status.Deployed = false
 		logger.Info("Set DeploymentReadyCondition false", "instance", instance)
@@ -313,12 +323,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		logger.Info("Set DeploymentReadyCondition true", "instance", instance)
 		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
 
-		// Explicitly set instance.Spec.Deploy = false
-		// We don't want another deploy triggered by any reconcile request, it should
-		// only be triggered when the user (or another controller) specifically
-		// sets it to true.
-		logger.Info("Set DeployStrategy.Deploy to false")
-		instance.Spec.DeployStrategy.Deploy = false
 	}
 
 	// Set DeploymentReadyCondition to False if it was unknown.

@@ -23,10 +23,10 @@ resource instance of the
 
 dataplane-operator provides a default list of services that will be deployed on
 dataplane nodes. The services list is set on the
-[`OpenStackDataPlaneRole`](openstack_dataplanerole.md#openstackdataplanerolespec) CRD.
+[`OpenStackDataPlaneNodeSet`](openstack_dataplanenodeset.md#openstackdataplanenodesetspec) CRD.
 
 The default list of services as they will appear on the `services` field on an
-`OpenStackDataPlaneRole` spec is:
+`OpenStackDataPlaneNodeSet` spec is:
 
     services:
       - configure-network
@@ -37,11 +37,11 @@ The default list of services as they will appear on the `services` field on an
       - libvirt
       - nova
 
-If the `services` field is ommitted from the `OpenStackDataPlaneRole` spec,
+If the `services` field is ommitted from the `OpenStackDataPlaneNodeSet` spec,
 then the above list will be used.
 
-The default list of services are reconciled during role reconciliation if the
-service is in the role's service list.
+The default list of services are reconciled during `NodeSet` reconciliation if the
+service is in the NodeSets' service list.
 
 ## dataplane-operator provided optional services
 
@@ -72,10 +72,9 @@ configuration. For more information see the
 ---
 **NOTE**
 
-Do not create a custom service with the same name as one of the
-default or optional services. The default or optional service will
-overwrite the custom service with the same name during role
-reconciliation.
+Do not create a custom service with the same name as one of the default
+services. The default service will overwrite the custom service with the same
+name during `NodeSet` reconciliation.
 
 ---
 
@@ -203,35 +202,52 @@ In the `OpenStackDataPlaneService` YAML, specify the custom image for the
 ##### Using ExtraMounts
 
 The `ExtraMounts` field in the
-[`NodeSection`](https://openstack-k8s-operators.github.io/dataplane-operator/openstack_dataplanerole/#nodesection)
+[`NodeSection`](https://openstack-k8s-operators.github.io/dataplane-operator/openstack_dataplanenodeset/#nodesection)
 field can be used to mount custom content into the ansible-runner image. In
 some cases, this is a simpler method to customize the image than having to
 build an entirely new image.
 
 ### Enabling a custom service
 
-To add a custom service to be executed as part of an `OpenStackDataPlaneRole`
-deployment, add the service name to the `services` field list on the role. Add
+To add a custom service to be executed as part of an `OpenStackDataPlaneNodeSet`
+deployment, add the service name to the `services` field list on the `NodeSet`. Add
 the service name in the order that it should be executed relative to the other
 services. This example shows adding the `hello-world` service as the first
-service to execute for the `edpm-compute` role.
+service to execute for the `edpm-compute` `NodeSet`.
 
     apiVersion: dataplane.openstack.org/v1beta1
-    kind: OpenStackDataPlane
+    kind: OpenStackDataPlaneNodeSet
     metadata:
       name: openstack-edpm
     spec:
-      roles:
-        edpm-compute:
-          services:
-            - hello-world
-            - configure-network
-            - validate-network
-            - install-os
-            - configure-os
-            - run-os
-            - libvirt
-            - nova
+      services:
+        - hello-world
+        - configure-network
+        - validate-network
+        - install-os
+        - configure-os
+        - run-os
+      nodeTemplate:
+        nodes:
+          edpm-compute:
+            ansible:
+              ansibleHost: 172.20.12.67
+              ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+              ansibleUser: root
+              ansibleVars:
+                ansible_ssh_transfer_method: scp
+                ctlplane_ip: 172.20.12.67
+                external_ip: 172.20.12.76
+                fqdn_internal_api: edpm-compute-1.example.com
+                internal_api_ip: 172.17.0.101
+                storage_ip: 172.18.0.101
+                tenant_ip: 172.10.0.101
+            hostName: edpm-compute-0
+            networkConfig: {}
+            nova:
+              cellName: cell1
+              deploy: true
+              novaInstance: nova
 
 When customizing the services list, the default list of services must be
 reproduced and then customized if the intent is to still deploy those services.

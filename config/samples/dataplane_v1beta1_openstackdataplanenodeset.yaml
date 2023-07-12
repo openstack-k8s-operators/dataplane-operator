@@ -1,7 +1,7 @@
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: openstackdataplanenodeset-sample
+  name: openstack-edpm-ipam
 spec:
   env:
     - name: ANSIBLE_FORCE_COLOR
@@ -17,75 +17,105 @@ spec:
     - ovn
     - libvirt
     - nova
+  dataPlane: openstack-edpm
+  preProvisioned: true
+  deployStrategy:
+      deploy: true
   nodeTemplate:
+    env:
+      - name: ANSIBLE_FORCE_COLOR
+        value: "True"
+      - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+        value: "True"
     nodes:
-      edpm-compute-0:
-        ansible:
-          ansibleHost: 172.20.12.67
-          ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-          ansibleUser: root
-          ansibleVars:
-            ansible_ssh_transfer_method: scp
-            ctlplane_ip: 172.20.12.67
-            external_ip: 172.20.12.76
-            fqdn_internal_api: edpm-compute-1.example.com
-            internal_api_ip: 172.17.0.101
-            storage_ip: 172.18.0.101
-            tenant_ip: 172.10.0.101
-        hostName: edpm-compute-0
-        networkConfig: {}
-        nova:
-          cellName: cell1
-          deploy: true
-          novaInstance: nova
-    networkConfig:
-      template: |
-        ---
-        network_config:
-        - type: interface
-          name: nic2
-          mtu: 1500
-          addresses:
-            - ip_netmask:
-                {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
-        - type: ovs_bridge
-          name: {{ neutron_physical_bridge_name }}
-          mtu: 1500
-          use_dhcp: false
-          dns_servers: {{ ctlplane_dns_nameservers }}
-          domain: []
-          addresses:
-          - ip_netmask: {{ lookup('vars', networks_lower["External"] ~ '_ip') }}/{{ lookup('vars', networks_lower["External"] ~ '_cidr') }}
-          routes: [{'ip_netmask': '0.0.0.0/0', 'next_hop': '192.168.1.254'}]
-          members:
-          - type: interface
-            name: nic1
-            mtu: 1500
-            # force the MAC address of the bridge to this interface
-            primary: true
-          - type: vlan
-            mtu: 1500
-            vlan_id: 20
-            addresses:
-            - ip_netmask:
-                172.17.0.101/24
-            routes: []
-          - type: vlan
-            mtu: 1500
-            vlan_id: 25
-            addresses:
-            - ip_netmask:
-                172.18.0.101/24
-            routes: []
-          - type: vlan
-            mtu: 1500
-            vlan_id: 22
-            addresses:
-            - ip_netmask:
-                172.19.0.101/24
-            routes: []
-    managed: false
+       edpm-compute-0:
+         nova: {}
+         hostName: edpm-compute-0
+         ansible:
+           ansibleHost: 192.168.122.100
+           ansibleUser: root
+           ansibleVars:
+             ctlplane_ip: 192.168.122.100
+             internal_api_ip: 172.17.0.100
+             storage_ip: 172.18.0.100
+             tenant_ip: 172.19.0.100
+             fqdn_internal_api: edpm-compute-0.example.com
     managementNetwork: ctlplane
     ansible:
+      ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
       ansibleUser: root
       ansiblePort: 22
+      ansibleVars:
+         service_net_map:
+           nova_api_network: internal_api
+           nova_libvirt_network: internal_api
+         edpm_chrony_ntp_servers:
+           - clock.redhat.com
+         # edpm_network_config
+         # Default nic config template for a EDPM compute node
+         # These vars are edpm_network_config role vars
+         edpm_network_config_hide_sensitive_logs: false
+         edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
+         # These vars are for the network config templates themselves and are
+         # considered EDPM network defaults.
+         neutron_physical_bridge_name: br-ex
+         neutron_public_interface_name: eth0
+         ctlplane_mtu: 1500
+         ctlplane_subnet_cidr: 24
+         ctlplane_gateway_ip: 192.168.122.1
+         ctlplane_host_routes:
+         - ip_netmask: 0.0.0.0/0
+           next_hop: 192.168.111.1
+         external_mtu: 1500
+         external_vlan_id: 44
+         external_cidr: '24'
+         external_host_routes: []
+         internal_api_mtu: 1500
+         internal_api_vlan_id: 20
+         internal_api_cidr: '24'
+         internal_api_host_routes: []
+         storage_mtu: 1500
+         storage_vlan_id: 21
+         storage_cidr: '24'
+         storage_host_routes: []
+         tenant_mtu: 1500
+         tenant_vlan_id: 22
+         tenant_cidr: '24'
+         tenant_host_routes: []
+         role_networks:
+         - InternalApi
+         - Storage
+         - Tenant
+         networks_lower:
+           External: external
+           InternalApi: internal_api
+           Storage: storage
+           Tenant: tenant
+         # edpm_nodes_validation
+         edpm_nodes_validation_validate_controllers_icmp: false
+         edpm_nodes_validation_validate_gateway_icmp: false
+         edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
+         edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
+         edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
+         edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
+         edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
+         ctlplane_dns_nameservers:
+         - 192.168.122.1
+         dns_search_domains: []
+         edpm_ovn_dbs:
+         - 192.168.122.1
+         registry_url: quay.io/podified-antelope-centos9
+         image_tag: current-podified
+         edpm_ovn_controller_agent_image: "{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}"
+         edpm_iscsid_image: "{{ registry_url }}/openstack-iscsid:{{ image_tag }}"
+         edpm_logrotate_crond_image: "{{ registry_url }}/openstack-cron:{{ image_tag }}"
+         edpm_nova_compute_container_image: "{{ registry_url }}/openstack-nova-compute:{{ image_tag }}"
+         edpm_nova_libvirt_container_image: "{{ registry_url }}/openstack-nova-libvirt:{{ image_tag }}"
+         edpm_ovn_metadata_agent_image: "{{ registry_url }}/openstack-neutron-metadata-agent-ovn:{{ image_tag }}"
+         gather_facts: false
+         enable_debug: false
+         # edpm firewall, change the allowed CIDR if needed
+         edpm_sshd_configure_firewall: true
+         edpm_sshd_allowed_ranges: ['192.168.122.0/24']
+         # SELinux module
+         edpm_selinux_mode: enforcing

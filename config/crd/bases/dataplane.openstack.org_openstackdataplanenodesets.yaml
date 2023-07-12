@@ -13,6 +13,7 @@ spec:
     listKind: OpenStackDataPlaneNodeSetList
     plural: openstackdataplanenodesets
     shortNames:
+    - osdpns
     - osdpnodeset
     - osdpnodesets
     singular: openstackdataplanenodeset
@@ -274,11 +275,6 @@ spec:
                 items:
                   type: string
                 type: array
-              networkConfig:
-                properties:
-                  template:
-                    type: string
-                type: object
               nodeTemplate:
                 properties:
                   ansible:
@@ -1090,8 +1086,6 @@ spec:
                             ansibleVars:
                               x-kubernetes-preserve-unknown-fields: true
                           type: object
-                        ansibleSSHPrivateKeySecret:
-                          type: string
                         extraMounts:
                           items:
                             properties:

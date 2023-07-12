@@ -31,6 +31,12 @@ import (
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 )
 
+// ManagedHostMap defines a struct to hold our HostMap. This HostMap is a map
+// of NodeSet names and Baremetalv1 InstanceSpec.
+type ManagedHostMap struct {
+	HostMap map[string]map[string]baremetalv1.InstanceSpec
+}
+
 // DeployBaremetalSet Deploy OpenStackBaremetalSet
 func DeployBaremetalSet(
 	ctx context.Context, helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneNodeSet,
@@ -102,7 +108,7 @@ func DeployBaremetalSet(
 // BuildBMHHostMap  Build managed host map for all roles
 func BuildBMHHostMap(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	nodeSetManagedHostMap map[string]map[string]baremetalv1.InstanceSpec) error {
+	nodeSetManagedHostMap *ManagedHostMap) error {
 	for _, node := range instance.Spec.NodeTemplate.Nodes {
 		labels := instance.GetObjectMeta().GetLabels()
 		nodeSetName, ok := labels["openstackdataplane"]
@@ -110,16 +116,18 @@ func BuildBMHHostMap(ctx context.Context, helper *helper.Helper,
 			// Node does not have a label
 			continue
 		}
-		if nodeSetManagedHostMap[nodeSetName] == nil {
-			nodeSetManagedHostMap[nodeSetName] = make(map[string]baremetalv1.InstanceSpec)
+		if nodeSetManagedHostMap.HostMap == nil {
+			nodeSetManagedHostMap.HostMap = make(map[string]map[string]baremetalv1.InstanceSpec)
+		}
+		if nodeSetManagedHostMap.HostMap[nodeSetName] == nil {
+			nodeSetManagedHostMap.HostMap[nodeSetName] = make(map[string]baremetalv1.InstanceSpec)
 		}
 
 		if !instance.Spec.PreProvisioned {
 			instanceSpec := baremetalv1.InstanceSpec{}
 			instanceSpec.UserData = node.UserData
 			instanceSpec.NetworkData = node.NetworkData
-			nodeSetManagedHostMap[nodeSetName][node.HostName] = instanceSpec
-
+			nodeSetManagedHostMap.HostMap[nodeSetName][node.HostName] = instanceSpec
 		}
 	}
 	return nil
