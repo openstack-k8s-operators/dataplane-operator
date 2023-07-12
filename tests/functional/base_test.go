@@ -10,40 +10,6 @@ import (
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 )
 
-func DefaultDataplaneNoNodesTemplate(name types.NamespacedName) *dataplanev1.OpenStackDataPlane {
-	return &dataplanev1.OpenStackDataPlane{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "dataplane.openstack.org/v1beta1",
-			Kind:       "OpenStackDataPlane",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name.Name,
-			Namespace: name.Namespace,
-		},
-		Spec: dataplanev1.OpenStackDataPlaneSpec{
-			DeployStrategy: dataplanev1.DeployStrategySection{
-				Deploy: false,
-			},
-			Roles: map[string]dataplanev1.OpenStackDataPlaneRoleSpec{
-				"edpm-compute-no-nodes": {
-					Services: []string{"configure-network", "validate-network", "install-os", "configure-os", "run-os"},
-					NodeTemplate: dataplanev1.NodeSection{
-						AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-					},
-				},
-			},
-		},
-	}
-}
-
-func CreateDataplaneNoNodes(name types.NamespacedName) *dataplanev1.OpenStackDataPlane {
-	instance := DefaultDataplaneNoNodesTemplate(name)
-	err := k8sClient.Create(ctx, instance)
-	Expect(err).NotTo(HaveOccurred())
-
-	return instance
-}
-
 func DefaultDataplaneRoleNoNodesTemplate(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneRole {
 	return &dataplanev1.OpenStackDataPlaneRole{
 		TypeMeta: metav1.TypeMeta{
@@ -64,6 +30,44 @@ func DefaultDataplaneRoleNoNodesTemplate(name types.NamespacedName) *dataplanev1
 
 func CreateDataplaneRoleNoNodes(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneRole {
 	instance := DefaultDataplaneRoleNoNodesTemplate(name)
+	err := k8sClient.Create(ctx, instance)
+	Expect(err).NotTo(HaveOccurred())
+
+	return instance
+}
+
+func DefaultDataPlaneSpec() dataplanev1.OpenStackDataPlaneSpec {
+	return dataplanev1.OpenStackDataPlaneSpec{
+		DeployStrategy: dataplanev1.DeployStrategySection{
+			Deploy: false,
+		},
+		Roles: map[string]dataplanev1.OpenStackDataPlaneRoleSpec{
+			"edpm-compute-no-nodes": {
+				Services: []string{"configure-network", "validate-network", "install-os", "configure-os", "run-os"},
+				NodeTemplate: dataplanev1.NodeSection{
+					AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
+				},
+			},
+		},
+	}
+}
+
+func DefaultDataPlane(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneSpec) *dataplanev1.OpenStackDataPlane {
+	return &dataplanev1.OpenStackDataPlane{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "dataplane.openstack.org/v1beta1",
+			Kind:       "OpenStackDataPlane",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name.Name,
+			Namespace: name.Namespace,
+		},
+		Spec: spec,
+	}
+}
+
+func CreateDataPlane(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneSpec) *dataplanev1.OpenStackDataPlane {
+	instance := DefaultDataPlane(name, spec)
 	err := k8sClient.Create(ctx, instance)
 	Expect(err).NotTo(HaveOccurred())
 

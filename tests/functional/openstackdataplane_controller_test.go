@@ -42,7 +42,7 @@ var _ = Describe("Dataplane Test", func() {
 
 	When("A Dataplane resorce is created", func() {
 		BeforeEach(func() {
-			DeferCleanup(th.DeleteInstance, CreateDataplaneNoNodes(dataplaneName))
+			DeferCleanup(th.DeleteInstance, CreateDataPlane(dataplaneName, DefaultDataPlaneSpec()))
 		})
 		It("should have the Spec fields initialized", func() {
 			dataplaneInstance := GetDataplane(dataplaneName)
