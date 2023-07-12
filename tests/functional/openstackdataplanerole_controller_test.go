@@ -16,7 +16,6 @@ limitations under the License.
 package functional
 
 import (
-	"fmt"
 	"os"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -47,7 +46,6 @@ var _ = Describe("Dataplane Role Test", func() {
 
 		It("should have the Status fields initialized", func() {
 			dataplaneRoleInstance := GetDataplaneRole(dataplaneRoleName)
-			fmt.Printf("DataPlaneRoleInstance: %+v", dataplaneRoleInstance)
 			Expect(dataplaneRoleInstance.Status.Deployed).Should(BeFalse())
 		})
 	})
