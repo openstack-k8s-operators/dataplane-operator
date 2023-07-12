@@ -18,7 +18,6 @@ spec:
           storage_ip: 172.18.0.100
           tenant_ip: 172.19.0.100
           fqdn_internal_api: edpm-compute-0.example.com
-        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     edpm-compute-1:
       role: edpm-compute
       hostName: edpm-compute-1
@@ -30,7 +29,6 @@ spec:
           storage_ip: 172.18.0.101
           tenant_ip: 172.19.0.101
           fqdn_internal_api: edpm-compute-1.example.com
-        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
   roles:
     edpm-compute:
       env:
@@ -39,11 +37,10 @@ spec:
         - name: ANSIBLE_ENABLE_TASK_DEBUGGER
           value: "True"
       baremetalSetTemplate:
-        rhelImageUrl: https://images.rdoproject.org/centos9/master/rdo_trunk/current-tripleo/overcloud-hardened-uefi-full.qcow2
         deploymentSSHSecret: dataplane-ansible-ssh-private-key-secret
         bmhLabelSelector:
           app: openstack
-        ctlplaneInterface: enp2s0
+        ctlplaneInterface: enp1s0
         ctlplaneGateway: 192.168.111.1
         ctlplaneNetmask: 255.255.255.0
         domainName: osptest.openstack.org
@@ -62,18 +59,12 @@ spec:
             nova_libvirt_network: internal_api
           edpm_chrony_ntp_servers:
             - clock.redhat.com
-          growvols_args: '/var=100%'
           # edpm_network_config
           # Default nic config template for a EDPM compute node
           # These vars are edpm_network_config role vars
           edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
           edpm_network_config_hide_sensitive_logs: false
-          edpm_network_config_os_net_config_mappings:
-            edpm-compute-0:
-              nic1: "52:54:00:66:01:f4"
-            edpm-compute-1:
-              nic1: "52:54:00:16:a2:2a"
-          #
+
           # These vars are for the network config templates themselves and are
           # considered EDPM network defaults.
           neutron_physical_bridge_name: br-ex
