@@ -40,7 +40,10 @@ import (
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/controllers"
+	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
+	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	aee "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 
 	test "github.com/openstack-k8s-operators/lib-common/modules/test"
 	. "github.com/openstack-k8s-operators/lib-common/modules/test/helpers"
@@ -85,12 +88,20 @@ var _ = BeforeSuite(func() {
 	aeeCRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
+	baremetalCRDs, err := test.GetCRDDirFromModule(
+		"github.com/openstack-k8s-operators/openstack-baremetal-operator/api", gomod, "bases")
+	Expect(err).ShouldNot(HaveOccurred())
+	infraCRDs, err := test.GetCRDDirFromModule(
+		"github.com/openstack-k8s-operators/infra-operator/apis", gomod, "bases")
+	Expect(err).ShouldNot(HaveOccurred())
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("..", "..", "config", "crd", "bases"),
 			aeeCRDs,
+			baremetalCRDs,
+			infraCRDs,
 		},
 		ErrorIfCRDPathMissing: true,
 	}
@@ -113,6 +124,12 @@ var _ = BeforeSuite(func() {
 	err = corev1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = appsv1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = baremetalv1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = novav1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = infrav1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	//+kubebuilder:scaffold:scheme
 
