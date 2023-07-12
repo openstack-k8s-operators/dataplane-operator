@@ -50,6 +50,10 @@ status:
     reason: Ready
     status: "True"
     type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
   - message: NovaComputeReady ready
     reason: Ready
     status: "True"

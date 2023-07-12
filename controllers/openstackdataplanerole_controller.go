@@ -47,6 +47,13 @@ import (
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 )
 
+const (
+	// AnsibleSSHPrivateKey ssh private key
+	AnsibleSSHPrivateKey = "ssh-privatekey"
+	// AnsibleSSHAuthorizedKeys authorized keys
+	AnsibleSSHAuthorizedKeys = "authorized_keys"
+)
+
 // OpenStackDataPlaneRoleReconciler reconciles a OpenStackDataPlaneRole object
 type OpenStackDataPlaneRoleReconciler struct {
 	client.Client
@@ -211,6 +218,45 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
+	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
+
+	if ansibleSSHPrivateKeySecret != "" {
+		var secretKeys = []string{}
+		secretKeys = append(secretKeys, AnsibleSSHPrivateKey)
+		if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
+			secretKeys = append(secretKeys, AnsibleSSHAuthorizedKeys)
+		}
+		_, result, err = secret.VerifySecret(
+			ctx,
+			types.NamespacedName{Namespace: instance.Namespace,
+				Name: ansibleSSHPrivateKeySecret},
+			secretKeys,
+			helper.GetClient(),
+			time.Duration(5)*time.Second,
+		)
+
+		if err != nil {
+			if (result != ctrl.Result{}) {
+				instance.Status.Conditions.MarkFalse(
+					condition.InputReadyCondition,
+					condition.RequestedReason,
+					condition.SeverityInfo,
+					fmt.Sprintf(dataplanev1.InputReadyWaitingMessage,
+						"secret/"+ansibleSSHPrivateKeySecret))
+			} else {
+				instance.Status.Conditions.MarkFalse(
+					condition.InputReadyCondition,
+					condition.RequestedReason,
+					condition.SeverityWarning,
+					err.Error())
+			}
+			return result, err
+		}
+	}
+
+	// all our input checks out so report InputReady
+	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.InputReadyMessage)
+
 	// Reconcile BaremetalSet if required
 	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
 		isReady, err := deployment.DeployBaremetalSet(ctx, helper, instance,
@@ -226,23 +272,6 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
 		return ctrl.Result{}, err
-	}
-
-	// Verify Ansible SSH Secret
-	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
-	if ansibleSSHPrivateKeySecret != "" {
-		_, result, err = secret.VerifySecret(
-			ctx,
-			types.NamespacedName{Namespace: instance.Namespace, Name: ansibleSSHPrivateKeySecret},
-			[]string{
-				"ssh-privatekey",
-			},
-			r.Client,
-			time.Duration(5)*time.Second,
-		)
-		if err != nil {
-			return result, err
-		}
 	}
 
 	// all setup tasks complete, mark SetupReadyCondition True

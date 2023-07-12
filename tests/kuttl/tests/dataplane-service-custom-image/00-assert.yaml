@@ -64,6 +64,10 @@ status:
     severity: Info
     status: "False"
     type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
   - message: Init
     reason: Init
     status: Unknown
