@@ -94,6 +94,9 @@ var _ = BeforeSuite(func() {
 	infraCRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/infra-operator/apis", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
+	novaCRDs, err := test.GetCRDDirFromModule(
+		"github.com/openstack-k8s-operators/nova-operator/api", gomod, "bases")
+	Expect(err).ShouldNot(HaveOccurred())
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
@@ -102,6 +105,7 @@ var _ = BeforeSuite(func() {
 			aeeCRDs,
 			baremetalCRDs,
 			infraCRDs,
+			novaCRDs,
 		},
 		ErrorIfCRDPathMissing: true,
 	}
