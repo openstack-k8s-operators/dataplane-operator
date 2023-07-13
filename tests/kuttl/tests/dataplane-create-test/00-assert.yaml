@@ -264,8 +264,99 @@ metadata:
     openstackdataplane: openstack-edpm
   name: dataplanerole-edpm-compute
 data:
+<<<<<<< HEAD
   inventory: ZWRwbS1jb21wdXRlOgogICAgdmFyczoKICAgICAgICBhbnNpYmxlX3BvcnQ6IDIyCiAgICAgICAgYW5zaWJsZV91c2VyOiByb290CiAgICAgICAgY3RscGxhbmVfZG5zX25hbWVzZXJ2ZXJzOgogICAgICAgICAgICAtIDE5Mi4xNjguMTIyLjEKICAgICAgICBjdGxwbGFuZV9nYXRld2F5X2lwOiAxOTIuMTY4LjEyMi4xCiAgICAgICAgY3RscGxhbmVfaG9zdF9yb3V0ZXM6CiAgICAgICAgICAgIC0gaXBfbmV0bWFzazogMC4wLjAuMC8wCiAgICAgICAgICAgICAgbmV4dF9ob3A6IDE5Mi4xNjguMTIyLjEKICAgICAgICBjdGxwbGFuZV9tdHU6IDE1MDAKICAgICAgICBjdGxwbGFuZV9zdWJuZXRfY2lkcjogMjQKICAgICAgICBkbnNfc2VhcmNoX2RvbWFpbnM6IFtdCiAgICAgICAgZWRwbV9jaHJvbnlfbnRwX3NlcnZlcnM6CiAgICAgICAgICAgIC0gY2xvY2sucmVkaGF0LmNvbQogICAgICAgICAgICAtIGNsb2NrMi5yZWRoYXQuY29tCiAgICAgICAgZWRwbV9pc2NzaWRfaW1hZ2U6ICd7eyByZWdpc3RyeV91cmwgfX0vb3BlbnN0YWNrLWlzY3NpZDp7eyBpbWFnZV90YWcgfX0nCiAgICAgICAgZWRwbV9sb2dyb3RhdGVfY3JvbmRfaW1hZ2U6ICd7eyByZWdpc3RyeV91cmwgfX0vb3BlbnN0YWNrLWNyb246e3sgaW1hZ2VfdGFnIH19JwogICAgICAgIGVkcG1fbmV0d29ya19jb25maWdfaGlkZV9zZW5zaXRpdmVfbG9nczogZmFsc2UKICAgICAgICBlZHBtX25ldHdvcmtfY29uZmlnX3RlbXBsYXRlOiB0ZW1wbGF0ZXMvc2luZ2xlX25pY192bGFucy9zaW5nbGVfbmljX3ZsYW5zLmoyCiAgICAgICAgZWRwbV9ub2Rlc192YWxpZGF0aW9uX3ZhbGlkYXRlX2NvbnRyb2xsZXJzX2ljbXA6IGZhbHNlCiAgICAgICAgZWRwbV9ub2Rlc192YWxpZGF0aW9uX3ZhbGlkYXRlX2dhdGV3YXlfaWNtcDogZmFsc2UKICAgICAgICBlZHBtX25vdmFfY29tcHV0ZV9jb250YWluZXJfaW1hZ2U6ICd7eyByZWdpc3RyeV91cmwgfX0vb3BlbnN0YWNrLW5vdmEtY29tcHV0ZTp7eyBpbWFnZV90YWcgfX0nCiAgICAgICAgZWRwbV9ub3ZhX2xpYnZpcnRfY29udGFpbmVyX2ltYWdlOiAne3sgcmVnaXN0cnlfdXJsIH19L29wZW5zdGFjay1ub3ZhLWxpYnZpcnQ6e3sgaW1hZ2VfdGFnIH19JwogICAgICAgIGVkcG1fb3ZuX2NvbnRyb2xsZXJfYWdlbnRfaW1hZ2U6ICd7eyByZWdpc3RyeV91cmwgfX0vb3BlbnN0YWNrLW92bi1jb250cm9sbGVyOnt7IGltYWdlX3RhZyB9fScKICAgICAgICBlZHBtX292bl9kYnM6CiAgICAgICAgICAgIC0gMTkyLjE2OC4yNC4xCiAgICAgICAgZWRwbV9vdm5fbWV0YWRhdGFfYWdlbnRfREVGQVVMVF9iaW5kX2hvc3Q6IDEyNy4wLjAuMQogICAgICAgIGVkcG1fb3ZuX21ldGFkYXRhX2FnZW50X0RFRkFVTFRfdHJhbnNwb3J0X3VybDogcmFiYml0Oi8vZGVmYXVsdF91c2VyQHJhYmJpdG1xLm9wZW5zdGFjay5zdmM6NTY3MgogICAgICAgIGVkcG1fb3ZuX21ldGFkYXRhX2FnZW50X2ltYWdlOiAne3sgcmVnaXN0cnlfdXJsIH19L29wZW5zdGFjay1uZXV0cm9uLW1ldGFkYXRhLWFnZW50LW92bjp7eyBpbWFnZV90YWcgfX0nCiAgICAgICAgZWRwbV9vdm5fbWV0YWRhdGFfYWdlbnRfbWV0YWRhdGFfYWdlbnRfREVGQVVMVF9tZXRhZGF0YV9wcm94eV9zaGFyZWRfc2VjcmV0OiAxMjM0NTY3OAogICAgICAgIGVkcG1fb3ZuX21ldGFkYXRhX2FnZW50X21ldGFkYXRhX2FnZW50X0RFRkFVTFRfbm92YV9tZXRhZGF0YV9ob3N0OiAxMjcuMC4wLjEKICAgICAgICBlZHBtX292bl9tZXRhZGF0YV9hZ2VudF9tZXRhZGF0YV9hZ2VudF9vdm5fb3ZuX3NiX2Nvbm5lY3Rpb246IHRjcDoxMC4yMTcuNS4xMjE6NjY0MgogICAgICAgIGVkcG1fc2VsaW51eF9tb2RlOiBlbmZvcmNpbmcKICAgICAgICBlZHBtX3NzaGRfYWxsb3dlZF9yYW5nZXM6CiAgICAgICAgICAgIC0gMTkyLjE2OC4xMjIuMC8yNAogICAgICAgIGVkcG1fc3NoZF9jb25maWd1cmVfZmlyZXdhbGw6IHRydWUKICAgICAgICBlbmFibGVfZGVidWc6IGZhbHNlCiAgICAgICAgZXh0ZXJuYWxfY2lkcjogIjI0IgogICAgICAgIGV4dGVybmFsX2hvc3Rfcm91dGVzOiBbXQogICAgICAgIGV4dGVybmFsX210dTogMTUwMAogICAgICAgIGV4dGVybmFsX3ZsYW5faWQ6IDQ0CiAgICAgICAgZ2F0aGVyX2ZhY3RzOiBmYWxzZQogICAgICAgIGltYWdlX3RhZzogY3VycmVudC1wb2RpZmllZAogICAgICAgIGludGVybmFsX2FwaV9jaWRyOiAiMjQiCiAgICAgICAgaW50ZXJuYWxfYXBpX2hvc3Rfcm91dGVzOiBbXQogICAgICAgIGludGVybmFsX2FwaV9tdHU6IDE1MDAKICAgICAgICBpbnRlcm5hbF9hcGlfdmxhbl9pZDogMjAKICAgICAgICBtYW5hZ2VtZW50X25ldHdvcms6IGN0bHBsYW5lCiAgICAgICAgbmV0d29ya3NfbG93ZXI6CiAgICAgICAgICAgIEV4dGVybmFsOiBleHRlcm5hbAogICAgICAgICAgICBJbnRlcm5hbEFwaTogaW50ZXJuYWxfYXBpCiAgICAgICAgICAgIFN0b3JhZ2U6IHN0b3JhZ2UKICAgICAgICAgICAgVGVuYW50OiB0ZW5hbnQKICAgICAgICBuZXV0cm9uX3BoeXNpY2FsX2JyaWRnZV9uYW1lOiBici1leAogICAgICAgIG5ldXRyb25fcHVibGljX2ludGVyZmFjZV9uYW1lOiBldGgwCiAgICAgICAgcmVnaXN0cnlfdXJsOiBxdWF5LmlvL3BvZGlmaWVkLWFudGVsb3BlLWNlbnRvczkKICAgICAgICByb2xlX25ldHdvcmtzOgogICAgICAgICAgICAtIEludGVybmFsQXBpCiAgICAgICAgICAgIC0gU3RvcmFnZQogICAgICAgICAgICAtIFRlbmFudAogICAgICAgIHNlcnZpY2VfbmV0X21hcDoKICAgICAgICAgICAgbm92YV9hcGlfbmV0d29yazogaW50ZXJuYWxfYXBpCiAgICAgICAgICAgIG5vdmFfbGlidmlydF9uZXR3b3JrOiBpbnRlcm5hbF9hcGkKICAgICAgICBzdG9yYWdlX2NpZHI6ICIyNCIKICAgICAgICBzdG9yYWdlX2hvc3Rfcm91dGVzOiBbXQogICAgICAgIHN0b3JhZ2VfbXR1OiAxNTAwCiAgICAgICAgc3RvcmFnZV92bGFuX2lkOiAyMQogICAgICAgIHRlbmFudF9jaWRyOiAiMjQiCiAgICAgICAgdGVuYW50X2hvc3Rfcm91dGVzOiBbXQogICAgICAgIHRlbmFudF9tdHU6IDE1MDAKICAgICAgICB0ZW5hbnRfdmxhbl9pZDogMjIKICAgIGhvc3RzOgogICAgICAgIGVkcG0tY29tcHV0ZS0wOgogICAgICAgICAgICBhbnNpYmxlX2hvc3Q6IDE5Mi4xNjguMTIyLjEwMAogICAgICAgICAgICBjdGxwbGFuZV9pcDogMTkyLjE2OC4xMjIuMTAwCiAgICAgICAgICAgIGZxZG5faW50ZXJuYWxfYXBpOiBlZHBtLWNvbXB1dGUtMC5leGFtcGxlLmNvbQogICAgICAgICAgICBpbnRlcm5hbF9hcGlfaXA6IDE3Mi4xNy4wLjEwMAogICAgICAgICAgICBzdG9yYWdlX2lwOiAxNzIuMTguMC4xMDAKICAgICAgICAgICAgdGVuYW50X2lwOiAxNzIuMTkuMC4xMDAKICAgICAgICBlZHBtLWNvbXB1dGUtMToKICAgICAgICAgICAgYW5zaWJsZV9ob3N0OiAxOTIuMTY4LjEyMi4xMDEKICAgICAgICAgICAgY3RscGxhbmVfaXA6IDE5Mi4xNjguMTIyLjEwMQogICAgICAgICAgICBmcWRuX2ludGVybmFsX2FwaTogZWRwbS1jb21wdXRlLTEuZXhhbXBsZS5jb20KICAgICAgICAgICAgaW50ZXJuYWxfYXBpX2lwOiAxNzIuMTcuMC4xMDEKICAgICAgICAgICAgc3RvcmFnZV9pcDogMTcyLjE4LjAuMTAxCiAgICAgICAgICAgIHRlbmFudF9pcDogMTcyLjE5LjAuMTAxCg==
   network: ""
+=======
+  inventory: |
+    edpm-compute:
+        vars:
+            ansible_port: 22
+            ansible_user: root
+            ctlplane_dns_nameservers:
+                - 192.168.122.1
+            ctlplane_gateway_ip: 192.168.122.1
+            ctlplane_host_routes:
+                - ip_netmask: 0.0.0.0/0
+                  next_hop: 192.168.122.1
+            ctlplane_mtu: 1500
+            ctlplane_subnet_cidr: 24
+            dns_search_domains: []
+            edpm_chrony_ntp_servers:
+                - clock.redhat.com
+                - clock2.redhat.com
+            edpm_iscsid_image: '{{ registry_url }}/openstack-iscsid:{{ image_tag }}'
+            edpm_logrotate_crond_image: '{{ registry_url }}/openstack-cron:{{ image_tag }}'
+            edpm_network_config_hide_sensitive_logs: false
+            edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
+            edpm_nodes_validation_validate_controllers_icmp: false
+            edpm_nodes_validation_validate_gateway_icmp: false
+            edpm_nova_compute_container_image: '{{ registry_url }}/openstack-nova-compute:{{ image_tag }}'
+            edpm_nova_libvirt_container_image: '{{ registry_url }}/openstack-nova-libvirt:{{ image_tag }}'
+            edpm_ovn_controller_agent_image: '{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}'
+            edpm_ovn_dbs:
+                - 192.168.24.1
+            edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
+            edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
+            edpm_ovn_metadata_agent_image: '{{ registry_url }}/openstack-neutron-metadata-agent-ovn:{{ image_tag }}'
+            edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
+            edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
+            edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
+            edpm_selinux_mode: enforcing
+            edpm_sshd_allowed_ranges:
+                - 192.168.122.0/24
+            edpm_sshd_configure_firewall: true
+            enable_debug: false
+            external_cidr: "24"
+            external_host_routes: []
+            external_mtu: 1500
+            external_vlan_id: 44
+            gather_facts: false
+            image_tag: current-podified
+            internal_api_cidr: "24"
+            internal_api_host_routes: []
+            internal_api_mtu: 1500
+            internal_api_vlan_id: 20
+            management_network: ctlplane
+            networks_lower:
+                External: external
+                InternalApi: internal_api
+                Storage: storage
+                Tenant: tenant
+            neutron_physical_bridge_name: br-ex
+            neutron_public_interface_name: eth0
+            registry_url: quay.io/podified-antelope-centos9
+            role_networks:
+                - InternalApi
+                - Storage
+                - Tenant
+            service_net_map:
+                nova_api_network: internal_api
+                nova_libvirt_network: internal_api
+            storage_cidr: "24"
+            storage_host_routes: []
+            storage_mtu: 1500
+            storage_vlan_id: 21
+            tenant_cidr: "24"
+            tenant_host_routes: []
+            tenant_mtu: 1500
+            tenant_vlan_id: 22
+        hosts:
+            edpm-compute-0:
+                ansible_host: 192.168.122.100
+                ctlplane_ip: 192.168.122.100
+                fqdn_internal_api: edpm-compute-0.example.com
+                internal_api_ip: 172.17.0.100
+                storage_ip: 172.18.0.100
+                tenant_ip: 172.19.0.100
+            edpm-compute-1:
+                ansible_host: 192.168.122.101
+                ctlplane_ip: 192.168.122.101
+                fqdn_internal_api: edpm-compute-1.example.com
+                internal_api_ip: 172.17.0.101
+                storage_ip: 172.18.0.101
+                tenant_ip: 172.19.0.101
+>>>>>>> b15adf2 (Update nova-operator version)
 ---
 apiVersion: v1
 kind: Secret
@@ -274,8 +365,92 @@ metadata:
     openstackdataplanerole: edpm-compute
   name: dataplanenode-edpm-compute-0
 data:
+<<<<<<< HEAD
   inventory: YWxsOgogICAgaG9zdHM6CiAgICAgICAgZWRwbS1jb21wdXRlLTA6CiAgICAgICAgICAgIGFuc2libGVfaG9zdDogMTkyLjE2OC4xMjIuMTAwCiAgICAgICAgICAgIGFuc2libGVfcG9ydDogIjIyIgogICAgICAgICAgICBhbnNpYmxlX3VzZXI6IHJvb3QKICAgICAgICAgICAgY3RscGxhbmVfZG5zX25hbWVzZXJ2ZXJzOgogICAgICAgICAgICAgICAgLSAxOTIuMTY4LjEyMi4xCiAgICAgICAgICAgIGN0bHBsYW5lX2dhdGV3YXlfaXA6IDE5Mi4xNjguMTIyLjEKICAgICAgICAgICAgY3RscGxhbmVfaG9zdF9yb3V0ZXM6CiAgICAgICAgICAgICAgICAtIGlwX25ldG1hc2s6IDAuMC4wLjAvMAogICAgICAgICAgICAgICAgICBuZXh0X2hvcDogMTkyLjE2OC4xMjIuMQogICAgICAgICAgICBjdGxwbGFuZV9pcDogMTkyLjE2OC4xMjIuMTAwCiAgICAgICAgICAgIGN0bHBsYW5lX210dTogMTUwMAogICAgICAgICAgICBjdGxwbGFuZV9zdWJuZXRfY2lkcjogMjQKICAgICAgICAgICAgZG5zX3NlYXJjaF9kb21haW5zOiBbXQogICAgICAgICAgICBlZHBtX2Nocm9ueV9udHBfc2VydmVyczoKICAgICAgICAgICAgICAgIC0gY2xvY2sucmVkaGF0LmNvbQogICAgICAgICAgICAgICAgLSBjbG9jazIucmVkaGF0LmNvbQogICAgICAgICAgICBlZHBtX2lzY3NpZF9pbWFnZTogJ3t7IHJlZ2lzdHJ5X3VybCB9fS9vcGVuc3RhY2staXNjc2lkOnt7IGltYWdlX3RhZyB9fScKICAgICAgICAgICAgZWRwbV9sb2dyb3RhdGVfY3JvbmRfaW1hZ2U6ICd7eyByZWdpc3RyeV91cmwgfX0vb3BlbnN0YWNrLWNyb246e3sgaW1hZ2VfdGFnIH19JwogICAgICAgICAgICBlZHBtX25ldHdvcmtfY29uZmlnX2hpZGVfc2Vuc2l0aXZlX2xvZ3M6IGZhbHNlCiAgICAgICAgICAgIGVkcG1fbmV0d29ya19jb25maWdfdGVtcGxhdGU6IHRlbXBsYXRlcy9zaW5nbGVfbmljX3ZsYW5zL3NpbmdsZV9uaWNfdmxhbnMuajIKICAgICAgICAgICAgZWRwbV9ub2Rlc192YWxpZGF0aW9uX3ZhbGlkYXRlX2NvbnRyb2xsZXJzX2ljbXA6IGZhbHNlCiAgICAgICAgICAgIGVkcG1fbm9kZXNfdmFsaWRhdGlvbl92YWxpZGF0ZV9nYXRld2F5X2ljbXA6IGZhbHNlCiAgICAgICAgICAgIGVkcG1fbm92YV9jb21wdXRlX2NvbnRhaW5lcl9pbWFnZTogJ3t7IHJlZ2lzdHJ5X3VybCB9fS9vcGVuc3RhY2stbm92YS1jb21wdXRlOnt7IGltYWdlX3RhZyB9fScKICAgICAgICAgICAgZWRwbV9ub3ZhX2xpYnZpcnRfY29udGFpbmVyX2ltYWdlOiAne3sgcmVnaXN0cnlfdXJsIH19L29wZW5zdGFjay1ub3ZhLWxpYnZpcnQ6e3sgaW1hZ2VfdGFnIH19JwogICAgICAgICAgICBlZHBtX292bl9jb250cm9sbGVyX2FnZW50X2ltYWdlOiAne3sgcmVnaXN0cnlfdXJsIH19L29wZW5zdGFjay1vdm4tY29udHJvbGxlcjp7eyBpbWFnZV90YWcgfX0nCiAgICAgICAgICAgIGVkcG1fb3ZuX2RiczoKICAgICAgICAgICAgICAgIC0gMTkyLjE2OC4yNC4xCiAgICAgICAgICAgIGVkcG1fb3ZuX21ldGFkYXRhX2FnZW50X0RFRkFVTFRfYmluZF9ob3N0OiAxMjcuMC4wLjEKICAgICAgICAgICAgZWRwbV9vdm5fbWV0YWRhdGFfYWdlbnRfREVGQVVMVF90cmFuc3BvcnRfdXJsOiByYWJiaXQ6Ly9kZWZhdWx0X3VzZXJAcmFiYml0bXEub3BlbnN0YWNrLnN2Yzo1NjcyCiAgICAgICAgICAgIGVkcG1fb3ZuX21ldGFkYXRhX2FnZW50X2ltYWdlOiAne3sgcmVnaXN0cnlfdXJsIH19L29wZW5zdGFjay1uZXV0cm9uLW1ldGFkYXRhLWFnZW50LW92bjp7eyBpbWFnZV90YWcgfX0nCiAgICAgICAgICAgIGVkcG1fb3ZuX21ldGFkYXRhX2FnZW50X21ldGFkYXRhX2FnZW50X0RFRkFVTFRfbWV0YWRhdGFfcHJveHlfc2hhcmVkX3NlY3JldDogMTIzNDU2NzgKICAgICAgICAgICAgZWRwbV9vdm5fbWV0YWRhdGFfYWdlbnRfbWV0YWRhdGFfYWdlbnRfREVGQVVMVF9ub3ZhX21ldGFkYXRhX2hvc3Q6IDEyNy4wLjAuMQogICAgICAgICAgICBlZHBtX292bl9tZXRhZGF0YV9hZ2VudF9tZXRhZGF0YV9hZ2VudF9vdm5fb3ZuX3NiX2Nvbm5lY3Rpb246IHRjcDoxMC4yMTcuNS4xMjE6NjY0MgogICAgICAgICAgICBlZHBtX3NlbGludXhfbW9kZTogZW5mb3JjaW5nCiAgICAgICAgICAgIGVkcG1fc3NoZF9hbGxvd2VkX3JhbmdlczoKICAgICAgICAgICAgICAgIC0gMTkyLjE2OC4xMjIuMC8yNAogICAgICAgICAgICBlZHBtX3NzaGRfY29uZmlndXJlX2ZpcmV3YWxsOiB0cnVlCiAgICAgICAgICAgIGVuYWJsZV9kZWJ1ZzogZmFsc2UKICAgICAgICAgICAgZXh0ZXJuYWxfY2lkcjogIjI0IgogICAgICAgICAgICBleHRlcm5hbF9ob3N0X3JvdXRlczogW10KICAgICAgICAgICAgZXh0ZXJuYWxfbXR1OiAxNTAwCiAgICAgICAgICAgIGV4dGVybmFsX3ZsYW5faWQ6IDQ0CiAgICAgICAgICAgIGZxZG5faW50ZXJuYWxfYXBpOiBlZHBtLWNvbXB1dGUtMC5leGFtcGxlLmNvbQogICAgICAgICAgICBnYXRoZXJfZmFjdHM6IGZhbHNlCiAgICAgICAgICAgIGltYWdlX3RhZzogY3VycmVudC1wb2RpZmllZAogICAgICAgICAgICBpbnRlcm5hbF9hcGlfY2lkcjogIjI0IgogICAgICAgICAgICBpbnRlcm5hbF9hcGlfaG9zdF9yb3V0ZXM6IFtdCiAgICAgICAgICAgIGludGVybmFsX2FwaV9pcDogMTcyLjE3LjAuMTAwCiAgICAgICAgICAgIGludGVybmFsX2FwaV9tdHU6IDE1MDAKICAgICAgICAgICAgaW50ZXJuYWxfYXBpX3ZsYW5faWQ6IDIwCiAgICAgICAgICAgIG1hbmFnZW1lbnRfbmV0d29yazogY3RscGxhbmUKICAgICAgICAgICAgbmV0d29ya3M6IFtdCiAgICAgICAgICAgIG5ldHdvcmtzX2xvd2VyOgogICAgICAgICAgICAgICAgRXh0ZXJuYWw6IGV4dGVybmFsCiAgICAgICAgICAgICAgICBJbnRlcm5hbEFwaTogaW50ZXJuYWxfYXBpCiAgICAgICAgICAgICAgICBTdG9yYWdlOiBzdG9yYWdlCiAgICAgICAgICAgICAgICBUZW5hbnQ6IHRlbmFudAogICAgICAgICAgICBuZXV0cm9uX3BoeXNpY2FsX2JyaWRnZV9uYW1lOiBici1leAogICAgICAgICAgICBuZXV0cm9uX3B1YmxpY19pbnRlcmZhY2VfbmFtZTogZXRoMAogICAgICAgICAgICByZWdpc3RyeV91cmw6IHF1YXkuaW8vcG9kaWZpZWQtYW50ZWxvcGUtY2VudG9zOQogICAgICAgICAgICByb2xlX25ldHdvcmtzOgogICAgICAgICAgICAgICAgLSBJbnRlcm5hbEFwaQogICAgICAgICAgICAgICAgLSBTdG9yYWdlCiAgICAgICAgICAgICAgICAtIFRlbmFudAogICAgICAgICAgICBzZXJ2aWNlX25ldF9tYXA6CiAgICAgICAgICAgICAgICBub3ZhX2FwaV9uZXR3b3JrOiBpbnRlcm5hbF9hcGkKICAgICAgICAgICAgICAgIG5vdmFfbGlidmlydF9uZXR3b3JrOiBpbnRlcm5hbF9hcGkKICAgICAgICAgICAgc3RvcmFnZV9jaWRyOiAiMjQiCiAgICAgICAgICAgIHN0b3JhZ2VfaG9zdF9yb3V0ZXM6IFtdCiAgICAgICAgICAgIHN0b3JhZ2VfaXA6IDE3Mi4xOC4wLjEwMAogICAgICAgICAgICBzdG9yYWdlX210dTogMTUwMAogICAgICAgICAgICBzdG9yYWdlX3ZsYW5faWQ6IDIxCiAgICAgICAgICAgIHRlbmFudF9jaWRyOiAiMjQiCiAgICAgICAgICAgIHRlbmFudF9ob3N0X3JvdXRlczogW10KICAgICAgICAgICAgdGVuYW50X2lwOiAxNzIuMTkuMC4xMDAKICAgICAgICAgICAgdGVuYW50X210dTogMTUwMAogICAgICAgICAgICB0ZW5hbnRfdmxhbl9pZDogMjIK
   network: ""
+=======
+  inventory: |
+    all:
+        hosts:
+            edpm-compute-0:
+                ansible_host: 192.168.122.100
+                ansible_port: "22"
+                ansible_user: root
+                ctlplane_dns_nameservers:
+                    - 192.168.122.1
+                ctlplane_gateway_ip: 192.168.122.1
+                ctlplane_host_routes:
+                    - ip_netmask: 0.0.0.0/0
+                      next_hop: 192.168.122.1
+                ctlplane_ip: 192.168.122.100
+                ctlplane_mtu: 1500
+                ctlplane_subnet_cidr: 24
+                dns_search_domains: []
+                edpm_chrony_ntp_servers:
+                    - clock.redhat.com
+                    - clock2.redhat.com
+                edpm_iscsid_image: '{{ registry_url }}/openstack-iscsid:{{ image_tag }}'
+                edpm_logrotate_crond_image: '{{ registry_url }}/openstack-cron:{{ image_tag }}'
+                edpm_network_config_hide_sensitive_logs: false
+                edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
+                edpm_nodes_validation_validate_controllers_icmp: false
+                edpm_nodes_validation_validate_gateway_icmp: false
+                edpm_nova_compute_container_image: '{{ registry_url }}/openstack-nova-compute:{{ image_tag }}'
+                edpm_nova_libvirt_container_image: '{{ registry_url }}/openstack-nova-libvirt:{{ image_tag }}'
+                edpm_ovn_controller_agent_image: '{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}'
+                edpm_ovn_dbs:
+                    - 192.168.24.1
+                edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
+                edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
+                edpm_ovn_metadata_agent_image: '{{ registry_url }}/openstack-neutron-metadata-agent-ovn:{{ image_tag }}'
+                edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
+                edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
+                edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
+                edpm_selinux_mode: enforcing
+                edpm_sshd_allowed_ranges:
+                    - 192.168.122.0/24
+                edpm_sshd_configure_firewall: true
+                enable_debug: false
+                external_cidr: "24"
+                external_host_routes: []
+                external_mtu: 1500
+                external_vlan_id: 44
+                fqdn_internal_api: edpm-compute-0.example.com
+                gather_facts: false
+                image_tag: current-podified
+                internal_api_cidr: "24"
+                internal_api_host_routes: []
+                internal_api_ip: 172.17.0.100
+                internal_api_mtu: 1500
+                internal_api_vlan_id: 20
+                management_network: ctlplane
+                networks: []
+                networks_lower:
+                    External: external
+                    InternalApi: internal_api
+                    Storage: storage
+                    Tenant: tenant
+                neutron_physical_bridge_name: br-ex
+                neutron_public_interface_name: eth0
+                registry_url: quay.io/podified-antelope-centos9
+                role_networks:
+                    - InternalApi
+                    - Storage
+                    - Tenant
+                service_net_map:
+                    nova_api_network: internal_api
+                    nova_libvirt_network: internal_api
+                storage_cidr: "24"
+                storage_host_routes: []
+                storage_ip: 172.18.0.100
+                storage_mtu: 1500
+                storage_vlan_id: 21
+                tenant_cidr: "24"
+                tenant_host_routes: []
+                tenant_ip: 172.19.0.100
+                tenant_mtu: 1500
+                tenant_vlan_id: 22
+>>>>>>> b15adf2 (Update nova-operator version)
 ---
 apiVersion: v1
 kind: Secret
@@ -284,5 +459,89 @@ metadata:
     openstackdataplanerole: edpm-compute
   name: dataplanenode-edpm-compute-1
 data:
+<<<<<<< HEAD
   inventory: YWxsOgogICAgaG9zdHM6CiAgICAgICAgZWRwbS1jb21wdXRlLTE6CiAgICAgICAgICAgIGFuc2libGVfaG9zdDogMTkyLjE2OC4xMjIuMTAxCiAgICAgICAgICAgIGFuc2libGVfcG9ydDogIjIyIgogICAgICAgICAgICBhbnNpYmxlX3VzZXI6IHJvb3QKICAgICAgICAgICAgY3RscGxhbmVfZG5zX25hbWVzZXJ2ZXJzOgogICAgICAgICAgICAgICAgLSAxOTIuMTY4LjEyMi4xCiAgICAgICAgICAgIGN0bHBsYW5lX2dhdGV3YXlfaXA6IDE5Mi4xNjguMTIyLjEKICAgICAgICAgICAgY3RscGxhbmVfaG9zdF9yb3V0ZXM6CiAgICAgICAgICAgICAgICAtIGlwX25ldG1hc2s6IDAuMC4wLjAvMAogICAgICAgICAgICAgICAgICBuZXh0X2hvcDogMTkyLjE2OC4xMjIuMQogICAgICAgICAgICBjdGxwbGFuZV9pcDogMTkyLjE2OC4xMjIuMTAxCiAgICAgICAgICAgIGN0bHBsYW5lX210dTogMTUwMAogICAgICAgICAgICBjdGxwbGFuZV9zdWJuZXRfY2lkcjogMjQKICAgICAgICAgICAgZG5zX3NlYXJjaF9kb21haW5zOiBbXQogICAgICAgICAgICBlZHBtX2Nocm9ueV9udHBfc2VydmVyczoKICAgICAgICAgICAgICAgIC0gY2xvY2sucmVkaGF0LmNvbQogICAgICAgICAgICAgICAgLSBjbG9jazIucmVkaGF0LmNvbQogICAgICAgICAgICBlZHBtX2lzY3NpZF9pbWFnZTogJ3t7IHJlZ2lzdHJ5X3VybCB9fS9vcGVuc3RhY2staXNjc2lkOnt7IGltYWdlX3RhZyB9fScKICAgICAgICAgICAgZWRwbV9sb2dyb3RhdGVfY3JvbmRfaW1hZ2U6ICd7eyByZWdpc3RyeV91cmwgfX0vb3BlbnN0YWNrLWNyb246e3sgaW1hZ2VfdGFnIH19JwogICAgICAgICAgICBlZHBtX25ldHdvcmtfY29uZmlnX2hpZGVfc2Vuc2l0aXZlX2xvZ3M6IGZhbHNlCiAgICAgICAgICAgIGVkcG1fbmV0d29ya19jb25maWdfdGVtcGxhdGU6IHRlbXBsYXRlcy9zaW5nbGVfbmljX3ZsYW5zL3NpbmdsZV9uaWNfdmxhbnMuajIKICAgICAgICAgICAgZWRwbV9ub2Rlc192YWxpZGF0aW9uX3ZhbGlkYXRlX2NvbnRyb2xsZXJzX2ljbXA6IGZhbHNlCiAgICAgICAgICAgIGVkcG1fbm9kZXNfdmFsaWRhdGlvbl92YWxpZGF0ZV9nYXRld2F5X2ljbXA6IGZhbHNlCiAgICAgICAgICAgIGVkcG1fbm92YV9jb21wdXRlX2NvbnRhaW5lcl9pbWFnZTogJ3t7IHJlZ2lzdHJ5X3VybCB9fS9vcGVuc3RhY2stbm92YS1jb21wdXRlOnt7IGltYWdlX3RhZyB9fScKICAgICAgICAgICAgZWRwbV9ub3ZhX2xpYnZpcnRfY29udGFpbmVyX2ltYWdlOiAne3sgcmVnaXN0cnlfdXJsIH19L29wZW5zdGFjay1ub3ZhLWxpYnZpcnQ6e3sgaW1hZ2VfdGFnIH19JwogICAgICAgICAgICBlZHBtX292bl9jb250cm9sbGVyX2FnZW50X2ltYWdlOiAne3sgcmVnaXN0cnlfdXJsIH19L29wZW5zdGFjay1vdm4tY29udHJvbGxlcjp7eyBpbWFnZV90YWcgfX0nCiAgICAgICAgICAgIGVkcG1fb3ZuX2RiczoKICAgICAgICAgICAgICAgIC0gMTkyLjE2OC4yNC4xCiAgICAgICAgICAgIGVkcG1fb3ZuX21ldGFkYXRhX2FnZW50X0RFRkFVTFRfYmluZF9ob3N0OiAxMjcuMC4wLjEKICAgICAgICAgICAgZWRwbV9vdm5fbWV0YWRhdGFfYWdlbnRfREVGQVVMVF90cmFuc3BvcnRfdXJsOiByYWJiaXQ6Ly9kZWZhdWx0X3VzZXJAcmFiYml0bXEub3BlbnN0YWNrLnN2Yzo1NjcyCiAgICAgICAgICAgIGVkcG1fb3ZuX21ldGFkYXRhX2FnZW50X2ltYWdlOiAne3sgcmVnaXN0cnlfdXJsIH19L29wZW5zdGFjay1uZXV0cm9uLW1ldGFkYXRhLWFnZW50LW92bjp7eyBpbWFnZV90YWcgfX0nCiAgICAgICAgICAgIGVkcG1fb3ZuX21ldGFkYXRhX2FnZW50X21ldGFkYXRhX2FnZW50X0RFRkFVTFRfbWV0YWRhdGFfcHJveHlfc2hhcmVkX3NlY3JldDogMTIzNDU2NzgKICAgICAgICAgICAgZWRwbV9vdm5fbWV0YWRhdGFfYWdlbnRfbWV0YWRhdGFfYWdlbnRfREVGQVVMVF9ub3ZhX21ldGFkYXRhX2hvc3Q6IDEyNy4wLjAuMQogICAgICAgICAgICBlZHBtX292bl9tZXRhZGF0YV9hZ2VudF9tZXRhZGF0YV9hZ2VudF9vdm5fb3ZuX3NiX2Nvbm5lY3Rpb246IHRjcDoxMC4yMTcuNS4xMjE6NjY0MgogICAgICAgICAgICBlZHBtX3NlbGludXhfbW9kZTogZW5mb3JjaW5nCiAgICAgICAgICAgIGVkcG1fc3NoZF9hbGxvd2VkX3JhbmdlczoKICAgICAgICAgICAgICAgIC0gMTkyLjE2OC4xMjIuMC8yNAogICAgICAgICAgICBlZHBtX3NzaGRfY29uZmlndXJlX2ZpcmV3YWxsOiB0cnVlCiAgICAgICAgICAgIGVuYWJsZV9kZWJ1ZzogZmFsc2UKICAgICAgICAgICAgZXh0ZXJuYWxfY2lkcjogIjI0IgogICAgICAgICAgICBleHRlcm5hbF9ob3N0X3JvdXRlczogW10KICAgICAgICAgICAgZXh0ZXJuYWxfbXR1OiAxNTAwCiAgICAgICAgICAgIGV4dGVybmFsX3ZsYW5faWQ6IDQ0CiAgICAgICAgICAgIGZxZG5faW50ZXJuYWxfYXBpOiBlZHBtLWNvbXB1dGUtMS5leGFtcGxlLmNvbQogICAgICAgICAgICBnYXRoZXJfZmFjdHM6IGZhbHNlCiAgICAgICAgICAgIGltYWdlX3RhZzogY3VycmVudC1wb2RpZmllZAogICAgICAgICAgICBpbnRlcm5hbF9hcGlfY2lkcjogIjI0IgogICAgICAgICAgICBpbnRlcm5hbF9hcGlfaG9zdF9yb3V0ZXM6IFtdCiAgICAgICAgICAgIGludGVybmFsX2FwaV9pcDogMTcyLjE3LjAuMTAxCiAgICAgICAgICAgIGludGVybmFsX2FwaV9tdHU6IDE1MDAKICAgICAgICAgICAgaW50ZXJuYWxfYXBpX3ZsYW5faWQ6IDIwCiAgICAgICAgICAgIG1hbmFnZW1lbnRfbmV0d29yazogY3RscGxhbmUKICAgICAgICAgICAgbmV0d29ya3M6IFtdCiAgICAgICAgICAgIG5ldHdvcmtzX2xvd2VyOgogICAgICAgICAgICAgICAgRXh0ZXJuYWw6IGV4dGVybmFsCiAgICAgICAgICAgICAgICBJbnRlcm5hbEFwaTogaW50ZXJuYWxfYXBpCiAgICAgICAgICAgICAgICBTdG9yYWdlOiBzdG9yYWdlCiAgICAgICAgICAgICAgICBUZW5hbnQ6IHRlbmFudAogICAgICAgICAgICBuZXV0cm9uX3BoeXNpY2FsX2JyaWRnZV9uYW1lOiBici1leAogICAgICAgICAgICBuZXV0cm9uX3B1YmxpY19pbnRlcmZhY2VfbmFtZTogZXRoMAogICAgICAgICAgICByZWdpc3RyeV91cmw6IHF1YXkuaW8vcG9kaWZpZWQtYW50ZWxvcGUtY2VudG9zOQogICAgICAgICAgICByb2xlX25ldHdvcmtzOgogICAgICAgICAgICAgICAgLSBJbnRlcm5hbEFwaQogICAgICAgICAgICAgICAgLSBTdG9yYWdlCiAgICAgICAgICAgICAgICAtIFRlbmFudAogICAgICAgICAgICBzZXJ2aWNlX25ldF9tYXA6CiAgICAgICAgICAgICAgICBub3ZhX2FwaV9uZXR3b3JrOiBpbnRlcm5hbF9hcGkKICAgICAgICAgICAgICAgIG5vdmFfbGlidmlydF9uZXR3b3JrOiBpbnRlcm5hbF9hcGkKICAgICAgICAgICAgc3RvcmFnZV9jaWRyOiAiMjQiCiAgICAgICAgICAgIHN0b3JhZ2VfaG9zdF9yb3V0ZXM6IFtdCiAgICAgICAgICAgIHN0b3JhZ2VfaXA6IDE3Mi4xOC4wLjEwMQogICAgICAgICAgICBzdG9yYWdlX210dTogMTUwMAogICAgICAgICAgICBzdG9yYWdlX3ZsYW5faWQ6IDIxCiAgICAgICAgICAgIHRlbmFudF9jaWRyOiAiMjQiCiAgICAgICAgICAgIHRlbmFudF9ob3N0X3JvdXRlczogW10KICAgICAgICAgICAgdGVuYW50X2lwOiAxNzIuMTkuMC4xMDEKICAgICAgICAgICAgdGVuYW50X210dTogMTUwMAogICAgICAgICAgICB0ZW5hbnRfdmxhbl9pZDogMjIK
   network: ""
+=======
+  inventory: |
+    all:
+        hosts:
+            edpm-compute-1:
+                ansible_host: 192.168.122.101
+                ansible_port: "22"
+                ansible_user: root
+                ctlplane_dns_nameservers:
+                    - 192.168.122.1
+                ctlplane_gateway_ip: 192.168.122.1
+                ctlplane_host_routes:
+                    - ip_netmask: 0.0.0.0/0
+                      next_hop: 192.168.122.1
+                ctlplane_ip: 192.168.122.101
+                ctlplane_mtu: 1500
+                ctlplane_subnet_cidr: 24
+                dns_search_domains: []
+                edpm_chrony_ntp_servers:
+                    - clock.redhat.com
+                    - clock2.redhat.com
+                edpm_iscsid_image: '{{ registry_url }}/openstack-iscsid:{{ image_tag }}'
+                edpm_logrotate_crond_image: '{{ registry_url }}/openstack-cron:{{ image_tag }}'
+                edpm_network_config_hide_sensitive_logs: false
+                edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
+                edpm_nodes_validation_validate_controllers_icmp: false
+                edpm_nodes_validation_validate_gateway_icmp: false
+                edpm_nova_compute_container_image: '{{ registry_url }}/openstack-nova-compute:{{ image_tag }}'
+                edpm_nova_libvirt_container_image: '{{ registry_url }}/openstack-nova-libvirt:{{ image_tag }}'
+                edpm_ovn_controller_agent_image: '{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}'
+                edpm_ovn_dbs:
+                    - 192.168.24.1
+                edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
+                edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
+                edpm_ovn_metadata_agent_image: '{{ registry_url }}/openstack-neutron-metadata-agent-ovn:{{ image_tag }}'
+                edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
+                edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
+                edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
+                edpm_selinux_mode: enforcing
+                edpm_sshd_allowed_ranges:
+                    - 192.168.122.0/24
+                edpm_sshd_configure_firewall: true
+                enable_debug: false
+                external_cidr: "24"
+                external_host_routes: []
+                external_mtu: 1500
+                external_vlan_id: 44
+                fqdn_internal_api: edpm-compute-1.example.com
+                gather_facts: false
+                image_tag: current-podified
+                internal_api_cidr: "24"
+                internal_api_host_routes: []
+                internal_api_ip: 172.17.0.101
+                internal_api_mtu: 1500
+                internal_api_vlan_id: 20
+                management_network: ctlplane
+                networks: []
+                networks_lower:
+                    External: external
+                    InternalApi: internal_api
+                    Storage: storage
+                    Tenant: tenant
+                neutron_physical_bridge_name: br-ex
+                neutron_public_interface_name: eth0
+                registry_url: quay.io/podified-antelope-centos9
+                role_networks:
+                    - InternalApi
+                    - Storage
+                    - Tenant
+                service_net_map:
+                    nova_api_network: internal_api
+                    nova_libvirt_network: internal_api
+                storage_cidr: "24"
+                storage_host_routes: []
+                storage_ip: 172.18.0.101
+                storage_mtu: 1500
+                storage_vlan_id: 21
+                tenant_cidr: "24"
+                tenant_host_routes: []
+                tenant_ip: 172.19.0.101
+                tenant_mtu: 1500
+                tenant_vlan_id: 22
+>>>>>>> b15adf2 (Update nova-operator version)

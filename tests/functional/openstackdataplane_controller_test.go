@@ -61,4 +61,14 @@ var _ = Describe("Dataplane Test", func() {
 			Expect(dataplaneRoleInstance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret).Should(Equal("dataplane-ansible-ssh-private-key-secret"))
 		})
 	})
+	When("A dataplane resource is created with nic-config overrides", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataPlane(dataplaneName, DataPlaneWithNodeSpec()))
+			CreateSSHSecret(dataplaneName.Namespace, dataplaneName.Name)
+		})
+		It("Should have a configMap with ansibleVars for 'edpm_network_config_override'", func() {
+			dataplaneInstanceCM := th.GetConfigMap(types.NamespacedName{Namespace: namespace, Name: "dataplanenode-edpm-compute-0"})
+			Expect(dataplaneInstanceCM.Data["network"]).Should(ContainSubstring("network_config"))
+		})
+	})
 })
