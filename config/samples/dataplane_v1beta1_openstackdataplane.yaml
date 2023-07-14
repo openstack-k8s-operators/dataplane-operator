@@ -39,14 +39,6 @@ spec:
           value: "True"
         - name: ANSIBLE_ENABLE_TASK_DEBUGGER
           value: "True"
-      baremetalSetTemplate:
-        deploymentSSHSecret: dataplane-ansible-ssh-private-key-secret
-        ctlplaneInterface: enp1s0
-        provisionServerName: openstackprovisionserver
-        ctlplaneGateway: 172.22.0.3
-        ctlplaneNetmask: 255.255.255.0
-        bmhNamespace: openstack
-        domainName: osptest.openstack.org
       preProvisioned: true
       services:
         - configure-network

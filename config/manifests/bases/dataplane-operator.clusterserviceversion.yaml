@@ -28,7 +28,7 @@ spec:
         - urn:alm:descriptor:com.tectonic.ui:number
       - description: 'AnsibleSSHPrivateKeySecret Private SSH Key secret containing
           private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey:
-          <base64 encoded private key contents> https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets'
+          <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>'
         displayName: Ansible SSHPrivate Key Secret
         path: node.ansibleSSHPrivateKeySecret
         x-descriptors:
@@ -63,7 +63,7 @@ spec:
         - urn:alm:descriptor:com.tectonic.ui:number
       - description: 'AnsibleSSHPrivateKeySecret Private SSH Key secret containing
           private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey:
-          <base64 encoded private key contents> https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets'
+          <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>'
         displayName: Ansible SSHPrivate Key Secret
         path: nodeTemplate.ansibleSSHPrivateKeySecret
         x-descriptors:
@@ -108,7 +108,7 @@ spec:
         - urn:alm:descriptor:com.tectonic.ui:number
       - description: 'AnsibleSSHPrivateKeySecret Private SSH Key secret containing
           private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey:
-          <base64 encoded private key contents> https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets'
+          <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>'
         displayName: Ansible SSHPrivate Key Secret
         path: nodes.node.ansibleSSHPrivateKeySecret
         x-descriptors:
@@ -125,7 +125,7 @@ spec:
         - urn:alm:descriptor:com.tectonic.ui:number
       - description: 'AnsibleSSHPrivateKeySecret Private SSH Key secret containing
           private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey:
-          <base64 encoded private key contents> https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets'
+          <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>'
         displayName: Ansible SSHPrivate Key Secret
         path: roles.nodeTemplate.ansibleSSHPrivateKeySecret
         x-descriptors:

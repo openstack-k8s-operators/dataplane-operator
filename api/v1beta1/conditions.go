@@ -128,4 +128,7 @@ const (
 
 	// RoleDNSDataReadyErrorMessage error
 	RoleDNSDataReadyErrorMessage = "RoleDNSDataReady error occurred"
+
+	// InputReadyWaitingMessage not yet ready
+	InputReadyWaitingMessage = "Waiting for input %s, not yet ready"
 )

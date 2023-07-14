@@ -152,20 +152,38 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	if instance.Status.Conditions.IsUnknown(dataplanev1.SetupReadyCondition) {
 		instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 	}
-
 	ansibleSSHPrivateKeySecret := instance.Spec.Node.AnsibleSSHPrivateKeySecret
+
 	_, result, err = secret.VerifySecret(
 		ctx,
 		types.NamespacedName{Namespace: instance.Namespace, Name: ansibleSSHPrivateKeySecret},
 		[]string{
-			"ssh-privatekey",
+			AnsibleSSHPrivateKey,
 		},
-		r.Client,
+		helper.GetClient(),
 		time.Duration(5)*time.Second,
 	)
+
 	if err != nil {
+		if (result != ctrl.Result{}) {
+			instance.Status.Conditions.MarkFalse(
+				condition.InputReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				fmt.Sprintf(dataplanev1.InputReadyWaitingMessage,
+					"secret/"+ansibleSSHPrivateKeySecret))
+		} else {
+			instance.Status.Conditions.MarkFalse(
+				condition.InputReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityWarning,
+				err.Error())
+		}
 		return result, err
 	}
+
+	// all our input checks out so report InputReady
+	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.InputReadyMessage)
 
 	// check if provided network attachments exist
 	for _, netAtt := range instance.Spec.NetworkAttachments {

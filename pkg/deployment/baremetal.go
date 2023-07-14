@@ -68,7 +68,10 @@ func DeployBaremetalSet(
 				}
 			}
 			baremetalSet.Spec.BaremetalHosts[node.Spec.HostName] = instanceSpec
-
+			commonSecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
+			if baremetalSet.Spec.DeploymentSSHSecret == "" {
+				baremetalSet.Spec.DeploymentSSHSecret = commonSecret
+			}
 		}
 		err := controllerutil.SetControllerReference(
 			helper.GetBeforeObject(), baremetalSet, helper.GetScheme())
