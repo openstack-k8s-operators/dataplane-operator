@@ -13,7 +13,7 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: Deployment completed
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: DeploymentReady
@@ -46,7 +46,7 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: Deployment completed
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: DeploymentReady

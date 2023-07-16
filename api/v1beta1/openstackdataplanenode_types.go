@@ -87,7 +87,7 @@ func init() {
 
 // IsReady - returns true if the DataPlaneNode is ready
 func (instance OpenStackDataPlaneNode) IsReady() bool {
-	return instance.Status.Conditions.IsTrue(condition.DeploymentReadyCondition)
+	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
 }
 
 // IsSetupReady - returns true if the DataPlaneNode is ready to be deployed
