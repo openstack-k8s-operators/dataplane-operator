@@ -125,15 +125,15 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 	}
 
-	// all setup tasks complete, mark SetupReadyCondition True
-	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
-
 	ctrlResult, err := createOrPatchDataPlaneResources(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		return ctrlResult, nil
 	}
+
+	// all setup tasks complete, mark SetupReadyCondition True
+	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
 
 	var deployErrors []string
 	shouldRequeue := false
