@@ -503,10 +503,15 @@ func (in *OpenStackDataPlaneServiceSpec) DeepCopyInto(out *OpenStackDataPlaneSer
 		*out = make([]KubeService, len(*in))
 		copy(*out, *in)
 	}
-	if in.Role != nil {
-		in, out := &in.Role, &out.Role
-		*out = new(v1alpha1.Role)
-		(*in).DeepCopyInto(*out)
+	if in.ConfigMaps != nil {
+		in, out := &in.ConfigMaps, &out.ConfigMaps
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
+	if in.Secrets != nil {
+		in, out := &in.Secrets, &out.Secrets
+		*out = make([]string, len(*in))
+		copy(*out, *in)
 	}
 }
 

@@ -30,6 +30,10 @@ spec:
             type: object
           spec:
             properties:
+              configMaps:
+                items:
+                  type: string
+                type: array
               label:
                 type: string
               openStackAnsibleEERunnerImage:
@@ -89,6 +93,10 @@ spec:
                       type: object
                     type: array
                 type: object
+              secrets:
+                items:
+                  type: string
+                type: array
               services:
                 items:
                   properties:
