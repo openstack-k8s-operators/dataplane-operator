@@ -1,0 +1,120 @@
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: dataplane-deployment-kuttl-service-edpm-compute-no-nodes
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneRole
+    name: edpm-compute-no-nodes
+spec:
+  backoffLimit: 6
+  envConfigMapName: openstack-aee-default-env
+  extraMounts:
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/kuttl-service/00-ansibleVars
+      subPath: 00-ansibleVars
+    - mountPath: /var/lib/openstack/configs/kuttl-service/00-kuttl-service.conf
+      subPath: 00-kuttl-service.conf
+    - mountPath: /var/lib/openstack/configs/kuttl-service/01-kuttl-service.conf
+      subPath: 01-kuttl-service.conf
+    volumes:
+    - configMap:
+        items:
+        - key: 00-ansibleVars
+          path: 00-ansibleVars
+        name: kuttl-service-cm-0
+    - configMap:
+        items:
+        - key: 00-kuttl-service.conf
+          path: 00-kuttl-service.conf
+        name: kuttl-service-cm-0
+    - configMap:
+        items:
+        - key: 01-kuttl-service.conf
+          path: 01-kuttl-service.conf
+        name: kuttl-service-cm-0
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/kuttl-service/01-ansibleVars
+      subPath: 01-ansibleVars
+    - mountPath: /var/lib/openstack/configs/kuttl-service/10-kuttl-service.conf
+      subPath: 10-kuttl-service.conf
+    - mountPath: /var/lib/openstack/configs/kuttl-service/20-kuttl-service.conf
+      subPath: 20-kuttl-service.conf
+    volumes:
+    - configMap:
+        items:
+        - key: 01-ansibleVars
+          path: 01-ansibleVars
+        name: kuttl-service-cm-1
+    - configMap:
+        items:
+        - key: 10-kuttl-service.conf
+          path: 10-kuttl-service.conf
+        name: kuttl-service-cm-1
+    - configMap:
+        items:
+        - key: 20-kuttl-service.conf
+          path: 20-kuttl-service.conf
+        name: kuttl-service-cm-1
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    - mountPath: /runner/network/nic-config-template
+      name: inventory
+      subPath: network
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - configMap:
+        items:
+        - key: inventory
+          path: inventory
+        - key: network
+          path: network
+        name: dataplanerole-edpm-compute-no-nodes
+      name: inventory
+  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+  name: openstackansibleee
+  play: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep infinity
+          delegate_to: localhost
+  preserveJobs: false
+  restartPolicy: Never
+  roles:
+    any_errors_fatal: true
+    become: false
+    gather_facts: false
+    hosts: '{{ primary_role_name | default([]) }}:{{ deploy_target_host | default(''overcloud'')
+      }}'
+    name: Run Standalone Role
+    strategy: linear
+  uid: 1001
+status:
+  JobStatus: Running
+  conditions:
+  - message: AnsibleExecutionJob is running
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: Ready
+  - message: AnsibleExecutionJob is running
+    reason: Requested
+    severity: Info
+    status: "False"
+    type: AnsibleExecutionJobReady

@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kuttl-service-cm-0
+data:
+  00-kuttl-service.conf: |
+    a=b
+    c=d
+  01-kuttl-service.conf: |
+    e=f
+    g=h
+  00-ansibleVars: |
+    foo: bar
+    baz: blippy
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kuttl-service-cm-1
+data:
+  10-kuttl-service.conf: |
+    i=j
+  20-kuttl-service.conf: |
+    k=l
+  01-ansibleVars: |
+    baz: blippy
+    zed: zod
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: kuttl-service
+spec:
+  label: dataplane-deployment-kuttl-service
+  play: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep infinity
+          delegate_to: localhost
+  configMaps:
+    - kuttl-service-cm-0
+    - kuttl-service-cm-1
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlane
+metadata:
+  name: openstack-edpm-no-nodes
+spec:
+  deployStrategy:
+      deploy: true
+  roles:
+    edpm-compute-no-nodes:
+      nodeTemplate:
+        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+      services:
+        - kuttl-service

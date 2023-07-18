@@ -20,8 +20,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path"
+	"sort"
+	"strconv"
 
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
@@ -29,8 +33,10 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -78,6 +84,10 @@ func Deploy(
 		readyMessage = fmt.Sprintf(dataplanev1.ServiceReadyMessage, deployName)
 		readyErrorMessage = dataplanev1.ServiceErrorMessage
 		aeeSpec.OpenStackAnsibleEERunnerImage = foundService.Spec.OpenStackAnsibleEERunnerImage
+		aeeSpec, err = addServiceExtraMounts(ctx, helper, aeeSpec, foundService)
+		if err != nil {
+			return &ctrl.Result{}, err
+		}
 		err = ConditionalDeploy(
 			ctx,
 			helper,
@@ -311,5 +321,68 @@ func ConditionalDeploy(
 	}
 
 	return err
+
+}
+
+// addServiceExtraMounts adds the service configs as ExtraMounts to aeeSpec
+func addServiceExtraMounts(
+	ctx context.Context,
+	helper *helper.Helper,
+	aeeSpec dataplanev1.AnsibleEESpec,
+	service dataplanev1.OpenStackDataPlaneService,
+) (dataplanev1.AnsibleEESpec, error) {
+
+	client := helper.GetClient()
+	baseMountPath := path.Join(ConfigPaths, service.Name)
+
+	for _, cmName := range service.Spec.ConfigMaps {
+
+		volMounts := storage.VolMounts{}
+		cm := &corev1.ConfigMap{}
+		err := client.Get(ctx, types.NamespacedName{Name: cmName, Namespace: service.Namespace}, cm)
+		if err != nil {
+			return aeeSpec, err
+		}
+
+		keys := []string{}
+		for key := range cm.Data {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+
+		for idx, key := range keys {
+			name := fmt.Sprintf("%s-%s", cmName, strconv.Itoa(idx))
+			volume := corev1.Volume{
+				Name: name,
+				VolumeSource: corev1.VolumeSource{
+					ConfigMap: &corev1.ConfigMapVolumeSource{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: cmName,
+						},
+						Items: []corev1.KeyToPath{
+							{
+								Key:  key,
+								Path: key,
+							},
+						},
+					},
+				},
+			}
+
+			volumeMount := corev1.VolumeMount{
+				Name:      name,
+				MountPath: path.Join(baseMountPath, key),
+				SubPath:   key,
+			}
+
+			volMounts.Volumes = append(volMounts.Volumes, volume)
+			volMounts.Mounts = append(volMounts.Mounts, volumeMount)
+
+		}
+
+		aeeSpec.ExtraMounts = append(aeeSpec.ExtraMounts, volMounts)
+	}
+
+	return aeeSpec, nil
 
 }
