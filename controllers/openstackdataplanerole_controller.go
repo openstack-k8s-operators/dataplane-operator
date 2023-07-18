@@ -182,13 +182,9 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	listOpts := []client.ListOption{
 		client.InNamespace(instance.GetNamespace()),
 	}
-	labelSelector := map[string]string{
-		"openstackdataplanerole": instance.Name,
-	}
-	if len(labelSelector) > 0 {
-		labels := client.MatchingLabels(labelSelector)
-		listOpts = append(listOpts, labels)
-	}
+	fields := client.MatchingFields{"spec.role": instance.Name}
+	listOpts = append(listOpts, fields)
+
 	err = r.Client.List(ctx, nodes, listOpts...)
 	if err != nil {
 		return ctrl.Result{}, err
