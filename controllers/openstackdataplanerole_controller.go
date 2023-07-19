@@ -266,6 +266,18 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		}
 	}
 
+	// Ensure all nodes are in SetupReady state
+	setupReadyNodes := 0
+	for _, node := range nodes.Items {
+		if node.IsSetupReady() {
+			setupReadyNodes++
+		}
+	}
+
+	if setupReadyNodes < len(nodes.Items) {
+		return ctrl.Result{}, err
+	}
+
 	// Generate Role Inventory
 	roleConfigMap, err := deployment.GenerateRoleInventory(ctx, helper, instance,
 		nodes.Items, allIPSets, dnsAddresses)
