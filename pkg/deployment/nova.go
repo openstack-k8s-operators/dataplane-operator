@@ -73,6 +73,7 @@ func DeployNovaExternalCompute(
 		novaExternalCompute.Spec.Deploy = template.Deploy
 		novaExternalCompute.Spec.NetworkAttachments = aeeSpec.NetworkAttachments
 		novaExternalCompute.Spec.AnsibleEEContainerImage = aeeSpec.OpenStackAnsibleEERunnerImage
+		novaExternalCompute.Spec.DNSConfig = aeeSpec.DNSConfig
 
 		err := controllerutil.SetControllerReference(owner, novaExternalCompute, helper.GetScheme())
 		if err != nil {
