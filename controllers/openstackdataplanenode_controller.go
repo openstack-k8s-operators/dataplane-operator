@@ -270,6 +270,14 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneNodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &dataplanev1.OpenStackDataPlaneNode{}, "spec.role",
+		func(rawObj client.Object) []string {
+			node := rawObj.(*dataplanev1.OpenStackDataPlaneNode)
+			return []string{node.Spec.Role}
+		}); err != nil {
+		return err
+	}
+
 	roleWatcher := handler.EnqueueRequestsFromMapFunc(func(obj client.Object) []reconcile.Request {
 		var namespace string = obj.GetNamespace()
 		var roleName string = obj.GetName()
@@ -281,11 +289,8 @@ func (r *OpenStackDataPlaneNodeReconciler) SetupWithManager(mgr ctrl.Manager) er
 		listOpts := []client.ListOption{
 			client.InNamespace(namespace),
 		}
-		labelSelector := map[string]string{
-			"openstackdataplanerole": roleName,
-		}
-		labels := client.MatchingLabels(labelSelector)
-		listOpts = append(listOpts, labels)
+		fields := client.MatchingFields{"spec.role": roleName}
+		listOpts = append(listOpts, fields)
 		err := r.Client.List(context.Background(), nodes, listOpts...)
 		if err != nil {
 			r.Log.Error(err, "Unable to retrieve Node CRs %v")
