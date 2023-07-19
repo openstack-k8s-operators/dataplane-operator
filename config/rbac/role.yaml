@@ -81,18 +81,6 @@ rules:
   - dataplane.openstack.org
   resources:
   - openstackdataplanenodes
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - dataplane.openstack.org
-  resources:
-  - openstackdataplanenodes
   - openstackdataplaneroles
   verbs:
   - create
@@ -102,20 +90,6 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - dataplane.openstack.org
-  resources:
-  - openstackdataplanenodes/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - dataplane.openstack.org
-  resources:
-  - openstackdataplanenodes/status
-  verbs:
-  - get
-  - patch
-  - update
 - apiGroups:
   - dataplane.openstack.org
   resources:

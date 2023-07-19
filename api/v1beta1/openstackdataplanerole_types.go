@@ -125,49 +125,6 @@ func (instance *OpenStackDataPlaneRole) InitConditions() {
 	instance.Status.Deployed = false
 }
 
-// Validate - validates the shared data between role and nodes
-func (instance OpenStackDataPlaneRole) Validate(nodes []OpenStackDataPlaneNode) error {
-	var errorMsgs []string
-	containsEmptyField := false
-	for _, field := range UniqueSpecFields {
-		if reflect.ValueOf(instance.Spec).FieldByName(field).IsZero() {
-			containsEmptyField = true
-			break
-		}
-	}
-
-	if !containsEmptyField {
-		for _, node := range nodes {
-			suffix := fmt.Sprintf("node: %s and role: %s", node.Name, instance.Name)
-			msgs := AssertUniquenessBetween(node.Spec, instance.Spec, suffix)
-			errorMsgs = append(errorMsgs, msgs...)
-		}
-	}
-
-	// Compare nodes when role fields are empty
-	if containsEmptyField {
-		nodeMap := make(map[string]OpenStackDataPlaneNode)
-
-		for _, node := range nodes {
-			for _, field := range UniqueSpecFields {
-				if len(nodeMap[field].Name) > 0 {
-					suffix := fmt.Sprintf("node: %s and node: %s", node.Name, nodeMap[field].Name)
-					msgs := AssertUniquenessBetween(node.Spec, nodeMap[field].Spec, suffix)
-					errorMsgs = append(errorMsgs, msgs...)
-				}
-				if len(nodeMap[field].Name) == 0 && !reflect.ValueOf(node.Spec).FieldByName(field).IsZero() {
-					nodeMap[field] = node
-				}
-			}
-		}
-	}
-
-	if len(errorMsgs) > 0 {
-		return fmt.Errorf("validation error(s): %s", errorMsgs)
-	}
-	return nil
-}
-
 // GetAnsibleEESpec - get the fields that will be passed to AEE
 func (instance OpenStackDataPlaneRole) GetAnsibleEESpec() AnsibleEESpec {
 	return AnsibleEESpec{

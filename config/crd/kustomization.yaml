@@ -4,7 +4,6 @@
 resources:
 - bases/dataplane.openstack.org_openstackdataplanes.yaml
 - bases/dataplane.openstack.org_openstackdataplaneroles.yaml
-- bases/dataplane.openstack.org_openstackdataplanenodes.yaml
 - bases/dataplane.openstack.org_openstackdataplaneservices.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 

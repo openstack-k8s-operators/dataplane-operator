@@ -95,7 +95,6 @@ manifests: gowork controller-gen crd-to-markdown ## Generate WebhookConfiguratio
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd$(CRDDESC_OVERRIDE) webhook paths="./..." output:crd:artifacts:config=config/crd/bases && \
 	rm -f api/bases/* && cp -a config/crd/bases api/
 	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplane_types.go -n OpenStackDataPlane > docs/openstack_dataplane.md
-	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplanenode_types.go -n OpenStackDataPlaneNode > docs/openstack_dataplanenode.md
 	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplanerole_types.go -n OpenStackDataPlaneRole > docs/openstack_dataplanerole.md
 	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplaneservice_types.go -n OpenStackDataPlaneService > docs/openstack_dataplaneservice.md
 

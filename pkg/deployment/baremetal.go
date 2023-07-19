@@ -34,7 +34,7 @@ import (
 // DeployBaremetalSet Deploy OpenStackBaremetalSet
 func DeployBaremetalSet(
 	ctx context.Context, helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneRole,
-	nodes *dataplanev1.OpenStackDataPlaneNodeList, ipSets map[string]infranetworkv1.IPSet,
+	ipSets map[string]infranetworkv1.IPSet,
 	dnsAddresses []string,
 ) (bool, error) {
 	baremetalSet := &baremetalv1.OpenStackBaremetalSet{
@@ -47,12 +47,13 @@ func DeployBaremetalSet(
 	utils.LogForObject(helper, "Reconciling BaremetalSet", instance)
 	_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), baremetalSet, func() error {
 		instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec)
-		for _, node := range nodes.Items {
-			ipSet, ok := ipSets[node.Name]
-			instanceSpec := baremetalSet.Spec.BaremetalHosts[node.Spec.HostName]
+		for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
+			hostName := node.HostName
+			ipSet, ok := ipSets[nodeName]
+			instanceSpec := baremetalSet.Spec.BaremetalHosts[hostName]
 			if !ok {
 				utils.LogForObject(helper, "IPAM Not configured for use, skipping", instance)
-				instanceSpec.CtlPlaneIP = node.Spec.AnsibleHost
+				instanceSpec.CtlPlaneIP = node.AnsibleHost
 			} else {
 				for _, res := range ipSet.Status.Reservation {
 					if res.Network == CtlPlaneNetwork {
@@ -67,11 +68,8 @@ func DeployBaremetalSet(
 					}
 				}
 			}
-			baremetalSet.Spec.BaremetalHosts[node.Spec.HostName] = instanceSpec
-			commonSecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
-			if baremetalSet.Spec.DeploymentSSHSecret == "" {
-				baremetalSet.Spec.DeploymentSSHSecret = commonSecret
-			}
+			baremetalSet.Spec.BaremetalHosts[hostName] = instanceSpec
+
 		}
 		err := controllerutil.SetControllerReference(
 			helper.GetBeforeObject(), baremetalSet, helper.GetScheme())
@@ -103,11 +101,10 @@ func DeployBaremetalSet(
 
 // BuildBMHHostMap  Build managed host map for all roles
 func BuildBMHHostMap(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlane,
-	nodes *dataplanev1.OpenStackDataPlaneNodeList,
+	instance *dataplanev1.OpenStackDataPlaneRole,
 	roleManagedHostMap map[string]map[string]baremetalv1.InstanceSpec) error {
-	for _, node := range nodes.Items {
-		labels := node.GetObjectMeta().GetLabels()
+	for _, node := range instance.Spec.NodeTemplate.Nodes {
+		labels := instance.GetObjectMeta().GetLabels()
 		roleName, ok := labels["openstackdataplanerole"]
 		if !ok {
 			// Node does not have a label
@@ -117,11 +114,11 @@ func BuildBMHHostMap(ctx context.Context, helper *helper.Helper,
 			roleManagedHostMap[roleName] = make(map[string]baremetalv1.InstanceSpec)
 		}
 
-		if !instance.Spec.Roles[roleName].PreProvisioned {
+		if !instance.Spec.PreProvisioned {
 			instanceSpec := baremetalv1.InstanceSpec{}
-			instanceSpec.UserData = node.Spec.Node.UserData
-			instanceSpec.NetworkData = node.Spec.Node.NetworkData
-			roleManagedHostMap[roleName][node.Spec.HostName] = instanceSpec
+			instanceSpec.UserData = node.UserData
+			instanceSpec.NetworkData = node.NetworkData
+			roleManagedHostMap[roleName][node.HostName] = instanceSpec
 
 		}
 	}

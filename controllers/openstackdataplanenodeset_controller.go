@@ -19,7 +19,6 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"sort"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -175,34 +174,20 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		delete(instance.ObjectMeta.Labels, "openstackdataplane")
 	}
 
-	// Get List of Nodes with matching Role Label
-	nodes := &dataplanev1.OpenStackDataPlaneNodeList{}
-
 	listOpts := []client.ListOption{
 		client.InNamespace(instance.GetNamespace()),
 	}
-	fields := client.MatchingFields{"spec.role": instance.Name}
-	listOpts = append(listOpts, fields)
-
-	err = r.Client.List(ctx, nodes, listOpts...)
-	if err != nil {
-		return ctrl.Result{}, err
+	labelSelector := map[string]string{
+		"openstackdataplanerole": instance.Name,
 	}
-	logger.Info("found nodes", "total", len(nodes.Items))
 
-	// Order the nodes based on Name
-	sort.SliceStable(nodes.Items, func(i, j int) bool {
-		return nodes.Items[i].Name < nodes.Items[j].Name
-	})
-
-	// Validate NodeSpecs
-	err = instance.Validate(nodes.Items)
-	if err != nil {
-		return ctrl.Result{}, err
+	if len(labelSelector) > 0 {
+		labels := client.MatchingLabels(labelSelector)
+		listOpts = append(listOpts, labels)
 	}
 
 	// Ensure IPSets Required for Nodes
-	allIPSets, isReady, err := deployment.EnsureIPSets(ctx, helper, instance, nodes)
+	allIPSets, isReady, err := deployment.EnsureIPSets(ctx, helper, instance)
 	if err != nil || !isReady {
 		return ctrl.Result{}, err
 	}
@@ -210,7 +195,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	// Ensure DNSData Required for Nodes
 	dnsAddresses, dnsClusterAddresses, ctlplaneSearchDomain, isReady, err := deployment.EnsureDNSData(
 		ctx, helper,
-		instance, nodes, allIPSets)
+		instance, allIPSets)
 	if err != nil || !isReady {
 		return ctrl.Result{}, err
 	}
@@ -260,22 +245,10 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		instance.Status.Conditions.MarkUnknown(dataplanev1.RoleBareMetalProvisionReadyCondition,
 			condition.InitReason, condition.InitReason)
 		isReady, err := deployment.DeployBaremetalSet(ctx, helper, instance,
-			nodes, allIPSets, dnsAddresses)
+			allIPSets, dnsAddresses)
 		if err != nil || !isReady {
 			return ctrl.Result{}, err
 		}
-	}
-
-	// Ensure all nodes are in SetupReady state
-	setupReadyNodes := 0
-	for _, node := range nodes.Items {
-		if node.IsSetupReady() {
-			setupReadyNodes++
-		}
-	}
-
-	if setupReadyNodes < len(nodes.Items) {
-		return ctrl.Result{}, err
 	}
 
 	// TODO: if the input hash changes or the nodes in the role is updated we should
@@ -301,13 +274,31 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
+	// Verify Ansible SSH Secret
+	ansibleSSHPrivateKeySecret = instance.Spec.AnsibleSSHPrivateKeySecret
+	if ansibleSSHPrivateKeySecret != "" {
+		_, result, err = secret.VerifySecret(
+			ctx,
+			types.NamespacedName{Namespace: instance.Namespace, Name: ansibleSSHPrivateKeySecret},
+			[]string{
+				"ssh-privatekey",
+			},
+			r.Client,
+			time.Duration(5)*time.Second,
+		)
+		if err != nil {
+			return result, err
+		}
+	}
+
 	// all setup tasks complete, mark SetupReadyCondition True
 	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
 
 	logger.Info("Role", "DeployStrategy", instance.Spec.DeployStrategy.Deploy,
 		"Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
-		logger.Info("Starting DataPlaneRole deploy")
+		logger.Info("Deploying NodeSet: %s", instance.Name)
+		logger.Info("Starting DataPlaneNodeSet deploy")
 		logger.Info("Set Status.Deployed to false", "instance", instance)
 		instance.Status.Deployed = false
 		logger.Info("Set DeploymentReadyCondition false", "instance", instance)
@@ -343,6 +334,13 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		instance.Status.Deployed = true
 		logger.Info("Set DeploymentReadyCondition true", "instance", instance)
 		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
+
+		// Explicitly set instance.Spec.Deploy = false
+		// We don't want another deploy triggered by any reconcile request, it should
+		// only be triggered when the user (or another controller) specifically
+		// sets it to true.
+		logger.Info("Set DeployStrategy.Deploy to false")
+		instance.Spec.DeployStrategy.Deploy = false
 	}
 
 	// Set DeploymentReadyCondition to False if it was unknown.

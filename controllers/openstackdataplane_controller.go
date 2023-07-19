@@ -19,24 +19,18 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/go-logr/logr"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
-	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
@@ -125,14 +119,6 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 	}
 
-	ctrlResult, err := createOrPatchDataPlaneResources(ctx, instance, helper)
-	if err != nil {
-		return ctrl.Result{}, err
-	} else if !ctrlResult.IsZero() {
-		// if result isn't empty, return it
-		return ctrlResult, nil
-	}
-
 	// all setup tasks complete, mark SetupReadyCondition True
 	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
 
@@ -142,7 +128,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		logger.Info("Starting DataPlane deploy")
 		logger.Info("Set DeploymentReadyCondition false", "instance", instance)
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
-		roles := &dataplanev1.OpenStackDataPlaneRoleList{}
+		roles := &dataplanev1.OpenStackDataPlaneNodeSetList{}
 
 		listOpts := []client.ListOption{
 			client.InNamespace(instance.GetNamespace()),
@@ -158,31 +144,12 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		logger.Info("found roles", "total", len(roles.Items))
-		if len(instance.Spec.Roles) > len(roles.Items) {
-			shouldRequeue = true
-		}
 
 		for _, role := range roles.Items {
 			logger.Info("DataPlane deploy", "role.Name", role.Name)
 			if role.Spec.DataPlane != instance.Name {
 				err = fmt.Errorf("role %s: role.DataPlane does not match with role.Label", role.Name)
 				deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
-			}
-			logger.Info("Role", "DeployStrategy.Deploy", role.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-			if !role.Spec.DeployStrategy.Deploy {
-				_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), &role, func() error {
-					logger.Info("Reconciling Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-					helper.GetLogger().Info("CreateOrPatch Role.DeployStrategy.Deploy", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
-					role.Spec.DeployStrategy.Deploy = instance.Spec.DeployStrategy.Deploy
-					if err != nil {
-						deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
-					}
-					return nil
-				})
-				if err != nil {
-					deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
-				}
 			}
 			if !role.IsReady() {
 				logger.Info("Role", "IsReady", role.IsReady(), "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
@@ -227,7 +194,6 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		logger.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
 	}
-
 	// Explicitly set instance.Spec.Deploy = false
 	// We don't want another deploy triggered by any reconcile request, it should
 	// only be triggered when the user (or another controller) specifically
@@ -249,154 +215,5 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 func (r *OpenStackDataPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1.OpenStackDataPlane{}).
-		Owns(&dataplanev1.OpenStackDataPlaneNode{}).
-		Owns(&dataplanev1.OpenStackDataPlaneRole{}).
 		Complete(r)
-}
-
-// createOrPatchDataPlaneResources -
-func createOrPatchDataPlaneResources(ctx context.Context, instance *dataplanev1.OpenStackDataPlane, helper *helper.Helper) (ctrl.Result, error) {
-	// create DataPlaneRoles
-	roleManagedHostMap := make(map[string]map[string]baremetalv1.InstanceSpec)
-	err := createOrPatchDataPlaneRoles(ctx, instance, helper, roleManagedHostMap)
-	if err != nil {
-		instance.Status.Conditions.MarkFalse(
-			condition.ReadyCondition,
-			condition.ErrorReason,
-			condition.SeverityError,
-			dataplanev1.DataPlaneErrorMessage,
-			err.Error())
-		return ctrl.Result{}, err
-	}
-
-	// Create DataPlaneNodes
-	err = createOrPatchDataPlaneNodes(ctx, instance, helper)
-	if err != nil {
-		instance.Status.Conditions.MarkFalse(
-			condition.ReadyCondition,
-			condition.ErrorReason,
-			condition.SeverityError,
-			dataplanev1.DataPlaneNodeErrorMessage,
-			err.Error())
-		return ctrl.Result{}, err
-	}
-
-	// Get All Nodes
-	nodes := &dataplanev1.OpenStackDataPlaneNodeList{}
-	listOpts := []client.ListOption{
-		client.InNamespace(instance.GetNamespace()),
-	}
-
-	err = helper.GetClient().List(ctx, nodes, listOpts...)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	if len(nodes.Items) < len(instance.Spec.Nodes) {
-		util.LogForObject(helper, "All nodes not yet created, requeueing", instance)
-		return ctrl.Result{RequeueAfter: time.Second * 10}, nil
-	}
-
-	// Order the nodes based on Name
-	sort.SliceStable(nodes.Items, func(i, j int) bool {
-		return nodes.Items[i].Name < nodes.Items[j].Name
-	})
-
-	err = deployment.BuildBMHHostMap(ctx, helper, instance, nodes, roleManagedHostMap)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	// Patch the role again to provision the nodes
-	err = createOrPatchDataPlaneRoles(ctx, instance, helper, roleManagedHostMap)
-	if err != nil {
-		instance.Status.Conditions.MarkFalse(
-			condition.ReadyCondition,
-			condition.ErrorReason,
-			condition.SeverityError,
-			dataplanev1.DataPlaneErrorMessage,
-			err.Error())
-		return ctrl.Result{}, err
-	}
-
-	return ctrl.Result{}, nil
-}
-
-// createOrPatchDataPlaneNodes Create or Patch DataPlaneNodes
-func createOrPatchDataPlaneNodes(ctx context.Context, instance *dataplanev1.OpenStackDataPlane, helper *helper.Helper) error {
-	logger := helper.GetLogger()
-	client := helper.GetClient()
-
-	for nodeName, nodeSpec := range instance.Spec.Nodes {
-		logger.Info("CreateDataPlaneNode", "nodeName", nodeName)
-		node := &dataplanev1.OpenStackDataPlaneNode{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      nodeName,
-				Namespace: instance.Namespace,
-			},
-		}
-		_, err := controllerutil.CreateOrPatch(ctx, client, node, func() error {
-			nodeSpec.DeepCopyInto(&node.Spec)
-			err := controllerutil.SetControllerReference(instance, node, helper.GetScheme())
-			if err != nil {
-				return err
-			}
-			return nil
-		})
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// createOrPatchDataPlaneRoles Create or Patch DataPlaneRole
-func createOrPatchDataPlaneRoles(ctx context.Context,
-	instance *dataplanev1.OpenStackDataPlane, helper *helper.Helper,
-	roleManagedHostMap map[string]map[string]baremetalv1.InstanceSpec) error {
-	client := helper.GetClient()
-	logger := helper.GetLogger()
-	for roleName, roleSpec := range instance.Spec.Roles {
-		role := &dataplanev1.OpenStackDataPlaneRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      roleName,
-				Namespace: instance.Namespace,
-			},
-		}
-		err := client.Get(
-			ctx, types.NamespacedName{Name: roleName, Namespace: instance.Namespace}, role)
-
-		if err != nil && !k8s_errors.IsNotFound(err) {
-			return err
-		}
-
-		logger.Info("Create Or Patch DataPlaneRole", "roleName", roleName)
-		_, err = controllerutil.CreateOrPatch(ctx, client, role, func() error {
-			// role.Spec.DeployStrategy is explicitly omitted. Otherwise, it
-			// could get reset to False, and if the DataPlane deploy sets it to
-			// True, the DataPlane and DataPlaneRole controllers will be stuck
-			// looping trying to reconcile.
-			role.Spec.DataPlane = instance.Name
-			role.Spec.NodeTemplate = roleSpec.NodeTemplate
-			role.Spec.NetworkAttachments = roleSpec.NetworkAttachments
-			role.Spec.Env = roleSpec.Env
-			role.Spec.Services = roleSpec.Services
-			hostMap, ok := roleManagedHostMap[roleName]
-			if ok {
-				bmsTemplate := roleSpec.BaremetalSetTemplate.DeepCopy()
-				bmsTemplate.BaremetalHosts = hostMap
-				role.Spec.BaremetalSetTemplate = *bmsTemplate
-			}
-			err := controllerutil.SetControllerReference(instance, role, helper.GetScheme())
-			if err != nil {
-				return err
-			}
-			return nil
-		})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }

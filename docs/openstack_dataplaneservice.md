@@ -9,6 +9,8 @@
 * [DeployStrategySection](#deploystrategysection)
 * [NetworkConfigSection](#networkconfigsection)
 * [NodeSection](#nodesection)
+* [NodeTemplate](#nodetemplate)
+* [NovaTemplate](#novatemplate)
 * [KubeService](#kubeservice)
 * [OpenStackDataPlaneServiceList](#openstackdataplaneservicelist)
 * [OpenStackDataPlaneServiceSpec](#openstackdataplaneservicespec)
@@ -60,6 +62,32 @@ NodeSection is a specification of the node attributes
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
+| hostName | HostName - node name | string | false |
+| networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | false |
+| networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | true |
+| networks | Networks - Instance networks | []infranetworkv1.IPSetNetwork | false |
+| managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
+| ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
+| ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
+| ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
+| ansibleVars | AnsibleVars for configuring ansible | string | false |
+| ansibleSSHPrivateKeySecret | AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey: <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets> | string | false |
+| extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | false |
+| userData | UserData  node specific user-data | *corev1.SecretReference | false |
+| networkData | NetworkData  node specific network-data | *corev1.SecretReference | false |
+| nova | NovaTemplate specifies the parameters for the compute service deployment on the EDPM node. If it is specified both in OpenstackDataPlaneRole and the OpenstackDataPlaneNode for the same EDPM node then the configuration in OpenstackDataPlaneNode will be used and the configuration in the OpenstackDataPlaneRole will be ignored. If this is defined in neither then compute service(s) will not be deployed on the EDPM node. | *[NovaTemplate](#novatemplate) | false |
+
+[Back to Custom Resources](#custom-resources)
+
+#### NodeTemplate
+
+NodeTemplate is a specification of the node attributes
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| nodeNames | Nodes - Map of Node Names and node specific data. Values here override defaults in the upper level section. | map[string][NodeSection](#nodesection) | true |
+| hostName | HostName - node name | string | false |
+| networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | false |
 | networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | false |
 | networks | Networks - Instance networks | []infranetworkv1.IPSetNetwork | false |
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |

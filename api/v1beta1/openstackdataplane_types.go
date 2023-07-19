@@ -28,9 +28,6 @@ import (
 type OpenStackDataPlaneSpec struct {
 
 	// +kubebuilder:validation:Optional
-	// Nodes - Map of nodes
-	Nodes map[string]OpenStackDataPlaneNodeSpec `json:"nodes,omitempty"`
-	// +kubebuilder:validation:Optional
 	// Roles - Map of roles
 	Roles map[string]OpenStackDataPlaneRoleSpec `json:"roles,omitempty"`
 	// +kubebuilder:validation:Optional

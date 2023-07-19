@@ -17,8 +17,6 @@ limitations under the License.
 package v1beta1
 
 import (
-	"fmt"
-
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -48,26 +46,6 @@ var _ webhook.Defaulter = &OpenStackDataPlane{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (r *OpenStackDataPlane) Default() {
-	openstackdataplanelog.Info("default", "name", r.Name)
-	r.Spec.Default()
-
-}
-
-// Default - set defaults for this OpenStackDataPlane spec
-func (spec *OpenStackDataPlaneSpec) Default() {
-	for nodeName, node := range spec.Nodes {
-		if node.HostName == "" {
-			node.HostName = nodeName
-		}
-		if node.Node.AnsibleSSHPrivateKeySecret == "" {
-			if node.Role == "" {
-				continue
-			}
-			roleSSHSecret := spec.Roles[node.Role].NodeTemplate.AnsibleSSHPrivateKeySecret
-			node.Node.AnsibleSSHPrivateKeySecret = roleSSHSecret
-		}
-		spec.Nodes[nodeName] = *node.DeepCopy()
-	}
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
@@ -77,20 +55,7 @@ var _ webhook.Validator = &OpenStackDataPlane{}
 
 // Validate implements common validations
 func (spec *OpenStackDataPlaneSpec) Validate() field.ErrorList {
-	var allErrs field.ErrorList
-	basePath := field.NewPath("spec")
-	// Validate SSHKey is not empty in both Role or Node
-	for nodeName, node := range spec.Nodes {
-		sshKeyPath := basePath.Child("nodes").Child(
-			nodeName).Child("node").Child("ansibleSSHPrivateKeySecret")
-		if node.Node.AnsibleSSHPrivateKeySecret == "" &&
-			(node.Role == "" ||
-				spec.Roles[node.Role].NodeTemplate.AnsibleSSHPrivateKeySecret == "") {
-			allErrs = append(allErrs,
-				field.Invalid(sshKeyPath, "", fmt.Sprintf(errNoSSHKey, nodeName)))
-		}
-	}
-	return allErrs
+	return nil
 }
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type

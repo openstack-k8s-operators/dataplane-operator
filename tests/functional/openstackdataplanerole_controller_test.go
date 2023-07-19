@@ -41,7 +41,7 @@ var _ = Describe("Dataplane Role Test", func() {
 		})
 		It("should have the Spec fields initialized", func() {
 			dataplaneRoleInstance := GetDataplaneRole(dataplaneRoleName)
-			Expect(dataplaneRoleInstance.Spec.DeployStrategy.Deploy).Should(BeFalse())
+			Expect(dataplaneRoleInstance.Spec.DeployStrategy.AnsibleTags).Should(BeNil())
 		})
 
 		It("should have the Status fields initialized", func() {
