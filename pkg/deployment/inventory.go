@@ -25,6 +25,8 @@ import (
 	"strings"
 
 	yaml "gopkg.in/yaml.v3"
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
@@ -50,7 +52,6 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 
 	for _, node := range nodes {
 		host := roleNameGroup.AddHost(node.Name)
-		var dnsSearchDomains []string
 		// Use if provided else use hostname
 		if node.Spec.AnsibleHost != "" {
 			host.Vars["ansible_host"] = node.Spec.AnsibleHost
@@ -59,37 +60,7 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 		}
 		ipSet, ok := allIPSets[node.Name]
 		if ok {
-			for _, res := range ipSet.Status.Reservation {
-				// Build the vars for ips/routes etc
-				switch n := res.Network; n {
-				case CtlPlaneNetwork:
-					host.Vars["ctlplane_ip"] = res.Address
-					_, ipnet, err := net.ParseCIDR(res.Cidr)
-					if err == nil {
-						netCidr, _ := ipnet.Mask.Size()
-						host.Vars["ctlplane_subnet_cidr"] = netCidr
-					}
-					host.Vars["ctlplane_mtu"] = res.MTU
-					host.Vars["gateway_ip"] = res.Gateway
-					host.Vars["ctlplane_dns_nameservers"] = dnsAddresses
-					host.Vars["ctlplane_host_routes"] = res.Routes
-					dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
-				default:
-					entry := toSnakeCase(string(n))
-					host.Vars[entry+"_ip"] = res.Address
-					_, ipnet, err := net.ParseCIDR(res.Cidr)
-					if err == nil {
-						netCidr, _ := ipnet.Mask.Size()
-						host.Vars[entry+"_cidr"] = netCidr
-					}
-					host.Vars[entry+"_vlan_id"] = res.Vlan
-					host.Vars[entry+"_mtu"] = res.MTU
-					//host.Vars[string.Join(entry, "_gateway_ip")] = res.Gateway
-					host.Vars[entry+"_host_routes"] = res.Routes
-					dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
-				}
-				host.Vars["dns_search_domains"] = dnsSearchDomains
-			}
+			pupulateInventoryFromIPAM(&ipSet, host, dnsAddresses)
 		}
 
 		err = resolveAnsibleVars(&node.Spec.Node, &host, &ansible.Group{})
@@ -136,6 +107,22 @@ func GenerateNodeInventory(ctx context.Context, helper *helper.Helper,
 	all := inventory.AddGroup("all")
 	host := all.AddHost(instance.Name)
 
+	ipSet := &infranetworkv1.IPSet{}
+	err = helper.GetClient().Get(ctx,
+		types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, ipSet)
+	if err != nil {
+		if !k8s_errors.IsNotFound(err) {
+			return "", err
+		}
+		// Don't try to popluare inventory
+		utils.LogForObject(helper, "Networks not configured for Role", instance)
+	} else {
+		dnsAddresses, _, err := checkDNSService(ctx, helper, instance)
+		if err != nil {
+			return "", err
+		}
+		pupulateInventoryFromIPAM(ipSet, host, dnsAddresses)
+	}
 	networkConfig := getAnsibleNetworkConfig(instance, instanceRole)
 
 	if networkConfig.Template != "" {
@@ -185,6 +172,44 @@ func GenerateNodeInventory(ctx context.Context, helper *helper.Helper,
 	}
 	err = configmap.EnsureConfigMaps(ctx, helper, instance, cms, nil)
 	return configMapName, err
+}
+
+// pupulateInventoryFromIPAM populates inventory from IPAM
+func pupulateInventoryFromIPAM(
+	ipSet *infranetworkv1.IPSet, host ansible.Host,
+	dnsAddresses []string) {
+	var dnsSearchDomains []string
+	for _, res := range ipSet.Status.Reservation {
+		// Build the vars for ips/routes etc
+		switch n := res.Network; n {
+		case CtlPlaneNetwork:
+			host.Vars["ctlplane_ip"] = res.Address
+			_, ipnet, err := net.ParseCIDR(res.Cidr)
+			if err == nil {
+				netCidr, _ := ipnet.Mask.Size()
+				host.Vars["ctlplane_subnet_cidr"] = netCidr
+			}
+			host.Vars["ctlplane_mtu"] = res.MTU
+			host.Vars["gateway_ip"] = res.Gateway
+			host.Vars["ctlplane_dns_nameservers"] = dnsAddresses
+			host.Vars["ctlplane_host_routes"] = res.Routes
+			dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
+		default:
+			entry := toSnakeCase(string(n))
+			host.Vars[entry+"_ip"] = res.Address
+			_, ipnet, err := net.ParseCIDR(res.Cidr)
+			if err == nil {
+				netCidr, _ := ipnet.Mask.Size()
+				host.Vars[entry+"_cidr"] = netCidr
+			}
+			host.Vars[entry+"_vlan_id"] = res.Vlan
+			host.Vars[entry+"_mtu"] = res.MTU
+			host.Vars[entry+"_gateway_ip"] = res.Gateway
+			host.Vars[entry+"_host_routes"] = res.Routes
+			dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
+		}
+		host.Vars["dns_search_domains"] = dnsSearchDomains
+	}
 }
 
 // getAnsibleUser returns the string value from the template unless it is set in the node

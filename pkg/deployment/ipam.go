@@ -127,22 +127,12 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	allIPSets map[string]infranetworkv1.IPSet) ([]string, string, bool, error) {
 
 	// Verify dnsmasq CR exists
-	dnsmasqList := &infranetworkv1.DNSMasqList{}
-	listOpts := []client.ListOption{
-		client.InNamespace(instance.GetNamespace()),
-	}
-	err := helper.GetClient().List(ctx, dnsmasqList, listOpts...)
-	if err != nil {
-		return nil, "", false, err
-	}
-	if len(dnsmasqList.Items) == 0 {
-		util.LogForObject(helper, "No DNSMasq CR exists yet, DNS Service won't be used", instance)
-		return nil, "", true, nil
-	} else if !dnsmasqList.Items[0].IsReady() {
-		util.LogForObject(helper, "DNSMasq service exists, but not ready yet ", instance)
-		return nil, "", false, nil
-	}
+	dnsAddresses, isReady, err := checkDNSService(
+		ctx, helper, instance)
 
+	if err != nil || !isReady || dnsAddresses == nil {
+		return nil, "", isReady, err
+	}
 	// Create or Patch DNSData
 	ctlplaneSearchDomain, err := createOrPatchDNSData(
 		ctx, helper, instance, nodes, allIPSets)
@@ -173,7 +163,6 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	instance.Status.Conditions.MarkTrue(
 		dataplanev1.RoleDNSDataReadyCondition,
 		dataplanev1.RoleDNSDataReadyMessage)
-	dnsAddresses := dnsmasqList.Items[0].Status.DNSAddresses
 	return dnsAddresses, ctlplaneSearchDomain, true, nil
 }
 
@@ -235,4 +224,25 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 	}
 
 	return allIPSets, nil
+}
+
+// checkDNSService checks if DNS is configured and ready
+func checkDNSService(ctx context.Context, helper *helper.Helper,
+	instance client.Object) ([]string, bool, error) {
+	dnsmasqList := &infranetworkv1.DNSMasqList{}
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.GetNamespace()),
+	}
+	err := helper.GetClient().List(ctx, dnsmasqList, listOpts...)
+	if err != nil {
+		return nil, false, err
+	}
+	if len(dnsmasqList.Items) == 0 {
+		util.LogForObject(helper, "No DNSMasq CR exists yet, DNS Service won't be used", instance)
+		return nil, true, nil
+	} else if !dnsmasqList.Items[0].IsReady() {
+		util.LogForObject(helper, "DNSMasq service exists, but not ready yet ", instance)
+		return nil, false, nil
+	}
+	return dnsmasqList.Items[0].Status.DNSAddresses, true, nil
 }
