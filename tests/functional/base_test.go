@@ -3,7 +3,6 @@ package functional
 import (
 	"github.com/onsi/gomega"
 	. "github.com/onsi/gomega"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -90,13 +89,4 @@ func GetDataplaneRole(name types.NamespacedName) *dataplanev1.OpenStackDataPlane
 		return nil
 	}, timeout, interval).Should(Succeed())
 	return instance
-}
-
-func DeleteNamespace(name string) {
-	ns := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-	}
-	gomega.Expect(k8sClient.Delete(ctx, ns)).Should(gomega.Succeed())
 }
