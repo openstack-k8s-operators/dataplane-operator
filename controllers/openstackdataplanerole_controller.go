@@ -189,6 +189,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	r.Log.Info("found nodes", "total", len(nodes.Items))
 
 	// Order the nodes based on Name
 	sort.SliceStable(nodes.Items, func(i, j int) bool {
