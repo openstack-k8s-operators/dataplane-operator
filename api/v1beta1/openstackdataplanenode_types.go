@@ -85,9 +85,14 @@ func init() {
 	SchemeBuilder.Register(&OpenStackDataPlaneNode{}, &OpenStackDataPlaneNodeList{})
 }
 
-// IsReady - returns true if the DataPlane is ready
+// IsReady - returns true if the DataPlaneNode is ready
 func (instance OpenStackDataPlaneNode) IsReady() bool {
 	return instance.Status.Conditions.IsTrue(condition.DeploymentReadyCondition)
+}
+
+// IsSetupReady - returns true if the DataPlaneNode is ready to be deployed
+func (instance OpenStackDataPlaneNode) IsSetupReady() bool {
+	return instance.Status.Conditions.IsTrue(SetupReadyCondition)
 }
 
 // InitConditions - Initializes Status Conditons
