@@ -157,6 +157,10 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		if err != nil {
 			return ctrl.Result{}, err
 		}
+		r.Log.Info("found roles", "total", len(roles.Items))
+		if len(instance.Spec.Roles) > len(roles.Items) {
+			shouldRequeue = true
+		}
 
 		for _, role := range roles.Items {
 			logger.Info("DataPlane deploy", "role.Name", role.Name)

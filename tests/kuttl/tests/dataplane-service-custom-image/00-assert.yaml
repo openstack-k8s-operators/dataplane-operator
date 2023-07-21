@@ -29,7 +29,6 @@ status:
     reason: Ready
     status: "True"
     type: SetupReady
-  deployed: true
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneRole
