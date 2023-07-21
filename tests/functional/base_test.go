@@ -31,41 +31,55 @@ func CreateDataplaneNoNodes(name types.NamespacedName) *dataplanev1.OpenStackDat
 	return instance
 }
 
-func DefaultDataplaneRoleNoNodesTemplate(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneRole {
-	return &dataplanev1.OpenStackDataPlaneRole{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "dataplane.openstack.org/v1beta1",
-			Kind:       "OpenStackDataPlaneRole",
+func DefaultDataPlaneSpec() dataplanev1.OpenStackDataPlaneSpec {
+	return dataplanev1.OpenStackDataPlaneSpec{
+		DeployStrategy: dataplanev1.DeployStrategySection{
+			Deploy: true,
 		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "edpm-compute-no-nodes",
-			Namespace: name.Namespace,
+		NodeSets: []string{
+			"edpm-compute-node-set",
 		},
-		Spec: dataplanev1.OpenStackDataPlaneRoleSpec{},
 	}
 }
 
-func CreateDataplaneRoleNoNodes(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneRole {
-	instance := DefaultDataplaneRoleNoNodesTemplate(name)
+func CreateDataplaneNodeSet(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneNodeSetSpec) *dataplanev1.OpenStackDataPlaneNodeSet {
+	instance := DefaultDataplaneNodeSetTemplate(name, spec)
 	err := k8sClient.Create(ctx, instance)
 	Expect(err).NotTo(HaveOccurred())
 
 	return instance
 }
 
-func DefaultDataPlaneSpec() dataplanev1.OpenStackDataPlaneSpec {
-	return dataplanev1.OpenStackDataPlaneSpec{
+func DefaultDataPlaneNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
+	return dataplanev1.OpenStackDataPlaneNodeSetSpec{
 		DeployStrategy: dataplanev1.DeployStrategySection{
-			AnsibleTags: "",
+			Deploy: true,
 		},
-		Roles: map[string]dataplanev1.OpenStackDataPlaneRoleSpec{
-			"edpm-compute-no-nodes": {
-				Services: []string{"configure-network", "validate-network", "install-os", "configure-os", "run-os"},
-				NodeTemplate: dataplanev1.NodeTemplate{
-					AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-				},
+		NodeTemplate: dataplanev1.NodeTemplate{
+			Nodes: map[string]dataplanev1.NodeSection{
+				"edpm-compute-node-set": {},
+			},
+			Ansible: dataplanev1.AnsibleOpts{
+				AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
 			},
 		},
+	}
+}
+
+func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneNodeSetSpec) *dataplanev1.OpenStackDataPlaneNodeSet {
+	return &dataplanev1.OpenStackDataPlaneNodeSet{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "dataplane.openstack.org/v1beta1",
+			Kind:       "OpenStackDataPlane",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name.Name,
+			Namespace: name.Namespace,
+			Labels: map[string]string{
+				"openstackdataplane": "dataplane-test",
+			},
+		},
+		Spec: spec,
 	}
 }
 
@@ -100,8 +114,8 @@ func GetDataplane(name types.NamespacedName) *dataplanev1.OpenStackDataPlane {
 	return instance
 }
 
-func GetDataplaneRole(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneRole {
-	instance := &dataplanev1.OpenStackDataPlaneRole{}
+func GetDataplaneNodeSet(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneNodeSet {
+	instance := &dataplanev1.OpenStackDataPlaneNodeSet{}
 	gomega.Eventually(func(g gomega.Gomega) error {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 		return nil

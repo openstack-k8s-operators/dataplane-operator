@@ -27,7 +27,9 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -43,7 +45,7 @@ type OpenStackDataPlaneReconciler struct {
 }
 
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanes,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodes;openstackdataplaneroles,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanes/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanes/finalizers,verbs=update
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices,verbs=get;list;watch
@@ -128,40 +130,58 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		logger.Info("Starting DataPlane deploy")
 		logger.Info("Set DeploymentReadyCondition false", "instance", instance)
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
-		roles := &dataplanev1.OpenStackDataPlaneNodeSetList{}
+		nodeSets := &dataplanev1.OpenStackDataPlaneNodeSetList{}
 
-		listOpts := []client.ListOption{
-			client.InNamespace(instance.GetNamespace()),
+		labelSelector := labels.NewSelector()
+		labelReq, err := labels.NewRequirement("openstackdataplane", selection.In, []string{instance.Name})
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf("failed to format labelSelector: %w", err)
 		}
-		labelSelector := map[string]string{
-			"openstackdataplane": instance.Name,
+		labelSelector.Add(*labelReq)
+
+		listOpts := client.ListOptions{
+			Namespace:     instance.GetNamespace(),
+			LabelSelector: labelSelector,
 		}
-		if len(labelSelector) > 0 {
-			labels := client.MatchingLabels(labelSelector)
-			listOpts = append(listOpts, labels)
-		}
-		err = r.Client.List(ctx, roles, listOpts...)
+
+		err = r.Client.List(ctx, nodeSets, &listOpts)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 
-		for _, role := range roles.Items {
-			logger.Info("DataPlane deploy", "role.Name", role.Name)
-			if role.Spec.DataPlane != instance.Name {
-				err = fmt.Errorf("role %s: role.DataPlane does not match with role.Label", role.Name)
-				deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
+		// If we didn't find any nodeSets with the labelSelector, we wont be able to deploy anything. Let's Log
+		// this and requeue.
+		if len(nodeSets.Items) == 0 {
+			logger.Info(fmt.Sprintf("No nodeSets were found with matching label: %v", labelSelector))
+			return ctrl.Result{RequeueAfter: time.Second * 5}, nil
+		}
+
+		for _, nodeSet := range nodeSets.Items {
+			logger.Info("DataPlane deploy", "nodeSet.Name", nodeSet.Name)
+			// We don't expect that our nodeSet list will be overly large. As such, linear search is likely
+			// to be computationally more efficient compared to importing and using slices.Contains() here.
+			nodeSetFound := false
+			for _, nodeSetName := range instance.Spec.NodeSets {
+				if nodeSetName == nodeSet.Name {
+					nodeSetFound = true
+				}
 			}
-			if !role.IsReady() {
-				logger.Info("Role", "IsReady", role.IsReady(), "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+
+			if !nodeSetFound {
+				err = fmt.Errorf("nodeSet %s: nodeSet.DataPlane does not match with nodeSet.Label", nodeSet.Name)
+				deployErrors = append(deployErrors, "nodeSet.Name: "+nodeSet.Name+" error: "+err.Error())
+			}
+
+			if !nodeSet.IsReady() {
+				logger.Info("NodeSet", "IsReady", nodeSet.IsReady(), "NodeSet.Namespace", instance.Namespace, "NodeSet.Name", nodeSet.Name)
 				shouldRequeue = true
-				mirroredCondition := role.Status.Conditions.Mirror(condition.ReadyCondition)
+				mirroredCondition := nodeSet.Status.Conditions.Mirror(condition.ReadyCondition)
 				if mirroredCondition != nil {
-					logger.Info("Role", "Status", mirroredCondition.Message, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+					logger.Info("NodeSet", "Status", mirroredCondition.Message, "NodeSet.Namespace", instance.Namespace, "NodeSet.Name", nodeSet.Name)
 					if condition.IsError(mirroredCondition) {
-						deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+mirroredCondition.Message)
+						deployErrors = append(deployErrors, "nodeSet.Name: "+nodeSet.Name+" error "+mirroredCondition.Message)
 					}
 				}
-
 			}
 		}
 	}
@@ -178,7 +198,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 	if shouldRequeue {
-		logger.Info("one or more roles aren't ready, requeueing")
+		logger.Info("one or more nodeSets aren't ready, requeueing")
 		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
 	}
 	if instance.Spec.DeployStrategy.Deploy && len(deployErrors) == 0 {

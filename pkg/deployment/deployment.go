@@ -51,7 +51,7 @@ func Deploy(
 	status *dataplanev1.OpenStackDataPlaneStatus,
 	aeeSpec dataplanev1.AnsibleEESpec,
 	services []string,
-	role *dataplanev1.OpenStackDataPlaneRole,
+	nodeSet *dataplanev1.OpenStackDataPlaneNodeSet,
 ) (*ctrl.Result, error) {
 
 	log := helper.GetLogger()
@@ -113,7 +113,7 @@ func Deploy(
 		)
 		// Some OpenStackDataPlaneService might need Kubernetes Services to be created
 		if len(foundService.Spec.Services) > 0 {
-			errKube := CreateKubeServices(&foundService, nodes, helper, make(map[string]string))
+			errKube := CreateKubeServices(&foundService, nodeSet, helper, make(map[string]string))
 			if errKube != nil {
 				return &ctrl.Result{}, errKube
 			}
@@ -125,76 +125,7 @@ func Deploy(
 		log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 	}
 
-<<<<<<< HEAD
-=======
-	// Call DeployNovaExternalCompute individually for each node
-	var novaExternalComputes []*novav1beta1.NovaExternalCompute
-	var novaReadyConditionsTrue []*condition.Condition
-	var novaErrors []error
-	for nodeName := range role.Spec.NodeTemplate.Nodes {
-		template, err := getNovaTemplate(nodeName, role)
-		if err != nil {
-			log.Error(err, "Failed to get merged NovaTemplate")
-			novaErrors = append(novaErrors, err)
-			continue
-		}
-		if template == nil {
-			// If the Nova template is not defined neither in the Node nor in
-			// the Role then it means the Node is not a compute node. So skip
-			// NovaExternalCompute deployment.
-			log.Info("Skip creating NovaExternalCompute as the Node is not a compute", "node", nodeName)
-			continue
-		}
-
-		nodeConfigMapName := fmt.Sprintf("dataplanenode-%s", nodeName)
-		novaExternalCompute, err := DeployNovaExternalCompute(
-			ctx,
-			helper,
-			role,
-			obj,
-			sshKeySecret,
-			nodeConfigMapName,
-			status,
-			aeeSpec,
-			*template,
-		)
-		if err != nil {
-			novaErrors = append(novaErrors, err)
-			continue
-		}
-		novaExternalComputes = append(novaExternalComputes, novaExternalCompute)
-		novaReadyCondition := novaExternalCompute.Status.Conditions.Get(condition.ReadyCondition)
-		log.Info("Nova Status", "NovaExternalCompute", nodeName, "IsReady", novaExternalCompute.IsReady())
-		if novaExternalCompute.IsReady() {
-			novaReadyConditionsTrue = append(novaReadyConditionsTrue, novaReadyCondition)
-
-		}
-	}
-
-	// When any errors are found, wrap all into a single error, and return
-	// it
-	errStr := "DeployNovaExternalCompute error:"
-	if len(novaErrors) > 0 {
-		for _, err := range novaErrors {
-			errStr = fmt.Sprintf("%s: %s", errStr, err.Error())
-		}
-		err = errors.New(errStr)
-		return &ctrl.Result{}, err
-	}
-
-	// Return when any condition is not ready, otherwise set the role as
-	// deployed.
-	if len(novaReadyConditionsTrue) < len(novaExternalComputes) {
-		log.Info("Not all NovaExternalCompute ReadyConditions are true.")
-		return &ctrl.Result{}, nil
-	}
-
-	log.Info("All NovaExternalCompute ReadyConditions are true")
-	status.Conditions.Set(condition.TrueCondition(dataplanev1.NovaComputeReadyCondition, dataplanev1.NovaComputeReadyMessage))
-
->>>>>>> 29c9439 (Remove OpenStackDataPlaneNode CRD and Controller)
 	return nil, nil
-
 }
 
 // ConditionalDeploy function encapsulating primary deloyment handling with

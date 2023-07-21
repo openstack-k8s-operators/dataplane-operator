@@ -11,8 +11,7 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - description: OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets
-        API
+    - description: OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets API
       displayName: OpenStack Data Plane NodeSet
       kind: OpenStackDataPlaneNodeSet
       name: openstackdataplanenodesets.dataplane.openstack.org

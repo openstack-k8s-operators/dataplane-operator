@@ -6,11 +6,11 @@
 ### Sub Resources
 
 * [AnsibleEESpec](#ansibleeespec)
+* [AnsibleOpts](#ansibleopts)
 * [DeployStrategySection](#deploystrategysection)
 * [NetworkConfigSection](#networkconfigsection)
 * [NodeSection](#nodesection)
 * [NodeTemplate](#nodetemplate)
-* [NovaTemplate](#novatemplate)
 * [KubeService](#kubeservice)
 * [OpenStackDataPlaneServiceList](#openstackdataplaneservicelist)
 * [OpenStackDataPlaneServiceSpec](#openstackdataplaneservicespec)
@@ -30,6 +30,19 @@ AnsibleEESpec is a specification of the ansible EE attributes
 | extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | false |
 | env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
 | dnsConfig | DNSConfig for setting dnsservers | *corev1.PodDNSConfig | false |
+
+[Back to Custom Resources](#custom-resources)
+
+#### AnsibleOpts
+
+AnsibleOpts defines a logical grouping of Ansible related configuration options.
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
+| ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
+| ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
+| ansibleVars | AnsibleVars for configuring ansible | map[string]json.RawMessage | false |
 
 [Back to Custom Resources](#custom-resources)
 
@@ -58,7 +71,7 @@ NetworkConfigSection is a specification of the Network configuration details
 
 #### NodeSection
 
-NodeSection is a specification of the node attributes
+
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
@@ -67,15 +80,11 @@ NodeSection is a specification of the node attributes
 | networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | true |
 | networks | Networks - Instance networks | []infranetworkv1.IPSetNetwork | false |
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
-| ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
-| ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
-| ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
-| ansibleVars | AnsibleVars for configuring ansible | string | false |
+| ansible | Ansible is the group of Ansible related configuration options. | [AnsibleOpts](#ansibleopts) | false |
 | ansibleSSHPrivateKeySecret | AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey: <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets> | string | false |
 | extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | false |
 | userData | UserData  node specific user-data | *corev1.SecretReference | false |
 | networkData | NetworkData  node specific network-data | *corev1.SecretReference | false |
-| nova | NovaTemplate specifies the parameters for the compute service deployment on the EDPM node. If it is specified both in OpenstackDataPlaneRole and the OpenstackDataPlaneNode for the same EDPM node then the configuration in OpenstackDataPlaneNode will be used and the configuration in the OpenstackDataPlaneRole will be ignored. If this is defined in neither then compute service(s) will not be deployed on the EDPM node. | *[NovaTemplate](#novatemplate) | false |
 
 [Back to Custom Resources](#custom-resources)
 
@@ -85,16 +94,13 @@ NodeTemplate is a specification of the node attributes
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| nodeNames | Nodes - Map of Node Names and node specific data. Values here override defaults in the upper level section. | map[string][NodeSection](#nodesection) | true |
-| hostName | HostName - node name | string | false |
+| ansibleSSHPrivateKeySecret | AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey: <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets> | string | false |
+| nodes | Nodes - Map of Node Names and node specific data. Values here override defaults in the upper level section. | map[string][NodeSection](#nodesection) | true |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | false |
 | networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | false |
 | networks | Networks - Instance networks | []infranetworkv1.IPSetNetwork | false |
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
-| ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
-| ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
-| ansibleVars | AnsibleVars for configuring ansible | map[string]json.RawMessage | false |
-| ansibleSSHPrivateKeySecret | AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey: <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets> | string | false |
+| ansible | Ansible is the group of Ansible related configuration options. | [AnsibleOpts](#ansibleopts) | false |
 | extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | false |
 | userData | UserData  node specific user-data | *corev1.SecretReference | false |
 | networkData | NetworkData  node specific network-data | *corev1.SecretReference | false |

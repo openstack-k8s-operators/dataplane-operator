@@ -80,8 +80,7 @@ rules:
 - apiGroups:
   - dataplane.openstack.org
   resources:
-  - openstackdataplanenodes
-  - openstackdataplaneroles
+  - openstackdataplanenodesets
   verbs:
   - create
   - delete
@@ -93,25 +92,13 @@ rules:
 - apiGroups:
   - dataplane.openstack.org
   resources:
-  - openstackdataplaneroles
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - dataplane.openstack.org
-  resources:
-  - openstackdataplaneroles/finalizers
+  - openstackdataplanenodesets/finalizers
   verbs:
   - update
 - apiGroups:
   - dataplane.openstack.org
   resources:
-  - openstackdataplaneroles/status
+  - openstackdataplanenodesets/status
   verbs:
   - get
   - patch

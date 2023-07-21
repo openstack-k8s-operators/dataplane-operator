@@ -24,11 +24,16 @@ import (
 )
 
 var _ = Describe("Dataplane Role Test", func() {
+	var dataplaneName types.NamespacedName
 	var dataplaneRoleName types.NamespacedName
 
 	BeforeEach(func() {
 		dataplaneRoleName = types.NamespacedName{
 			Name:      "edpm-compute-no-nodes",
+			Namespace: namespace,
+		}
+		dataplaneName = types.NamespacedName{
+			Name:      "dataplane-test",
 			Namespace: namespace,
 		}
 		err := os.Setenv("OPERATOR_TEMPLATES", "../../templates")
@@ -37,15 +42,16 @@ var _ = Describe("Dataplane Role Test", func() {
 
 	When("A Dataplane resorce is created", func() {
 		BeforeEach(func() {
-			DeferCleanup(th.DeleteInstance, CreateDataplaneRoleNoNodes(dataplaneRoleName))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneRoleName, DefaultDataPlaneNodeSetSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataPlane(dataplaneName, DefaultDataPlaneSpec()))
 		})
 		It("should have the Spec fields initialized", func() {
-			dataplaneRoleInstance := GetDataplaneRole(dataplaneRoleName)
-			Expect(dataplaneRoleInstance.Spec.DeployStrategy.AnsibleTags).Should(BeNil())
+			dataplaneRoleInstance := GetDataplaneNodeSet(dataplaneRoleName)
+			Expect(dataplaneRoleInstance.Spec.DeployStrategy.Deploy).Should(BeFalse())
 		})
 
 		It("should have the Status fields initialized", func() {
-			dataplaneRoleInstance := GetDataplaneRole(dataplaneRoleName)
+			dataplaneRoleInstance := GetDataplaneNodeSet(dataplaneRoleName)
 			Expect(dataplaneRoleInstance.Status.Deployed).Should(BeFalse())
 		})
 	})

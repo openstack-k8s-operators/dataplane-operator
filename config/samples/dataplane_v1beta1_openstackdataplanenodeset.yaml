@@ -1,8 +1,13 @@
 apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlaneRole
+kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: openstackdataplanerole-sample
+  name: openstackdataplanenodeset-sample
 spec:
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+      value: "True"
   services:
     - configure-network
     - validate-network
@@ -13,6 +18,26 @@ spec:
     - libvirt
     - nova
   nodeTemplate:
+    nodes:
+      edpm-compute-0:
+        ansible:
+          ansibleHost: 172.20.12.67
+          ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+          ansibleUser: root
+          ansibleVars:
+            ansible_ssh_transfer_method: scp
+            ctlplane_ip: 172.20.12.67
+            external_ip: 172.20.12.76
+            fqdn_internal_api: edpm-compute-1.example.com
+            internal_api_ip: 172.17.0.101
+            storage_ip: 172.18.0.101
+            tenant_ip: 172.10.0.101
+        hostName: edpm-compute-0
+        networkConfig: {}
+        nova:
+          cellName: cell1
+          deploy: true
+          novaInstance: nova
     networkConfig:
       template: |
         ---
@@ -61,5 +86,6 @@ spec:
             routes: []
     managed: false
     managementNetwork: ctlplane
-    ansibleUser: root
-    ansiblePort: 22
+    ansible:
+      ansibleUser: root
+      ansiblePort: 22

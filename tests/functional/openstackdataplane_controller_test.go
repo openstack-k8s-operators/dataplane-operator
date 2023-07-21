@@ -25,15 +25,15 @@ import (
 
 var _ = Describe("Dataplane Test", func() {
 	var dataplaneName types.NamespacedName
-	var dataplaneRoleName types.NamespacedName
+	var dataplaneNodeSetName types.NamespacedName
 
 	BeforeEach(func() {
 		dataplaneName = types.NamespacedName{
 			Name:      "dataplane-test",
 			Namespace: namespace,
 		}
-		dataplaneRoleName = types.NamespacedName{
-			Name:      "edpm-compute-no-nodes",
+		dataplaneNodeSetName = types.NamespacedName{
+			Name:      "edpm-compute-node-set",
 			Namespace: namespace,
 		}
 		err := os.Setenv("OPERATOR_TEMPLATES", "../../templates")
@@ -42,11 +42,12 @@ var _ = Describe("Dataplane Test", func() {
 
 	When("A Dataplane resorce is created", func() {
 		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec()))
 			DeferCleanup(th.DeleteInstance, CreateDataPlane(dataplaneName, DefaultDataPlaneSpec()))
 		})
 		It("should have the Spec fields initialized", func() {
 			dataplaneInstance := GetDataplane(dataplaneName)
-			Expect(dataplaneInstance.Spec.DeployStrategy.AnsibleTags).Should(BeNil())
+			Expect(dataplaneInstance.Spec.DeployStrategy.Deploy).Should(BeTrue())
 		})
 
 		It("should have the Status fields initialized", func() {
@@ -54,10 +55,9 @@ var _ = Describe("Dataplane Test", func() {
 			Expect(dataplaneInstance.Status.Deployed).Should(BeFalse())
 		})
 
-		It("Should have created a OpenStackDataplaneRole", func() {
-			dataplaneRoleInstance := GetDataplaneRole(dataplaneRoleName)
-			Expect(dataplaneRoleInstance).NotTo(BeNil())
-			Expect(dataplaneRoleInstance.Spec.AnsibleSSHPrivateKeySecret).Should(Equal("dataplane-ansible-ssh-private-key-secret"))
+		It("Should have put a label on the OpenStackDataPlaneNodeSet CR", func() {
+			dataplaneNodeSet := GetDataplaneNodeSet(dataplaneNodeSetName)
+			Expect(dataplaneNodeSet.ObjectMeta.Annotations["edpm.openstack.org/deploy"]).Should(Equal("true"))
 		})
 	})
 })

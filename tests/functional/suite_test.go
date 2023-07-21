@@ -144,7 +144,7 @@ var _ = BeforeSuite(func() {
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
-	err = (&controllers.OpenStackDataPlaneRoleReconciler{
+	err = (&controllers.OpenStackDataPlaneNodeSetReconciler{
 		Client:  k8sManager.GetClient(),
 		Scheme:  k8sManager.GetScheme(),
 		Kclient: kclient,

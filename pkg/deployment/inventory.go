@@ -34,8 +34,8 @@ import (
 	utils "github.com/openstack-k8s-operators/lib-common/modules/common/util"
 )
 
-// GenerateRoleInventory yields a parsed Inventory for role
-func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
+// GenerateNodeSetInventory yields a parsed Inventory for role
+func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allIPSets map[string]infranetworkv1.IPSet, dnsAddresses []string) (string, error) {
 	var err error
@@ -55,12 +55,12 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 
 		// Use ansible_host if provided else use hostname. Fall back to
 		// nodeName if all else fails.
-		if node.AnsibleHost != "" {
-			host.Vars["ansible_host"] = node.AnsibleHost
+		if node.Ansible.AnsibleHost != "" {
+			host.Vars["ansible_host"] = node.Ansible.AnsibleHost
 		} else if node.HostName != "" {
 			host.Vars["ansible_host"] = node.HostName
 		} else {
-			host.Vars["ansible_host"] = node.Spec.HostName
+			host.Vars["ansible_host"] = nodeName
 		}
 
 		ipSet, ok := allIPSets[nodeName]
@@ -131,7 +131,7 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 
 	invData, err := inventory.MarshalYAML()
 	if err != nil {
-		utils.LogErrorForObject(helper, err, "Could not parse Role inventory", instance)
+		utils.LogErrorForObject(helper, err, "Could not parse NodeSet inventory", instance)
 		return "", err
 	}
 	secretData := map[string]string{
@@ -193,18 +193,18 @@ func populateInventoryFromIPAM(
 
 // getAnsibleUser returns the string value from the template unless it is set in the node
 func getAnsibleUser(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) string {
-	if instance.Spec.NodeTemplate.Nodes[nodeName].AnsibleUser != "" {
-		return instance.Spec.NodeTemplate.Nodes[nodeName].AnsibleUser
+	if instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsibleUser != "" {
+		return instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsibleUser
 	}
-	return instance.Spec.NodeTemplate.AnsibleUser
+	return instance.Spec.NodeTemplate.Ansible.AnsibleUser
 }
 
 // getAnsiblePort returns the string value from the template unless it is set in the node
 func getAnsiblePort(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) string {
-	if instance.Spec.NodeTemplate.Nodes[nodeName].AnsiblePort > 0 {
-		return strconv.Itoa(instance.Spec.NodeTemplate.Nodes[nodeName].AnsiblePort)
+	if instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsiblePort > 0 {
+		return strconv.Itoa(instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsiblePort)
 	}
-	return strconv.Itoa(instance.Spec.NodeTemplate.AnsiblePort)
+	return strconv.Itoa(instance.Spec.NodeTemplate.Ansible.AnsiblePort)
 }
 
 // getAnsibleManagementNetwork returns the string value from the template unless it is set in the node
@@ -234,8 +234,8 @@ func getAnsibleNetworks(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeNam
 }
 
 // getAnsibleVars returns ansible vars for a node
-func getAnsibleVars(helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	nodeName string) (map[string]interface{}, error) {
+func getAnsibleVars(
+	helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) (map[string]interface{}, error) {
 	// Merge the ansibleVars from the role into the value set on the node.
 	// Top level keys set on the node ansibleVars should override top level keys from the role AnsibleVars.
 	// However, there is no "deep" merge of values. Only top level keys are comvar matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
@@ -244,7 +244,7 @@ func getAnsibleVars(helper *helper.Helper, instance *dataplanev1.OpenStackDataPl
 	nodeSet := make(map[string]interface{})
 	node := make(map[string]interface{})
 	var nodeSetYamlError, nodeYamlError error
-	for key, val := range instance.Spec.NodeTemplate.AnsibleVars {
+	for key, val := range instance.Spec.NodeTemplate.Ansible.AnsibleVars {
 		var v interface{}
 		nodeSetYamlError = yaml.Unmarshal(val, &v)
 		if nodeSetYamlError != nil {
@@ -258,7 +258,7 @@ func getAnsibleVars(helper *helper.Helper, instance *dataplanev1.OpenStackDataPl
 		nodeSet[key] = v
 	}
 
-	for key, val := range instance.Spec.Node.NodeTemplate[nodeName].AnsibleVars {
+	for key, val := range instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsibleVars {
 		var v interface{}
 		nodeYamlError = yaml.Unmarshal(val, &v)
 		if nodeYamlError != nil {
@@ -271,6 +271,7 @@ func getAnsibleVars(helper *helper.Helper, instance *dataplanev1.OpenStackDataPl
 		}
 		node[key] = v
 	}
+
 	if nodeSet == nil && node != nil {
 		return node, nil
 	}
@@ -288,11 +289,11 @@ func getAnsibleVars(helper *helper.Helper, instance *dataplanev1.OpenStackDataPl
 func resolveAnsibleVars(nodeTemplate *dataplanev1.NodeTemplate, host *ansible.Host, group *ansible.Group) error {
 	ansibleVarsData := make(map[string]interface{})
 
-	if nodeTemplate.AnsibleUser != "" {
-		ansibleVarsData["ansible_user"] = nodeTemplate.AnsibleUser
+	if nodeTemplate.Ansible.AnsibleHost != "" {
+		ansibleVarsData["ansible_user"] = nodeTemplate.Ansible.AnsibleUser
 	}
-	if nodeTemplate.AnsiblePort > 0 {
-		ansibleVarsData["ansible_port"] = nodeTemplate.AnsiblePort
+	if nodeTemplate.Ansible.AnsiblePort > 0 {
+		ansibleVarsData["ansible_port"] = nodeTemplate.Ansible.AnsiblePort
 	}
 	if nodeTemplate.ManagementNetwork != "" {
 		ansibleVarsData["management_network"] = nodeTemplate.ManagementNetwork
@@ -305,7 +306,7 @@ func resolveAnsibleVars(nodeTemplate *dataplanev1.NodeTemplate, host *ansible.Ho
 	}
 
 	var err error
-	for key, val := range nodeTemplate.AnsibleVars {
+	for key, val := range nodeTemplate.Ansible.AnsibleVars {
 		var v interface{}
 		err = yaml.Unmarshal(val, &v)
 		if err != nil {
@@ -332,11 +333,11 @@ func resolveAnsibleVars(nodeTemplate *dataplanev1.NodeTemplate, host *ansible.Ho
 func resolveNodeAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host, group *ansible.Group) error {
 	ansibleVarsData := make(map[string]interface{})
 
-	if node.AnsibleUser != "" {
-		ansibleVarsData["ansible_user"] = node.AnsibleUser
+	if node.Ansible.AnsibleUser != "" {
+		ansibleVarsData["ansible_user"] = node.Ansible.AnsibleUser
 	}
-	if node.AnsiblePort > 0 {
-		ansibleVarsData["ansible_port"] = node.AnsiblePort
+	if node.Ansible.AnsiblePort > 0 {
+		ansibleVarsData["ansible_port"] = node.Ansible.AnsiblePort
 	}
 	if node.ManagementNetwork != "" {
 		ansibleVarsData["management_network"] = node.ManagementNetwork
@@ -348,7 +349,7 @@ func resolveNodeAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host, g
 		ansibleVarsData["networks"] = node.Networks
 	}
 	var err error
-	for key, val := range node.AnsibleVars {
+	for key, val := range node.Ansible.AnsibleVars {
 		var v interface{}
 		err = yaml.Unmarshal(val, &v)
 		if err != nil {
