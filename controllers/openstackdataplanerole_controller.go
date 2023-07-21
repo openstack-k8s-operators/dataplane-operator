@@ -237,8 +237,8 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 					condition.InputReadyCondition,
 					condition.RequestedReason,
 					condition.SeverityInfo,
-					fmt.Sprintf(dataplanev1.InputReadyWaitingMessage,
-						"secret/"+ansibleSSHPrivateKeySecret))
+					dataplanev1.InputReadyWaitingMessage,
+					"secret/"+ansibleSSHPrivateKeySecret)
 			} else {
 				instance.Status.Conditions.MarkFalse(
 					condition.InputReadyCondition,

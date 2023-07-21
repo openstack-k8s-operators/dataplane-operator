@@ -170,8 +170,8 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 				condition.InputReadyCondition,
 				condition.RequestedReason,
 				condition.SeverityInfo,
-				fmt.Sprintf(dataplanev1.InputReadyWaitingMessage,
-					"secret/"+ansibleSSHPrivateKeySecret))
+				dataplanev1.InputReadyWaitingMessage,
+				"secret/"+ansibleSSHPrivateKeySecret)
 		} else {
 			instance.Status.Conditions.MarkFalse(
 				condition.InputReadyCondition,
@@ -191,8 +191,8 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 					condition.InputReadyCondition,
 					condition.RequestedReason,
 					condition.SeverityInfo,
-					fmt.Sprintf(dataplanev1.InputReadyWaitingMessage,
-						"network-attachment-definition/"+netAtt))
+					dataplanev1.InputReadyWaitingMessage,
+					"network-attachment-definition/"+netAtt)
 				return ctrl.Result{RequeueAfter: time.Second * 10}, fmt.Errorf("network-attachment-definition %s not found", netAtt)
 			}
 			instance.Status.Conditions.MarkFalse(
