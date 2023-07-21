@@ -170,8 +170,8 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 				condition.InputReadyCondition,
 				condition.RequestedReason,
 				condition.SeverityInfo,
-				fmt.Sprintf(dataplanev1.InputReadyWaitingMessage,
-					"secret/"+ansibleSSHPrivateKeySecret))
+				dataplanev1.InputReadyWaitingMessage,
+				"secret/"+ansibleSSHPrivateKeySecret)
 		} else {
 			instance.Status.Conditions.MarkFalse(
 				condition.InputReadyCondition,
@@ -182,31 +182,31 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		return result, err
 	}
 
-	// all our input checks out so report InputReady
-	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.InputReadyMessage)
-
 	// check if provided network attachments exist
 	for _, netAtt := range instance.Spec.NetworkAttachments {
 		_, err := nad.GetNADWithName(ctx, helper, netAtt, instance.Namespace)
 		if err != nil {
 			if k8s_errors.IsNotFound(err) {
-				instance.Status.Conditions.Set(condition.FalseCondition(
-					condition.NetworkAttachmentsReadyCondition,
+				instance.Status.Conditions.MarkFalse(
+					condition.InputReadyCondition,
 					condition.RequestedReason,
 					condition.SeverityInfo,
-					condition.NetworkAttachmentsReadyWaitingMessage,
-					netAtt))
+					dataplanev1.InputReadyWaitingMessage,
+					"network-attachment-definition/"+netAtt)
 				return ctrl.Result{RequeueAfter: time.Second * 10}, fmt.Errorf("network-attachment-definition %s not found", netAtt)
 			}
-			instance.Status.Conditions.Set(condition.FalseCondition(
-				condition.NetworkAttachmentsReadyCondition,
+			instance.Status.Conditions.MarkFalse(
+				condition.InputReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityWarning,
-				condition.NetworkAttachmentsReadyErrorMessage,
-				err.Error()))
+				condition.InputReadyErrorMessage,
+				err.Error())
 			return ctrl.Result{}, err
 		}
 	}
+
+	// all our input checks out so report InputReady
+	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.InputReadyMessage)
 
 	nodeConfigMap, err := deployment.GenerateNodeInventory(ctx, helper, instance, instanceRole)
 	if err != nil {
