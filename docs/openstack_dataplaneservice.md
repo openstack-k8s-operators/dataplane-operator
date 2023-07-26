@@ -10,6 +10,7 @@
 * [NetworkConfigSection](#networkconfigsection)
 * [NodeSection](#nodesection)
 * [NovaTemplate](#novatemplate)
+* [KubeService](#kubeservice)
 * [OpenStackDataPlaneServiceList](#openstackdataplaneservicelist)
 * [OpenStackDataPlaneServiceSpec](#openstackdataplaneservicespec)
 * [OpenStackDataPlaneServiceStatus](#openstackdataplaneservicestatus)
@@ -87,6 +88,18 @@ NovaTemplate specifies the parameters for the compute service deployment on the 
 
 [Back to Custom Resources](#custom-resources)
 
+#### KubeService
+
+KubeService represents a Kubernetes Service. It is called like this to avoid the extreme overloading of the Service term in this context
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| name | Name of the Service will have in kubernetes | string | true |
+| port | Port is the port of the service | int | true |
+| protocol | Protocol is the protocol used to connect to the endpoint | string | false |
+
+[Back to Custom Resources](#custom-resources)
+
 #### OpenStackDataPlaneService
 
 OpenStackDataPlaneService is the Schema for the openstackdataplaneservices API
@@ -117,6 +130,7 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | label | Label to use for service | string | false |
+| services | Services to create to expose possible external services in computes | [][KubeService](#kubeservice) | false |
 | play | Play is the playbook contents that ansible will run on execution. If both Play and Role are specified, Play takes precedence | string | false |
 | role | Role is the description of an Ansible Role | *ansibleeev1.Role | false |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | false |
