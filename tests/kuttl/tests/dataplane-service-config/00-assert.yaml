@@ -94,7 +94,7 @@ spec:
         - name: Sleep
           command: sleep infinity
           delegate_to: localhost
-  preserveJobs: false
+  preserveJobs: true
   restartPolicy: Never
   roles:
     any_errors_fatal: true

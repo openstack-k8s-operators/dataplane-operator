@@ -54,7 +54,12 @@ spec:
       deploy: true
   roles:
     edpm-compute-no-nodes:
-      nodeTemplate:
-        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
       services:
         - kuttl-service
+      nodeTemplate:
+        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+        ansibleVars:
+          edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: ""
+          edpm_ovn_metadata_agent_DEFAULT_transport_url: ""
+          edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: ""
+          edpm_ovn_dbs: ""

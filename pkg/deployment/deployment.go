@@ -383,6 +383,51 @@ func addServiceExtraMounts(
 		aeeSpec.ExtraMounts = append(aeeSpec.ExtraMounts, volMounts)
 	}
 
+	for _, secretName := range service.Spec.Secrets {
+
+		volMounts := storage.VolMounts{}
+		sec := &corev1.Secret{}
+		err := client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, sec)
+		if err != nil {
+			return aeeSpec, err
+		}
+
+		keys := []string{}
+		for key := range sec.Data {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+
+		for idx, key := range keys {
+			name := fmt.Sprintf("%s-%s", secretName, strconv.Itoa(idx))
+			volume := corev1.Volume{
+				Name: name,
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: secretName,
+						Items: []corev1.KeyToPath{
+							{
+								Key:  key,
+								Path: key,
+							},
+						},
+					},
+				},
+			}
+
+			volumeMount := corev1.VolumeMount{
+				Name:      name,
+				MountPath: path.Join(baseMountPath, key),
+				SubPath:   key,
+			}
+
+			volMounts.Volumes = append(volMounts.Volumes, volume)
+			volMounts.Mounts = append(volMounts.Mounts, volumeMount)
+
+		}
+
+		aeeSpec.ExtraMounts = append(aeeSpec.ExtraMounts, volMounts)
+	}
 	return aeeSpec, nil
 
 }
