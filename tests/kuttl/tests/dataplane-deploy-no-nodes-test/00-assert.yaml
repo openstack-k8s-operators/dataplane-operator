@@ -17,6 +17,8 @@ spec:
         - install-os
         - configure-os
         - run-os
+        - libvirt
+        - nova
 status:
   conditions:
   - message: Deployment not started

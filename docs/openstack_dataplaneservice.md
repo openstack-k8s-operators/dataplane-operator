@@ -71,7 +71,6 @@ NodeSection is a specification of the node attributes
 | extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | false |
 | userData | UserData  node specific user-data | *corev1.SecretReference | false |
 | networkData | NetworkData  node specific network-data | *corev1.SecretReference | false |
-| nova | NovaTemplate specifies the parameters for the compute service deployment on the EDPM node. If it is specified both in OpenstackDataPlaneRole and the OpenstackDataPlaneNode for the same EDPM node then the configuration in OpenstackDataPlaneNode will be used and the configuration in the OpenstackDataPlaneRole will be ignored. If this is defined in neither then compute service(s) will not be deployed on the EDPM node. | *[NovaTemplate](#novatemplate) | false |
 
 [Back to Custom Resources](#custom-resources)
 

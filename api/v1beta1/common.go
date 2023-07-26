@@ -74,15 +74,6 @@ type NodeSection struct {
 	// NetworkData  node specific network-data
 	// +kubebuilder:validation:Optional
 	NetworkData *corev1.SecretReference `json:"networkData,omitempty"`
-
-	// NovaTemplate specifies the parameters for the compute service deployment
-	// on the EDPM node. If it is specified both in OpenstackDataPlaneRole and
-	// the OpenstackDataPlaneNode for the same EDPM node then the configuration
-	// in OpenstackDataPlaneNode will be used and the configuration in the
-	// OpenstackDataPlaneRole will be ignored. If this is defined in neither
-	// then compute service(s) will not be deployed on the EDPM node.
-	// +kubebuilder:validation:Optional
-	Nova *NovaTemplate `json:"nova,omitempty"`
 }
 
 // DeployStrategySection for fields controlling the deployment

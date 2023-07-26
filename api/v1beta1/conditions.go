@@ -55,19 +55,6 @@ const (
 	// SetupReadyCondition - Overall setup condition
 	SetupReadyCondition condition.Type = "SetupReady"
 
-	// NovaComputeReadyCondition Status=True condition indicates nova-compute
-	// has been deployed and is ready
-	NovaComputeReadyCondition condition.Type = "NovaComputeReady"
-
-	// NovaComputeReadyMessage ready
-	NovaComputeReadyMessage = "NovaComputeReady ready"
-
-	// NovaComputeReadyWaitingMessage not yet ready
-	NovaComputeReadyWaitingMessage = "NovaComputeReady not yet ready"
-
-	// NovaComputeErrorMessage error
-	NovaComputeErrorMessage = "NovaCompute error occurred"
-
 	// RoleBareMetalProvisionReadyCondition Status=True condition indicates
 	// all baremetal nodes provisioned for the Role.
 	RoleBareMetalProvisionReadyCondition condition.Type = "RoleBaremetalProvisionReady"
