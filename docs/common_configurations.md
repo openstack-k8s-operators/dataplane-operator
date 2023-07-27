@@ -59,8 +59,8 @@ The
 [edpm_network_config](https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles/edpm_network_config)
 ansible role is responsible for configuring networking on dataplane nodes.
 
-The `edpm_network_config_template` variable specifies the path to an ansible
-template that describes the networking configuration to be applied. The
+The `edpm_network_config_template` variable specifies the template that
+describes the networking configuration to be applied. The
 template itself also contains variables that can be used to customize the
 networking configuration for a specific node (IP addresses, interface names,
 routes, etc). Templates provided with the edpm_network_config role are at
@@ -77,7 +77,51 @@ field that shows defining the variables that configure the
 `edpm_network_config` role.
 
     ansibleVars:
-      edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
+      edpm_network_config_template: |
+            ---
+            network_config:
+            - type: interface
+              name: nic2
+              mtu: 1500
+              addresses:
+                - ip_netmask:
+                    {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
+            - type: ovs_bridge
+              name: {{ neutron_physical_bridge_name }}
+              mtu: 1500
+              use_dhcp: false
+              dns_servers: {{ ctlplane_dns_nameservers }}
+              domain: []
+              addresses:
+              - ip_netmask: {{ lookup('vars', networks_lower["External"] ~ '_ip') }}/{{ lookup('vars', networks_lower["External"] ~ '_cidr') }}
+              routes: [{'ip_netmask': '0.0.0.0/0', 'next_hop': '192.168.1.254'}]
+              members:
+              - type: interface
+                name: nic1
+                mtu: 1500
+                # force the MAC address of the bridge to this interface
+                primary: true
+              - type: vlan
+                mtu: 1500
+                vlan_id: 20
+                addresses:
+                - ip_netmask:
+                    172.17.0.101/24
+                routes: []
+              - type: vlan
+                mtu: 1500
+                vlan_id: 25
+                addresses:
+                - ip_netmask:
+                    172.18.0.101/24
+                routes: []
+              - type: vlan
+                mtu: 1500
+                vlan_id: 22
+                addresses:
+                - ip_netmask:
+                    172.19.0.101/24
+                routes: []
       ctlplane_ip: 192.168.122.100
       internal_api_ip: 172.17.0.100
       storage_ip: 172.18.0.100

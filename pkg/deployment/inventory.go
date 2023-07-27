@@ -78,7 +78,6 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 	}
 	secretData := map[string]string{
 		"inventory": string(invData),
-		"network":   string(instance.Spec.NodeTemplate.NetworkConfig.Template),
 	}
 	secretName := fmt.Sprintf("dataplanerole-%s", instance.Name)
 	template := []utils.Template{
@@ -125,11 +124,6 @@ func GenerateNodeInventory(ctx context.Context, helper *helper.Helper,
 		}
 		populateInventoryFromIPAM(ipSet, host, dnsAddresses)
 	}
-	networkConfig := getAnsibleNetworkConfig(instance, instanceRole)
-
-	if networkConfig.Template != "" {
-		host.Vars["edpm_network_config_template"] = NicConfigTemplateFile
-	}
 
 	host.Vars["ansible_user"] = getAnsibleUser(instance, instanceRole)
 	host.Vars["ansible_port"] = getAnsiblePort(instance, instanceRole)
@@ -158,7 +152,6 @@ func GenerateNodeInventory(ctx context.Context, helper *helper.Helper,
 	}
 	secretData := map[string]string{
 		"inventory": string(invData),
-		"network":   string(networkConfig.Template),
 	}
 	secretName := fmt.Sprintf("dataplanenode-%s", instance.Name)
 	template := []utils.Template{
@@ -240,15 +233,6 @@ func getAnsibleManagementNetwork(
 	return instanceRole.Spec.NodeTemplate.ManagementNetwork
 }
 
-// getAnsibleNetworkConfig returns a JSON string value from the template unless it is set in the node
-func getAnsibleNetworkConfig(instance *dataplanev1.OpenStackDataPlaneNode,
-	instanceRole *dataplanev1.OpenStackDataPlaneRole) dataplanev1.NetworkConfigSection {
-	if instance.Spec.Node.NetworkConfig.Template != "" {
-		return instance.Spec.Node.NetworkConfig
-	}
-	return instanceRole.Spec.NodeTemplate.NetworkConfig
-}
-
 // getAnsibleNetworks returns a JSON string mapping fixedIP and/or network name to their valules
 func getAnsibleNetworks(instance *dataplanev1.OpenStackDataPlaneNode,
 	instanceRole *dataplanev1.OpenStackDataPlaneRole) []infranetworkv1.IPSetNetwork {
@@ -321,9 +305,6 @@ func resolveAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host, group
 	}
 	if node.ManagementNetwork != "" {
 		ansibleVarsData["management_network"] = node.ManagementNetwork
-	}
-	if node.NetworkConfig.Template != "" {
-		ansibleVarsData["edpm_network_config_template"] = NicConfigTemplateFile
 	}
 	if len(node.Networks) > 0 {
 		ansibleVarsData["networks"] = node.Networks

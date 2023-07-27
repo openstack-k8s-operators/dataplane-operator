@@ -98,9 +98,6 @@ spec:
     - mountPath: /runner/inventory/hosts
       name: inventory
       subPath: inventory
-    - mountPath: /runner/network/nic-config-template
-      name: inventory
-      subPath: network
     volumes:
     - name: ssh-key
       secret:
@@ -113,9 +110,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        - key: network
-          path: network
-        secretName: dataplanerole-edpm-compute-no-nodes
+        name: dataplanerole-edpm-compute-no-nodes
   image: example.com/repo/runner-image:latest
   name: openstackansibleee
   restartPolicy: Never

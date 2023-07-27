@@ -40,13 +40,13 @@ var _ = Describe("Dataplane Role Test", func() {
 			DeferCleanup(th.DeleteInstance, CreateDataplaneRoleNoNodes(dataplaneRoleName))
 		})
 		It("should have the Spec fields initialized", func() {
-			dataplaneRoleInstance := GetDataplaneRole(dataplaneRoleName)
-			Expect(dataplaneRoleInstance.Spec.DeployStrategy.Deploy).Should(BeFalse())
+			dataplaneNodeSetInstance := GetDataplaneRole(dataplaneRoleName)
+			Expect(dataplaneNodeSetInstance.Spec.DeployStrategy.Deploy).Should(BeFalse())
 		})
 
 		It("should have the Status fields initialized", func() {
-			dataplaneRoleInstance := GetDataplaneRole(dataplaneRoleName)
-			Expect(dataplaneRoleInstance.Status.Deployed).Should(BeFalse())
+			dataplaneNodeSetInstance := GetDataplaneRole(dataplaneRoleName)
+			Expect(dataplaneNodeSetInstance.Status.Deployed).Should(BeFalse())
 		})
 	})
 })

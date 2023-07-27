@@ -66,9 +66,9 @@ var _ = Describe("Dataplane Test", func() {
 			DeferCleanup(th.DeleteInstance, CreateDataPlane(dataplaneName, DataPlaneWithNodeSpec()))
 			CreateSSHSecret(dataplaneName.Namespace, dataplaneName.Name)
 		})
-		It("Should have a configMap with ansibleVars for 'edpm_network_config_override'", func() {
+		It("Should have a configMap with ansibleVars for 'edpm_network_config_template'", func() {
 			dataplaneInstanceCM := th.GetConfigMap(types.NamespacedName{Namespace: namespace, Name: "dataplanenode-edpm-compute-0"})
-			Expect(dataplaneInstanceCM.Data["network"]).Should(ContainSubstring("network_config"))
+			Expect(dataplaneInstanceCM.Data["inventory"]).Should(ContainSubstring("network_config"))
 		})
 	})
 })

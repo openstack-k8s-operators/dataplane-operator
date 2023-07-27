@@ -133,7 +133,6 @@ inline in the example.
               # edpm_network_config
               # Default nic config template for a EDPM compute node
               # These vars are edpm_network_config role vars
-              edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
 
               # See config/samples/dataplane_v1beta1_openstackdataplane.yaml
               # for the other most common ansible varialbes that need to be set.

@@ -901,11 +901,6 @@ spec:
                           type: array
                         managementNetwork:
                           type: string
-                        networkConfig:
-                          properties:
-                            template:
-                              type: string
-                          type: object
                         networkData:
                           properties:
                             name:
@@ -1940,11 +1935,6 @@ spec:
                           type: array
                         managementNetwork:
                           type: string
-                        networkConfig:
-                          properties:
-                            template:
-                              type: string
-                          type: object
                         networkData:
                           properties:
                             name:

@@ -29,11 +29,6 @@ import (
 type NodeSection struct {
 
 	// +kubebuilder:validation:Optional
-	// NetworkConfig - Network configuration details. Contains os-net-config
-	// related properties.
-	NetworkConfig NetworkConfigSection `json:"networkConfig,omitempty"`
-
-	// +kubebuilder:validation:Optional
 	// Networks - Instance networks
 	Networks []infranetworkv1.IPSetNetwork `json:"networks,omitempty"`
 
@@ -95,15 +90,6 @@ type DeployStrategySection struct {
 	// +kubebuilder:validation:Optional
 	// AnsibleSkipTags for ansible execution
 	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
-}
-
-// NetworkConfigSection is a specification of the Network configuration details
-type NetworkConfigSection struct {
-
-	// +kubebuilder:validation:Optional
-	// Template - Contains a Ansible j2 nic config template to use when applying node
-	// network configuration
-	Template string `json:"template,omitempty" yaml:"template,omitempty"`
 }
 
 // UniqueSpecFields - the array of fields that must be unique between role and nodes

@@ -13,53 +13,40 @@ spec:
     - libvirt
     - nova
   nodeTemplate:
-    networkConfig:
-      template: |
-        ---
-        network_config:
-        - type: interface
-          name: nic2
-          mtu: 1500
-          addresses:
-            - ip_netmask:
-                {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
-        - type: ovs_bridge
-          name: {{ neutron_physical_bridge_name }}
-          mtu: 1500
-          use_dhcp: false
-          dns_servers: {{ ctlplane_dns_nameservers }}
-          domain: []
-          addresses:
-          - ip_netmask: {{ lookup('vars', networks_lower["External"] ~ '_ip') }}/{{ lookup('vars', networks_lower["External"] ~ '_cidr') }}
-          routes: [{'ip_netmask': '0.0.0.0/0', 'next_hop': '192.168.1.254'}]
-          members:
-          - type: interface
-            name: nic1
-            mtu: 1500
-            # force the MAC address of the bridge to this interface
-            primary: true
-          - type: vlan
-            mtu: 1500
-            vlan_id: 20
-            addresses:
-            - ip_netmask:
-                172.17.0.101/24
-            routes: []
-          - type: vlan
-            mtu: 1500
-            vlan_id: 25
-            addresses:
-            - ip_netmask:
-                172.18.0.101/24
-            routes: []
-          - type: vlan
-            mtu: 1500
-            vlan_id: 22
-            addresses:
-            - ip_netmask:
-                172.19.0.101/24
-            routes: []
     managed: false
     managementNetwork: ctlplane
     ansibleUser: root
     ansiblePort: 22
+    ansibleVars:
+      edpm_network_config_template: |
+          ---
+          {% set mtu_list = [ctlplane_mtu] %}
+          {% for network in role_networks %}
+          {{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+          {%- endfor %}
+          {% set min_viable_mtu = mtu_list | max %}
+          network_config:
+          - type: ovs_bridge
+            name: {{ neutron_physical_bridge_name }}
+            mtu: {{ min_viable_mtu }}
+            use_dhcp: false
+            dns_servers: {{ ctlplane_dns_nameservers }}
+            domain: {{ dns_search_domains }}
+            addresses:
+            - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
+            routes: {{ ctlplane_host_routes }}
+            members:
+            - type: interface
+              name: nic1
+              mtu: {{ min_viable_mtu }}
+              # force the MAC address of the bridge to this interface
+              primary: true
+          {% for network in role_networks %}
+            - type: vlan
+              mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+              vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+              addresses:
+              - ip_netmask:
+                  {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+              routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+          {% endfor %}

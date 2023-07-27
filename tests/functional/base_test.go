@@ -1,6 +1,8 @@
 package functional
 
 import (
+	"encoding/json"
+
 	"github.com/onsi/gomega"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -99,6 +101,12 @@ func DataPlaneWithNodeSpec() dataplanev1.OpenStackDataPlaneSpec {
                     172.19.0.101/24
                 routes: []
 	`
+
+	customNicConfigTemplateJSON, err := json.Marshal([]byte(customNicConfigTemplate))
+	if err != nil {
+		return dataplanev1.OpenStackDataPlaneSpec{}
+	}
+
 	return dataplanev1.OpenStackDataPlaneSpec{
 		DeployStrategy: dataplanev1.DeployStrategySection{
 			Deploy: false,
@@ -114,10 +122,10 @@ func DataPlaneWithNodeSpec() dataplanev1.OpenStackDataPlaneSpec {
 		Nodes: map[string]dataplanev1.OpenStackDataPlaneNodeSpec{
 			"edpm-compute-0": {
 				Node: dataplanev1.NodeSection{
-					NetworkConfig: dataplanev1.NetworkConfigSection{
-						Template: customNicConfigTemplate,
-					},
 					AnsibleSSHPrivateKeySecret: "ssh-key-secret",
+					AnsibleVars: map[string]json.RawMessage{
+						"edpm_network_config_template": customNicConfigTemplateJSON,
+					},
 				},
 				Role: "edpm-compute",
 			},
