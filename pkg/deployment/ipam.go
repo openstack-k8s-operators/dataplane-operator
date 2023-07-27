@@ -193,14 +193,6 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 		if len(nets) == 0 {
 			nets = instance.Spec.NodeTemplate.Networks
 		}
-		if instance.Spec.PreProvisioned {
-			// Drop CtlPlaneNetwork
-			for i, v := range nets {
-				if v.Name == CtlPlaneNetwork {
-					nets = append(nets[:i], nets[i+1:]...)
-				}
-			}
-		}
 		if len(nets) > 0 {
 			util.LogForObject(helper, "Reconciling IPSet", instance)
 			ipSet := &infranetworkv1.IPSet{
