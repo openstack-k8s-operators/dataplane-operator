@@ -89,6 +89,10 @@ func DeployBaremetalSet(
 	// Check if baremetalSet is ready
 	if !baremetalSet.IsReady() {
 		utils.LogForObject(helper, "BaremetalSet not ready, waiting...", instance)
+		instance.Status.Conditions.MarkFalse(
+			dataplanev1.RoleBareMetalProvisionReadyCondition,
+			condition.RequestedReason, condition.SeverityInfo,
+			dataplanev1.RoleBaremetalProvisionReadyWaitingMessage)
 		return false, nil
 	}
 	instance.Status.Conditions.MarkTrue(
