@@ -22,6 +22,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	"encoding/json"
 	networkv1beta1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
@@ -108,6 +109,21 @@ func (in *NodeSection) DeepCopyInto(out *NodeSection) {
 		*out = make([]networkv1beta1.IPSetNetwork, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
+	if in.AnsibleVars != nil {
+		in, out := &in.AnsibleVars, &out.AnsibleVars
+		*out = make(map[string]json.RawMessage, len(*in))
+		for key, val := range *in {
+			var outVal []byte
+			if val == nil {
+				(*out)[key] = nil
+			} else {
+				in, out := &val, &outVal
+				*out = make(json.RawMessage, len(*in))
+				copy(*out, *in)
+			}
+			(*out)[key] = outVal
 		}
 	}
 	if in.ExtraMounts != nil {

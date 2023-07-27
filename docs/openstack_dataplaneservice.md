@@ -65,7 +65,7 @@ NodeSection is a specification of the node attributes
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
 | ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
 | ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
-| ansibleVars | AnsibleVars for configuring ansible | string | false |
+| ansibleVars | AnsibleVars for configuring ansible | map[string]json.RawMessage | false |
 | ansibleSSHPrivateKeySecret | AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey: <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets> | string | false |
 | extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | false |
 | userData | UserData  node specific user-data | *corev1.SecretReference | false |

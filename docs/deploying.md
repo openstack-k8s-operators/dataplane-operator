@@ -245,7 +245,7 @@ With the nodes and the controlplane specific variables added, the full
           hostName: edpm-compute-0
           ansibleHost: 192.168.122.100
           node:
-            ansibleVars: |
+            ansibleVars:
               ctlplane_ip: 192.168.122.100
               internal_api_ip: 172.17.0.100
               storage_ip: 172.18.0.100
@@ -256,7 +256,7 @@ With the nodes and the controlplane specific variables added, the full
           hostName: edpm-compute-1
           ansibleHost: 192.168.122.101
           node:
-            ansibleVars: |
+            ansibleVars:
               ctlplane_ip: 192.168.122.101
               internal_api_ip: 172.17.0.101
               storage_ip: 172.18.0.101

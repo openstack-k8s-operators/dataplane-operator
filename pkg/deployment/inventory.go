@@ -265,26 +265,36 @@ func getAnsibleVars(helper *helper.Helper, instance *dataplanev1.OpenStackDataPl
 	// However, there is no "deep" merge of values. Only top level keys are comvar matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
 
 	// Unmarshal the YAML strings into two maps
-	var role, node map[string]interface{}
-	roleYamlError := yaml.Unmarshal([]byte(instanceRole.Spec.NodeTemplate.AnsibleVars), &role)
-	if roleYamlError != nil {
-		utils.LogErrorForObject(
-			helper,
-			roleYamlError,
-			fmt.Sprintf("Failed to unmarshal YAML data from role AnsibleVars '%s'",
-				instanceRole.Spec.NodeTemplate.AnsibleVars), instance)
-		return nil, roleYamlError
-	}
-	nodeYamlError := yaml.Unmarshal([]byte(instance.Spec.Node.AnsibleVars), &node)
-	if nodeYamlError != nil {
-		utils.LogErrorForObject(
-			helper,
-			nodeYamlError,
-			fmt.Sprintf("Failed to unmarshal YAML data from node AnsibleVars '%s'",
-				instance.Spec.Node.AnsibleVars), instance)
-		return nil, nodeYamlError
+	role := make(map[string]interface{})
+	node := make(map[string]interface{})
+	var roleYamlError, nodeYamlError error
+	for key, val := range instanceRole.Spec.NodeTemplate.AnsibleVars {
+		var v interface{}
+		roleYamlError = yaml.Unmarshal(val, &v)
+		if roleYamlError != nil {
+			utils.LogErrorForObject(
+				helper,
+				roleYamlError,
+				fmt.Sprintf("Failed to unmarshal YAML data from role AnsibleVar '%s'",
+					key), instance)
+			return nil, roleYamlError
+		}
+		role[key] = v
 	}
 
+	for key, val := range instance.Spec.Node.AnsibleVars {
+		var v interface{}
+		nodeYamlError = yaml.Unmarshal(val, &v)
+		if nodeYamlError != nil {
+			utils.LogErrorForObject(
+				helper,
+				nodeYamlError,
+				fmt.Sprintf("Failed to unmarshal YAML data from node AnsibleVar '%s'",
+					key), instance)
+			return nil, nodeYamlError
+		}
+		node[key] = v
+	}
 	if role == nil && node != nil {
 		return node, nil
 	}
@@ -317,10 +327,14 @@ func resolveAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host, group
 	if len(node.Networks) > 0 {
 		ansibleVarsData["networks"] = node.Networks
 	}
-
-	err := yaml.Unmarshal([]byte(node.AnsibleVars), ansibleVarsData)
-	if err != nil {
-		return err
+	var err error
+	for key, val := range node.AnsibleVars {
+		var v interface{}
+		err = yaml.Unmarshal(val, &v)
+		if err != nil {
+			return err
+		}
+		ansibleVarsData[key] = v
 	}
 
 	if host.Vars != nil {
