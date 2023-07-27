@@ -256,11 +256,16 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 
 	// Reconcile BaremetalSet if required
 	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
+		// Reset the RoleBareMetalProvisionReadyCondition to unknown
+		instance.Status.Conditions.MarkUnknown(dataplanev1.RoleBareMetalProvisionReadyCondition,
+			condition.InitReason, condition.InitReason)
 		isReady, err := deployment.DeployBaremetalSet(ctx, helper, instance,
 			nodes, allIPSets, dnsAddresses)
 		if err != nil || !isReady {
 			return ctrl.Result{}, err
 		}
+	} else {
+		instance.Status.Conditions.Remove(dataplanev1.RoleBareMetalProvisionReadyCondition)
 	}
 
 	// Ensure all nodes are in SetupReady state

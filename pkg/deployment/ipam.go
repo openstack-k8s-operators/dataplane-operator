@@ -50,6 +50,10 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 
 	for _, s := range allIPSets {
 		if s.Status.Conditions.IsFalse(condition.ReadyCondition) {
+			instance.Status.Conditions.MarkFalse(
+				dataplanev1.RoleIPReservationReadyCondition,
+				condition.RequestedReason, condition.SeverityInfo,
+				dataplanev1.RoleIPReservationReadyWaitingMessage)
 			return nil, false, nil
 		}
 	}
@@ -131,6 +135,21 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 		ctx, helper, instance)
 
 	if err != nil || !isReady || dnsAddresses == nil {
+		if err != nil {
+			instance.Status.Conditions.MarkFalse(
+				dataplanev1.RoleDNSDataReadyCondition,
+				condition.ErrorReason, condition.SeverityError,
+				dataplanev1.RoleDNSDataReadyErrorMessage)
+		}
+		if !isReady {
+			instance.Status.Conditions.MarkFalse(
+				dataplanev1.RoleDNSDataReadyCondition,
+				condition.RequestedReason, condition.SeverityInfo,
+				dataplanev1.RoleDNSDataReadyWaitingMessage)
+		}
+		if dnsAddresses == nil {
+			instance.Status.Conditions.Remove(dataplanev1.RoleDNSDataReadyCondition)
+		}
 		return nil, "", isReady, err
 	}
 	// Create or Patch DNSData
@@ -153,11 +172,19 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	key := client.ObjectKeyFromObject(dnsData)
 	err = helper.GetClient().Get(ctx, key, dnsData)
 	if err != nil {
+		instance.Status.Conditions.MarkFalse(
+			dataplanev1.RoleDNSDataReadyCondition,
+			condition.ErrorReason, condition.SeverityError,
+			dataplanev1.RoleDNSDataReadyErrorMessage)
 		return nil, "", false, err
 	}
 
 	if !dnsData.IsReady() {
 		util.LogForObject(helper, "DNSData not ready yet waiting", instance)
+		instance.Status.Conditions.MarkFalse(
+			dataplanev1.RoleDNSDataReadyCondition,
+			condition.RequestedReason, condition.SeverityInfo,
+			dataplanev1.RoleDNSDataReadyWaitingMessage)
 		return nil, "", false, nil
 	}
 	instance.Status.Conditions.MarkTrue(
@@ -182,6 +209,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 	}
 	if len(netConfigList.Items) == 0 {
 		util.LogForObject(helper, "No NetConfig CR exists yet, IPAM won't be used", instance)
+		instance.Status.Conditions.Remove(dataplanev1.RoleIPReservationReadyCondition)
 		return nil, nil
 	}
 
