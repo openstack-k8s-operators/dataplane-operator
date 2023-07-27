@@ -111,7 +111,7 @@ func (instance *OpenStackDataPlaneRole) InitConditions() {
 
 	// Only set Baremetal related conditions if we have baremetal hosts included in the
 	// baremetalSetTemplate.
-	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) >= 1 {
+	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
 		bmConditionsList := []condition.Type{
 			RoleBareMetalProvisionReadyCondition,
 			RoleIPReservationReadyCondition,
@@ -122,7 +122,7 @@ func (instance *OpenStackDataPlaneRole) InitConditions() {
 		}
 	}
 
-	if instance.Spec.Services != nil {
+	if instance.Spec.Services != nil && instance.Spec.DeployStrategy.Deploy {
 		for _, service := range instance.Spec.Services {
 			readyCondition := condition.Type(fmt.Sprintf(ServiceReadyCondition, service))
 			cl = append(cl, *condition.UnknownCondition(readyCondition, condition.InitReason, condition.InitReason))

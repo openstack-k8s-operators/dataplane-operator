@@ -9,11 +9,11 @@ spec:
     deploy: true
 status:
   conditions:
-  - message: DataPlane ready
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
-  - message: Setup complete
+  - message: Deployment completed
     reason: Ready
     status: "True"
     type: DeploymentReady
@@ -42,11 +42,11 @@ spec:
     deploy: true
 status:
   conditions:
-  - message: DataPlaneRole ready
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
-  - message: Setup complete
+  - message: Deployment completed
     reason: Ready
     status: "True"
     type: DeploymentReady
