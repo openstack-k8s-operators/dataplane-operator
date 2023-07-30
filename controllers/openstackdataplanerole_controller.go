@@ -140,7 +140,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		}
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
-			r.Log.Error(_err, "Error updating instance status conditions")
+			r.Log.Error(err, "Error updating instance status conditions")
 			_err = err
 			return
 		}
