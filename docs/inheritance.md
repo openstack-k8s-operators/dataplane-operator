@@ -133,7 +133,7 @@ metadata:
   name: edpm-compute
 spec:
   nodeTemplate:
-    ansibleVars: |
+    ansibleVars:
       neutron_public_interface_name: eth0
       edpm_chrony_ntp_servers:
         - clock.redhat.com
@@ -148,7 +148,7 @@ metadata:
 spec:
   role: edpm-compute
   node:
-    ansibleVars: |
+    ansibleVars:
       tenant_ip: 192.168.24.100
   ...
 ```

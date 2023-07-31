@@ -283,7 +283,7 @@ spec:
                   ansibleUser:
                     type: string
                   ansibleVars:
-                    type: string
+                    x-kubernetes-preserve-unknown-fields: true
                   extraMounts:
                     items:
                       properties:

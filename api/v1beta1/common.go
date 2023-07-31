@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	"encoding/json"
 	"reflect"
 
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
@@ -49,9 +50,10 @@ type NodeSection struct {
 	// AnsiblePort SSH port for Ansible connection
 	AnsiblePort int `json:"ansiblePort,omitempty"`
 
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:pruning:PreserveUnknownFields
+	// +kubebuilder:validation:Schemaless
 	// AnsibleVars for configuring ansible
-	AnsibleVars string `json:"ansibleVars,omitempty"`
+	AnsibleVars map[string]json.RawMessage `json:"ansibleVars,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}

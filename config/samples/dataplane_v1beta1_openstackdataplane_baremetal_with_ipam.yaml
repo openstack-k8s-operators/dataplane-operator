@@ -34,6 +34,7 @@ spec:
         dnsSearchDomains:
           - osptest.openstack.org
       nodeTemplate:
+        nova: {}
         networks:
         - name: CtlPlane
           subnetName: subnet1
@@ -47,7 +48,7 @@ spec:
         managementNetwork: CtlPlane
         ansibleUser: cloud-admin
         ansiblePort: 22
-        ansibleVars: |
+        ansibleVars:
           service_net_map:
             nova_api_network: internal_api
             nova_libvirt_network: internal_api
@@ -85,12 +86,15 @@ spec:
           dns_search_domains: []
           edpm_ovn_dbs:
           - 192.168.111.1
-          edpm_ovn_controller_agent_image: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
-          edpm_iscsid_image: quay.io/podified-antelope-centos9/openstack-iscsid:current-podified
-          edpm_logrotate_crond_image: quay.io/podified-antelope-centos9/openstack-cron:current-podified
-          edpm_nova_compute_container_image: quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified
-          edpm_nova_libvirt_container_image: quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified
-          edpm_ovn_metadata_agent_image: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
+
+          registry_url: quay.io/podified-antelope-centos9
+          image_tag: current-podified
+          edpm_ovn_controller_agent_image: "{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}"
+          edpm_iscsid_image: "{{ registry_url }}/openstack-iscsid:{{ image_tag }}"
+          edpm_logrotate_crond_image: "{{ registry_url }}/openstack-cron:{{ image_tag }}"
+          edpm_nova_compute_container_image: "{{ registry_url }}/openstack-nova-compute:{{ image_tag }}"
+          edpm_nova_libvirt_container_image: "{{ registry_url }}/openstack-nova-libvirt:{{ image_tag }}"
+          edpm_ovn_metadata_agent_image: "{{ registry_url }}/openstack-neutron-metadata-agent-ovn:{{ image_tag }}"
 
           gather_facts: false
           enable_debug: false

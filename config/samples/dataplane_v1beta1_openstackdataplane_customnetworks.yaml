@@ -11,7 +11,7 @@ spec:
       hostName: edpm-compute-0
       ansibleHost: 192.168.1.5
       node:
-        ansibleVars: |
+        ansibleVars:
           ctlplane_ip: 192.168.1.5
           internal_api_ip: 172.17.0.101
           storage_ip: 172.18.0.101
@@ -87,7 +87,7 @@ spec:
                 - ip_netmask:
                     172.19.0.101/24
                 routes: []
-        ansibleVars: |
+        ansibleVars:
           # edpm_network_config
           # Default nic config template for a EDPM compute node
           # These vars are edpm_network_config role vars
