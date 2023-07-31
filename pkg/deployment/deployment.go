@@ -95,6 +95,14 @@ func Deploy(
 			aeeSpec,
 			foundService,
 		)
+		// Some OpenStackDataPlaneService might need Kubernetes Services to be created
+		if len(foundService.Spec.Services) > 0 {
+			errKube := CreateKubeServices(&foundService, nodes, helper, make(map[string]string))
+			if errKube != nil {
+				return &ctrl.Result{}, errKube
+			}
+		}
+
 		if err != nil || !status.Conditions.IsTrue(readyCondition) {
 			return &ctrl.Result{}, err
 		}

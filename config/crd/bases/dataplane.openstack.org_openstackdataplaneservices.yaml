@@ -87,6 +87,21 @@ spec:
                       type: object
                     type: array
                 type: object
+              services:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    port:
+                      type: integer
+                    protocol:
+                      default: http
+                      type: string
+                  required:
+                  - name
+                  - port
+                  type: object
+                type: array
             type: object
           status:
             properties:
