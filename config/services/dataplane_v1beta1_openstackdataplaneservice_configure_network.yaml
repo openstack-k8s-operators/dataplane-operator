@@ -37,6 +37,11 @@ spec:
           name: "osp.edpm.edpm_tuned"
         tags:
           - "edpm_tuned"
+      - name: "Configure DDP Package"
+        import_role:
+          name: "osp.edpm.edpm_ddp_package"
+        tags:
+          - "edpm_ddp_package"
       - name: "Configure Kernel Args"
         import_role:
           name: "osp.edpm.edpm_kernel"
