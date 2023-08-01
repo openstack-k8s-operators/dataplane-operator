@@ -22,6 +22,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/go-logr/logr"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -37,8 +38,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	"github.com/go-logr/logr"
 )
 
 // OpenStackDataPlaneReconciler reconciles a OpenStackDataPlane object
@@ -91,7 +90,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	)
 	if err != nil {
 		// helper might be nil, so can't use util.LogErrorForObject since it requires helper as first arg
-		r.Log.Error(err, fmt.Sprintf("unable to acquire helper for OpenStackDataPlane %s", instance.Name))
+		logger.Error(err, fmt.Sprintf("unable to acquire helper for OpenStackDataPlane %s", instance.Name))
 		return ctrl.Result{}, err
 	}
 
@@ -110,7 +109,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
-			r.Log.Error(_err, "PatchInstance error")
+			logger.Error(_err, "PatchInstance error")
 			_err = err
 			return
 		}
@@ -139,8 +138,8 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	var deployErrors []string
 	shouldRequeue := false
 	if instance.Spec.DeployStrategy.Deploy {
-		r.Log.Info("Starting DataPlane deploy")
-		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
+		logger.Info("Starting DataPlane deploy")
+		logger.Info("Set DeploymentReadyCondition false", "instance", instance)
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
 		roles := &dataplanev1.OpenStackDataPlaneRoleList{}
 
@@ -158,7 +157,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		r.Log.Info("found roles", "total", len(roles.Items))
+		logger.Info("found roles", "total", len(roles.Items))
 		if len(instance.Spec.Roles) > len(roles.Items) {
 			shouldRequeue = true
 		}
@@ -169,10 +168,10 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 				err = fmt.Errorf("role %s: role.DataPlane does not match with role.Label", role.Name)
 				deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+err.Error())
 			}
-			r.Log.Info("Role", "DeployStrategy.Deploy", role.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+			logger.Info("Role", "DeployStrategy.Deploy", role.Spec.DeployStrategy.Deploy, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
 			if !role.Spec.DeployStrategy.Deploy {
 				_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), &role, func() error {
-					r.Log.Info("Reconciling Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+					logger.Info("Reconciling Role", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
 					helper.GetLogger().Info("CreateOrPatch Role.DeployStrategy.Deploy", "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
 					role.Spec.DeployStrategy.Deploy = instance.Spec.DeployStrategy.Deploy
 					if err != nil {
@@ -185,11 +184,11 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 				}
 			}
 			if !role.IsReady() {
-				r.Log.Info("Role", "IsReady", role.IsReady(), "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+				logger.Info("Role", "IsReady", role.IsReady(), "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
 				shouldRequeue = true
 				mirroredCondition := role.Status.Conditions.Mirror(condition.ReadyCondition)
 				if mirroredCondition != nil {
-					r.Log.Info("Role", "Status", mirroredCondition.Message, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
+					logger.Info("Role", "Status", mirroredCondition.Message, "Role.Namespace", instance.Namespace, "Role.Name", role.Name)
 					if condition.IsError(mirroredCondition) {
 						deployErrors = append(deployErrors, "role.Name: "+role.Name+" error: "+mirroredCondition.Message)
 					}
@@ -211,12 +210,12 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 	if shouldRequeue {
-		r.Log.Info("one or more roles aren't ready, requeueing")
+		logger.Info("one or more roles aren't ready, requeueing")
 		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
 	}
 	if instance.Spec.DeployStrategy.Deploy && len(deployErrors) == 0 {
 		instance.Status.Deployed = true
-		r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
+		logger.Info("Set DeploymentReadyCondition true", "instance", instance)
 		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
 	}
 
@@ -224,7 +223,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// Handles the case where the DataPlane is created with
 	// DeployStrategy.Deploy=false.
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
-		r.Log.Info("Set DeploymentReadyCondition false")
+		logger.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
 	}
 
@@ -238,7 +237,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// Handles the case where the Node is created with
 	// DeployStrategy.Deploy=false.
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
-		r.Log.Info("Set DeploymentReadyCondition false")
+		logger.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
 	}
 
