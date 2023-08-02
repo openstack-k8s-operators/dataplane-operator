@@ -97,8 +97,8 @@ type OpenStackDataPlaneRoleReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
 
-	r.Log = log.FromContext(ctx)
-	r.Log.Info("Reconciling Role")
+	logger := log.FromContext(ctx)
+	logger.Info("Reconciling Role")
 
 	// Fetch the OpenStackDataPlaneRole instance
 	instance := &dataplanev1.OpenStackDataPlaneRole{}
@@ -119,7 +119,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		r.Client,
 		r.Kclient,
 		r.Scheme,
-		r.Log,
+		logger,
 	)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -141,7 +141,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
-			r.Log.Error(_err, "PatchInstance error")
+			logger.Error(_err, "PatchInstance error")
 			_err = err
 			return
 		}
@@ -170,10 +170,10 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		if instance.ObjectMeta.Labels == nil {
 			instance.ObjectMeta.Labels = make(map[string]string)
 		}
-		r.Log.Info(fmt.Sprintf("Adding label %s=%s", "openstackdataplane", instance.Spec.DataPlane))
+		logger.Info(fmt.Sprintf("Adding label %s=%s", "openstackdataplane", instance.Spec.DataPlane))
 		instance.ObjectMeta.Labels["openstackdataplane"] = instance.Spec.DataPlane
 	} else if instance.ObjectMeta.Labels != nil {
-		r.Log.Info(fmt.Sprintf("Removing label %s", "openstackdataplane"))
+		logger.Info(fmt.Sprintf("Removing label %s", "openstackdataplane"))
 		delete(instance.ObjectMeta.Labels, "openstackdataplane")
 	}
 
@@ -190,7 +190,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	r.Log.Info("found nodes", "total", len(nodes.Items))
+	logger.Info("found nodes", "total", len(nodes.Items))
 
 	// Order the nodes based on Name
 	sort.SliceStable(nodes.Items, func(i, j int) bool {
@@ -292,11 +292,11 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	// all setup tasks complete, mark SetupReadyCondition True
 	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
 
-	r.Log.Info("Role", "DeployStrategy", instance.Spec.DeployStrategy.Deploy,
+	logger.Info("Role", "DeployStrategy", instance.Spec.DeployStrategy.Deploy,
 		"Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
-		r.Log.Info("Starting DataPlaneRole deploy")
-		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
+		logger.Info("Starting DataPlaneRole deploy")
+		logger.Info("Set DeploymentReadyCondition false", "instance", instance)
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			condition.DeploymentReadyCondition, condition.RequestedReason,
 			condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
@@ -327,14 +327,14 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		}
 
 		instance.Status.Deployed = true
-		r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
+		logger.Info("Set DeploymentReadyCondition true", "instance", instance)
 		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
 
 		// Explicitly set instance.Spec.Deploy = false
 		// We don't want another deploy triggered by any reconcile request, it should
 		// only be triggered when the user (or another controller) specifically
 		// sets it to true.
-		r.Log.Info("Set DeployStrategy.Deploy to false")
+		logger.Info("Set DeployStrategy.Deploy to false")
 		instance.Spec.DeployStrategy.Deploy = false
 
 	}
@@ -343,7 +343,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	// Handles the case where the Role is created with
 	// DeployStrategy.Deploy=false.
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
-		r.Log.Info("Set DeploymentReadyCondition false")
+		logger.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
 	}
 

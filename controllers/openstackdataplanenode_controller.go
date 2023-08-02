@@ -74,8 +74,8 @@ type OpenStackDataPlaneNodeReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
 
-	r.Log = log.FromContext(ctx)
-	r.Log.Info("Reconciling Node")
+	logger := log.FromContext(ctx)
+	logger.Info("Reconciling Node")
 
 	// Fetch the OpenStackDataPlaneNode instance
 	instance := &dataplanev1.OpenStackDataPlaneNode{}
@@ -96,7 +96,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		r.Client,
 		r.Kclient,
 		r.Scheme,
-		r.Log,
+		logger,
 	)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -111,10 +111,10 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		if instance.ObjectMeta.Labels == nil {
 			instance.ObjectMeta.Labels = make(map[string]string)
 		}
-		r.Log.Info(fmt.Sprintf("Adding label %s=%s", "openstackdataplanerole", instance.Spec.Role))
+		logger.Info(fmt.Sprintf("Adding label %s=%s", "openstackdataplanerole", instance.Spec.Role))
 		instance.ObjectMeta.Labels["openstackdataplanerole"] = instance.Spec.Role
 	} else if instance.ObjectMeta.Labels != nil {
-		r.Log.Info(fmt.Sprintf("Removing label %s", "openstackdataplanerole"))
+		logger.Info(fmt.Sprintf("Removing label %s", "openstackdataplanerole"))
 		delete(instance.ObjectMeta.Labels, "openstackdataplanerole")
 	}
 
@@ -135,7 +135,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
-			r.Log.Error(_err, "PatchInstance error")
+			logger.Error(_err, "PatchInstance error")
 			_err = err
 			return
 		}
@@ -217,10 +217,10 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	// all setup tasks complete, mark SetupReadyCondition True
 	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
 
-	r.Log.Info("Node", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Node.Namespace", instance.Namespace, "Node.Name", instance.Name)
+	logger.Info("Node", "DeployStrategy", instance.Spec.DeployStrategy.Deploy, "Node.Namespace", instance.Namespace, "Node.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
-		r.Log.Info("Starting DataPlaneNode deploy")
-		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
+		logger.Info("Starting DataPlaneNode deploy")
+		logger.Info("Set DeploymentReadyCondition false", "instance", instance)
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
 		nodes := &dataplanev1.OpenStackDataPlaneNodeList{
 			Items: []dataplanev1.OpenStackDataPlaneNode{*instance},
@@ -246,7 +246,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		}
 
 		instance.Status.Deployed = true
-		r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
+		logger.Info("Set DeploymentReadyCondition true", "instance", instance)
 		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
 
 		// Explicitly set instance.Spec.Deploy = false
@@ -261,7 +261,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	// Handles the case where the Node is created with
 	// DeployStrategy.Deploy=false.
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
-		r.Log.Info("Set DeploymentReadyCondition false")
+		logger.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
 	}
 
