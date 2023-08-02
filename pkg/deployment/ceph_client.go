@@ -46,7 +46,7 @@ func ConfigureCephClient(ctx context.Context, helper *helper.Helper, obj client.
 		Tasks:    dataplaneutil.PopulateTasks(tasks),
 	}
 
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureCephClientLabel, sshKeySecret, inventoryConfigMap, "", role, aeeSpec)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, ConfigureCephClientLabel, sshKeySecret, inventoryConfigMap, "", "", role, aeeSpec)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to execute Ansible for ConfigureCephClient")
 		return err

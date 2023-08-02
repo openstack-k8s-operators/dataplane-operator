@@ -49,7 +49,7 @@ func DeployService(ctx context.Context, helper *helper.Helper, obj client.Object
 	if foundService.Spec.Role != nil {
 		role = *foundService.Spec.Role
 	}
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, foundService.Spec.Label, sshKeySecret, inventoryConfigMap, foundService.Spec.Play, role, aeeSpec)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, foundService.Spec.Label, sshKeySecret, inventoryConfigMap, foundService.Spec.Play, foundService.Spec.Playbook, role, aeeSpec)
 	if err != nil {
 		helper.GetLogger().Error(err, fmt.Sprintf("Unable to execute Ansible for %s", foundService.Name))
 		return err
