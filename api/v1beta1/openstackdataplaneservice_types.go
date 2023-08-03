@@ -49,9 +49,12 @@ type OpenStackDataPlaneServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	Services []KubeService `json:"services,omitempty"`
 
-	// Play is the playbook contents that ansible will run on execution.
-	// If both Play and Role are specified, Play takes precedence
+	// Play is an inline playbook contents that ansible will run on execution.
+	// If both Play and Roles are specified, Play takes precedence
 	Play string `json:"play,omitempty"`
+
+	// Playbook is a path to the playbook that ansible will run on this execution
+	Playbook string `json:"playbook,omitempty"`
 
 	// Role is the description of an Ansible Role
 	// +kubebuilder:validation:Optional

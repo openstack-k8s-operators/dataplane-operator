@@ -131,7 +131,8 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | ----- | ----------- | ------ | -------- |
 | label | Label to use for service | string | false |
 | services | Services to create to expose possible external services in computes | [][KubeService](#kubeservice) | false |
-| play | Play is the playbook contents that ansible will run on execution. If both Play and Role are specified, Play takes precedence | string | false |
+| play | Play is an inline playbook contents that ansible will run on execution. If both Play and Roles are specified, Play takes precedence | string | false |
+| playbook | Playbook is a path to the playbook that ansible will run on this execution | string | false |
 | role | Role is the description of an Ansible Role | *ansibleeev1.Role | false |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | false |
 

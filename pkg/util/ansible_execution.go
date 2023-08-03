@@ -44,6 +44,7 @@ func AnsibleExecution(
 	sshKeySecret string,
 	inventoryConfigMap string,
 	play string,
+	playbook string,
 	role ansibleeev1.Role,
 	aeeSpec dataplanev1.AnsibleEESpec,
 ) error {
@@ -91,6 +92,9 @@ func AnsibleExecution(
 
 		if len(play) > 0 {
 			ansibleEE.Spec.Play = play
+		}
+		if len(playbook) > 0 {
+			ansibleEE.Spec.Playbook = playbook
 		}
 		ansibleEE.Spec.Role = &role
 

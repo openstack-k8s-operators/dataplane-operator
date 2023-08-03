@@ -36,6 +36,8 @@ spec:
                 type: string
               play:
                 type: string
+              playbook:
+                type: string
               role:
                 properties:
                   any_errors_fatal:
