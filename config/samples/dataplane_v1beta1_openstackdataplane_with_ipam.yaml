@@ -1,4 +1,3 @@
----
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlane
 metadata:
@@ -10,13 +9,21 @@ spec:
     edpm-compute-0:
       role: edpm-compute
       hostName: edpm-compute-0
+      ansibleHost: 192.168.122.100
       node:
-        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+        ansibleVars:
+          ctlplane_ip: 192.168.122.100
+      deployStrategy:
+        deploy: false
     edpm-compute-1:
       role: edpm-compute
       hostName: edpm-compute-1
+      ansibleHost: 192.168.122.101
       node:
-        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+        ansibleVars:
+          ctlplane_ip: 192.168.122.101
+      deployStrategy:
+        deploy: false
   roles:
     edpm-compute:
       env:
@@ -24,21 +31,21 @@ spec:
           value: "True"
         - name: ANSIBLE_ENABLE_TASK_DEBUGGER
           value: "True"
-        - name: ANSIBLE_VERBOSITY
-          value: "2"
+      preProvisioned: true
+      services:
+        - configure-network
+        - validate-network
+        - install-os
+        - configure-os
+        - run-os
       networkAttachments:
         - ctlplane
         - internalapi
         - storage
         - tenant
-      baremetalSetTemplate:
-        deploymentSSHSecret: dataplane-ansible-ssh-private-key-secret
-        bmhLabelSelector:
-          app: openstack
-        ctlplaneInterface: enp1s0
-        dnsSearchDomains:
-          - osptest.openstack.org
       nodeTemplate:
+        # Defining the novaTemplate here means the nodes in this role are
+        # computes
         nova: {}
         networks:
         - name: CtlPlane
@@ -50,21 +57,21 @@ spec:
           subnetName: subnet1
         - name: Tenant
           subnetName: subnet1
-        managementNetwork: CtlPlane
-        ansibleUser: cloud-admin
+        managementNetwork: ctlplane
+        ansibleUser: root
         ansiblePort: 22
+        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
         ansibleVars:
           service_net_map:
             nova_api_network: internal_api
             nova_libvirt_network: internal_api
-          edpm_chrony_ntp_servers:
-            - 0.pool.ntp.org
-            - 1.pool.ntp.org
+
           # edpm_network_config
           # Default nic config template for a EDPM compute node
           # These vars are edpm_network_config role vars
           edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
           edpm_network_config_hide_sensitive_logs: false
+          #
           # These vars are for the network config templates themselves and are
           # considered EDPM network defaults.
           neutron_physical_bridge_name: br-ex
@@ -83,8 +90,14 @@ spec:
           edpm_nodes_validation_validate_controllers_icmp: false
           edpm_nodes_validation_validate_gateway_icmp: false
 
-          edpm_ovn_metadata_agent_metadata_agent_default_metadata_proxy_shared_secret: 12345678
-          edpm_ovn_metadata_agent_default_bind_host: 127.0.0.1
+          edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
+          edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
+          edpm_chrony_ntp_servers:
+          - clock.redhat.com
+          - clock2.redhat.com
+
+          ctlplane_dns_nameservers:
+          - 192.168.122.1
           dns_search_domains: []
 
           registry_url: quay.io/podified-antelope-centos9
@@ -95,12 +108,11 @@ spec:
           edpm_nova_compute_container_image: "{{ registry_url }}/openstack-nova-compute:{{ image_tag }}"
           edpm_nova_libvirt_container_image: "{{ registry_url }}/openstack-nova-libvirt:{{ image_tag }}"
           edpm_ovn_metadata_agent_image: "{{ registry_url }}/openstack-neutron-metadata-agent-ovn:{{ image_tag }}"
-
           gather_facts: false
           enable_debug: false
           # edpm firewall, change the allowed CIDR if needed
           edpm_sshd_configure_firewall: true
-          edpm_sshd_allowed_ranges: ['192.168.111.0/24']
+          edpm_sshd_allowed_ranges: ['192.168.122.0/24']
           # SELinux module
           edpm_selinux_mode: enforcing
       deployStrategy:
