@@ -255,8 +255,8 @@ github.com/openstack-k8s-operators/lib-common/modules/test v0.1.1 h1:upLnnux++Cu
 github.com/openstack-k8s-operators/lib-common/modules/test v0.1.1/go.mod h1:lIJaEPmGwyY4k9ti39OXzZCtv+SybPHSRMg+PfXvPTQ=
 github.com/openstack-k8s-operators/mariadb-operator/api v0.1.0 h1:oM0ZzFHHj+ioCc7NXHIO6+sy7I2yiN29DI9/jh4fe54=
 github.com/openstack-k8s-operators/mariadb-operator/api v0.1.0/go.mod h1:m5XuZSa5Zt5uAw3WbJYOIkFAGXy01mybVekcKOq1qHI=
-github.com/openstack-k8s-operators/nova-operator/api v0.1.0 h1:aBabsbpRMdhJEQROdIXOozevghqOgpCOMzJVduuEpS4=
-github.com/openstack-k8s-operators/nova-operator/api v0.1.0/go.mod h1:bQWyn3wTGEjbWk6qzyL7IhcIl9xU5WcGBcKBZZiD3Uo=
+github.com/openstack-k8s-operators/nova-operator/api v0.1.1 h1:4FHCnUBopafOdnR+JEHyPROdi5wUjOk7G9YcfP3rfIE=
+github.com/openstack-k8s-operators/nova-operator/api v0.1.1/go.mod h1:bQWyn3wTGEjbWk6qzyL7IhcIl9xU5WcGBcKBZZiD3Uo=
 github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.1.0 h1:M0WPgJ4ceFFg80amyOJY694zaMtovQyRN0AM0IuG8JA=
 github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.1.0/go.mod h1:kkCrsqex/cB2DqupYTG0VOTZXQZLrKNhX9L4mHqEEgM=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.1.0 h1:Azz4lBUefF9HUV8WndreRrFlzujhBp0b/fd+TuJBePY=
