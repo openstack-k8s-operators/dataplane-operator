@@ -46,6 +46,11 @@ spec:
         - install-os
         - configure-os
         - run-os
+      networkAttachments:
+        - ctlplane
+        - internalapi
+        - storage
+        - tenant
       nodeTemplate:
         # Defining the novaTemplate here means the nodes in this role are
         # computes

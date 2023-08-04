@@ -20,6 +20,7 @@ require (
 	github.com/openstack-k8s-operators/nova-operator/api v0.1.0
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.1.0
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.1.0
+	github.com/openstack-k8s-operators/ovn-operator/api v0.1.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.7
 	k8s.io/apimachinery v0.26.7
@@ -72,7 +73,7 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
-	golang.org/x/mod v0.10.0 // indirect
+	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect

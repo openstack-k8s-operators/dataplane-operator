@@ -26,6 +26,11 @@ spec:
           value: "True"
         - name: ANSIBLE_VERBOSITY
           value: "2"
+      networkAttachments:
+        - ctlplane
+        - internalapi
+        - storage
+        - tenant
       baremetalSetTemplate:
         deploymentSSHSecret: dataplane-ansible-ssh-private-key-secret
         bmhLabelSelector:

@@ -34,6 +34,8 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	utils "github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // GenerateRoleInventory yields a parsed Inventory for role
@@ -60,12 +62,47 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 		}
 		ipSet, ok := allIPSets[node.Name]
 		if ok {
-			pupulateInventoryFromIPAM(&ipSet, host, dnsAddresses)
+			populateInventoryFromIPAM(&ipSet, host, dnsAddresses)
 		}
 
 		err = resolveAnsibleVars(&node.Spec.Node, &host, &ansible.Group{})
 		if err != nil {
 			return "", err
+		}
+	}
+
+	if instance.Spec.NodeTemplate.Nova != nil {
+		if _, ok := roleNameGroup.Vars["edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host"]; !ok {
+			novaSvc := &corev1.Service{}
+			err = helper.GetClient().Get(ctx, types.NamespacedName{Name: "nova-metadata-internal", Namespace: instance.Namespace}, novaSvc)
+			if err != nil {
+				return "", err
+			}
+			roleNameGroup.Vars["edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host"] = novaSvc.Status.LoadBalancer.Ingress[0].IP
+		}
+	}
+	if _, ok := roleNameGroup.Vars["edpm_ovn_metadata_agent_DEFAULT_transport_url"]; !ok {
+		transportSecret := &corev1.Secret{}
+		err = helper.GetClient().Get(ctx, types.NamespacedName{Name: "rabbitmq-transport-url-neutron-neutron-transport", Namespace: instance.Namespace}, transportSecret)
+		if err != nil {
+			return "", err
+		}
+		roleNameGroup.Vars["edpm_ovn_metadata_agent_DEFAULT_transport_url"] = string(transportSecret.Data["transport_url"])
+	}
+
+	_, sbOk := roleNameGroup.Vars["edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection"]
+	_, dbOk := roleNameGroup.Vars["edpm_ovn_dbs"]
+	if !sbOk || !dbOk {
+		ovn := &ovnv1.OVNDBCluster{}
+		err = helper.GetClient().Get(ctx, types.NamespacedName{Name: "ovndbcluster-sb", Namespace: instance.Namespace}, ovn)
+		if err != nil {
+			return "", err
+		}
+		if !sbOk {
+			roleNameGroup.Vars["edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection"] = ovn.Status.DBAddress
+		}
+		if !dbOk {
+			roleNameGroup.Vars["edpm_ovn_dbs"] = ovn.Status.NetworkAttachments["openstack/internalapi"]
 		}
 	}
 
@@ -121,7 +158,7 @@ func GenerateNodeInventory(ctx context.Context, helper *helper.Helper,
 		if err != nil {
 			return "", err
 		}
-		pupulateInventoryFromIPAM(ipSet, host, dnsAddresses)
+		populateInventoryFromIPAM(ipSet, host, dnsAddresses)
 	}
 	networkConfig := getAnsibleNetworkConfig(instance, instanceRole)
 
@@ -174,8 +211,8 @@ func GenerateNodeInventory(ctx context.Context, helper *helper.Helper,
 	return configMapName, err
 }
 
-// pupulateInventoryFromIPAM populates inventory from IPAM
-func pupulateInventoryFromIPAM(
+// populateInventoryFromIPAM populates inventory from IPAM
+func populateInventoryFromIPAM(
 	ipSet *infranetworkv1.IPSet, host ansible.Host,
 	dnsAddresses []string) {
 	var dnsSearchDomains []string
