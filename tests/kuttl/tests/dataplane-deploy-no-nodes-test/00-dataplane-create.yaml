@@ -9,6 +9,11 @@ spec:
     edpm-compute-no-nodes:
       nodeTemplate:
         ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+        ansibleVars:
+          edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
+          edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
+          edpm_ovn_dbs:
+          - 192.168.24.1
       services:
         - configure-network
         - validate-network

@@ -11,7 +11,7 @@ spec:
       hostName: edpm-compute-0
       ansibleHost: 192.168.122.100
       node:
-        ansibleVars: |
+        ansibleVars:
           ctlplane_ip: 192.168.122.100
           internal_api_ip: 172.17.0.100
           storage_ip: 172.18.0.100
@@ -25,7 +25,7 @@ spec:
       hostName: edpm-compute-1
       ansibleHost: 192.168.122.101
       node:
-        ansibleVars: |
+        ansibleVars:
           ctlplane_ip: 192.168.122.101
           internal_api_ip: 172.17.0.101
           storage_ip: 172.18.0.101
@@ -89,7 +89,7 @@ spec:
         ansibleUser: root
         ansiblePort: 22
         ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-        ansibleVars: |
+        ansibleVars:
           service_net_map:
             nova_api_network: internal_api
             nova_libvirt_network: internal_api

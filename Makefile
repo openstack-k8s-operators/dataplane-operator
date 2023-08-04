@@ -49,7 +49,7 @@ endif
 # Image URL to use all building/pushing image targets
 IMG ?= $(IMAGE_TAG_BASE):latest
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
-ENVTEST_K8S_VERSION = 1.25
+ENVTEST_K8S_VERSION = 1.26
 
 CRDDESC_OVERRIDE ?= :maxDescLen=0
 
@@ -233,6 +233,8 @@ $(GINKGO): $(LOCALBIN)
 
 .PHONY: kuttl-test
 kuttl-test: ## Run kuttl tests
+	if oc get dnsmasq dns; then echo "dnsmasq/dns CR can not exist during kuttl tests"; exit 1; fi
+	if oc get netconfig netconfig; then echo "netconfig/netconfig CR can not exist during kuttl tests"; exit 1; fi
 	$(LOCALBIN)/kubectl-kuttl test --config kuttl-test.yaml tests/kuttl/tests $(KUTTL_ARGS)
 
 .PHONY: kuttl

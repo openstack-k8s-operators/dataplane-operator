@@ -23,15 +23,38 @@ import (
 	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
+// KubeService represents a Kubernetes Service. It is called like this to avoid the extreme overloading of the
+// Service term in this context
+type KubeService struct {
+	// Name of the Service will have in kubernetes
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+
+	// Port is the port of the service
+	// +kubebuilder:validation:Required
+	Port int `json:"port"`
+
+	// Protocol is the protocol used to connect to the endpoint
+	// +kubebuilder:default=http
+	Protocol string `json:"protocol,omitempty"`
+}
+
 // OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService
 type OpenStackDataPlaneServiceSpec struct {
 	// Label to use for service
 	// +kubebuilder:validation:Optional
 	Label string `json:"label,omitempty"`
 
-	// Play is the playbook contents that ansible will run on execution.
-	// If both Play and Role are specified, Play takes precedence
+	// Services to create to expose possible external services in computes
+	// +kubebuilder:validation:Optional
+	Services []KubeService `json:"services,omitempty"`
+
+	// Play is an inline playbook contents that ansible will run on execution.
+	// If both Play and Roles are specified, Play takes precedence
 	Play string `json:"play,omitempty"`
+
+	// Playbook is a path to the playbook that ansible will run on this execution
+	Playbook string `json:"playbook,omitempty"`
 
 	// Role is the description of an Ansible Role
 	// +kubebuilder:validation:Optional

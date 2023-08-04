@@ -34,6 +34,8 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	utils "github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // GenerateRoleInventory yields a parsed Inventory for role
@@ -60,12 +62,47 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 		}
 		ipSet, ok := allIPSets[node.Name]
 		if ok {
-			pupulateInventoryFromIPAM(&ipSet, host, dnsAddresses)
+			populateInventoryFromIPAM(&ipSet, host, dnsAddresses)
 		}
 
 		err = resolveAnsibleVars(&node.Spec.Node, &host, &ansible.Group{})
 		if err != nil {
 			return "", err
+		}
+	}
+
+	if instance.Spec.NodeTemplate.Nova != nil {
+		if _, ok := roleNameGroup.Vars["edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host"]; !ok {
+			novaSvc := &corev1.Service{}
+			err = helper.GetClient().Get(ctx, types.NamespacedName{Name: "nova-metadata-internal", Namespace: instance.Namespace}, novaSvc)
+			if err != nil {
+				return "", err
+			}
+			roleNameGroup.Vars["edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host"] = novaSvc.Status.LoadBalancer.Ingress[0].IP
+		}
+	}
+	if _, ok := roleNameGroup.Vars["edpm_ovn_metadata_agent_DEFAULT_transport_url"]; !ok {
+		transportSecret := &corev1.Secret{}
+		err = helper.GetClient().Get(ctx, types.NamespacedName{Name: "rabbitmq-transport-url-neutron-neutron-transport", Namespace: instance.Namespace}, transportSecret)
+		if err != nil {
+			return "", err
+		}
+		roleNameGroup.Vars["edpm_ovn_metadata_agent_DEFAULT_transport_url"] = string(transportSecret.Data["transport_url"])
+	}
+
+	_, sbOk := roleNameGroup.Vars["edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection"]
+	_, dbOk := roleNameGroup.Vars["edpm_ovn_dbs"]
+	if !sbOk || !dbOk {
+		ovn := &ovnv1.OVNDBCluster{}
+		err = helper.GetClient().Get(ctx, types.NamespacedName{Name: "ovndbcluster-sb", Namespace: instance.Namespace}, ovn)
+		if err != nil {
+			return "", err
+		}
+		if !sbOk {
+			roleNameGroup.Vars["edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection"] = ovn.Status.DBAddress
+		}
+		if !dbOk {
+			roleNameGroup.Vars["edpm_ovn_dbs"] = ovn.Status.NetworkAttachments["openstack/internalapi"]
 		}
 	}
 
@@ -121,7 +158,7 @@ func GenerateNodeInventory(ctx context.Context, helper *helper.Helper,
 		if err != nil {
 			return "", err
 		}
-		pupulateInventoryFromIPAM(ipSet, host, dnsAddresses)
+		populateInventoryFromIPAM(ipSet, host, dnsAddresses)
 	}
 	networkConfig := getAnsibleNetworkConfig(instance, instanceRole)
 
@@ -174,8 +211,8 @@ func GenerateNodeInventory(ctx context.Context, helper *helper.Helper,
 	return configMapName, err
 }
 
-// pupulateInventoryFromIPAM populates inventory from IPAM
-func pupulateInventoryFromIPAM(
+// populateInventoryFromIPAM populates inventory from IPAM
+func populateInventoryFromIPAM(
 	ipSet *infranetworkv1.IPSet, host ansible.Host,
 	dnsAddresses []string) {
 	var dnsSearchDomains []string
@@ -265,26 +302,36 @@ func getAnsibleVars(helper *helper.Helper, instance *dataplanev1.OpenStackDataPl
 	// However, there is no "deep" merge of values. Only top level keys are comvar matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
 
 	// Unmarshal the YAML strings into two maps
-	var role, node map[string]interface{}
-	roleYamlError := yaml.Unmarshal([]byte(instanceRole.Spec.NodeTemplate.AnsibleVars), &role)
-	if roleYamlError != nil {
-		utils.LogErrorForObject(
-			helper,
-			roleYamlError,
-			fmt.Sprintf("Failed to unmarshal YAML data from role AnsibleVars '%s'",
-				instanceRole.Spec.NodeTemplate.AnsibleVars), instance)
-		return nil, roleYamlError
-	}
-	nodeYamlError := yaml.Unmarshal([]byte(instance.Spec.Node.AnsibleVars), &node)
-	if nodeYamlError != nil {
-		utils.LogErrorForObject(
-			helper,
-			nodeYamlError,
-			fmt.Sprintf("Failed to unmarshal YAML data from node AnsibleVars '%s'",
-				instance.Spec.Node.AnsibleVars), instance)
-		return nil, nodeYamlError
+	role := make(map[string]interface{})
+	node := make(map[string]interface{})
+	var roleYamlError, nodeYamlError error
+	for key, val := range instanceRole.Spec.NodeTemplate.AnsibleVars {
+		var v interface{}
+		roleYamlError = yaml.Unmarshal(val, &v)
+		if roleYamlError != nil {
+			utils.LogErrorForObject(
+				helper,
+				roleYamlError,
+				fmt.Sprintf("Failed to unmarshal YAML data from role AnsibleVar '%s'",
+					key), instance)
+			return nil, roleYamlError
+		}
+		role[key] = v
 	}
 
+	for key, val := range instance.Spec.Node.AnsibleVars {
+		var v interface{}
+		nodeYamlError = yaml.Unmarshal(val, &v)
+		if nodeYamlError != nil {
+			utils.LogErrorForObject(
+				helper,
+				nodeYamlError,
+				fmt.Sprintf("Failed to unmarshal YAML data from node AnsibleVar '%s'",
+					key), instance)
+			return nil, nodeYamlError
+		}
+		node[key] = v
+	}
 	if role == nil && node != nil {
 		return node, nil
 	}
@@ -317,10 +364,14 @@ func resolveAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host, group
 	if len(node.Networks) > 0 {
 		ansibleVarsData["networks"] = node.Networks
 	}
-
-	err := yaml.Unmarshal([]byte(node.AnsibleVars), ansibleVarsData)
-	if err != nil {
-		return err
+	var err error
+	for key, val := range node.AnsibleVars {
+		var v interface{}
+		err = yaml.Unmarshal(val, &v)
+		if err != nil {
+			return err
+		}
+		ansibleVarsData[key] = v
 	}
 
 	if host.Vars != nil {

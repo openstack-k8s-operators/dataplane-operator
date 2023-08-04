@@ -10,6 +10,7 @@
 * [NetworkConfigSection](#networkconfigsection)
 * [NodeSection](#nodesection)
 * [NovaTemplate](#novatemplate)
+* [KubeService](#kubeservice)
 * [OpenStackDataPlaneServiceList](#openstackdataplaneservicelist)
 * [OpenStackDataPlaneServiceSpec](#openstackdataplaneservicespec)
 * [OpenStackDataPlaneServiceStatus](#openstackdataplaneservicestatus)
@@ -65,7 +66,7 @@ NodeSection is a specification of the node attributes
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
 | ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
 | ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
-| ansibleVars | AnsibleVars for configuring ansible | string | false |
+| ansibleVars | AnsibleVars for configuring ansible | map[string]json.RawMessage | false |
 | ansibleSSHPrivateKeySecret | AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH key for connecting to node. Must be of the form: Secret.data.ssh-privatekey: <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets> | string | false |
 | extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | false |
 | userData | UserData  node specific user-data | *corev1.SecretReference | false |
@@ -84,6 +85,18 @@ NovaTemplate specifies the parameters for the compute service deployment on the 
 | novaInstance | NovaInstance is the name of the Nova CR that represents the deployment the compute(s) belongs to. You can query the name of the Nova CRs in you system via `oc get Nova -o jsonpath='{.items[*].metadata.name}'` | string | true |
 | customServiceConfig | CustomServiceConfig - customize the nova-compute service config using this parameter to change service defaults, or overwrite rendered information using raw OpenStack config format. The content gets added to to /etc/nova/nova.conf.d directory as 02-nova-override.conf file. | string | false |
 | deploy | Deploy true means the compute service(s) are allowed to be changed on the EDPM node(s) if necessary. If set to false then only the pre-requisite data (e.g. config maps) will be generated but no actual modification on the compute node(s) itself will happen. | *bool | true |
+
+[Back to Custom Resources](#custom-resources)
+
+#### KubeService
+
+KubeService represents a Kubernetes Service. It is called like this to avoid the extreme overloading of the Service term in this context
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| name | Name of the Service will have in kubernetes | string | true |
+| port | Port is the port of the service | int | true |
+| protocol | Protocol is the protocol used to connect to the endpoint | string | false |
 
 [Back to Custom Resources](#custom-resources)
 
@@ -117,7 +130,9 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | label | Label to use for service | string | false |
-| play | Play is the playbook contents that ansible will run on execution. If both Play and Role are specified, Play takes precedence | string | false |
+| services | Services to create to expose possible external services in computes | [][KubeService](#kubeservice) | false |
+| play | Play is an inline playbook contents that ansible will run on execution. If both Play and Roles are specified, Play takes precedence | string | false |
+| playbook | Playbook is a path to the playbook that ansible will run on this execution | string | false |
 | role | Role is the description of an Ansible Role | *ansibleeev1.Role | false |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | false |
 
