@@ -87,7 +87,7 @@ func init() {
 
 // IsReady - returns true if the DataPlaneNode is ready
 func (instance OpenStackDataPlaneNode) IsReady() bool {
-	return instance.Status.Conditions.IsTrue(condition.DeploymentReadyCondition)
+	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
 }
 
 // IsSetupReady - returns true if the DataPlaneNode is ready to be deployed
@@ -105,7 +105,7 @@ func (instance *OpenStackDataPlaneNode) InitConditions(instanceRole *OpenStackDa
 		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
 	)
 
-	if instanceRole.Spec.Services != nil {
+	if instanceRole.Spec.Services != nil && instanceRole.Spec.DeployStrategy.Deploy {
 		for _, service := range instanceRole.Spec.Services {
 			readyCondition := condition.Type(fmt.Sprintf(ServiceReadyCondition, service))
 			cl = append(cl, *condition.UnknownCondition(readyCondition, condition.InitReason, condition.InitReason))

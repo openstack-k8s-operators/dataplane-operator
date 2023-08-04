@@ -151,26 +151,6 @@ status:
     reason: Ready
     status: "True"
     type: SetupReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: configure-network service ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: configure-os service ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: install-os service ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: run-os service ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: validate-network service ready
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNode
@@ -219,26 +199,6 @@ status:
     reason: Ready
     status: "True"
     type: SetupReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: configure-network service ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: configure-os service ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: install-os service ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: run-os service ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: validate-network service ready
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNode
@@ -287,26 +247,6 @@ status:
     reason: Ready
     status: "True"
     type: SetupReady
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: configure-network service ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: configure-os service ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: install-os service ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: run-os service ready
-  - message: Init
-    reason: Init
-    status: Unknown
-    type: validate-network service ready
 ---
 apiVersion: v1
 kind: ConfigMap

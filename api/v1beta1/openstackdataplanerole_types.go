@@ -96,7 +96,7 @@ func init() {
 
 // IsReady - returns true if the DataPlane is ready
 func (instance OpenStackDataPlaneRole) IsReady() bool {
-	return instance.Status.Conditions.IsTrue(condition.DeploymentReadyCondition)
+	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
 }
 
 // InitConditions - Initializes Status Conditons
@@ -107,12 +107,22 @@ func (instance *OpenStackDataPlaneRole) InitConditions() {
 		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(condition.InputReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(RoleBareMetalProvisionReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(RoleIPReservationReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(RoleDNSDataReadyCondition, condition.InitReason, condition.InitReason),
 	)
 
-	if instance.Spec.Services != nil {
+	// Only set Baremetal related conditions if we have baremetal hosts included in the
+	// baremetalSetTemplate.
+	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
+		bmConditionsList := []condition.Type{
+			RoleBareMetalProvisionReadyCondition,
+			RoleIPReservationReadyCondition,
+			RoleDNSDataReadyCondition,
+		}
+		for _, c := range bmConditionsList {
+			cl = append(cl, *condition.UnknownCondition(c, condition.InitReason, condition.InitReason))
+		}
+	}
+
+	if instance.Spec.Services != nil && instance.Spec.DeployStrategy.Deploy {
 		for _, service := range instance.Spec.Services {
 			readyCondition := condition.Type(fmt.Sprintf(ServiceReadyCondition, service))
 			cl = append(cl, *condition.UnknownCondition(readyCondition, condition.InitReason, condition.InitReason))

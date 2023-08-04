@@ -118,24 +118,24 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		delete(instance.ObjectMeta.Labels, "openstackdataplanerole")
 	}
 
-	// Always patch the instance status when exiting this function so we can
-	// persist any changes.
+	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() {
-		// update the overall status condition if service is ready
-		if instance.IsReady() || instanceRole.IsReady() {
+		// update the Ready condition based on the sub conditions
+		if instance.Status.Conditions.AllSubConditionIsTrue() {
 			instance.Status.Deployed = true
-			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, dataplanev1.DataPlaneNodeReadyMessage)
+			instance.Status.Conditions.MarkTrue(
+				condition.ReadyCondition, condition.ReadyMessage)
 		} else {
 			// something is not ready so reset the Ready condition
 			instance.Status.Conditions.MarkUnknown(
 				condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage)
 			// and recalculate it based on the state of the rest of the conditions
-			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
+			instance.Status.Conditions.Set(
+				instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
-
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
-			logger.Error(_err, "PatchInstance error")
+			logger.Error(err, "Error updating instance status conditions")
 			_err = err
 			return
 		}
