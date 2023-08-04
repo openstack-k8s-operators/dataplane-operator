@@ -20,3 +20,4 @@ spec:
         - install-os
         - configure-os
         - run-os
+        - ovn

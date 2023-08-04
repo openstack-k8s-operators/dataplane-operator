@@ -74,6 +74,10 @@ status:
     reason: Ready
     status: "True"
     type: install-os service ready
+  - message: ovn service ready
+    reason: Ready
+    status: "True"
+    type: ovn service ready
   - message: run-os service ready
     reason: Ready
     status: "True"
@@ -313,12 +317,6 @@ spec:
       name: Install edpm_chrony
       tags:
       - edpm_chrony
-    - import_role:
-        name: osp.edpm.edpm_ovn
-        tasks_from: install.yml
-      name: Install edpm_ovn
-      tags:
-      - edpm_ovn
     - name: Install edpm_logrotate_crond
       import_role:
         name: osp.edpm.edpm_logrotate_crond
@@ -431,12 +429,6 @@ spec:
       name: Configure edpm_timezone
       tags:
       - edpm_timezone
-    - import_role:
-        name: osp.edpm.edpm_ovn
-        tasks_from: configure.yml
-      name: Configure edpm_ovn
-      tags:
-      - edpm_ovn
     - name: Configure edpm_ssh_known_hosts
       import_role:
         name: osp.edpm.edpm_ssh_known_hosts
@@ -553,12 +545,6 @@ spec:
       name: Run edpm_timezone
       tags:
       - edpm_timezone
-    - import_role:
-        name: osp.edpm.edpm_ovn
-        tasks_from: run.yml
-      name: Run edpm_ovn
-      tags:
-      - edpm_ovn
     - name: Apply nftables configuration
       import_role:
         name: osp.edpm.edpm_nftables
@@ -578,6 +564,75 @@ spec:
         tasks_from: run.yml
       tags:
         - edpm_iscsid
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  generation: 1
+  name: dataplane-deployment-ovn-edpm-compute-no-nodes
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneRole
+    name: edpm-compute-no-nodes
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    - mountPath: /runner/network/nic-config-template
+      name: inventory
+      subPath: network
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - configMap:
+        items:
+        - key: inventory
+          path: inventory
+        - key: network
+          path: network
+        name: dataplanerole-edpm-compute-no-nodes
+      name: inventory
+  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+  name: openstackansibleee
+  restartPolicy: Never
+  roles:
+    any_errors_fatal: true
+    become: true
+    gather_facts: false
+    hosts: all
+    name: Deploy EDPM OVN
+    strategy: linear
+    tasks:
+    - import_role:
+        name: osp.edpm.edpm_ovn
+      name: ovn
+      tags:
+      - edpm_ovn
   uid: 1001
 status:
   JobStatus: Succeeded

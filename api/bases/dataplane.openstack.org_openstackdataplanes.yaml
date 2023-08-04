@@ -2017,6 +2017,7 @@ spec:
                       - install-os
                       - configure-os
                       - run-os
+                      - ovn
                       items:
                         type: string
                       type: array

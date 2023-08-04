@@ -60,7 +60,7 @@ type OpenStackDataPlaneRoleSpec struct {
 	NetworkAttachments []string `json:"networkAttachments,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default={configure-network,validate-network,install-os,configure-os,run-os}
+	// +kubebuilder:default={configure-network,validate-network,install-os,configure-os,run-os,ovn}
 	// Services list
 	Services []string `json:"services"`
 }
