@@ -225,8 +225,8 @@ github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f/go.mod h1:qRW
 github.com/onsi/ginkgo/v2 v2.11.0 h1:WgqUCUt/lT6yXoQ8Wef0fsNn5cAuMK7+KT9UFRz2tcU=
 github.com/onsi/gomega v1.27.10 h1:naR28SdDFlqrG6kScpT8VWpu1xWY5nJRCF3XaYyBjhI=
 github.com/onsi/gomega v1.27.10/go.mod h1:RsS8tutOdbdgzbPtzzATp12yT7kM5I5aElG3evPbQ0M=
-github.com/openstack-k8s-operators/infra-operator/apis v0.1.0 h1:cavVlTrKeW2xcyt78UPsj1uGxgjfKfzULLZNJEa5wgI=
-github.com/openstack-k8s-operators/infra-operator/apis v0.1.0/go.mod h1:t1xmsiZDqM3wXcLMqgHp7/iilK8ozuOkydV4Vi2Qibk=
+github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20230807091437-ba548589f8e8 h1:+aTGzibM/WV9Xw6qBvoUZ+0YGX0z5I0QY9a03RKxfMU=
+github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20230807091437-ba548589f8e8/go.mod h1:t1xmsiZDqM3wXcLMqgHp7/iilK8ozuOkydV4Vi2Qibk=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.1.0 h1:F1iYRBwa0cZ2VHw8Zs4frqSWQ1B/tiCuSwH/DuHb8VM=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.1.0/go.mod h1:3hAC5Ce0AOSt85BqD6DgTKNkJHmpXwqbwL8mVWRJQqo=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.1.0 h1:rHn0wlwBBggRl65gWDniF97XW+1XB2+4PsGZS2RIJ5E=

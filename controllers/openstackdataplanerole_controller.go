@@ -211,7 +211,8 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	}
 
 	// Ensure DNSData Required for Nodes
-	dnsAddresses, ctlplaneSearchDomain, isReady, err := deployment.EnsureDNSData(ctx, helper,
+	dnsAddresses, dnsClusterAddresses, ctlplaneSearchDomain, isReady, err := deployment.EnsureDNSData(
+		ctx, helper,
 		instance, nodes, allIPSets)
 	if err != nil || !isReady {
 		return ctrl.Result{}, err
@@ -322,9 +323,9 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 			condition.DeploymentReadyCondition, condition.RequestedReason,
 			condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
 		ansibleEESpec := instance.GetAnsibleEESpec()
-		if dnsAddresses != nil && ctlplaneSearchDomain != "" {
+		if dnsClusterAddresses != nil && ctlplaneSearchDomain != "" {
 			ansibleEESpec.DNSConfig = &corev1.PodDNSConfig{
-				Nameservers: dnsAddresses,
+				Nameservers: dnsClusterAddresses,
 				Searches:    []string{ctlplaneSearchDomain},
 			}
 		}
