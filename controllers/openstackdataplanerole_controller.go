@@ -266,11 +266,6 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		if err != nil || !isReady {
 			return ctrl.Result{}, err
 		}
-	} else {
-		// We don't require any baremetal nodes, so we will remove these conditions from the status
-		instance.Status.Conditions.Remove(dataplanev1.RoleBareMetalProvisionReadyCondition)
-		instance.Status.Conditions.Remove(dataplanev1.RoleDNSDataReadyCondition)
-		instance.Status.Conditions.Remove(dataplanev1.RoleIPReservationReadyCondition)
 	}
 
 	// Ensure all nodes are in SetupReady state
