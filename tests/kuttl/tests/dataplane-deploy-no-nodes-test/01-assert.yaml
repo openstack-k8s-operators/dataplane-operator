@@ -296,17 +296,6 @@ spec:
     strategy: linear
     tasks:
     - import_role:
-        name: osp.edpm.edpm_bootstrap
-        tasks_from: bootstrap.yml
-      name: Install edpm_bootstrap
-      tags:
-      - edpm_bootstrap
-    - import_role:
-        name: osp.edpm.edpm_kernel
-      name: Install edpm_kernel
-      tags:
-      - edpm_kernel
-    - import_role:
         name: osp.edpm.edpm_podman
         tasks_from: install.yml
       name: Install edpm_podman
