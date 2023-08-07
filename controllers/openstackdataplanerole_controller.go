@@ -231,7 +231,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 				Name: ansibleSSHPrivateKeySecret},
 			secretKeys,
 			helper.GetClient(),
-			time.Duration(5)*time.Second,
+			time.Second*5,
 		)
 
 		if err != nil {
