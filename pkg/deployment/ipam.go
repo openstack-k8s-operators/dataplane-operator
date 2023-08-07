@@ -128,10 +128,10 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneRole,
 	nodes *dataplanev1.OpenStackDataPlaneNodeList,
-	allIPSets map[string]infranetworkv1.IPSet) ([]string, string, bool, error) {
+	allIPSets map[string]infranetworkv1.IPSet) ([]string, []string, string, bool, error) {
 
 	// Verify dnsmasq CR exists
-	dnsAddresses, isReady, err := checkDNSService(
+	dnsAddresses, dnsClusterAddresses, isReady, err := checkDNSService(
 		ctx, helper, instance)
 
 	if err != nil || !isReady || dnsAddresses == nil {
@@ -150,7 +150,7 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 		if dnsAddresses == nil {
 			instance.Status.Conditions.Remove(dataplanev1.RoleDNSDataReadyCondition)
 		}
-		return nil, "", isReady, err
+		return nil, nil, "", isReady, err
 	}
 	// Create or Patch DNSData
 	ctlplaneSearchDomain, err := createOrPatchDNSData(
@@ -160,7 +160,7 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 			dataplanev1.RoleDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
 			dataplanev1.RoleDNSDataReadyErrorMessage)
-		return nil, "", false, err
+		return nil, nil, "", false, err
 	}
 
 	dnsData := &infranetworkv1.DNSData{
@@ -176,7 +176,7 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 			dataplanev1.RoleDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
 			dataplanev1.RoleDNSDataReadyErrorMessage)
-		return nil, "", false, err
+		return nil, nil, "", false, err
 	}
 
 	if !dnsData.IsReady() {
@@ -185,12 +185,12 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 			dataplanev1.RoleDNSDataReadyCondition,
 			condition.RequestedReason, condition.SeverityInfo,
 			dataplanev1.RoleDNSDataReadyWaitingMessage)
-		return nil, "", false, nil
+		return nil, nil, "", false, nil
 	}
 	instance.Status.Conditions.MarkTrue(
 		dataplanev1.RoleDNSDataReadyCondition,
 		dataplanev1.RoleDNSDataReadyMessage)
-	return dnsAddresses, ctlplaneSearchDomain, true, nil
+	return dnsAddresses, dnsClusterAddresses, ctlplaneSearchDomain, true, nil
 }
 
 // reserveIPs Reserves IPs by creating IPSets
@@ -248,21 +248,23 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 
 // checkDNSService checks if DNS is configured and ready
 func checkDNSService(ctx context.Context, helper *helper.Helper,
-	instance client.Object) ([]string, bool, error) {
+	instance client.Object) ([]string, []string, bool, error) {
 	dnsmasqList := &infranetworkv1.DNSMasqList{}
 	listOpts := []client.ListOption{
 		client.InNamespace(instance.GetNamespace()),
 	}
 	err := helper.GetClient().List(ctx, dnsmasqList, listOpts...)
 	if err != nil {
-		return nil, false, err
+		return nil, nil, false, err
 	}
 	if len(dnsmasqList.Items) == 0 {
 		util.LogForObject(helper, "No DNSMasq CR exists yet, DNS Service won't be used", instance)
-		return nil, true, nil
+		return nil, nil, true, nil
 	} else if !dnsmasqList.Items[0].IsReady() {
 		util.LogForObject(helper, "DNSMasq service exists, but not ready yet ", instance)
-		return nil, false, nil
+		return nil, nil, false, nil
 	}
-	return dnsmasqList.Items[0].Status.DNSAddresses, true, nil
+	dnsClusterAddresses := dnsmasqList.Items[0].Status.DNSClusterAddresses
+	dnsAddresses := dnsmasqList.Items[0].Status.DNSAddresses
+	return dnsAddresses, dnsClusterAddresses, true, nil
 }

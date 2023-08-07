@@ -154,7 +154,7 @@ func GenerateNodeInventory(ctx context.Context, helper *helper.Helper,
 		// Don't try to popluare inventory
 		utils.LogForObject(helper, "Networks not configured for Role", instance)
 	} else {
-		dnsAddresses, _, err := checkDNSService(ctx, helper, instance)
+		dnsAddresses, _, _, err := checkDNSService(ctx, helper, instance)
 		if err != nil {
 			return "", err
 		}
