@@ -161,7 +161,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 			AnsibleSSHPrivateKey,
 		},
 		helper.GetClient(),
-		time.Duration(5)*time.Second,
+		time.Second*5,
 	)
 
 	if err != nil {
