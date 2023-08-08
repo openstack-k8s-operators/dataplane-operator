@@ -75,7 +75,7 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 		if _, ok := roleNameGroup.Vars["edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host"]; !ok {
 			novaSvc := &corev1.Service{}
 			err = helper.GetClient().Get(ctx, types.NamespacedName{Name: "nova-metadata-internal", Namespace: instance.Namespace}, novaSvc)
-			if err != nil {
+			if err != nil && !k8s_errors.IsNotFound(err) {
 				return "", err
 			}
 			roleNameGroup.Vars["edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host"] = novaSvc.Status.LoadBalancer.Ingress[0].IP
@@ -84,7 +84,7 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 	if _, ok := roleNameGroup.Vars["edpm_ovn_metadata_agent_DEFAULT_transport_url"]; !ok {
 		transportSecret := &corev1.Secret{}
 		err = helper.GetClient().Get(ctx, types.NamespacedName{Name: "rabbitmq-transport-url-neutron-neutron-transport", Namespace: instance.Namespace}, transportSecret)
-		if err != nil {
+		if err != nil && !k8s_errors.IsNotFound(err) {
 			return "", err
 		}
 		roleNameGroup.Vars["edpm_ovn_metadata_agent_DEFAULT_transport_url"] = string(transportSecret.Data["transport_url"])
@@ -95,7 +95,7 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 	if !sbOk || !dbOk {
 		ovn := &ovnv1.OVNDBCluster{}
 		err = helper.GetClient().Get(ctx, types.NamespacedName{Name: "ovndbcluster-sb", Namespace: instance.Namespace}, ovn)
-		if err != nil {
+		if err != nil && !k8s_errors.IsNotFound(err) {
 			return "", err
 		}
 		if !sbOk {
