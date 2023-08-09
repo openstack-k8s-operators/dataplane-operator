@@ -148,12 +148,13 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 			},
 		}
 		_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), ensureService, func() error {
-			ensureService.Spec = *serviceObjSpec
+			serviceObjSpec.DeepCopyInto(&ensureService.Spec)
 			return nil
 		})
 		if err != nil {
 			return fmt.Errorf("Error ensuring service: %w", err)
 		}
+
 	}
 
 	return nil

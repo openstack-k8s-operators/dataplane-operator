@@ -134,6 +134,8 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | play | Play is an inline playbook contents that ansible will run on execution. If both Play and Roles are specified, Play takes precedence | string | false |
 | playbook | Playbook is a path to the playbook that ansible will run on this execution | string | false |
 | role | Role is the description of an Ansible Role | *ansibleeev1.Role | false |
+| configMaps | ConfigMaps list of ConfigMap names to mount as ExtraMounts for the OpenStackAnsibleEE | []string | false |
+| secrets | Secrets list of Secret names to mount as ExtraMounts for the OpenStackAnsibleEE | []string | false |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | false |
 
 [Back to Custom Resources](#custom-resources)

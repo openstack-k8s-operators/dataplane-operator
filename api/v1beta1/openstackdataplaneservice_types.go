@@ -60,9 +60,17 @@ type OpenStackDataPlaneServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	Role *ansibleeev1.Role `json:"role,omitempty"`
 
+	// ConfigMaps list of ConfigMap names to mount as ExtraMounts for the OpenStackAnsibleEE
 	// +kubebuilder:validation:Optional
+	ConfigMaps []string `json:"configMaps,omitempty" yaml:"configMaps,omitempty"`
+
+	// Secrets list of Secret names to mount as ExtraMounts for the OpenStackAnsibleEE
+	// +kubebuilder:validation:Optional
+	Secrets []string `json:"secrets,omitempty"`
+
 	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
-	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty"`
+	// +kubebuilder:validation:Optional
+	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty" yaml:"openStackAnsibleEERunnerImage,omitempty"`
 }
 
 // OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService
