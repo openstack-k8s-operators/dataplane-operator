@@ -261,8 +261,6 @@ github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.1.0 h1:M0
 github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.1.0/go.mod h1:kkCrsqex/cB2DqupYTG0VOTZXQZLrKNhX9L4mHqEEgM=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.1.0 h1:Azz4lBUefF9HUV8WndreRrFlzujhBp0b/fd+TuJBePY=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.1.0/go.mod h1:BNOYX3F8NlBh73k2Utxlz+5o1DcZX76a3DY+WPMC31s=
-github.com/openstack-k8s-operators/ovn-operator/api v0.1.0 h1:AnmXOjUJMgxg8cRewjUIHfOCH1o3jTftYfvXiRGBjmA=
-github.com/openstack-k8s-operators/ovn-operator/api v0.1.0/go.mod h1:SSNSWIHTf2i/yM2KprT7FZeCuQfGwEf5eHnISi3zMAg=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

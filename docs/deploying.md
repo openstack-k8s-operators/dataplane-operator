@@ -155,12 +155,20 @@ controlplane that is already deployed. This set of ansible variables and the
 `oc` command that can be used to get their values are shown below.
 
 ```console
+export EDPM_OVN_METADATA_AGENT_TRANSPORT_URL=$(oc get secret rabbitmq-transport-url-neutron-neutron-transport -o json | jq -r .data.transport_url | base64 -d)
+export EDPM_OVN_METADATA_AGENT_SB_CONNECTION=$(oc get ovndbcluster ovndbcluster-sb -o json | jq -r .status.dbAddress)
+export EDPM_OVN_METADATA_AGENT_NOVA_METADATA_HOST=$(oc get svc nova-metadata-internal -o json |jq -r '.status.loadBalancer.ingress[0].ip')
 export EDPM_OVN_METADATA_AGENT_PROXY_SHARED_SECRET=$(oc get secret osp-secret -o json | jq -r .data.MetadataSecret  | base64 -d)
 export EDPM_OVN_METADATA_AGENT_BIND_HOST=127.0.0.1
+export EDPM_OVN_DBS=$(oc get ovndbcluster ovndbcluster-sb -o json | jq -r '.status.networkAttachments."openstack/internalapi"')
 
 echo "
+edpm_ovn_metadata_agent_DEFAULT_transport_url: ${EDPM_OVN_METADATA_AGENT_TRANSPORT_URL}
+edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: ${EDPM_OVN_METADATA_AGENT_SB_CONNECTION}
+edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: ${EDPM_OVN_METADATA_AGENT_NOVA_METADATA_HOST}
 edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: ${EDPM_OVN_METADATA_AGENT_PROXY_SHARED_SECRET}
 edpm_ovn_metadata_agent_DEFAULT_bind_host: ${EDPM_OVN_METADATA_AGENT_BIND_HOST}
+edpm_ovn_dbs: ${EDPM_OVN_DBS}
 "
 ```
 
