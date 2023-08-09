@@ -363,13 +363,17 @@ operator-lint: gowork ## Runs operator-lint
 # webhook definitions are removed from the csv before running
 # this. Also, cleanup the webhook configuration for local testing
 # before deplying with olm again.
-# $oc delete -n openstack validatingwebhookconfiguration/vopenstackdataplane.kb.io
-# $oc delete -n openstack mutatingwebhookconfiguration/mopenstackdataplane.kb.io
+# $ make webhook-cleanup
 SKIP_CERT ?=false
 .PHONY: run-with-webhook
 run-with-webhook: manifests generate fmt vet ## Run a controller from your host.
 	/bin/bash hack/configure_local_webhook.sh
 	go run ./main.go
+
+.PHONY: webhook-cleanup
+webhook-cleanup:
+	oc delete -n openstack validatingwebhookconfiguration/vopenstackdataplane.kb.io
+	oc delete -n openstack mutatingwebhookconfiguration/mopenstackdataplane.kb.io
 
 .PHONY: docs
 docs: ## Build docs and preview it
