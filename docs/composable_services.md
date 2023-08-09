@@ -41,12 +41,39 @@ then the above list will be used.
 The default list of services are reconciled during role reconciliation if the
 service is in the role's service list.
 
+## dataplane-operator provided optional services
+
+Not all services which ship with the dataplane-operator are enabled by
+default. Additional optional services are documented here.
+
+### ceph-client
+
+Include this service to configure EDPM nodes as clients of a
+Ceph server.  Usually this service is included after `install-os`
+and before `configure-os`. This service requires the data plane CR to
+have an `extraMounts` entry whose `extraVolType` is Ceph in order to
+access Ceph secrets. For more information see the
+[Ceph documentation](https://github.com/openstack-k8s-operators/docs/blob/main/ceph.md).
+
+    services:
+      - ceph-client
+
+### ceph-hci-pre
+
+Include this service to prepare EDPM nodes to host Ceph in an HCI
+configuration. For more information see the
+[HCI documenation](https://github.com/openstack-k8s-operators/docs/blob/main/hci.md).
+
+    services:
+      - ceph-hci-pre
+
 ---
 **NOTE**
 
-Do not create a custom service with the same name as one of the default
-services. The default service will overwrite the custom service with the same
-name during role reconciliation.
+Do not create a custom service with the same name as one of the
+default or optional services. The default or optional service will
+overwrite the custom service with the same name during role
+reconciliation.
 
 ---
 

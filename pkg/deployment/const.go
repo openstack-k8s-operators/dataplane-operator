@@ -33,9 +33,6 @@ const (
 	// RunOSLabel for RunOS OpenStackAnsibleEE
 	RunOSLabel = "dataplane-deployment-run-os"
 
-	// ConfigureCephClientLabel for ConfigureCephClient OpenStackAnsibleEE
-	ConfigureCephClientLabel = "dataplane-deployment-configure-ceph-client"
-
 	// InstallOpenStackLabel for InstallOpenStack OpenStackAnsibleEE
 	InstallOpenStackLabel = "dataplane-deployment-install-openstack"
 
