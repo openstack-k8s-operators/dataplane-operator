@@ -7,7 +7,7 @@ metrics:
 webhook:
   port: 9443
 leaderElection:
-  leaderElect: true
+  leaderElect: false
   resourceName: e12e763d.openstack.org
 # leaderElectionReleaseOnCancel defines if the leader should step down volume
 # when the Manager ends. This requires the binary to immediately end when the
