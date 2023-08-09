@@ -52,6 +52,12 @@ spec:
       kind: OpenStackDataPlaneRole
       name: openstackdataplaneroles.dataplane.openstack.org
       specDescriptors:
+      - description: AddressIPv6MapIPv4 - Whether to create IPv6 DNS records which
+          map to the IPv4 address, for environments which are IPv4 only
+        displayName: Address IPv6 Map IPv4
+        path: addressIPv6MapIPv4
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       - description: Deploy boolean to trigger ansible execution
         displayName: Deploy
         path: deployStrategy.deploy
@@ -114,6 +120,12 @@ spec:
         path: nodes.node.ansibleSSHPrivateKeySecret
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes:Secret
+      - description: AddressIPv6MapIPv4 - Whether to create IPv6 DNS records which
+          map to the IPv4 address, for environments which are IPv4 only
+        displayName: Address IPv6 Map IPv4
+        path: roles.addressIPv6MapIPv4
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       - description: Deploy boolean to trigger ansible execution
         displayName: Deploy
         path: roles.deployStrategy.deploy

@@ -18,6 +18,7 @@ package deployment
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -91,6 +92,12 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 					fqdnNames = append(fqdnNames, fqdnName)
 					dnsRecord.Hostnames = fqdnNames
 					allDNSRecords = append(allDNSRecords, dnsRecord)
+					if instance.Spec.AddressIPv6MapIPv4 {
+						dnsRecord = infranetworkv1.DNSHost{}
+						dnsRecord.IP = fmt.Sprintf("::ffff:%s", res.Address)
+						dnsRecord.Hostnames = fqdnNames
+						allDNSRecords = append(allDNSRecords, dnsRecord)
+					}
 					// Adding only ctlplane domain for ansibleee.
 					// TODO (rabi) This is not very efficient.
 					if res.Network == CtlPlaneNetwork && ctlplaneSearchDomain == "" {

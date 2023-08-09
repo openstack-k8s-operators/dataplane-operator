@@ -123,5 +123,6 @@ OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
 | deployStrategy | DeployStrategy section to control how the node is deployed | [DeployStrategySection](#deploystrategysection) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | false |
 | services | Services list | []string | true |
+| addressIPv6MapIPv4 | \n\nAddressIPv6MapIPv4 - Whether to create IPv6 DNS records which map to the IPv4 address, for environments which are IPv4 only | bool | false |
 
 [Back to Custom Resources](#custom-resources)

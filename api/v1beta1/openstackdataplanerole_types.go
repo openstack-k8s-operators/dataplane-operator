@@ -63,6 +63,12 @@ type OpenStackDataPlaneRoleSpec struct {
 	// +kubebuilder:default={configure-network,validate-network,install-os,configure-os,run-os}
 	// Services list
 	Services []string `json:"services"`
+
+	// +kubebuilder:validation:Optional
+	//
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// AddressIPv6MapIPv4 - Whether to create IPv6 DNS records which map to the IPv4 address, for environments which are IPv4 only
+	AddressIPv6MapIPv4 bool `json:"addressIPv6MapIPv4,omitempty"`
 }
 
 //+kubebuilder:object:root=true

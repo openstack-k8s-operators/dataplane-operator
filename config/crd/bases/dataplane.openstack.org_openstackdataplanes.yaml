@@ -962,6 +962,8 @@ spec:
               roles:
                 additionalProperties:
                   properties:
+                    addressIPv6MapIPv4:
+                      type: boolean
                     baremetalSetTemplate:
                       properties:
                         automatedCleaningMode:

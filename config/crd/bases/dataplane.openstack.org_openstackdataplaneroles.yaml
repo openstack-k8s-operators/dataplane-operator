@@ -39,6 +39,8 @@ spec:
             type: object
           spec:
             properties:
+              addressIPv6MapIPv4:
+                type: boolean
               baremetalSetTemplate:
                 properties:
                   automatedCleaningMode:
