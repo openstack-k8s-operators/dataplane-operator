@@ -1,0 +1,17 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: ceph-hci-pre
+spec:
+  label: dataplane-deployment-ceph-hci-pre
+  role:
+    name: "Prepare EDPM to Host Ceph"
+    hosts: "all"
+    strategy: "linear"
+    become: true
+    tasks:
+      - name: "Prepare EDPM to Host Ceph"
+        import_role:
+          name: "osp.edpm.edpm_ceph_hci_pre"
+        tags:
+          - "edpm_ceph_hci_pre"
