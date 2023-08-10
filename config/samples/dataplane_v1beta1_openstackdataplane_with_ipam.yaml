@@ -11,8 +11,18 @@ spec:
       hostName: edpm-compute-0
       ansibleHost: 192.168.122.100
       node:
-        ansibleVars:
-          ctlplane_ip: 192.168.122.100
+        ansibleVars: {}
+        networks:
+        - name: CtlPlane
+          subnetName: subnet1
+          defaultRoute: true
+          fixedIP: 192.168.122.100
+        - name: InternalApi
+          subnetName: subnet1
+        - name: Storage
+          subnetName: subnet1
+        - name: Tenant
+          subnetName: subnet1
       deployStrategy:
         deploy: false
     edpm-compute-1:
@@ -20,8 +30,18 @@ spec:
       hostName: edpm-compute-1
       ansibleHost: 192.168.122.101
       node:
-        ansibleVars:
-          ctlplane_ip: 192.168.122.101
+       ansibleVars: {}
+       networks:
+       - name: CtlPlane
+         subnetName: subnet1
+         defaultRoute: true
+         fixedIP: 192.168.122.101
+       - name: InternalApi
+         subnetName: subnet1
+       - name: Storage
+         subnetName: subnet1
+       - name: Tenant
+         subnetName: subnet1
       deployStrategy:
         deploy: false
   roles:
@@ -44,16 +64,6 @@ spec:
         # Defining the novaTemplate here means the nodes in this role are
         # computes
         nova: {}
-        networks:
-        - name: CtlPlane
-          subnetName: subnet1
-          defaultRoute: true
-        - name: InternalApi
-          subnetName: subnet1
-        - name: Storage
-          subnetName: subnet1
-        - name: Tenant
-          subnetName: subnet1
         managementNetwork: ctlplane
         ansibleUser: root
         ansiblePort: 22
@@ -92,11 +102,6 @@ spec:
           edpm_chrony_ntp_servers:
           - clock.redhat.com
           - clock2.redhat.com
-
-          ctlplane_dns_nameservers:
-          - 192.168.122.1
-          dns_search_domains: []
-
           registry_url: quay.io/podified-antelope-centos9
           image_tag: current-podified
           edpm_ovn_controller_agent_image: "{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}"

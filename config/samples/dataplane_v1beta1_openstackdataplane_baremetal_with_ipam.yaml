@@ -33,8 +33,6 @@ spec:
         bmhLabelSelector:
           app: openstack
         ctlplaneInterface: enp1s0
-        dnsSearchDomains:
-          - osptest.openstack.org
       nodeTemplate:
         nova: {}
         networks:

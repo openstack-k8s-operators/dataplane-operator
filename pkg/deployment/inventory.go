@@ -60,15 +60,17 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 		} else {
 			host.Vars["ansible_host"] = node.Spec.HostName
 		}
-		ipSet, ok := allIPSets[node.Name]
-		if ok {
-			populateInventoryFromIPAM(&ipSet, host, dnsAddresses)
-		}
 
 		err = resolveAnsibleVars(&node.Spec.Node, &host, &ansible.Group{})
 		if err != nil {
 			return "", err
 		}
+
+		ipSet, ok := allIPSets[node.Name]
+		if ok {
+			populateInventoryFromIPAM(&ipSet, host, dnsAddresses)
+		}
+
 	}
 
 	if instance.Spec.NodeTemplate.Nova != nil {
