@@ -124,7 +124,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		if instance.Status.Conditions.AllSubConditionIsTrue() {
 			instance.Status.Deployed = true
 			instance.Status.Conditions.MarkTrue(
-				condition.ReadyCondition, condition.ReadyMessage)
+				condition.ReadyCondition, dataplanev1.DataPlaneNodeReadyMessage)
 		} else {
 			// something is not ready so reset the Ready condition
 			instance.Status.Conditions.MarkUnknown(

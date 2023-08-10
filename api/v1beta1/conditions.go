@@ -24,26 +24,17 @@ const (
 	// DataPlaneNodeReadyMessage ready
 	DataPlaneNodeReadyMessage = "DataPlaneNode ready"
 
-	// DataPlaneNodeReadyWaitingMessage ready
-	DataPlaneNodeReadyWaitingMessage = "DataPlaneNode not yet ready"
-
 	// DataPlaneNodeErrorMessage error
 	DataPlaneNodeErrorMessage = "DataPlaneNode error occurred %s"
 
 	// DataPlaneRoleReadyMessage ready
 	DataPlaneRoleReadyMessage = "DataPlaneRole ready"
 
-	// DataPlaneRoleReadyWaitingMessage ready
-	DataPlaneRoleReadyWaitingMessage = "DataPlaneRole not yet ready"
-
 	// DataPlaneRoleErrorMessage error
 	DataPlaneRoleErrorMessage = "DataPlaneRole error occurred %s"
 
 	// DataPlaneReadyMessage ready
 	DataPlaneReadyMessage = "DataPlane ready"
-
-	// DataPlaneReadyWaitingMessage ready
-	DataPlaneReadyWaitingMessage = "DataPlane not yet ready"
 
 	// DataPlaneErrorMessage error
 	DataPlaneErrorMessage = "DataPlane error occurred %s"
