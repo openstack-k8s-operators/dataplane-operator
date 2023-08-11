@@ -54,6 +54,7 @@ spec:
         - configure-network
         - validate-network
         - install-os
+        - ceph-client
         - configure-os
         - run-os
       nodeTemplate:

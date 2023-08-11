@@ -55,19 +55,6 @@ const (
 	// SetupReadyCondition - Overall setup condition
 	SetupReadyCondition condition.Type = "SetupReady"
 
-	// ConfigureCephClientReadyCondition Status=True condition indicates if the
-	// Ceph client configuration is finished and successful.
-	ConfigureCephClientReadyCondition condition.Type = "ConfigureCephClientReady"
-
-	// ConfigureCephClientReadyMessage ready
-	ConfigureCephClientReadyMessage = "ConfigureCephClient ready"
-
-	// ConfigureCephClientReadyWaitingMessage not yet ready
-	ConfigureCephClientReadyWaitingMessage = "ConfigureCephClient not yet ready"
-
-	// ConfigureCephClientErrorMessage error
-	ConfigureCephClientErrorMessage = "ConfigureCephClient error occurred %s"
-
 	// NovaComputeReadyCondition Status=True condition indicates nova-compute
 	// has been deployed and is ready
 	NovaComputeReadyCondition condition.Type = "NovaComputeReady"

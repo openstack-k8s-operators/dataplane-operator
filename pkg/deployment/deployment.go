@@ -67,7 +67,6 @@ func Deploy(
 	var deployFunc deployFuncDef
 	var deployName string
 	var deployLabel string
-	var foundService dataplanev1.OpenStackDataPlaneService
 
 	// (slagle) For the prototype, we deploy all the composable services first
 	for _, service := range services {
@@ -112,48 +111,6 @@ func Deploy(
 				return &ctrl.Result{}, errKube
 			}
 		}
-
-		if err != nil || !status.Conditions.IsTrue(readyCondition) {
-			return &ctrl.Result{}, err
-		}
-		log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
-	}
-
-	// ConfigureCephClient
-	haveCephSecret := false
-	for _, extraMount := range aeeSpec.ExtraMounts {
-		if extraMount.ExtraVolType == "Ceph" {
-			haveCephSecret = true
-			break
-		}
-	}
-	if !haveCephSecret {
-		log.Info("Skipping execution of Ansible for ConfigureCephClient because extraMounts does not have an extraVolType of Ceph.")
-	} else {
-		readyCondition = dataplanev1.ConfigureCephClientReadyCondition
-		readyWaitingMessage = dataplanev1.ConfigureCephClientReadyWaitingMessage
-		readyMessage = dataplanev1.ConfigureCephClientReadyMessage
-		readyErrorMessage = dataplanev1.ConfigureCephClientErrorMessage
-		deployFunc = ConfigureCephClient
-		deployName = "ConfigureCephClient"
-		deployLabel = ConfigureCephClientLabel
-		err = ConditionalDeploy(
-			ctx,
-			helper,
-			obj,
-			sshKeySecret,
-			inventoryConfigMap,
-			status,
-			readyCondition,
-			readyMessage,
-			readyWaitingMessage,
-			readyErrorMessage,
-			deployFunc,
-			deployName,
-			deployLabel,
-			aeeSpec,
-			foundService,
-		)
 
 		if err != nil || !status.Conditions.IsTrue(readyCondition) {
 			return &ctrl.Result{}, err
