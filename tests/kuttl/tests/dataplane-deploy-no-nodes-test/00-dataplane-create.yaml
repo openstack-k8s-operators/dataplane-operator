@@ -6,6 +6,13 @@ metadata:
 data:
   00-ansibleVars: Zm9vCg==
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ovncontroller-config
+data:
+  ovsdb-config: test-ovn-config
+---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlane
 metadata:
