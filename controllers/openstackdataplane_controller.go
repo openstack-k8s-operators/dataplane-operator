@@ -29,11 +29,13 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -43,9 +45,10 @@ import (
 // OpenStackDataPlaneReconciler reconciles a OpenStackDataPlane object
 type OpenStackDataPlaneReconciler struct {
 	client.Client
-	Kclient kubernetes.Interface
-	Scheme  *runtime.Scheme
-	Log     logr.Logger
+	Kclient  kubernetes.Interface
+	Scheme   *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
 }
 
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanes,verbs=get;list;watch;create;update;patch;delete
@@ -134,6 +137,7 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	// all setup tasks complete, mark SetupReadyCondition True
 	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
+	r.Recorder.Event(instance, corev1.EventTypeNormal, "SetupReady", fmt.Sprintf("dataplane %s setup complete", instance.Name))
 
 	var deployErrors []string
 	shouldRequeue := false
@@ -200,7 +204,9 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	if len(deployErrors) > 0 {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
-		err = fmt.Errorf(fmt.Sprintf("DeployDataplane error(s): %s", deployErrors))
+		errMsg := fmt.Sprintf("DeployDataplane error(s): %s", deployErrors)
+		err = fmt.Errorf(errMsg)
+		r.Recorder.Event(instance, corev1.EventTypeWarning, "DeployError", errMsg)
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			condition.DeploymentReadyCondition,
 			condition.ErrorReason,
