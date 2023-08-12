@@ -9,6 +9,8 @@ spec:
     - install-os
     - configure-os
     - run-os
+    - libvirt
+    - nova
   nodeTemplate:
     nova: {}
     managed: false

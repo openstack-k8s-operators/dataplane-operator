@@ -57,6 +57,8 @@ spec:
         - ceph-client
         - configure-os
         - run-os
+        - libvirt
+        - nova
       nodeTemplate:
         # Defining the novaTemplate here means the nodes in this role are
         # computes and they will have Ceph RBD config overrides

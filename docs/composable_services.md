@@ -34,6 +34,8 @@ The default list of services as they will appear on the `services` field on an
       - install-os
       - configure-os
       - run-os
+      - libvirt
+      - nova
 
 If the `services` field is ommitted from the `OpenStackDataPlaneRole` spec,
 then the above list will be used.
@@ -94,6 +96,8 @@ returned.
     repo-setup          8d
     run-os              8d
     validate-network    8d
+    libvirt             8d
+    nova                8d
 
 A service can be examined in more detail by looking at the YAML representation
 of the resource.
@@ -226,6 +230,8 @@ service to execute for the `edpm-compute` role.
             - install-os
             - configure-os
             - run-os
+            - libvirt
+            - nova
 
 When customizing the services list, the default list of services must be
 reproduced and then customized if the intent is to still deploy those services.

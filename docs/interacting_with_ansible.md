@@ -25,6 +25,8 @@ Sample output when the default list of services:
  dataplane-deployment-configure-network-edpm-compute                        True     AnsibleExecutionJob complete
  dataplane-deployment-configure-os-edpm-compute                             True     AnsibleExecutionJob complete
  dataplane-deployment-install-os-edpm-compute                               True     AnsibleExecutionJob complete
+ dataplane-deployment-libvirt-edpm-compute                                  True     AnsibleExecutionJob complete
+ dataplane-deployment-nova-edpm-compute                                     True     AnsibleExecutionJob complete
  dataplane-deployment-run-os-edpm-compute                                   True     AnsibleExecutionJob complete
  dataplane-deployment-validate-network-edpm-compute                         True     AnsibleExecutionJob complete
 
@@ -49,6 +51,8 @@ Sample output:
  dataplane-deployment-configure-network-edpm-compute   1/1           8s         2m51s
  dataplane-deployment-configure-os-edpm-compute        1/1           8s         2m27s
  dataplane-deployment-install-os-edpm-compute          1/1           8s         2m35s
+ dataplane-deployment-libvirt-edpm-compute             1/1           8s         2m35s
+ dataplane-deployment-nova-edpm-compute                1/1           8s         2m35s
  dataplane-deployment-run-os-edpm-compute              1/1           8s         2m19s
  dataplane-deployment-validate-network-edpm-compute    1/1           8s         2m43s
 

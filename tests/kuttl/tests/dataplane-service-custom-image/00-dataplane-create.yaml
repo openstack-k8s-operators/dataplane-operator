@@ -30,6 +30,7 @@ spec:
           edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
           edpm_ovn_dbs:
           - 192.168.24.1
+          edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: ""
       services:
         - custom-image-service
 ---

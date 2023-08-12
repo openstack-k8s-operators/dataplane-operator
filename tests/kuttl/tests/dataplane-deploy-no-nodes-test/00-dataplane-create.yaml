@@ -1,3 +1,11 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nova-cell1-compute-config
+data:
+  00-ansibleVars: Zm9vCg==
+---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlane
 metadata:
@@ -14,9 +22,12 @@ spec:
           edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
           edpm_ovn_dbs:
           - 192.168.24.1
+          edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: ""
       services:
         - configure-network
         - validate-network
         - install-os
         - configure-os
         - run-os
+        - libvirt
+        - nova

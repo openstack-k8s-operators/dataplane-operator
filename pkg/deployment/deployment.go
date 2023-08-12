@@ -18,7 +18,6 @@ package deployment
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"path"
 	"sort"
@@ -34,7 +33,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
-	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -59,7 +57,6 @@ func Deploy(
 
 	log := helper.GetLogger()
 
-	var err error
 	var readyCondition condition.Type
 	var readyMessage string
 	var readyWaitingMessage string
@@ -68,7 +65,7 @@ func Deploy(
 	var deployName string
 	var deployLabel string
 
-	// (slagle) For the prototype, we deploy all the composable services first
+	// Deploy the composable services
 	for _, service := range services {
 		log.Info("Deploying service", "service", service)
 		foundService, err := GetService(ctx, helper, service)
@@ -117,71 +114,6 @@ func Deploy(
 		}
 		log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 	}
-
-	// Call DeployNovaExternalCompute individually for each node
-	var novaExternalComputes []*novav1beta1.NovaExternalCompute
-	var novaReadyConditionsTrue []*condition.Condition
-	var novaErrors []error
-	for _, node := range nodes.Items {
-		template, err := getNovaTemplate(&node, role)
-		if err != nil {
-			log.Error(err, "Failed to get merged NovaTemplate")
-			novaErrors = append(novaErrors, err)
-			continue
-		}
-		if template == nil {
-			// If the Nova template is not defined neither in the Node nor in
-			// the Role then it means the Node is not a compute node. So skip
-			// NovaExternalCompute deployment.
-			log.Info("Skip creating NovaExternalCompute as the Node is not a compute", "node", node.Name)
-			continue
-		}
-
-		nodeConfigMapName := fmt.Sprintf("dataplanenode-%s", node.Name)
-		novaExternalCompute, err := DeployNovaExternalCompute(
-			ctx,
-			helper,
-			&node,
-			obj,
-			sshKeySecret,
-			nodeConfigMapName,
-			status,
-			aeeSpec,
-			*template,
-		)
-		if err != nil {
-			novaErrors = append(novaErrors, err)
-			continue
-		}
-		novaExternalComputes = append(novaExternalComputes, novaExternalCompute)
-		novaReadyCondition := novaExternalCompute.Status.Conditions.Get(condition.ReadyCondition)
-		log.Info("Nova Status", "NovaExternalCompute", node.Name, "IsReady", novaExternalCompute.IsReady())
-		if novaExternalCompute.IsReady() {
-			novaReadyConditionsTrue = append(novaReadyConditionsTrue, novaReadyCondition)
-
-		}
-	}
-
-	// When any errors are found, wrap all into a single error, and return
-	// it
-	errStr := "DeployNovaExternalCompute error:"
-	if len(novaErrors) > 0 {
-		for _, err := range novaErrors {
-			errStr = fmt.Sprintf("%s: %s", errStr, err.Error())
-		}
-		err = errors.New(errStr)
-		return &ctrl.Result{}, err
-	}
-
-	// Return when any condition is not ready, otherwise set the role as
-	// deployed.
-	if len(novaReadyConditionsTrue) < len(novaExternalComputes) {
-		log.Info("Not all NovaExternalCompute ReadyConditions are true.")
-		return &ctrl.Result{}, nil
-	}
-
-	log.Info("All NovaExternalCompute ReadyConditions are true")
-	status.Conditions.Set(condition.TrueCondition(dataplanev1.NovaComputeReadyCondition, dataplanev1.NovaComputeReadyMessage))
 
 	return nil, nil
 
