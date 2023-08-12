@@ -127,7 +127,7 @@ build: manifests generate fmt vet ## Build manager binary.
 
 .PHONY: run
 run: export ENABLE_WEBHOOKS?=false
-run: manifests generate fmt vet ## Run a controller from your host.
+run: manifests generate fmt vet webhook-cleanup ## Run a controller from your host.
 	go run ./main.go
 
 .PHONY: docker-build
@@ -372,8 +372,7 @@ run-with-webhook: manifests generate fmt vet ## Run a controller from your host.
 
 .PHONY: webhook-cleanup
 webhook-cleanup:
-	oc delete -n openstack validatingwebhookconfiguration/vopenstackdataplane.kb.io
-	oc delete -n openstack mutatingwebhookconfiguration/mopenstackdataplane.kb.io
+	/bin/bash hack/clean_local_webhook.sh
 
 .PHONY: docs
 docs: ## Build docs and preview it

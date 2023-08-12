@@ -61,6 +61,7 @@ type OpenStackDataPlaneRoleSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default={configure-network,validate-network,install-os,configure-os,run-os,ovn}
+	// +kubebuilder:default={configure-network,validate-network,install-os,configure-os,run-os,ovn,libvirt,nova}
 	// Services list
 	Services []string `json:"services"`
 }
@@ -121,18 +122,6 @@ func (instance *OpenStackDataPlaneRole) InitConditions() {
 		}
 	}
 
-	haveCephSecret := false
-	for _, extraMount := range instance.Spec.NodeTemplate.ExtraMounts {
-		if extraMount.ExtraVolType == "Ceph" {
-			haveCephSecret = true
-			break
-		}
-	}
-
-	if haveCephSecret {
-		cl.Set(condition.UnknownCondition(ConfigureCephClientReadyCondition, condition.InitReason, condition.InitReason))
-
-	}
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.Deployed = false
 }

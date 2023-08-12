@@ -34,6 +34,8 @@ The default list of services as they will appear on the `services` field on an
       - install-os
       - configure-os
       - run-os
+      - libvirt
+      - nova
 
 If the `services` field is ommitted from the `OpenStackDataPlaneRole` spec,
 then the above list will be used.
@@ -41,12 +43,39 @@ then the above list will be used.
 The default list of services are reconciled during role reconciliation if the
 service is in the role's service list.
 
+## dataplane-operator provided optional services
+
+Not all services which ship with the dataplane-operator are enabled by
+default. Additional optional services are documented here.
+
+### ceph-client
+
+Include this service to configure EDPM nodes as clients of a
+Ceph server.  Usually this service is included after `install-os`
+and before `configure-os`. This service requires the data plane CR to
+have an `extraMounts` entry whose `extraVolType` is Ceph in order to
+access Ceph secrets. For more information see the
+[Ceph documentation](https://github.com/openstack-k8s-operators/docs/blob/main/ceph.md).
+
+    services:
+      - ceph-client
+
+### ceph-hci-pre
+
+Include this service to prepare EDPM nodes to host Ceph in an HCI
+configuration. For more information see the
+[HCI documenation](https://github.com/openstack-k8s-operators/docs/blob/main/hci.md).
+
+    services:
+      - ceph-hci-pre
+
 ---
 **NOTE**
 
-Do not create a custom service with the same name as one of the default
-services. The default service will overwrite the custom service with the same
-name during role reconciliation.
+Do not create a custom service with the same name as one of the
+default or optional services. The default or optional service will
+overwrite the custom service with the same name during role
+reconciliation.
 
 ---
 
@@ -67,6 +96,8 @@ returned.
     repo-setup          8d
     run-os              8d
     validate-network    8d
+    libvirt             8d
+    nova                8d
 
 A service can be examined in more detail by looking at the YAML representation
 of the resource.
@@ -199,6 +230,8 @@ service to execute for the `edpm-compute` role.
             - install-os
             - configure-os
             - run-os
+            - libvirt
+            - nova
 
 When customizing the services list, the default list of services must be
 reproduced and then customized if the intent is to still deploy those services.

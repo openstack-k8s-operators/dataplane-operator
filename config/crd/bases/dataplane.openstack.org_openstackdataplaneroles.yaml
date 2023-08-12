@@ -1062,20 +1062,6 @@ spec:
                       - subnetName
                       type: object
                     type: array
-                  nova:
-                    properties:
-                      cellName:
-                        default: cell1
-                        type: string
-                      customServiceConfig:
-                        type: string
-                      deploy:
-                        default: true
-                        type: boolean
-                      novaInstance:
-                        default: nova
-                        type: string
-                    type: object
                   userData:
                     properties:
                       name:
@@ -1095,6 +1081,8 @@ spec:
                 - configure-os
                 - run-os
                 - ovn
+                - libvirt
+                - nova
                 items:
                   type: string
                 type: array

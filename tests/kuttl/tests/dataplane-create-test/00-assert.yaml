@@ -44,6 +44,14 @@ spec:
     value: "True"
   - name: ANSIBLE_ENABLE_TASK_DEBUGGER
     value: "True"
+  services:
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - run-os
+    - libvirt
+    - nova
   nodeTemplate:
     ansiblePort: 22
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret

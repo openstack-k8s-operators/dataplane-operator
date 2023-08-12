@@ -47,6 +47,8 @@ spec:
         - configure-os
         - run-os
         - ovn
+        - libvirt
+        - nova
       networkAttachments:
         - ctlplane
       nodeTemplate:

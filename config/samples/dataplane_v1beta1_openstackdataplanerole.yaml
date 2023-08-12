@@ -10,6 +10,8 @@ spec:
     - configure-os
     - run-os
     - ovn
+    - libvirt
+    - nova
   nodeTemplate:
     networkConfig:
       template: |

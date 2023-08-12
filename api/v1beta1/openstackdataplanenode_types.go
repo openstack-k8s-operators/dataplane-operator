@@ -112,18 +112,6 @@ func (instance *OpenStackDataPlaneNode) InitConditions(instanceRole *OpenStackDa
 		}
 	}
 
-	haveCephSecret := false
-	for _, extraMount := range instance.Spec.Node.ExtraMounts {
-		if extraMount.ExtraVolType == "Ceph" {
-			haveCephSecret = true
-			break
-		}
-	}
-
-	if haveCephSecret {
-		cl.Set(condition.UnknownCondition(ConfigureCephClientReadyCondition, condition.InitReason, condition.InitReason))
-
-	}
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.Deployed = false
 }

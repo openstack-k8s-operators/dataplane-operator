@@ -1,0 +1,17 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: ceph-client
+spec:
+  label: dataplane-deployment-ceph-client
+  role:
+    name: "Configure EDPM as client of Ceph"
+    hosts: "all"
+    strategy: "linear"
+    become: true
+    tasks:
+      - name: "Configure EDPM as client of Ceph"
+        import_role:
+          name: "osp.edpm.edpm_ceph_client_files"
+        tags:
+          - "edpm_ceph_client"
