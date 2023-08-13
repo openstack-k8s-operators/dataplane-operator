@@ -7,7 +7,6 @@ spec:
   hostName: edpm-compute-1
   ansibleHost: 192.168.122.101
   node:
-    nova: {}
     ansibleVars:
       tenant_ip: 192.168.24.101
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret

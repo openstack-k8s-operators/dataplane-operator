@@ -16,7 +16,6 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.1.0
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.1.0
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.1.1
-	github.com/openstack-k8s-operators/nova-operator/api v0.1.1
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.1.0
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.1.0
 	gopkg.in/yaml.v3 v3.0.1
