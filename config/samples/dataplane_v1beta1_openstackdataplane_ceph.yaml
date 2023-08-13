@@ -57,6 +57,7 @@ spec:
         - ceph-client
         - configure-os
         - run-os
+        - ovn
         - libvirt
         - nova
       nodeTemplate:
