@@ -6,12 +6,12 @@ workloads. The dataplane-operator prepares the nodes with enough operating
 system configuration so that they are ready for hosting other required
 OpenStack services and workloads.
 
-See [contributing](contributing.md) for notes for developers and
+See [contributing](https://openstack-k8s-operators.github.io/dataplane-operator/contributing/) for notes for developers and
 contributors, running the operator, building the documentation, etc.
 
-See [design](design.md) for details about the dataplane design.
+See [design](https://openstack-k8s-operators.github.io/dataplane-operator/design/) for details about the dataplane design.
 
-[Deploying a DataPlane](deploying.md) documents how to deploy a dataplane.
+[Deploying a DataPlane](https://openstack-k8s-operators.github.io/dataplane-operator/deploying/) documents how to deploy a dataplane.
 
 The documentation source is kept within the dataplane-operator repo in the
 [docs](https://github.com/openstack-k8s-operators/dataplane-operator/tree/main/docs) directory. The full
