@@ -64,9 +64,6 @@ spec:
       networkAttachments:
         - ctlplane
       nodeTemplate:
-        # Defining the novaTemplate here means the nodes in this role are
-        # computes
-        nova: {}
         managementNetwork: ctlplane
         ansibleUser: root
         ansiblePort: 22

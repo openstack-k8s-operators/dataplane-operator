@@ -126,10 +126,6 @@ inline in the example.
             # ${SECRET_NAME} that was used to create the secret.
             ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
 
-            # Defining the novaTemplate here means the nodes in this role are
-            # computes
-            nova: {}
-
             # Ansible variables that configure how the roles from edpm-ansible
             # customize the deployment.
             ansibleVars:
@@ -212,10 +208,6 @@ With the nodes and the controlplane specific variables added, the full
             # Secret name containing SSH key. Use the same secret name as
             # ${SECRET_NAME} that was used to create the secret.
             ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-
-            # Defining the novaTemplate here means the nodes in this role are
-            # computes
-            nova: {}
 
             # Ansible variables that configure how the roles from edpm-ansible
             # customize the deployment.

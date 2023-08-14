@@ -49,7 +49,6 @@ spec:
         dnsSearchDomains:
           - osptest.openstack.org
       nodeTemplate:
-        nova: {}
         managementNetwork: ctlplane
         ansibleUser: cloud-admin
         ansiblePort: 22

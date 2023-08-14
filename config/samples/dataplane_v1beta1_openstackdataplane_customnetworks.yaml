@@ -35,7 +35,6 @@ spec:
         - name: ANSIBLE_HOST_KEY_CHECKING
           value: false
       nodeTemplate:
-        nova: {}
         managed: false
         managementNetwork: ctlplane
         ansibleUser: root

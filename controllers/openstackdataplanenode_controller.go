@@ -41,7 +41,6 @@ import (
 	nad "github.com/openstack-k8s-operators/lib-common/modules/common/networkattachment"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	novav1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
@@ -57,7 +56,6 @@ type OpenStackDataPlaneNodeReconciler struct {
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodes/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodes/finalizers,verbs=update
 //+kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=nova.openstack.org,resources=novaexternalcomputes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
@@ -310,7 +308,6 @@ func (r *OpenStackDataPlaneNodeReconciler) SetupWithManager(mgr ctrl.Manager) er
 		For(&dataplanev1.OpenStackDataPlaneNode{}).
 		Watches(&source.Kind{Type: &dataplanev1.OpenStackDataPlaneRole{}}, roleWatcher).
 		Owns(&v1alpha1.OpenStackAnsibleEE{}).
-		Owns(&novav1beta1.NovaExternalCompute{}).
 		Owns(&corev1.ConfigMap{}).
 		Complete(r)
 }

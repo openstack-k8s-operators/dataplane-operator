@@ -13,7 +13,6 @@ spec:
     - libvirt
     - nova
   nodeTemplate:
-    nova: {}
     managed: false
     managementNetwork: ctlplane
     ansibleUser: root

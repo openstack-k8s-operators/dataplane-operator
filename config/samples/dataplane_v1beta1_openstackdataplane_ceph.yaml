@@ -61,23 +61,6 @@ spec:
         - libvirt
         - nova
       nodeTemplate:
-        # Defining the novaTemplate here means the nodes in this role are
-        # computes and they will have Ceph RBD config overrides
-        nova:
-          cellName: cell1
-          customServiceConfig: |
-            [libvirt]
-            images_type=rbd
-            images_rbd_pool=vms
-            images_rbd_ceph_conf=/etc/ceph/ceph.conf
-            images_rbd_glance_store_name=default_backend
-            images_rbd_glance_copy_poll_interval=15
-            images_rbd_glance_copy_timeout=600
-            rbd_user=openstack
-            rbd_secret_uuid=$FSID
-          # Replace the $FSID with an actual Ceph FSID
-          deploy: true
-          novaInstance: nova
         # The Ansible Pod will mount these files and copy them to nodes in role
         extraMounts:
         - extraVolType: Ceph
