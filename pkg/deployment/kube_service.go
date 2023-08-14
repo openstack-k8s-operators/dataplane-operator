@@ -27,7 +27,7 @@ import (
 	discoveryv1 "k8s.io/api/discovery/v1"
 )
 
-// CreateKubeServices creates a service in Kubernetes for each compute node and each port
+// CreateKubeServices creates a service in Kubernetes for each each port
 func CreateKubeServices(
 	instance *dataplanev1.OpenStackDataPlaneService,
 	nodes *dataplanev1.OpenStackDataPlaneNodeList,
@@ -38,39 +38,53 @@ func CreateKubeServices(
 	// just add all the compute nodes IPs to one service, the Service will round-robin between them.
 	// Our wanted behaviour is to expose all the compute nodes services at the same time.
 	for _, kubeService := range instance.Spec.Services {
-		for _, node := range nodes.Items {
-			_, err := service(kubeService, instance, &node, helper, labels)
-			if err != nil {
-				return err
-			}
-			_, err = endpointSlice(kubeService, instance, &node, helper, labels)
-			if err != nil {
-				return err
-			}
+		_, err := service(kubeService, instance, helper, labels)
+		if err != nil {
+			return err
 		}
+
+		addresses := make([]string, len(nodes.Items))
+		for i, item := range nodes.Items {
+			addresses[i] = item.Spec.AnsibleHost
+		}
+
+		index := 0
+		for i := 0; i < len(addresses); i += 100 {
+			end := i + 100
+
+			if end > len(addresses) {
+				end = len(addresses)
+			}
+
+			_, err = endpointSlice(kubeService, instance, addresses[i:end], index, helper, labels)
+			if err != nil {
+				return err
+			}
+			index++
+		}
+
 	}
 
 	return nil
 }
 
-// service creates a service in Kubernetes for the appropiate port for each compute node
+// service creates a service in Kubernetes for the appropiate port
 func service(
 	kubeService dataplanev1.KubeService,
 	instance *dataplanev1.OpenStackDataPlaneService,
-	node *dataplanev1.OpenStackDataPlaneNode,
 	helper *helper.Helper,
 	labels map[string]string,
 ) (*corev1.Service, error) {
 
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s", kubeService.Name, node.Spec.HostName),
+			Name:      kubeService.Name,
 			Namespace: instance.Namespace,
 		},
 	}
 
 	_, err := controllerutil.CreateOrUpdate(context.TODO(), helper.GetClient(), service, func() error {
-		labels["kubernetes.io/service-name"] = fmt.Sprintf("%s-%s", kubeService.Name, node.Spec.HostName)
+		labels["kubernetes.io/service-name"] = kubeService.Name
 		service.Labels = labels
 		service.Spec.Ports = []corev1.ServicePort{{
 			Protocol:   "TCP",
@@ -89,23 +103,29 @@ func service(
 	return service, err
 }
 
-// endpointSlice creates endpointslice in Kubernetes for the appropiate port in the passed node
+// endpointSlice creates endpointslice in Kubernetes for the appropiate port
 func endpointSlice(
 	kubeService dataplanev1.KubeService,
 	instance *dataplanev1.OpenStackDataPlaneService,
-	node *dataplanev1.OpenStackDataPlaneNode,
+	addresses []string,
+	index int,
 	helper *helper.Helper,
 	labels map[string]string,
 ) (*discoveryv1.EndpointSlice, error) {
+
+	if len(addresses) > 100 {
+		err := fmt.Errorf("an EndpointSlice cannot contain more than 100 endpoint addresses")
+		return nil, err
+	}
+
 	endpointSlice := &discoveryv1.EndpointSlice{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s", kubeService.Name, node.Spec.HostName),
+			Name:      fmt.Sprintf("%s-%v", kubeService.Name, index),
 			Namespace: instance.Namespace,
 		},
 	}
-
 	_, err := controllerutil.CreateOrUpdate(context.TODO(), helper.GetClient(), endpointSlice, func() error {
-		labels["kubernetes.io/service-name"] = fmt.Sprintf("%s-%s", kubeService.Name, node.Spec.HostName)
+		labels["kubernetes.io/service-name"] = kubeService.Name
 		endpointSlice.Labels = labels
 		endpointSlice.AddressType = "IPv4"
 		appProtocol := kubeService.Protocol
@@ -117,9 +137,7 @@ func endpointSlice(
 			Port:        &port,
 		}}
 		endpointSlice.Endpoints = []discoveryv1.Endpoint{{
-			Addresses: []string{
-				node.Spec.AnsibleHost,
-			},
+			Addresses: addresses,
 		}}
 
 		err := controllerutil.SetControllerReference(instance, endpointSlice, helper.GetScheme())
