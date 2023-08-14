@@ -294,7 +294,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 	}
 
 	// Generate Role Inventory
-	roleConfigMap, err := deployment.GenerateRoleInventory(ctx, helper, instance,
+	roleSecret, err := deployment.GenerateRoleInventory(ctx, helper, instance,
 		nodes.Items, allIPSets, dnsAddresses)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
@@ -323,7 +323,7 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		}
 		deployResult, err := deployment.Deploy(
 			ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret,
-			roleConfigMap, &instance.Status, ansibleEESpec,
+			roleSecret, &instance.Status, ansibleEESpec,
 			instance.Spec.Services, instance)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
@@ -396,7 +396,7 @@ func (r *OpenStackDataPlaneRoleReconciler) SetupWithManager(mgr ctrl.Manager) er
 		Owns(&baremetalv1.OpenStackBaremetalSet{}).
 		Owns(&infranetworkv1.IPSet{}).
 		Owns(&infranetworkv1.DNSData{}).
-		Owns(&corev1.ConfigMap{}).
+		Owns(&corev1.Secret{}).
 		Watches(&source.Kind{Type: &infranetworkv1.DNSMasq{}},
 			reconcileFunction).
 		Complete(r)

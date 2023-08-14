@@ -123,14 +123,14 @@ spec:
         - key: ssh-privatekey
           path: ssh_key
         secretName: dataplane-ansible-ssh-private-key-secret
-    - configMap:
+    - name: inventory
+      secret:
         items:
         - key: inventory
           path: inventory
         - key: network
           path: network
-        name: dataplanerole-edpm-compute-no-nodes
-      name: inventory
+        secretName: dataplanerole-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
@@ -179,14 +179,14 @@ spec:
         - key: ssh-privatekey
           path: ssh_key
         secretName: dataplane-ansible-ssh-private-key-secret
-    - configMap:
+    - name: inventory
+      secret:
         items:
         - key: inventory
           path: inventory
         - key: network
           path: network
-        name: dataplanerole-edpm-compute-no-nodes
-      name: inventory
+        secretName: dataplanerole-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
@@ -235,14 +235,14 @@ spec:
         - key: ssh-privatekey
           path: ssh_key
         secretName: dataplane-ansible-ssh-private-key-secret
-    - configMap:
+    - name: inventory
+      secret:
         items:
         - key: inventory
           path: inventory
         - key: network
           path: network
-        name: dataplanerole-edpm-compute-no-nodes
-      name: inventory
+        secretName: dataplanerole-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
@@ -292,14 +292,14 @@ spec:
         - key: ssh-privatekey
           path: ssh_key
         secretName: dataplane-ansible-ssh-private-key-secret
-    - configMap:
+    - name: inventory
+      secret:
         items:
         - key: inventory
           path: inventory
         - key: network
           path: network
-        name: dataplanerole-edpm-compute-no-nodes
-      name: inventory
+        secretName: dataplanerole-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
@@ -348,14 +348,14 @@ spec:
         - key: ssh-privatekey
           path: ssh_key
         secretName: dataplane-ansible-ssh-private-key-secret
-    - configMap:
+    - name: inventory
+      secret:
         items:
         - key: inventory
           path: inventory
         - key: network
           path: network
-        name: dataplanerole-edpm-compute-no-nodes
-      name: inventory
+        secretName: dataplanerole-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
@@ -405,14 +405,14 @@ spec:
         - key: ssh-privatekey
           path: ssh_key
         secretName: dataplane-ansible-ssh-private-key-secret
-    - configMap:
+    - name: inventory
+      secret:
         items:
         - key: inventory
           path: inventory
         - key: network
           path: network
-        name: dataplanerole-edpm-compute-no-nodes
-      name: inventory
+        secretName: dataplanerole-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
@@ -463,14 +463,14 @@ spec:
         - key: ssh-privatekey
           path: ssh_key
         secretName: dataplane-ansible-ssh-private-key-secret
-    - configMap:
+    - name: inventory
+      secret:
         items:
         - key: inventory
           path: inventory
         - key: network
           path: network
-        name: dataplanerole-edpm-compute-no-nodes
-      name: inventory
+        secretName: dataplanerole-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   preserveJobs: true
@@ -536,14 +536,14 @@ spec:
         - key: ssh-privatekey
           path: ssh_key
         secretName: dataplane-ansible-ssh-private-key-secret
-    - configMap:
+    - name: inventory
+      secret:
         items:
         - key: inventory
           path: inventory
         - key: network
           path: network
-        name: dataplanerole-edpm-compute-no-nodes
-      name: inventory
+        secretName: dataplanerole-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   preserveJobs: true

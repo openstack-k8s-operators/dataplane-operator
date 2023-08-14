@@ -206,7 +206,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	// all our input checks out so report InputReady
 	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.InputReadyMessage)
 
-	nodeConfigMap, err := deployment.GenerateNodeInventory(ctx, helper, instance, instanceRole)
+	nodeSecret, err := deployment.GenerateNodeInventory(ctx, helper, instance, instanceRole)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
 		return ctrl.Result{}, err
@@ -225,7 +225,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 		}
 		deployResult, err := deployment.Deploy(
 			ctx, helper, instance, nodes,
-			ansibleSSHPrivateKeySecret, nodeConfigMap,
+			ansibleSSHPrivateKeySecret, nodeSecret,
 			&instance.Status, instance.GetAnsibleEESpec(*instanceRole),
 			deployment.GetServices(instance, instanceRole), instanceRole)
 		if err != nil {
@@ -308,7 +308,7 @@ func (r *OpenStackDataPlaneNodeReconciler) SetupWithManager(mgr ctrl.Manager) er
 		For(&dataplanev1.OpenStackDataPlaneNode{}).
 		Watches(&source.Kind{Type: &dataplanev1.OpenStackDataPlaneRole{}}, roleWatcher).
 		Owns(&v1alpha1.OpenStackAnsibleEE{}).
-		Owns(&corev1.ConfigMap{}).
+		Owns(&corev1.Secret{}).
 		Complete(r)
 }
 

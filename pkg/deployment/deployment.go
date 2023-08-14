@@ -48,7 +48,7 @@ func Deploy(
 	obj client.Object,
 	nodes *dataplanev1.OpenStackDataPlaneNodeList,
 	sshKeySecret string,
-	inventoryConfigMap string,
+	inventorySecret string,
 	status *dataplanev1.OpenStackDataPlaneStatus,
 	aeeSpec dataplanev1.AnsibleEESpec,
 	services []string,
@@ -100,7 +100,7 @@ func Deploy(
 			helper,
 			obj,
 			sshKeySecret,
-			inventoryConfigMap,
+			inventorySecret,
 			status,
 			readyCondition,
 			readyMessage,
@@ -137,7 +137,7 @@ func ConditionalDeploy(
 	helper *helper.Helper,
 	obj client.Object,
 	sshKeySecret string,
-	inventoryConfigMap string,
+	inventorySecret string,
 	status *dataplanev1.OpenStackDataPlaneStatus,
 	readyCondition condition.Type,
 	readyMessage string,
@@ -155,7 +155,7 @@ func ConditionalDeploy(
 
 	if status.Conditions.IsUnknown(readyCondition) {
 		log.Info(fmt.Sprintf("%s Unknown, starting %s", readyCondition, deployName))
-		err = deployFunc(ctx, helper, obj, sshKeySecret, inventoryConfigMap, aeeSpec, foundService)
+		err = deployFunc(ctx, helper, obj, sshKeySecret, inventorySecret, aeeSpec, foundService)
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to %s for %s", deployName, obj.GetName()), obj)
 			return err
