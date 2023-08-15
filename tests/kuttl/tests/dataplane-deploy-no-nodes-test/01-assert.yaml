@@ -295,44 +295,7 @@ spec:
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
-  roles:
-    any_errors_fatal: true
-    become: true
-    gather_facts: false
-    hosts: all
-    name: Deploy EDPM Operating System Install
-    strategy: linear
-    tasks:
-    - import_role:
-        name: osp.edpm.edpm_podman
-        tasks_from: install.yml
-      name: Install edpm_podman
-      tags:
-      - edpm_podman
-    - import_role:
-        name: osp.edpm.edpm_sshd
-        tasks_from: install.yml
-      name: Install edpm_sshd
-      tags:
-      - edpm_sshd
-    - import_role:
-        name: osp.edpm.edpm_chrony
-        tasks_from: install.yml
-      name: Install edpm_chrony
-      tags:
-      - edpm_chrony
-    - name: Install edpm_logrotate_crond
-      import_role:
-        name: osp.edpm.edpm_logrotate_crond
-        tasks_from: install.yml
-      tags:
-        - edpm_logrotate_crond
-    - name: Install edpm_iscsid
-      import_role:
-        name: osp.edpm.edpm_iscsid
-        tasks_from: install.yml
-      tags:
-        - edpm_iscsid
+  playbook: osp.edpm.install_os
   uid: 1001
 status:
   JobStatus: Succeeded
@@ -389,73 +352,7 @@ spec:
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
-  roles:
-    any_errors_fatal: true
-    become: true
-    gather_facts: false
-    hosts: all
-    name: Deploy EDPM Operating System Configure
-    strategy: linear
-    tasks:
-    - import_role:
-        name: osp.edpm.edpm_podman
-        tasks_from: configure.yml
-      name: Configure edpm_podman
-      tags:
-      - edpm_podman
-    - import_role:
-        name: osp.edpm.edpm_container_manage
-        tasks_from: shutdown.yml
-      name: Manage edpm container services
-      tags:
-      - edpm_container_manage
-    - import_role:
-        name: osp.edpm.edpm_nftables
-        tasks_from: service-bootstrap.yml
-      name: Prepare nftables
-      tags:
-      - edpm_firewall
-    - import_role:
-        name: osp.edpm.edpm_sshd
-        tasks_from: configure.yml
-      name: Configure edpm_sshd
-      tags:
-      - edpm_sshd
-    - import_role:
-        name: osp.edpm.edpm_chrony
-        tasks_from: config.yml
-      name: Configure edpm_chrony
-      tags:
-      - edpm_chrony
-    - import_role:
-        name: osp.edpm.edpm_timezone
-        tasks_from: configure.yml
-      name: Configure edpm_timezone
-      tags:
-      - edpm_timezone
-    - name: Configure edpm_ssh_known_hosts
-      import_role:
-        name: osp.edpm.edpm_ssh_known_hosts
-      tags:
-        - edpm_ssh_known_hosts
-    - name: Configure edpm_logrotate_crond
-      import_role:
-        name: osp.edpm.edpm_logrotate_crond
-        tasks_from: configure.yml
-      tags:
-        - edpm_logrotate_crond
-    - name: Configure edpm_iscsid
-      import_role:
-        name: osp.edpm.edpm_iscsid
-        tasks_from: configure.yml
-      tags:
-        - edpm_iscsid
-    - name: Configure nftables
-      import_role:
-        name: osp.edpm.edpm_nftables
-        tasks_from: configure.yml
-      tags:
-        - edpm_firewall
+  playbook: osp.edpm.configure_os
   uid: 1001
 status:
   JobStatus: Succeeded
@@ -511,63 +408,7 @@ spec:
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
-  roles:
-    any_errors_fatal: true
-    become: true
-    gather_facts: false
-    hosts: all
-    name: Deploy EDPM Operating System Run
-    strategy: linear
-    tasks:
-    - import_role:
-        name: osp.edpm.edpm_sshd
-        tasks_from: run.yml
-      name: Run edpm_sshd
-      tags:
-      - edpm_sshd
-    - import_role:
-        name: osp.edpm.edpm_chrony
-        tasks_from: run.yml
-      name: Run edpm_chrony
-      tags:
-      - edpm_chrony
-    - import_role:
-        name: osp.edpm.edpm_chrony
-        tasks_from: online.yml
-      name: Run edpm_chrony (Online)
-      tags:
-      - edpm_chrony
-    - import_role:
-        name: osp.edpm.edpm_chrony
-        tasks_from: sync.yml
-      name: Run edpm_chrony (Sync)
-      tags:
-      - edpm_chrony
-    - import_role:
-        name: osp.edpm.edpm_timezone
-        tasks_from: run.yml
-      name: Run edpm_timezone
-      tags:
-      - edpm_timezone
-    - name: Apply nftables configuration
-      import_role:
-        name: osp.edpm.edpm_nftables
-        tasks_from: run.yml
-      when: deploy_edpm_openstack_run_firewall|default(true)|bool
-      tags:
-        - edpm_firewall
-    - name: Run edpm_logrotate_crond
-      import_role:
-        name: osp.edpm.edpm_logrotate_crond
-        tasks_from: run.yml
-      tags:
-        - edpm_logrotate_crond
-    - name: Run edpm_iscsid
-      import_role:
-        name: osp.edpm.edpm_iscsid
-        tasks_from: run.yml
-      tags:
-        - edpm_iscsid
+  playbook: osp.edpm.run_os
   uid: 1001
 status:
   JobStatus: Succeeded
