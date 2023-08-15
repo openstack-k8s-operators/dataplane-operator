@@ -4,15 +4,4 @@ metadata:
   name: install-frr
 spec:
   label: dataplane-deployment-install-frr
-  role:
-    name: "Deploy EDPM FRR Install"
-    hosts: "all"
-    strategy: "linear"
-    become: true
-    tasks:
-      - name: "Install edpm_frr"
-        import_role:
-          name: "osp.edpm.edpm_frr"
-          tasks_from: "install.yml"
-        tags:
-          - "edpm_frr"
+  playbook: osp.edpm.install_frr
