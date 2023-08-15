@@ -1894,6 +1894,9 @@ spec:
                 - install-os
                 - configure-os
                 - run-os
+                - ovn
+                - libvirt
+                - nova
                 items:
                   type: string
                 type: array
