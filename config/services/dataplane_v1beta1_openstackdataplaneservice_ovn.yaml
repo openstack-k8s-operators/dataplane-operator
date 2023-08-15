@@ -4,14 +4,4 @@ metadata:
   name: ovn
 spec:
   label: dataplane-deployment-ovn
-  role:
-    name: "Deploy EDPM OVN"
-    hosts: "all"
-    strategy: "linear"
-    become: true
-    tasks:
-      - name: "ovn"
-        import_role:
-          name: "osp.edpm.edpm_ovn"
-        tags:
-          - "edpm_ovn"
+  playbook: osp.edpm.ovn

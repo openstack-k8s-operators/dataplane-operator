@@ -624,19 +624,7 @@ spec:
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
-  roles:
-    any_errors_fatal: true
-    become: true
-    gather_facts: false
-    hosts: all
-    name: Deploy EDPM OVN
-    strategy: linear
-    tasks:
-    - import_role:
-        name: osp.edpm.edpm_ovn
-      name: ovn
-      tags:
-      - edpm_ovn
+  playbook: osp.edpm.ovn
   uid: 1001
 status:
   JobStatus: Succeeded
@@ -695,19 +683,7 @@ spec:
   name: openstackansibleee
   preserveJobs: true
   restartPolicy: Never
-  roles:
-    any_errors_fatal: true
-    become: false
-    gather_facts: false
-    hosts: all
-    name: Deploy EDPM libvirt
-    strategy: linear
-    tasks:
-    - import_role:
-        name: osp.edpm.edpm_libvirt
-      name: libvirt
-      tags:
-      - edpm_libvirt
+  playbook: osp.edpm.libvirt
   uid: 1001
 status:
   JobStatus: Succeeded
@@ -771,19 +747,7 @@ spec:
   name: openstackansibleee
   preserveJobs: true
   restartPolicy: Never
-  roles:
-    any_errors_fatal: true
-    become: false
-    gather_facts: false
-    hosts: all
-    name: Deploy EDPM Nova
-    strategy: linear
-    tasks:
-    - import_role:
-        name: osp.edpm.edpm_nova
-      name: nova
-      tags:
-      - edpm_nova
+  playbook: osp.edpm.nova
   uid: 1001
 status:
   JobStatus: Succeeded
