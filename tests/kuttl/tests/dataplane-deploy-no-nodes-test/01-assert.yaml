@@ -134,46 +134,7 @@ spec:
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
-  roles:
-    any_errors_fatal: true
-    become: false
-    gather_facts: false
-    hosts: all
-    name: Deploy EDPM Network
-    strategy: linear
-    tasks:
-    - import_role:
-        name: osp.edpm.edpm_growvols
-      name: Grow volumes
-      tags:
-      - edpm_growvols
-    - import_role:
-        name: osp.edpm.edpm_bootstrap
-        tasks_from: bootstrap.yml
-      name: Install edpm_bootstrap
-      tags:
-      - edpm_bootstrap
-    - import_role:
-        name: osp.edpm.edpm_kernel
-      name: Install edpm_kernel
-      tags:
-      - edpm_kernel
-    - import_role:
-        name: osp.edpm.edpm_tuned
-      name: Import edpm_tuned
-      tags:
-      - edpm_tuned
-    - import_role:
-        name: osp.edpm.edpm_kernel
-        tasks_from: kernelargs.yml
-      name: Configure Kernel Args
-      tags:
-      - edpm_kernel
-    - import_role:
-        name: osp.edpm.edpm_network_config
-      name: import edpm_network_config
-      tags:
-      - edpm_network_config
+  playbook: osp.edpm.configure_network
   uid: 1001
 status:
   JobStatus: Succeeded
@@ -229,17 +190,7 @@ spec:
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
-  roles:
-    any_errors_fatal: true
-    become: false
-    gather_facts: false
-    hosts: all
-    name: osp.edpm.edpm_nodes_validation
-    strategy: linear
-    tasks:
-    - import_role:
-        name: osp.edpm.edpm_nodes_validation
-      name: import edpm_nodes_validation
+  playbook: osp.edpm.validate_network
   uid: 1001
 status:
   JobStatus: Succeeded
