@@ -275,6 +275,21 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		return ctrl.Result{}, err
 	}
 
+	// TODO: if the input hash changes or the nodes in the role is updated we should
+	// detect that and redeploy the role that may also require deleting/recreating
+	// the dataplane service AEE CRs based on the updated input/inventory.
+	// for now we just check if the role is already deployed and not being deleted
+	// and leave the triggering to a human to initiate.
+	// This can be done by deleting the dataplane service AEE CRs and then
+	// patching the role to set  dataplane service condition ready to "Unknown"
+	// then patching the Deployed flag to false.
+	if instance.Status.Deployed && instance.DeletionTimestamp.IsZero() {
+		// The role is already deployed and not being deleted, so reconciliation
+		// is already complete.
+		r.Log.Info("Role already deployed", "instance", instance)
+		return ctrl.Result{}, nil
+	}
+
 	// Generate Role Inventory
 	roleConfigMap, err := deployment.GenerateRoleInventory(ctx, helper, instance,
 		nodes.Items, allIPSets, dnsAddresses)
@@ -290,6 +305,8 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 		"Role.Namespace", instance.Namespace, "Role.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
 		r.Log.Info("Starting DataPlaneRole deploy")
+		r.Log.Info("Set Status.Deployed to false", "instance", instance)
+		instance.Status.Deployed = false
 		r.Log.Info("Set DeploymentReadyCondition false", "instance", instance)
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			condition.DeploymentReadyCondition, condition.RequestedReason,
@@ -319,18 +336,10 @@ func (r *OpenStackDataPlaneRoleReconciler) Reconcile(ctx context.Context, req ct
 			result = *deployResult
 			return result, nil
 		}
-
+		r.Log.Info("Set status deploy true", "instance", instance)
 		instance.Status.Deployed = true
 		r.Log.Info("Set DeploymentReadyCondition true", "instance", instance)
 		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
-
-		// Explicitly set instance.Spec.Deploy = false
-		// We don't want another deploy triggered by any reconcile request, it should
-		// only be triggered when the user (or another controller) specifically
-		// sets it to true.
-		r.Log.Info("Set DeployStrategy.Deploy to false")
-		instance.Spec.DeployStrategy.Deploy = false
-
 	}
 
 	// Set DeploymentReadyCondition to False if it was unknown.
