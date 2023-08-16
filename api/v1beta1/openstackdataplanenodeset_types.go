@@ -20,7 +20,6 @@ import (
 	"fmt"
 
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
-	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,10 +27,6 @@ import (
 
 // OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNodeSet
 type OpenStackDataPlaneNodeSetSpec struct {
-	// +kubebuilder:validation:Optional
-	// DataPlane name of OpenStackDataPlane for this role
-	DataPlane string `json:"dataPlane,omitempty"`
-
 	// +kubebuilder:validation:Optional
 	// BaremetalSetTemplate Template for BaremetalSet for the NodeSet
 	BaremetalSetTemplate baremetalv1.OpenStackBaremetalSetSpec `json:"baremetalSetTemplate,omitempty"`
@@ -70,7 +65,7 @@ type OpenStackDataPlaneNodeSetSpec struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane NodeSet"
-// +kubebuilder:resource:shortName=osdpns;osdpnodeset;osdpnodesets
+//+kubebuilder:resource:shortName=osdpns;osdpnodeset;osdpnodesets
 //+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
 //+kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
 
@@ -80,7 +75,18 @@ type OpenStackDataPlaneNodeSet struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   OpenStackDataPlaneNodeSetSpec `json:"spec,omitempty"`
-	Status OpenStackDataPlaneStatus      `json:"status,omitempty"`
+	Status OpenStackDataPlaneNodeSetStatus      `json:"status,omitempty"`
+}
+
+// OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlaneNodeSet
+type OpenStackDataPlaneNodeSetStatus struct {
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
+	// Conditions
+	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
+
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Deployed
+	Deployed bool `json:"deployed,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true
@@ -98,7 +104,7 @@ func init() {
 
 // IsReady - returns true if the DataPlane is ready
 func (instance OpenStackDataPlaneNodeSet) IsReady() bool {
-	return instance.Status.Conditions.IsTrue(condition.DeploymentReadyCondition)
+	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
 }
 
 // InitConditions - Initializes Status Conditons
@@ -109,19 +115,14 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(condition.InputReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(NodeSetIPReservationReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(NodeSetDNSDataReadyCondition, condition.InitReason, condition.InitReason),
 	)
 
 	// Only set Baremetal related conditions if we have baremetal hosts included in the
- 	// baremetalSetTemplate.
- 	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
-		bmConditionsList := []condition.Type{
-			NodeSetBareMetalProvisionReadyCondition,
-			NodeSetIPReservationReadyCondition,
-			NodeSetDNSDataReadyCondition,
-		}
-		for _, c := range bmConditionsList {
-			cl = append(cl, *condition.UnknownCondition(c, condition.InitReason, condition.InitReason))
-		}
+	// baremetalSetTemplate.
+	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
+		cl = append(cl, *condition.UnknownCondition(NodeSetBareMetalProvisionReadyCondition, condition.InitReason, condition.InitReason))
 	}
 
 	if instance.Spec.Services != nil && instance.Spec.DeployStrategy.Deploy {

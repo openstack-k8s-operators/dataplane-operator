@@ -51,28 +51,6 @@ spec:
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       version: v1beta1
-    - description: OpenStackDataPlane is the Schema for the openstackdataplanes API
-      displayName: OpenStack Data Plane
-      kind: OpenStackDataPlane
-      name: openstackdataplanes.dataplane.openstack.org
-      specDescriptors:
-      - description: Deploy boolean to trigger ansible execution
-        displayName: Deploy
-        path: deployStrategy.deploy
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      statusDescriptors:
-      - description: Conditions
-        displayName: Conditions
-        path: conditions
-        x-descriptors:
-        - urn:alm:descriptor:io.kubernetes.conditions
-      - description: Deployed
-        displayName: Deployed
-        path: deployed
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      version: v1beta1
     - description: OpenStackDataPlaneService is the Schema for the openstackdataplaneservices
         API
       displayName: OpenStack Data Plane Service

@@ -20,7 +20,6 @@ import (
 	"flag"
 	"os"
 	"strconv"
-	"strings"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -117,15 +116,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.OpenStackDataPlaneReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackDataPlane"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlane")
-		os.Exit(1)
-	}
 	if err = (&controllers.OpenStackDataPlaneNodeSetReconciler{
 		Client:  mgr.GetClient(),
 		Scheme:  mgr.GetScheme(),
@@ -136,25 +126,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	checker := healthz.Ping
-	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) != "false" {
-		if err = (&dataplanev1.OpenStackDataPlane{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackDataPlane")
-			os.Exit(1)
-		}
-		checker = mgr.GetWebhookServer().StartedChecker()
-	}
-
 	//+kubebuilder:scaffold:builder
-
-	if err := mgr.AddHealthzCheck("healthz", checker); err != nil {
-		setupLog.Error(err, "unable to set up health check")
-		os.Exit(1)
-	}
-	if err := mgr.AddReadyzCheck("readyz", checker); err != nil {
-		setupLog.Error(err, "unable to set up ready check")
-		os.Exit(1)
-	}
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {

@@ -21,26 +21,8 @@ import (
 )
 
 const (
-	// DataPlaneNodeReadyMessage ready
-	DataPlaneNodeReadyMessage = "DataPlaneNode ready"
-
-	// DataPlaneNodeErrorMessage error
-	DataPlaneNodeErrorMessage = "DataPlaneNode error occurred %s"
-
-	// DataPlaneNodeSetReadyMessage ready
-	DataPlaneNodeSetReadyMessage = "DataPlaneNodeSet ready"
-
-	// DataPlaneNodeSetReadyWaitingMessage ready
-	DataPlaneNodeSetReadyWaitingMessage = "DataPlaneNodeSet not yet ready"
-
 	// DataPlaneNodeSetErrorMessage error
 	DataPlaneNodeSetErrorMessage = "DataPlaneNodeSet error occurred %s"
-
-	// DataPlaneReadyMessage ready
-	DataPlaneReadyMessage = "DataPlane ready"
-
-	// DataPlaneErrorMessage error
-	DataPlaneErrorMessage = "DataPlane error occurred %s"
 
 	// ServiceReadyCondition Status=True condition indicates if the
 	// service is finished and successful.

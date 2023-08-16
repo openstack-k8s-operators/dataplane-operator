@@ -13,6 +13,7 @@
 * [NodeTemplate](#nodetemplate)
 * [OpenStackDataPlaneNodeSetList](#openstackdataplanenodesetlist)
 * [OpenStackDataPlaneNodeSetSpec](#openstackdataplanenodesetspec)
+* [OpenStackDataPlaneNodeSetStatus](#openstackdataplanenodesetstatus)
 
 #### AnsibleEESpec
 
@@ -74,7 +75,6 @@ NodeSection defines the top level attributes inherited by nodes in the CR.
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | hostName | HostName - node name | string | false |
-| networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | false |
 | networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | true |
 | networks | Networks - Instance networks | []infranetworkv1.IPSetNetwork | false |
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
@@ -112,7 +112,7 @@ OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets API
 | ----- | ----------- | ------ | -------- |
 | metadata |  | metav1.ObjectMeta | false |
 | spec |  | [OpenStackDataPlaneNodeSetSpec](#openstackdataplanenodesetspec) | false |
-| status |  | OpenStackDataPlaneStatus | false |
+| status |  | [OpenStackDataPlaneNodeSetStatus](#openstackdataplanenodesetstatus) | false |
 
 [Back to Custom Resources](#custom-resources)
 
@@ -133,7 +133,6 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| dataPlane | DataPlane name of OpenStackDataPlane for this role | string | false |
 | baremetalSetTemplate | BaremetalSetTemplate Template for BaremetalSet for the NodeSet | baremetalv1.OpenStackBaremetalSetSpec | false |
 | nodeTemplate | NodeTemplate - node attributes specific to nodes defined by this resource. These attributes can be overriden at the individual node level, else take their defaults from valus in this section. | [NodeTemplate](#nodetemplate) | true |
 | preProvisioned | \n\nPreProvisioned - Whether the nodes are actually pre-provisioned (True) or should be preprovisioned (False) | bool | false |
@@ -141,5 +140,16 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 | deployStrategy | DeployStrategy section to control how the node is deployed | [DeployStrategySection](#deploystrategysection) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | false |
 | services | Services list | []string | true |
+
+[Back to Custom Resources](#custom-resources)
+
+#### OpenStackDataPlaneNodeSetStatus
+
+OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlaneNodeSet
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| conditions | Conditions | condition.Conditions | false |
+| deployed | Deployed | bool | false |
 
 [Back to Custom Resources](#custom-resources)

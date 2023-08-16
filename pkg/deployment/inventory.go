@@ -48,7 +48,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		return "", err
 	}
 
-	configMap = append(configMap, fmt.Sprintf("dataplanerole-%s", instance.Name))
+	configMap = fmt.Sprintf("dataplanenodeset-%s", instance.Name)
 	for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
 		host := roleNameGroup.AddHost(nodeName)
 		var dnsSearchDomains []string

@@ -76,7 +76,6 @@ NodeSection defines the top level attributes inherited by nodes in the CR.
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | hostName | HostName - node name | string | false |
-| networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | false |
 | networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | true |
 | networks | Networks - Instance networks | []infranetworkv1.IPSetNetwork | false |
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |

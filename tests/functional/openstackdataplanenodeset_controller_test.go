@@ -20,24 +20,38 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
 var _ = Describe("Dataplane Role Test", func() {
 	var dataplaneNodeSetName types.NamespacedName
+	var dataplaneConfigMapName types.NamespacedName
+	var dataplaneSecretName types.NamespacedName
 
 	BeforeEach(func() {
 		dataplaneNodeSetName = types.NamespacedName{
 			Name:      "edpm-compute-nodeset",
 			Namespace: namespace,
 		}
-		err := os.Setenv("OPERATOR_TEMPLATES", "../../templates")
+		dataplaneConfigMapName = types.NamespacedName{
+			Namespace: namespace,
+			Name:      "dataplanenodeset-edpm-compute-nodeset",
+		}
+		dataplaneSecretName = types.NamespacedName{
+			Namespace: namespace,
+			Name:      "dataplane-ansible-ssh-private-key-secret",
+		}
+		err := os.Setenv("OPERATOR_SERVICES", "../../config/services")
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	When("A Dataplane resorce is created", func() {
+	When("A Dataplane resorce is created with PreProvisioned nodes", func() {
 		BeforeEach(func() {
-			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))
 		})
 		It("should have the Spec fields initialized", func() {
 			dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
@@ -49,9 +63,48 @@ var _ = Describe("Dataplane Role Test", func() {
 			Expect(dataplaneNodeSetInstance.Status.Deployed).Should(BeFalse())
 		})
 
-		It("Should have a label", func() {
-			dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-			Expect(dataplaneNodeSetInstance.ObjectMeta.Labels["openstackdataplane"]).Should(Equal("dataplane-test"))
+		It("should have input not ready and unknown Conditions initialized", func() {
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.ReadyCondition,
+				corev1.ConditionFalse,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionFalse,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				dataplanev1.SetupReadyCondition,
+				corev1.ConditionFalse,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.DeploymentReadyCondition,
+				corev1.ConditionUnknown,
+			)
+		})
+
+		It("Should not have created a ConfigMap", func() {
+			th.AssertConfigMapDoesNotExist(dataplaneConfigMapName)
+		})
+	})
+
+	When("A ssh secret is created", func() {
+
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))
+			CreateSSHSecret(dataplaneSecretName)
+		})
+		It("Should have created a ConfigMap", func() {
+			cm := th.GetConfigMap(dataplaneConfigMapName)
+			Expect(cm.Data["inventory"]).Should(
+				ContainSubstring("edpm-compute-nodeset"))
 		})
 	})
 })

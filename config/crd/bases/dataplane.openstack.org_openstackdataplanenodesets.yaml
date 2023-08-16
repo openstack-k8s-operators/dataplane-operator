@@ -191,8 +191,6 @@ spec:
                 - ctlplaneInterface
                 - deploymentSSHSecret
                 type: object
-              dataPlane:
-                type: string
               deployStrategy:
                 properties:
                   ansibleLimit:
@@ -1835,10 +1833,6 @@ spec:
                           type: string
                         managementNetwork:
                           type: string
-                        networkAttachments:
-                          items:
-                            type: string
-                          type: array
                         networkConfig:
                           properties:
                             template:

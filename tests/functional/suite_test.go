@@ -66,9 +66,9 @@ const (
 	SecretName           = "test-secret"
 	MessageBusSecretName = "rabbitmq-secret"
 	ContainerImage       = "test://nova"
-	timeout              = 10 * time.Second
+	timeout              = 40 * time.Second
 	// have maximum 100 retries before the timeout hits
-	interval = timeout / 100
+	interval = 100
 )
 
 func TestAPIs(t *testing.T) {
@@ -150,14 +150,6 @@ var _ = BeforeSuite(func() {
 
 	kclient, err := kubernetes.NewForConfig(cfg)
 	Expect(err).ToNot(HaveOccurred(), "failed to create kclient")
-	err = (&controllers.OpenStackDataPlaneReconciler{
-		Client:  k8sManager.GetClient(),
-		Scheme:  k8sManager.GetScheme(),
-		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("Dataplane"),
-	}).SetupWithManager(k8sManager)
-	Expect(err).ToNot(HaveOccurred())
-
 	err = (&controllers.OpenStackDataPlaneNodeSetReconciler{
 		Client:  k8sManager.GetClient(),
 		Scheme:  k8sManager.GetScheme(),

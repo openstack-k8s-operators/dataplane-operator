@@ -50,9 +50,23 @@ func DeployBaremetalSet(
 		},
 	}
 
+	// Check if nodes need to be provisioned and set the relevant BaremetalHost field.
+	nodeSetManagedHostMap := ManagedHostMap{}
+	err := BuildBMHHostMap(ctx, helper, instance, &nodeSetManagedHostMap)
+	if err != nil {
+		return false, err
+	}
+
 	utils.LogForObject(helper, "Reconciling BaremetalSet", instance)
-	_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), baremetalSet, func() error {
+	_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), baremetalSet, func() error {
+		hostMap, ok := nodeSetManagedHostMap.HostMap[instance.Name]
+		if ok {
+			bmsTemplate := instance.Spec.BaremetalSetTemplate.DeepCopy()
+			bmsTemplate.BaremetalHosts = hostMap
+			instance.Spec.BaremetalSetTemplate = *bmsTemplate
+		}
 		instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec)
+
 		for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
 			hostName := node.HostName
 			ipSet, ok := ipSets[nodeName]
@@ -110,24 +124,18 @@ func BuildBMHHostMap(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	nodeSetManagedHostMap *ManagedHostMap) error {
 	for _, node := range instance.Spec.NodeTemplate.Nodes {
-		labels := instance.GetObjectMeta().GetLabels()
-		nodeSetName, ok := labels["openstackdataplane"]
-		if !ok {
-			// Node does not have a label
-			continue
-		}
 		if nodeSetManagedHostMap.HostMap == nil {
 			nodeSetManagedHostMap.HostMap = make(map[string]map[string]baremetalv1.InstanceSpec)
 		}
-		if nodeSetManagedHostMap.HostMap[nodeSetName] == nil {
-			nodeSetManagedHostMap.HostMap[nodeSetName] = make(map[string]baremetalv1.InstanceSpec)
+		if nodeSetManagedHostMap.HostMap[instance.Name] == nil {
+			nodeSetManagedHostMap.HostMap[instance.Name] = make(map[string]baremetalv1.InstanceSpec)
 		}
 
 		if !instance.Spec.PreProvisioned {
 			instanceSpec := baremetalv1.InstanceSpec{}
 			instanceSpec.UserData = node.UserData
 			instanceSpec.NetworkData = node.NetworkData
-			nodeSetManagedHostMap.HostMap[nodeSetName][node.HostName] = instanceSpec
+			nodeSetManagedHostMap.HostMap[instance.Name][node.HostName] = instanceSpec
 		}
 	}
 	return nil

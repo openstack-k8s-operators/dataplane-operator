@@ -161,18 +161,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		return ctrl.Result{}, err
 	}
 
-	// Add/Remove openstackdataplane Label
-	if len(instance.Spec.DataPlane) > 0 {
-		if instance.ObjectMeta.Labels == nil {
-			instance.ObjectMeta.Labels = make(map[string]string)
-		}
-		logger.Info(fmt.Sprintf("Adding label %s=%s", "openstackdataplane", instance.Spec.DataPlane))
-		instance.ObjectMeta.Labels["openstackdataplane"] = instance.Spec.DataPlane
-	} else if instance.ObjectMeta.Labels != nil {
-		logger.Info(fmt.Sprintf("Removing label %s", "openstackdataplane"))
-		delete(instance.ObjectMeta.Labels, "openstackdataplane")
-	}
-
 	// Ensure IPSets Required for Nodes
 	allIPSets, isReady, err := deployment.EnsureIPSets(ctx, helper, instance)
 	if err != nil || !isReady {
@@ -192,7 +180,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	if ansibleSSHPrivateKeySecret != "" {
 		var secretKeys = []string{}
 		secretKeys = append(secretKeys, AnsibleSSHPrivateKey)
-		if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
+		if !instance.Spec.PreProvisioned {
 			secretKeys = append(secretKeys, AnsibleSSHAuthorizedKeys)
 		}
 		_, result, err = secret.VerifySecret(
@@ -226,21 +214,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	// all our input checks out so report InputReady
 	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.InputReadyMessage)
 
-	// Check if nodes need to be provisioned and set the relevant BaremetalHost field.
-	nodeSetManagedHostMap := deployment.ManagedHostMap{}
-	err = deployment.BuildBMHHostMap(ctx, helper, instance, &nodeSetManagedHostMap)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-	hostMap, ok := nodeSetManagedHostMap.HostMap[instance.ObjectMeta.Labels["openstackdataplane"]]
-	if ok {
-		bmsTemplate := instance.Spec.BaremetalSetTemplate.DeepCopy()
-		bmsTemplate.BaremetalHosts = hostMap
-		instance.Spec.BaremetalSetTemplate = *bmsTemplate
-	}
-
 	// Reconcile BaremetalSet if required
-	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
+	if !instance.Spec.PreProvisioned {
 
 		// Reset the NodeSetBareMetalProvisionReadyCondition to unknown
 		instance.Status.Conditions.MarkUnknown(dataplanev1.NodeSetBareMetalProvisionReadyCondition,
@@ -252,8 +227,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		}
 	} else {
 		instance.Status.Conditions.Remove(dataplanev1.NodeSetBareMetalProvisionReadyCondition)
-		instance.Status.Conditions.Remove(dataplanev1.NodeSetDNSDataReadyCondition)
-		instance.Status.Conditions.Remove(dataplanev1.NodeSetIPReservationReadyCondition)
 	}
 
 	// TODO: if the input hash changes or the nodes in the role is updated we should
