@@ -10,13 +10,4 @@ metadata:
   name: validate-network
 spec:
   label: dataplane-deployment-validate-network
-  role:
-    name: "osp.edpm.edpm_nodes_validation"
-    hosts: "all"
-    strategy: "linear"
-    tasks:
-      - name: "import edpm_nodes_validation"
-        import_role:
-          name: "osp.edpm.edpm_nodes_validation"
-        tags:
-          - "edpm_nodes_validation"
+  playbook: osp.edpm.validate_network
