@@ -8,21 +8,10 @@ spec:
   playbook: osp.edpm.test_playbook
 ---
 apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlane
-metadata:
-  name: openstack-edpm-ipam
-spec:
-  deployStrategy:
-      deploy: true
-  nodeSets:
-    - edpm-compute-no-nodes
----
-apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
   name: edpm-compute-no-nodes
 spec:
-  dataPlane: openstack-edpm-ipam
   deployStrategy:
       deploy: true
   services:
@@ -32,4 +21,4 @@ spec:
     ansible:
       ansibleUser: cloud-admin
       ansiblePort: 22
-      ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret

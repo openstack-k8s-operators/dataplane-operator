@@ -32,7 +32,6 @@ spec:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     nodes:
        edpm-compute-0:
-         nova: {}
          hostName: edpm-compute-0
          ansible:
            ansibleUser: root
@@ -56,7 +55,6 @@ spec:
            subnetName: subnet1
        edpm-compute-1:
          hostName: edpm-compute-1
-         nova: {}
          ansible:
            ansibleUser: root
            ansibleHost: 192.168.122.101
@@ -66,7 +64,6 @@ spec:
              storage_ip: 172.18.0.101
              tenant_ip: 172.19.0.101
              fqdn_internal_api: edpm-compute-1.example.com
-             ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
          networks:
          - name: CtlPlane
            subnetName: subnet1

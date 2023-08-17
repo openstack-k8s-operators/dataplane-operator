@@ -39,7 +39,6 @@ spec:
             external_ip: 172.20.12.76
             fqdn_internal_api: edpm-compute-1.example.com
             ansible_ssh_transfer_method: scp
-          ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
           ansibleUser: root
     managed: false
     managementNetwork: ctlplane

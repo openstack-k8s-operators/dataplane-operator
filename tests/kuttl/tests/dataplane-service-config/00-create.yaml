@@ -46,16 +46,6 @@ spec:
     - kuttl-service-cm-1
 ---
 apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlane
-metadata:
-  name: openstack-edpm-no-nodes
-spec:
-  deployStrategy:
-    deploy: False
-  nodeSets:
-    - edpm-compute-no-nodes
----
-apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
   name: edpm-compute-no-nodes
@@ -68,8 +58,7 @@ spec:
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
   nodeTemplate:
-    ansible:
-      ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     nodes: {}
   services:
     - kuttl-service

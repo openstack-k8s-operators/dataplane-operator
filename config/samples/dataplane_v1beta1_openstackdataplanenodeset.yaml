@@ -17,11 +17,11 @@ spec:
     - ovn
     - libvirt
     - nova
-  dataPlane: openstack-edpm
   preProvisioned: true
   deployStrategy:
       deploy: true
   nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     env:
       - name: ANSIBLE_FORCE_COLOR
         value: "True"
@@ -29,7 +29,6 @@ spec:
         value: "True"
     nodes:
        edpm-compute-0:
-         nova: {}
          hostName: edpm-compute-0
          ansible:
            ansibleHost: 192.168.122.100
@@ -42,7 +41,6 @@ spec:
              fqdn_internal_api: edpm-compute-0.example.com
     managementNetwork: ctlplane
     ansible:
-      ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
       ansibleUser: root
       ansiblePort: 22
       ansibleVars:

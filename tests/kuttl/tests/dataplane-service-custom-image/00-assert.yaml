@@ -3,10 +3,7 @@ apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
   name: edpm-compute-no-nodes
-  labels:
-    openstackdataplane: openstack-edpm-ipam
 spec:
-  dataPlane: openstack-edpm-ipam
   deployStrategy:
     deploy: true
   services:
@@ -16,7 +13,7 @@ spec:
     ansible:
       ansibleUser: cloud-admin
       ansiblePort: 22
-      ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
 status:
   conditions:
   - message: custom-image-service service not yet ready
@@ -42,32 +39,6 @@ status:
     severity: Info
     status: "False"
     type: custom-image-service service ready
----
-apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlane
-metadata:
-  name: openstack-edpm-ipam
-spec:
-  deployStrategy:
-    deploy: true
-  nodeSets:
-    - edpm-compute-no-nodes
-status:
-  conditions:
-  - message: Deployment in progress
-    reason: Requested
-    severity: Info
-    status: "False"
-    type: Ready
-  - message: Deployment in progress
-    reason: Requested
-    severity: Info
-    status: "False"
-    type: DeploymentReady
-  - message: Setup complete
-    reason: Ready
-    status: "True"
-    type: SetupReady
 ---
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
