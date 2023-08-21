@@ -5,14 +5,7 @@ metadata:
 spec:
   label: dataplane-deployment-custom-image-service
   openStackAnsibleEERunnerImage: example.com/repo/runner-image:latest
-  role:
-    name: "test role"
-    hosts: "all"
-    strategy: "linear"
-    tasks:
-      - name: "test task"
-        import_role:
-          name: "test role"
+  playbook: osp.edpm.test_playbook
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlane

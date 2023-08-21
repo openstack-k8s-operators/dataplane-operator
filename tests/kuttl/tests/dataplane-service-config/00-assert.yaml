@@ -96,14 +96,6 @@ spec:
           delegate_to: localhost
   preserveJobs: true
   restartPolicy: Never
-  roles:
-    any_errors_fatal: true
-    become: false
-    gather_facts: false
-    hosts: '{{ primary_role_name | default([]) }}:{{ deploy_target_host | default(''overcloud'')
-      }}'
-    name: Run Standalone Role
-    strategy: linear
   uid: 1001
 status:
   JobStatus: Running

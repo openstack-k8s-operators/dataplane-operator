@@ -33,7 +33,6 @@ import (
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
 // ServiceYAML struct for service YAML unmarshalling
@@ -45,11 +44,8 @@ type ServiceYAML struct {
 
 // DeployService service deployment
 func DeployService(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventoryConfigMap string, aeeSpec dataplanev1.AnsibleEESpec, foundService dataplanev1.OpenStackDataPlaneService) error {
-	role := ansibleeev1.Role{}
-	if foundService.Spec.Role != nil {
-		role = *foundService.Spec.Role
-	}
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, foundService.Spec.Label, sshKeySecret, inventoryConfigMap, foundService.Spec.Play, foundService.Spec.Playbook, role, aeeSpec)
+
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, foundService.Spec.Label, sshKeySecret, inventoryConfigMap, foundService.Spec.Play, foundService.Spec.Playbook, aeeSpec)
 	if err != nil {
 		helper.GetLogger().Error(err, fmt.Sprintf("Unable to execute Ansible for %s", foundService.Name))
 		return err

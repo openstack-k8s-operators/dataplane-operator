@@ -20,7 +20,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
-	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
 // KubeService represents a Kubernetes Service. It is called like this to avoid the extreme overloading of the
@@ -55,10 +54,6 @@ type OpenStackDataPlaneServiceSpec struct {
 
 	// Playbook is a path to the playbook that ansible will run on this execution
 	Playbook string `json:"playbook,omitempty"`
-
-	// Role is the description of an Ansible Role
-	// +kubebuilder:validation:Optional
-	Role *ansibleeev1.Role `json:"role,omitempty"`
 
 	// ConfigMaps list of ConfigMap names to mount as ExtraMounts for the OpenStackAnsibleEE
 	// +kubebuilder:validation:Optional

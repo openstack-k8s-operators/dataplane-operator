@@ -45,7 +45,6 @@ func AnsibleExecution(
 	inventoryConfigMap string,
 	play string,
 	playbook string,
-	role ansibleeev1.Role,
 	aeeSpec dataplanev1.AnsibleEESpec,
 ) error {
 
@@ -96,7 +95,6 @@ func AnsibleExecution(
 		if len(playbook) > 0 {
 			ansibleEE.Spec.Playbook = playbook
 		}
-		ansibleEE.Spec.Role = &role
 
 		ansibleEEMounts := storage.VolMounts{}
 		sshKeyVolume := corev1.Volume{

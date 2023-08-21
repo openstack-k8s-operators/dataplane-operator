@@ -26,7 +26,6 @@ import (
 	networkv1beta1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
-	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -477,11 +476,6 @@ func (in *OpenStackDataPlaneServiceSpec) DeepCopyInto(out *OpenStackDataPlaneSer
 		in, out := &in.Services, &out.Services
 		*out = make([]KubeService, len(*in))
 		copy(*out, *in)
-	}
-	if in.Role != nil {
-		in, out := &in.Role, &out.Role
-		*out = new(v1alpha1.Role)
-		(*in).DeepCopyInto(*out)
 	}
 	if in.ConfigMaps != nil {
 		in, out := &in.ConfigMaps, &out.ConfigMaps
