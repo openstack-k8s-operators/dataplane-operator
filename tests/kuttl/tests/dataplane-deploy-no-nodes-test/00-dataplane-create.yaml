@@ -6,11 +6,19 @@ metadata:
 data:
   00-ansibleVars: Zm9vCg==
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ovncontroller-config
+data:
+  ovsdb-config: test-ovn-config
+---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
   name: edpm-compute-no-nodes
 spec:
+  preProvisioned: true
   services:
     - configure-network
     - validate-network
@@ -21,7 +29,7 @@ spec:
     - libvirt
     - nova
   deployStrategy:
-      deploy: true
+      deploy: false
   env:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"

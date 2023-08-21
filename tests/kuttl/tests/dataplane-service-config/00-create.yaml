@@ -50,6 +50,7 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: edpm-compute-no-nodes
 spec:
+  preProvisioned: true
   deployStrategy:
       deploy: true
   env:

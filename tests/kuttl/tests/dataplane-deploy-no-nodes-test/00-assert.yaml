@@ -15,7 +15,7 @@ spec:
     - libvirt
     - nova
   deployStrategy:
-      deploy: true
+      deploy: false
   env:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
@@ -26,52 +26,21 @@ spec:
     nodes: {}
 status:
   conditions:
-    - message: DataPlaneNodeSet ready
-      reason: Ready
-      status: "True"
-      type: Ready
-    - message: Deployment completed
-      reason: Ready
-      status: "True"
-      type: DeploymentReady
-    - message: Input data complete
-      reason: Ready
-      status: "True"
-      type: InputReady
-    - message: Setup complete
-      reason: Ready
-      status: "True"
-      type: SetupReady
-    - message: configure-network service ready
-      reason: Ready
-      status: "True"
-      type: configure-network service ready
-    - message: configure-os service ready
-      reason: Ready
-      status: "True"
-      type: configure-os service ready
-    - message: install-os service ready
-      reason: Ready
-      status: "True"
-      type: install-os service ready
-    - message: libvirt service ready
-      reason: Ready
-      status: "True"
-      type: libvirt service ready
-    - message: nova service ready
-      reason: Ready
-      status: "True"
-      type: nova service ready
-    - message: ovn service ready
-      reason: Ready
-      status: "True"
-      type: ovn service ready
-    - message: run-os service ready
-      reason: Ready
-      status: "True"
-      type: run-os service ready
-    - message: validate-network service ready
-      reason: Ready
-      status: "True"
-      type: validate-network service ready
-  deployed: true
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
+    type: Ready
+  - message: Deployment not started
+    reason: NotRequested
+    severity: Info
+    status: "False"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady

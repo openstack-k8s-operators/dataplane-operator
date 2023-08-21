@@ -3,15 +3,23 @@ kind: OpenStackDataPlaneService
 metadata:
   name: custom-image-service
 spec:
-  label: dataplane-deployment-custom-image-service
+  label: dp-custom-image-service
   openStackAnsibleEERunnerImage: example.com/repo/runner-image:latest
-  playbook: osp.edpm.test_playbook
+  role:
+    name: "test role"
+    hosts: "all"
+    strategy: "linear"
+    tasks:
+      - name: "test task"
+        import_role:
+          name: "test role"
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: edpm-compute-no-nodes
+  name: edpm-no-nodes-custom-service
 spec:
+  preProvisioned: true
   deployStrategy:
       deploy: true
   services:

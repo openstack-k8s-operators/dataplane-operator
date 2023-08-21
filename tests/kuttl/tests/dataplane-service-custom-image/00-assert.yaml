@@ -2,8 +2,9 @@
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: edpm-compute-no-nodes
+  name: edpm-no-nodes-custom-service
 spec:
+  preProvisioned: true
   deployStrategy:
     deploy: true
   services:
@@ -43,14 +44,14 @@ status:
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
-  name: dataplane-deployment-custom-image-service-edpm-compute-no-nodes
+  name: dp-custom-image-service-edpm-no-nodes-custom-service
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneNodeSet
-    name: edpm-compute-no-nodes
+    name: edpm-no-nodes-custom-service
 spec:
   backoffLimit: 6
   extraMounts:
@@ -82,7 +83,6 @@ spec:
   image: example.com/repo/runner-image:latest
   name: openstackansibleee
   restartPolicy: Never
-  playbook: osp.edpm.test_playbook
   uid: 1001
 status:
   JobStatus: Running

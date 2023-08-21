@@ -1,3 +1,4 @@
+---
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:

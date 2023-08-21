@@ -259,7 +259,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	r.Log.Info("NodeSet", "DeployStrategy", instance.Spec.DeployStrategy.Deploy,
 		"NodeSet.Namespace", instance.Namespace, "NodeSet.Name", instance.Name)
 	if instance.Spec.DeployStrategy.Deploy {
-		logger.Info("Deploying NodeSet: %s", instance.Name)
+		logger.Info(fmt.Sprintf("Deploying NodeSet: %s", instance.Name))
 		logger.Info("Set Status.Deployed to false", "instance", instance)
 		instance.Status.Deployed = false
 		logger.Info("Set DeploymentReadyCondition false", "instance", instance)
