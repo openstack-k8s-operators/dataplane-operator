@@ -1,13 +1,7 @@
 ---
 - job:
-    name: dataplane-operator-content-provider
-    parent: content-provider-base
-    vars:
-      cifmw_operator_build_org: openstack-k8s-operators
-      cifmw_operator_build_operators:
-        - name: "openstack-operator"
-          src: "~/src/github.com/{{ cifmw_operator_build_org }}/openstack-operator"
-          image_base: dataplane
+    name: dataplane-operator-crc-podified-edpm-baremetal
+    parent: cifmw-crc-podified-edpm-baremetal
     irrelevant-files: &openstack_if
       - tests/kuttl
       - docs
@@ -24,18 +18,6 @@
       - .*/*.md
       - kuttl-test.yaml
       - renovate.json
-
-- job:
-    name: dataplane-operator-crc-podified-edpm-deployment
-    parent: cifmw-crc-podified-edpm-deployment
-    vars:
-      bmo_setup: true
-    irrelevant-files: *openstack_if
-
-- job:
-    name: dataplane-operator-crc-podified-edpm-baremetal
-    parent: cifmw-crc-podified-edpm-baremetal
-    irrelevant-files: *openstack_if
 
 - job:
     name: dataplane-operator-docs-preview
