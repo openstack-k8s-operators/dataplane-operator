@@ -7,7 +7,6 @@
 
 * [AnsibleEESpec](#ansibleeespec)
 * [AnsibleOpts](#ansibleopts)
-* [DeployStrategySection](#deploystrategysection)
 * [NetworkConfigSection](#networkconfigsection)
 * [NodeSection](#nodesection)
 * [NodeTemplate](#nodetemplate)
@@ -43,19 +42,6 @@ AnsibleOpts defines a logical grouping of Ansible related configuration options.
 | ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
 | ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
 | ansibleVars | AnsibleVars for configuring ansible | map[string]json.RawMessage | false |
-
-[Back to Custom Resources](#custom-resources)
-
-#### DeployStrategySection
-
-DeployStrategySection for fields controlling the deployment
-
-| Field | Description | Scheme | Required |
-| ----- | ----------- | ------ | -------- |
-| deploy | Deploy boolean to trigger ansible execution | bool | true |
-| ansibleTags | AnsibleTags for ansible execution | string | false |
-| ansibleLimit | AnsibleLimit for ansible execution | string | false |
-| ansibleSkipTags | AnsibleSkipTags for ansible execution | string | false |
 
 [Back to Custom Resources](#custom-resources)
 

@@ -4,6 +4,7 @@ metadata:
   name: edpm-compute-no-nodes
   namespace: openstack
 spec:
+  preProvisioned: true
   services:
   - download-cache
   - configure-network
@@ -14,8 +15,6 @@ spec:
   - ovn
   - libvirt
   - nova
-  deployStrategy:
-    deploy: false
   env:
   - name: ANSIBLE_FORCE_COLOR
     value: "True"
@@ -28,12 +27,10 @@ status:
   conditions:
   - message: Deployment not started
     reason: NotRequested
-    severity: Info
     status: "False"
     type: Ready
   - message: Deployment not started
     reason: NotRequested
-    severity: Info
     status: "False"
     type: DeploymentReady
   - message: Input data complete

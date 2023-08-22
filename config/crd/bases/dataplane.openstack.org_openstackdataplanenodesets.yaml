@@ -191,20 +191,6 @@ spec:
                 - ctlplaneInterface
                 - deploymentSSHSecret
                 type: object
-              deployStrategy:
-                properties:
-                  ansibleLimit:
-                    type: string
-                  ansibleSkipTags:
-                    type: string
-                  ansibleTags:
-                    type: string
-                  deploy:
-                    default: true
-                    type: boolean
-                required:
-                - deploy
-                type: object
               env:
                 items:
                   properties:
@@ -1903,6 +1889,12 @@ spec:
             type: object
           status:
             properties:
+              CtlplaneSearchDomain:
+                type: string
+              DNSClusterAddresses:
+                items:
+                  type: string
+                type: array
               conditions:
                 items:
                   properties:

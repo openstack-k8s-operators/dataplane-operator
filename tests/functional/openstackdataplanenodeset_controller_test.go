@@ -53,10 +53,6 @@ var _ = Describe("Dataplane Role Test", func() {
 		BeforeEach(func() {
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))
 		})
-		It("should have the Spec fields initialized", func() {
-			dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-			Expect(dataplaneNodeSetInstance.Spec.DeployStrategy.Deploy).Should(BeFalse())
-		})
 
 		It("should have the Status fields initialized", func() {
 			dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
@@ -81,12 +77,6 @@ var _ = Describe("Dataplane Role Test", func() {
 				ConditionGetterFunc(DataplaneConditionGetter),
 				dataplanev1.SetupReadyCondition,
 				corev1.ConditionFalse,
-			)
-			th.ExpectCondition(
-				dataplaneNodeSetName,
-				ConditionGetterFunc(DataplaneConditionGetter),
-				condition.DeploymentReadyCondition,
-				corev1.ConditionUnknown,
 			)
 		})
 

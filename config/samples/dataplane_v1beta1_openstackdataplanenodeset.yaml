@@ -19,8 +19,6 @@ spec:
     - libvirt
     - nova
   preProvisioned: true
-  deployStrategy:
-      deploy: true
   nodes:
       edpm-compute-0:
         hostName: edpm-compute-0

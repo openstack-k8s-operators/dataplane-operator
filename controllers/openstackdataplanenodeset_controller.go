@@ -174,6 +174,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	if err != nil || !isReady {
 		return ctrl.Result{}, err
 	}
+	instance.Status.DNSClusterAddresses = dnsClusterAddresses
+	instance.Status.CtlplaneSearchDomain = ctlplaneSearchDomain
 
 	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 
@@ -240,7 +242,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	// Generate NodeSet Inventory
-	roleSecret, err := deployment.GenerateNodeSetInventory(ctx, helper, instance,
+	_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
 		allIPSets, dnsAddresses)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
@@ -250,52 +252,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	// all setup tasks complete, mark SetupReadyCondition True
 	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
 
-	// Trigger executions based on the OpenStackDataPlane Controller state.
-	r.Log.Info("NodeSet", "DeployStrategy", instance.Spec.DeployStrategy.Deploy,
-		"NodeSet.Namespace", instance.Namespace, "NodeSet.Name", instance.Name)
-	if instance.Spec.DeployStrategy.Deploy {
-		logger.Info(fmt.Sprintf("Deploying NodeSet: %s", instance.Name))
-		logger.Info("Set Status.Deployed to false", "instance", instance)
-		instance.Status.Deployed = false
-		logger.Info("Set DeploymentReadyCondition false", "instance", instance)
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			condition.DeploymentReadyCondition, condition.RequestedReason,
-			condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
-		ansibleEESpec := instance.GetAnsibleEESpec()
-		if dnsClusterAddresses != nil && ctlplaneSearchDomain != "" {
-			ansibleEESpec.DNSConfig = &corev1.PodDNSConfig{
-				Nameservers: dnsClusterAddresses,
-				Searches:    []string{ctlplaneSearchDomain},
-			}
-		}
-		deployResult, err := deployment.Deploy(
-			ctx, helper, instance, ansibleSSHPrivateKeySecret,
-			roleSecret, &instance.Status, ansibleEESpec,
-			instance.Spec.Services, instance)
-		if err != nil {
-			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
-			instance.Status.Conditions.Set(condition.FalseCondition(
-				condition.ReadyCondition,
-				condition.ErrorReason,
-				condition.SeverityWarning,
-				dataplanev1.DataPlaneNodeSetErrorMessage,
-				err.Error()))
-			return ctrl.Result{}, err
-		}
-		if deployResult != nil {
-			result = *deployResult
-			return result, nil
-		}
-		logger.Info("Set status deploy true", "instance", instance)
-		instance.Status.Deployed = true
-		logger.Info("Set DeploymentReadyCondition true", "instance", instance)
-		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
-
-	}
-
 	// Set DeploymentReadyCondition to False if it was unknown.
-	// Handles the case where the NodeSet is created with
-	// DeployStrategy.Deploy=false.
+	// Handles the case where the NodeSet is created, but not yet deployed.
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
 		logger.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))

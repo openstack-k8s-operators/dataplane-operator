@@ -1,0 +1,27 @@
+# permissions for end users to view openstackdataplanedeployments.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: openstackdataplanedeployment-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: dataplane-operator
+    app.kubernetes.io/part-of: dataplane-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: openstackdataplanedeployment-viewer-role
+rules:
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplanedeployments
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplanedeployments/status
+  verbs:
+  - get

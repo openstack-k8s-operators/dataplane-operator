@@ -4,4 +4,5 @@ resources:
   - dataplane_v1beta1_openstackdataplanenodeset_ceph.yaml
   - dataplane_v1beta1_openstackdataplanenodeset_customnetworks.yaml
   - dataplane_v1beta1_openstackdataplaneservice.yaml
+  - dataplane_v1beta1_openstackdataplanedeployment.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

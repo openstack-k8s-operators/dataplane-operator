@@ -123,26 +123,6 @@ type NodeTemplate struct {
 	NetworkData *corev1.SecretReference `json:"networkData,omitempty"`
 }
 
-// DeployStrategySection for fields controlling the deployment
-type DeployStrategySection struct {
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Deploy boolean to trigger ansible execution
-	// +kubebuilder:default=true
-	Deploy bool `json:"deploy"`
-
-	// AnsibleTags for ansible execution
-	// +kubebuilder:validation:Optional
-	AnsibleTags string `json:"ansibleTags,omitempty"`
-
-	// AnsibleLimit for ansible execution
-	// +kubebuilder:validation:Optional
-	AnsibleLimit string `json:"ansibleLimit,omitempty"`
-
-	// AnsibleSkipTags for ansible execution
-	// +kubebuilder:validation:Optional
-	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
-}
-
 // NetworkConfigSection is a specification of the Network configuration details
 type NetworkConfigSection struct {
 

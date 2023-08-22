@@ -28,8 +28,6 @@ spec:
   - ovn
   - libvirt
   - nova
-  deployStrategy:
-    deploy: false
   env:
   - name: ANSIBLE_FORCE_COLOR
     value: "True"

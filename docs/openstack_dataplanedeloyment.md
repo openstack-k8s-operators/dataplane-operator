@@ -1,7 +1,7 @@
 
 ### Custom Resources
 
-* [OpenStackDataPlaneNodeSet](#openstackdataplanenodeset)
+* [OpenStackDataPlaneDeployment](#openstackdataplanedeployment)
 
 ### Sub Resources
 
@@ -10,9 +10,9 @@
 * [NetworkConfigSection](#networkconfigsection)
 * [NodeSection](#nodesection)
 * [NodeTemplate](#nodetemplate)
-* [OpenStackDataPlaneNodeSetList](#openstackdataplanenodesetlist)
-* [OpenStackDataPlaneNodeSetSpec](#openstackdataplanenodesetspec)
-* [OpenStackDataPlaneNodeSetStatus](#openstackdataplanenodesetstatus)
+* [OpenStackDataPlaneDeploymentList](#openstackdataplanedeploymentlist)
+* [OpenStackDataPlaneDeploymentSpec](#openstackdataplanedeploymentspec)
+* [OpenStackDataPlaneDeploymentStatus](#openstackdataplanedeploymentstatus)
 
 #### AnsibleEESpec
 
@@ -88,54 +88,49 @@ NodeTemplate is a specification of the node attributes that override top level a
 
 [Back to Custom Resources](#custom-resources)
 
-#### OpenStackDataPlaneNodeSet
+#### OpenStackDataPlaneDeployment
 
-OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets API
+OpenStackDataPlaneDeployment is the Schema for the openstackdataplanedeployments API
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | metadata |  | metav1.ObjectMeta | false |
-| spec |  | [OpenStackDataPlaneNodeSetSpec](#openstackdataplanenodesetspec) | false |
-| status |  | [OpenStackDataPlaneNodeSetStatus](#openstackdataplanenodesetstatus) | false |
+| spec |  | [OpenStackDataPlaneDeploymentSpec](#openstackdataplanedeploymentspec) | false |
+| status |  | [OpenStackDataPlaneDeploymentStatus](#openstackdataplanedeploymentstatus) | false |
 
 [Back to Custom Resources](#custom-resources)
 
-#### OpenStackDataPlaneNodeSetList
+#### OpenStackDataPlaneDeploymentList
 
-OpenStackDataPlaneNodeSetList contains a list of OpenStackDataPlaneNodeSets
+OpenStackDataPlaneDeploymentList contains a list of OpenStackDataPlaneDeployment
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | metadata |  | metav1.ListMeta | false |
-| items |  | [][OpenStackDataPlaneNodeSet](#openstackdataplanenodeset) | true |
+| items |  | [][OpenStackDataPlaneDeployment](#openstackdataplanedeployment) | true |
 
 [Back to Custom Resources](#custom-resources)
 
-#### OpenStackDataPlaneNodeSetSpec
+#### OpenStackDataPlaneDeploymentSpec
 
-OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNodeSet
+OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlaneDeployment
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| baremetalSetTemplate | BaremetalSetTemplate Template for BaremetalSet for the NodeSet | baremetalv1.OpenStackBaremetalSetSpec | false |
-| nodeTemplate | NodeTemplate - node attributes specific to nodes defined by this resource. These attributes can be overriden at the individual node level, else take their defaults from valus in this section. | [NodeTemplate](#nodetemplate) | true |
-| nodes | Nodes - Map of Node Names and node specific data. Values here override defaults in the upper level section. | map[string][NodeSection](#nodesection) | true |
-| preProvisioned | \n\nPreProvisioned - Whether the nodes are actually pre-provisioned (True) or should be preprovisioned (False) | bool | false |
-| env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
-| networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | false |
-| services | Services list | []string | true |
+| nodeSets | NodeSets is the list of NodeSets deployed | []string | true |
+| ansibleTags | AnsibleTags for ansible execution | string | false |
+| ansibleLimit | AnsibleLimit for ansible execution | string | false |
+| ansibleSkipTags | AnsibleSkipTags for ansible execution | string | false |
 
 [Back to Custom Resources](#custom-resources)
 
-#### OpenStackDataPlaneNodeSetStatus
+#### OpenStackDataPlaneDeploymentStatus
 
-OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlaneNodeSet
+OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPlaneDeployment
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | conditions | Conditions | condition.Conditions | false |
 | deployed | Deployed | bool | false |
-| DNSClusterAddresses | DNSClusterAddresses | []string | false |
-| CtlplaneSearchDomain | CtlplaneSearchDomain | string | false |
 
 [Back to Custom Resources](#custom-resources)
