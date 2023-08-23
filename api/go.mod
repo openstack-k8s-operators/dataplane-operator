@@ -4,10 +4,10 @@ go 1.19
 
 require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20230808142958-b6c74f5e1faf
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.1.0
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.1.0
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.1.0
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.1.0
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.1.1-0.20230811131408-7be84c6eae21
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.1.1-0.20230811131408-7be84c6eae21
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.1.1-0.20230811185952-ac0404d40f5b
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.1.1-0.20230809115830-00f1cff071d6
 	k8s.io/api v0.26.7
 	k8s.io/apimachinery v0.26.7
 	sigs.k8s.io/controller-runtime v0.14.6
@@ -15,7 +15,7 @@ require (
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.10.2 // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
@@ -42,14 +42,12 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/onsi/gomega v1.27.10 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.14.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	go.uber.org/zap v1.25.0 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
@@ -68,7 +66,7 @@ require (
 	k8s.io/component-base v0.26.7 // indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230515203736-54b630e78af5 // indirect
-	k8s.io/utils v0.0.0-20230711102312-30195339c3c7 // indirect
+	k8s.io/utils v0.0.0-20230726121419-3b25d923346b // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
