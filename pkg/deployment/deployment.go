@@ -65,6 +65,11 @@ func Deploy(
 	var deployName string
 	var deployLabel string
 
+	// Save a copy of the original ExtraMounts so it can be reset after each
+	// service deployment
+	aeeSpecMounts := make([]storage.VolMounts, len(aeeSpec.ExtraMounts))
+	copy(aeeSpecMounts, aeeSpec.ExtraMounts)
+
 	// Deploy the composable services
 	for _, service := range services {
 		log.Info("Deploying service", "service", service)
@@ -80,7 +85,13 @@ func Deploy(
 		readyMessage = fmt.Sprintf(dataplanev1.ServiceReadyMessage, deployName)
 		readyErrorMessage = dataplanev1.ServiceErrorMessage
 		aeeSpec.OpenStackAnsibleEERunnerImage = foundService.Spec.OpenStackAnsibleEERunnerImage
+
+		// Reset ExtraMounts to its original value, and then add in service
+		// specific mounts.
+		aeeSpec.ExtraMounts = []storage.VolMounts{}
+		copy(aeeSpec.ExtraMounts, aeeSpecMounts)
 		aeeSpec, err = addServiceExtraMounts(ctx, helper, aeeSpec, foundService)
+
 		if err != nil {
 			return &ctrl.Result{}, err
 		}
