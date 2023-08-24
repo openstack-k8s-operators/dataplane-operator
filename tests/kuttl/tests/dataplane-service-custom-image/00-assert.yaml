@@ -119,17 +119,7 @@ spec:
   image: example.com/repo/runner-image:latest
   name: openstackansibleee
   restartPolicy: Never
-  roles:
-    any_errors_fatal: true
-    become: false
-    gather_facts: false
-    hosts: all
-    name: test role
-    strategy: linear
-    tasks:
-    - import_role:
-        name: test role
-      name: test task
+  playbook: osp.edpm.test_playbook
   uid: 1001
 status:
   JobStatus: Running
