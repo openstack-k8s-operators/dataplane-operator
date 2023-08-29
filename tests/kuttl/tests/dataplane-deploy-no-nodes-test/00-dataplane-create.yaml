@@ -7,6 +7,13 @@ data:
   01-nova.conf: Zm9vCg==
   nova-blank.conf: Zm9vCg==
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ovncontroller-config
+data:
+  ovsdb-config: test-ovn-config
+---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlane
 metadata:

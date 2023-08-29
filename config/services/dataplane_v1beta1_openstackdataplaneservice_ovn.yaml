@@ -5,3 +5,5 @@ metadata:
 spec:
   label: dataplane-deployment-ovn
   playbook: osp.edpm.ovn
+  configMaps:
+  - ovncontroller-config
