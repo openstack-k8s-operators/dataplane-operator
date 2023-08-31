@@ -192,10 +192,9 @@ func populateInventoryFromIPAM(
 				host.Vars["ctlplane_subnet_cidr"] = netCidr
 			}
 			host.Vars["ctlplane_mtu"] = res.MTU
-			host.Vars["gateway_ip"] = res.Gateway
+			host.Vars["ctlplane_gateway_ip"] = res.Gateway
 			host.Vars["ctlplane_dns_nameservers"] = dnsAddresses
 			host.Vars["ctlplane_host_routes"] = res.Routes
-			dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
 		default:
 			entry := toSnakeCase(string(n))
 			host.Vars[entry+"_ip"] = res.Address
@@ -208,10 +207,10 @@ func populateInventoryFromIPAM(
 			host.Vars[entry+"_mtu"] = res.MTU
 			host.Vars[entry+"_gateway_ip"] = res.Gateway
 			host.Vars[entry+"_host_routes"] = res.Routes
-			dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
 		}
-		host.Vars["dns_search_domains"] = dnsSearchDomains
+		dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
 	}
+	host.Vars["dns_search_domains"] = dnsSearchDomains
 }
 
 // getAnsibleUser returns the string value from the template unless it is set in the node
