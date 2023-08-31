@@ -119,7 +119,7 @@ func (r *OpenStackDataPlaneNodeReconciler) Reconcile(ctx context.Context, req ct
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() {
 		// update the Ready condition based on the sub conditions
-		if instance.Status.Conditions.AllSubConditionIsTrue() {
+		if instance.Status.Conditions.AllSubConditionIsTrue() || instanceRole.IsReady() {
 			instance.Status.Deployed = true
 			instance.Status.Conditions.MarkTrue(
 				condition.ReadyCondition, dataplanev1.DataPlaneNodeReadyMessage)
