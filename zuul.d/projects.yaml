@@ -4,8 +4,8 @@
     github-check:
       jobs:
         - dataplane-operator-docs-preview
-        - dataplane-operator-content-provider
-        - dataplane-operator-crc-podified-edpm-baremetal: &content_provider
+        - openstack-k8s-operators-content-provider
+        - podified-multinode-edpm-deployment-crc: &content_provider
             dependencies:
-              - dataplane-operator-content-provider
-        - dataplane-operator-crc-podified-edpm-deployment: *content_provider
+              - openstack-k8s-operators-content-provider
+        - dataplane-operator-crc-podified-edpm-baremetal: *content_provider
