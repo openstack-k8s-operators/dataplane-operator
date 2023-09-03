@@ -93,7 +93,11 @@ type OpenStackDataPlaneNodeSetReconciler struct {
 	client.Client
 	Kclient kubernetes.Interface
 	Scheme  *runtime.Scheme
-	Log     logr.Logger
+}
+
+// Getlogger returns a logger object with a prefix of "conroller.name" and aditional controller context fields
+func (r *OpenStackDataPlaneNodeSetReconciler) GetLogger(ctx context.Context) logr.Logger {
+	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackDataPlaneRole")
 }
 
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets,verbs=get;list;watch;create;update;patch;delete
@@ -131,8 +135,8 @@ type OpenStackDataPlaneNodeSetReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
 
-	logger := log.FromContext(ctx)
-	logger.Info("Reconciling NodeSet")
+	Log := r.GetLogger(ctx)
+	Log.Info("Reconciling Role")
 
 	// Fetch the OpenStackDataPlaneNodeSet instance
 	instance := &dataplanev1.OpenStackDataPlaneNodeSet{}
@@ -153,7 +157,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		r.Client,
 		r.Kclient,
 		r.Scheme,
-		logger,
+		Log,
 	)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -174,7 +178,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		}
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
-			logger.Error(err, "Error updating instance status conditions")
+			Log.Error(err, "Error updating instance status conditions")
 			_err = err
 			return
 		}
@@ -274,7 +278,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	if instance.Status.Deployed && instance.DeletionTimestamp.IsZero() {
 		// The role is already deployed and not being deleted, so reconciliation
 		// is already complete.
-		logger.Info("NodeSet already deployed", "instance", instance)
+		Log.Info("Role already deployed", "instance")
 		return ctrl.Result{}, nil
 	}
 
@@ -292,7 +296,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	// Set DeploymentReadyCondition to False if it was unknown.
 	// Handles the case where the NodeSet is created, but not yet deployed.
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
-		logger.Info("Set DeploymentReadyCondition false")
+		Log.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
 			condition.NotRequestedReason, condition.SeverityInfo,
 			condition.DeploymentReadyInitMessage)
@@ -300,15 +304,15 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	deploymentExists, isDeploymentReady, err := checkDeployment(helper, req)
 	if err != nil {
-		logger.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
+		Log.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
 		return ctrl.Result{}, err
 	}
 	if isDeploymentReady {
-		logger.Info("Set NodeSet DeploymentReadyCondition true")
+		Log.Info("Set NodeSet DeploymentReadyCondition true")
 		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
 			condition.DeploymentReadyMessage)
 	} else if deploymentExists {
-		logger.Info("Set NodeSet DeploymentReadyCondition false")
+		Log.Info("Set NodeSet DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
 			condition.RequestedReason, condition.SeverityInfo,
 			condition.DeploymentReadyRunningMessage)
@@ -341,7 +345,8 @@ func checkDeployment(helper *helper.Helper,
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
+	Log := r.GetLogger(ctx)
 	reconcileFunction := handler.EnqueueRequestsFromMapFunc(func(o client.Object) []reconcile.Request {
 		result := []reconcile.Request{}
 
@@ -353,8 +358,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		listOpts := []client.ListOption{
 			client.InNamespace(o.GetNamespace()),
 		}
-		if err := r.Client.List(context.Background(), nodeSets, listOpts...); err != nil {
-			r.Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSetList %w")
+		if err := r.Client.List(ctx, nodeSets, listOpts...); err != nil {
+			Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSetList %w")
 			return nil
 		}
 
