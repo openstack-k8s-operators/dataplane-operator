@@ -221,8 +221,8 @@ With the nodes and the controlplane specific variables added, the full
               # Variables set with values from the controlplane
               edpm_ovn_metadata_agent_default_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
               edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
-              edpm_ovn_metadata_agent_metadata_agent_default_nova_metadata_host: 127.0.0.1
-              edpm_ovn_metadata_agent_metadata_agent_default_metadata_proxy_shared_secret: 12345678
+              edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
+              edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
               edpm_ovn_metadata_agent_default_bind_host: 127.0.0.1
               edpm_ovn_dbs:
               - 192.168.24.1
