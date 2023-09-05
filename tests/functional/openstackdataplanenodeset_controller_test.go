@@ -29,19 +29,19 @@ import (
 
 var _ = Describe("Dataplane Role Test", func() {
 	var dataplaneNodeSetName types.NamespacedName
-	var dataplaneConfigMapName types.NamespacedName
 	var dataplaneSecretName types.NamespacedName
+	var dataplaneSSHSecretName types.NamespacedName
 
 	BeforeEach(func() {
 		dataplaneNodeSetName = types.NamespacedName{
 			Name:      "edpm-compute-nodeset",
 			Namespace: namespace,
 		}
-		dataplaneConfigMapName = types.NamespacedName{
+		dataplaneSecretName = types.NamespacedName{
 			Namespace: namespace,
 			Name:      "dataplanenodeset-edpm-compute-nodeset",
 		}
-		dataplaneSecretName = types.NamespacedName{
+		dataplaneSSHSecretName = types.NamespacedName{
 			Namespace: namespace,
 			Name:      "dataplane-ansible-ssh-private-key-secret",
 		}
@@ -90,8 +90,8 @@ var _ = Describe("Dataplane Role Test", func() {
 			)
 		})
 
-		It("Should not have created a ConfigMap", func() {
-			th.AssertConfigMapDoesNotExist(dataplaneConfigMapName)
+		It("Should not have created a Secret", func() {
+			th.AssertSecretDoesNotExist(dataplaneSecretName)
 		})
 	})
 
@@ -99,11 +99,11 @@ var _ = Describe("Dataplane Role Test", func() {
 
 		BeforeEach(func() {
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))
-			CreateSSHSecret(dataplaneSecretName)
+			CreateSSHSecret(dataplaneSSHSecretName)
 		})
-		It("Should have created a ConfigMap", func() {
-			cm := th.GetConfigMap(dataplaneConfigMapName)
-			Expect(cm.Data["inventory"]).Should(
+		It("Should have created a Secret", func() {
+			secret := th.GetSecret(dataplaneSecretName)
+			Expect(secret.Data["inventory"]).Should(
 				ContainSubstring("edpm-compute-nodeset"))
 		})
 	})

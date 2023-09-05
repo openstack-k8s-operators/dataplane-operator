@@ -74,8 +74,8 @@ type OpenStackDataPlaneNodeSet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   OpenStackDataPlaneNodeSetSpec `json:"spec,omitempty"`
-	Status OpenStackDataPlaneNodeSetStatus      `json:"status,omitempty"`
+	Spec   OpenStackDataPlaneNodeSetSpec   `json:"spec,omitempty"`
+	Status OpenStackDataPlaneNodeSetStatus `json:"status,omitempty"`
 }
 
 // OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlaneNodeSet

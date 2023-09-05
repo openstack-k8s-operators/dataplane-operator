@@ -9,15 +9,6 @@ spec:
       value: "True"
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
-  services:
-    - configure-network
-    - validate-network
-    - install-os
-    - configure-os
-    - run-os
-    - ovn
-    - libvirt
-    - nova
   preProvisioned: true
   deployStrategy:
     deploy: true

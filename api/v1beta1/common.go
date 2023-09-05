@@ -44,7 +44,6 @@ type AnsibleOpts struct {
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
 	AnsibleVars map[string]json.RawMessage `json:"ansibleVars,omitempty"`
-
 }
 
 // NodeSection defines the top level attributes inherited by nodes in the CR.

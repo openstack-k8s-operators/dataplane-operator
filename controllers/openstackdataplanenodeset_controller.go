@@ -274,7 +274,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 			}
 		}
 		deployResult, err := deployment.Deploy(
-			ctx, helper, instance, nodes, ansibleSSHPrivateKeySecret,
+			ctx, helper, instance, ansibleSSHPrivateKeySecret,
 			roleSecret, &instance.Status, ansibleEESpec,
 			instance.Spec.Services, instance)
 		if err != nil {

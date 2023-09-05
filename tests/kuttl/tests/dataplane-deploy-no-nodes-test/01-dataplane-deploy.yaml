@@ -4,23 +4,5 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: edpm-compute-no-nodes
 spec:
-  preProvisioned: true
-  services:
-    - configure-network
-    - validate-network
-    - install-os
-    - configure-os
-    - run-os
-    - ovn
-    - libvirt
-    - nova
   deployStrategy:
       deploy: true
-  env:
-    - name: ANSIBLE_FORCE_COLOR
-      value: "True"
-    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-      value: "True"
-  nodeTemplate:
-    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-    nodes: {}

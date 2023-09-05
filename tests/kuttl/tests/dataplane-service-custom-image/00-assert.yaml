@@ -79,7 +79,7 @@ spec:
           path: inventory
         - key: network
           path: network
-        secretName: dataplanerole-edpm-compute-no-nodes
+        secretName: dataplanenodeset-edpm-no-nodes-custom-service
   image: example.com/repo/runner-image:latest
   name: openstackansibleee
   restartPolicy: Never

@@ -39,7 +39,6 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allIPSets map[string]infranetworkv1.IPSet, dnsAddresses []string) (string, error) {
 	var err error
-	var configMap string
 
 	inventory := ansible.MakeInventory()
 	roleNameGroup := inventory.AddGroup(instance.Name)
@@ -48,7 +47,6 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		return "", err
 	}
 
-	configMap = fmt.Sprintf("dataplanenodeset-%s", instance.Name)
 	for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
 		host := roleNameGroup.AddHost(nodeName)
 		var dnsSearchDomains []string
@@ -138,7 +136,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		"inventory": string(invData),
 		"network":   string(instance.Spec.NodeTemplate.NetworkConfig.Template),
 	}
-	secretName := fmt.Sprintf("dataplanerole-%s", instance.Name)
+	secretName := fmt.Sprintf("dataplanenodeset-%s", instance.Name)
 	template := []utils.Template{
 		// Secret
 		{

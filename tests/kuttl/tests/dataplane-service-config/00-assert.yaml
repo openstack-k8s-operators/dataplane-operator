@@ -90,7 +90,7 @@ spec:
           path: inventory
         - key: network
           path: network
-        secretName: dataplanerole-edpm-compute-no-nodes
+        secretName: dataplanenodeset-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   play: |
