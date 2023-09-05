@@ -128,7 +128,8 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	ctrlResult, err := createOrPatchDataPlaneResources(ctx, instance, helper)
 	if err != nil {
 		return ctrl.Result{}, err
-	} else if (ctrlResult != ctrl.Result{}) {
+	} else if !ctrlResult.IsZero() {
+		// if result isn't empty, return it
 		return ctrlResult, nil
 	}
 
