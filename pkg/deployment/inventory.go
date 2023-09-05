@@ -31,8 +31,8 @@ import (
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/ansible"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	utils "github.com/openstack-k8s-operators/lib-common/modules/common/util"
 )
 
@@ -76,24 +76,24 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 		utils.LogErrorForObject(helper, err, "Could not parse Role inventory", instance)
 		return "", err
 	}
-	cmData := map[string]string{
+	secretData := map[string]string{
 		"inventory": string(invData),
 		"network":   string(instance.Spec.NodeTemplate.NetworkConfig.Template),
 	}
-	configMapName := fmt.Sprintf("dataplanerole-%s", instance.Name)
-	cms := []utils.Template{
-		// ConfigMap
+	secretName := fmt.Sprintf("dataplanerole-%s", instance.Name)
+	template := []utils.Template{
+		// Secret
 		{
-			Name:         configMapName,
+			Name:         secretName,
 			Namespace:    instance.Namespace,
 			Type:         utils.TemplateTypeNone,
 			InstanceType: instance.Kind,
-			CustomData:   cmData,
+			CustomData:   secretData,
 			Labels:       instance.ObjectMeta.Labels,
 		},
 	}
-	err = configmap.EnsureConfigMaps(ctx, helper, instance, cms, nil)
-	return configMapName, err
+	err = secret.EnsureSecrets(ctx, helper, instance, template, nil)
+	return secretName, err
 }
 
 // GenerateNodeInventory yields a parsed Inventory for node
@@ -156,24 +156,24 @@ func GenerateNodeInventory(ctx context.Context, helper *helper.Helper,
 		utils.LogErrorForObject(helper, err, "Could not Parse node inventory", instance)
 		return "", err
 	}
-	cmData := map[string]string{
+	secretData := map[string]string{
 		"inventory": string(invData),
 		"network":   string(networkConfig.Template),
 	}
-	configMapName := fmt.Sprintf("dataplanenode-%s", instance.Name)
-	cms := []utils.Template{
-		// ConfigMap
+	secretName := fmt.Sprintf("dataplanenode-%s", instance.Name)
+	template := []utils.Template{
+		// Secret
 		{
-			Name:         configMapName,
+			Name:         secretName,
 			Namespace:    instance.Namespace,
 			Type:         utils.TemplateTypeNone,
 			InstanceType: instance.Kind,
-			CustomData:   cmData,
+			CustomData:   secretData,
 			Labels:       instance.ObjectMeta.Labels,
 		},
 	}
-	err = configmap.EnsureConfigMaps(ctx, helper, instance, cms, nil)
-	return configMapName, err
+	err = secret.EnsureSecrets(ctx, helper, instance, template, nil)
+	return secretName, err
 }
 
 // populateInventoryFromIPAM populates inventory from IPAM

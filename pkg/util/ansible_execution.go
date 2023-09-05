@@ -42,7 +42,7 @@ func AnsibleExecution(
 	obj client.Object,
 	label string,
 	sshKeySecret string,
-	inventoryConfigMap string,
+	inventorySecret string,
 	play string,
 	playbook string,
 	aeeSpec dataplanev1.AnsibleEESpec,
@@ -120,10 +120,8 @@ func AnsibleExecution(
 		inventoryVolume := corev1.Volume{
 			Name: "inventory",
 			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: inventoryConfigMap,
-					},
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: inventorySecret,
 					Items: []corev1.KeyToPath{
 						{
 							Key:  "inventory",
