@@ -55,7 +55,6 @@ spec:
           value: "2"
       preProvisioned: true
       services:
-        - repo-setup
         - configure-network
         - validate-network
         - install-os

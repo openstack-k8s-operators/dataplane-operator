@@ -27,7 +27,6 @@ spec:
         - name: ANSIBLE_VERBOSITY
           value: "2"
       services:
-        - repo-setup
         - configure-network
         - validate-network
         - install-os
