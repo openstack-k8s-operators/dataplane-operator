@@ -1,7 +1,6 @@
 package functional
 
 import (
-	"github.com/onsi/gomega"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -89,7 +88,7 @@ func DefaultDataplaneDeploymentTemplate(name types.NamespacedName, spec dataplan
 
 func GetDataplaneDeployment(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneDeployment {
 	instance := &dataplanev1.OpenStackDataPlaneDeployment{}
-	gomega.Eventually(func(g gomega.Gomega) error {
+	Eventually(func(g Gomega) error {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 		return nil
 	}, timeout, interval).Should(Succeed())
@@ -98,7 +97,7 @@ func GetDataplaneDeployment(name types.NamespacedName) *dataplanev1.OpenStackDat
 
 func GetDataplaneNodeSet(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneNodeSet {
 	instance := &dataplanev1.OpenStackDataPlaneNodeSet{}
-	gomega.Eventually(func(g gomega.Gomega) error {
+	Eventually(func(g Gomega) error {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 		return nil
 	}, timeout, interval).Should(Succeed())
@@ -111,7 +110,7 @@ func DeleteNamespace(name string) {
 			Name: name,
 		},
 	}
-	gomega.Expect(k8sClient.Delete(ctx, ns)).Should(gomega.Succeed())
+	Expect(k8sClient.Delete(ctx, ns)).Should(Succeed())
 }
 
 func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
