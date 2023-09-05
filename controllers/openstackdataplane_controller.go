@@ -233,14 +233,6 @@ func (r *OpenStackDataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// sets it to true.
 	instance.Spec.DeployStrategy.Deploy = false
 
-	// Set DeploymentReadyCondition to False if it was unknown.
-	// Handles the case where the Node is created with
-	// DeployStrategy.Deploy=false.
-	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
-		logger.Info("Set DeploymentReadyCondition false")
-		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
-	}
-
 	return ctrl.Result{}, nil
 }
 
