@@ -1,5 +1,5 @@
-mkdocs
-mike
-mkdocs-git-revision-date-plugin
-mkdocs-material
-mkdocs-build-plantuml-plugin
+mkdocs>=1.5.2,<1.6.0
+mike>=1.1.2,<1.2.0
+mkdocs-git-revision-date-plugin>=0.3.2,<1.0.0
+mkdocs-material>=9.2.8,<9.3.0
+mkdocs-build-plantuml-plugin>=1.7.4,<1.8.0
