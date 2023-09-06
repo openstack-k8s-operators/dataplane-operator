@@ -57,7 +57,7 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	NetworkAttachments []string `json:"networkAttachments,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default={configure-network,validate-network,install-os,configure-os,run-os,ovn,libvirt,nova}
+	// +kubebuilder:default={configure-network,validate-network,install-os,configure-os,run-os,ovn,libvirt,nova,telemetry}
 	// Services list
 	Services []string `json:"services"`
 }

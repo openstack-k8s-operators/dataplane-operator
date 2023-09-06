@@ -17,6 +17,7 @@ spec:
     - ovn
     - libvirt
     - nova
+    - telemetry
   preProvisioned: true
   deployStrategy:
       deploy: true

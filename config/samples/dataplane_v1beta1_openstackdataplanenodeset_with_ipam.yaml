@@ -21,6 +21,7 @@ spec:
     - ovn
     - libvirt
     - nova
+    - telemetry
   baremetalSetTemplate:
     deploymentSSHSecret: dataplane-ansible-ssh-private-key-secret
     bmhLabelSelector:

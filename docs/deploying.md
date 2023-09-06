@@ -310,6 +310,7 @@ The output should be similar to:
     validate-network    6d6h
     libvirt             6d6h
     nova                6d6h
+    telemetry           6d6h
 
 Each service uses the
 [`role`](https://openstack-k8s-operators.github.io/openstack-ansibleee-operator/openstack_ansibleee/#role)
@@ -416,6 +417,7 @@ $ oc get openstackdataplanerole edpm-compute -o json | jq .status.conditions[].t
 "libvirt service ready"
 "nova service ready"
 "run-os service ready"
+"telemetry service ready"
 "validate-network service ready"
 ```
 

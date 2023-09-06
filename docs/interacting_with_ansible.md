@@ -28,6 +28,7 @@ Sample output when the default list of services:
  dataplane-deployment-libvirt-edpm-compute                                  True     AnsibleExecutionJob complete
  dataplane-deployment-nova-edpm-compute                                     True     AnsibleExecutionJob complete
  dataplane-deployment-run-os-edpm-compute                                   True     AnsibleExecutionJob complete
+ dataplane-deployment-telemetry-edpm-compute                                True     AnsibleExecutionJob complete
  dataplane-deployment-validate-network-edpm-compute                         True     AnsibleExecutionJob complete
 
 Querying for pods with the OpenStackAnsibleEE label
@@ -54,6 +55,7 @@ Sample output:
  dataplane-deployment-libvirt-edpm-compute             1/1           8s         2m35s
  dataplane-deployment-nova-edpm-compute                1/1           8s         2m35s
  dataplane-deployment-run-os-edpm-compute              1/1           8s         2m19s
+ dataplane-deployment-telemetry-edpm-compute           1/1           8s         2m35s
  dataplane-deployment-validate-network-edpm-compute    1/1           8s         2m43s
 
 Using the job name, the corresponding pod can be retrieved:
