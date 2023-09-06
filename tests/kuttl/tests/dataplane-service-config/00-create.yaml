@@ -46,20 +46,20 @@ spec:
     - kuttl-service-cm-1
 ---
 apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlane
+kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: openstack-edpm-no-nodes
+  name: edpm-compute-no-nodes
 spec:
+  preProvisioned: true
   deployStrategy:
       deploy: true
-  roles:
-    edpm-compute-no-nodes:
-      services:
-        - kuttl-service
-      nodeTemplate:
-        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-        ansibleVars:
-          edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: ""
-          edpm_ovn_metadata_agent_DEFAULT_transport_url: ""
-          edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: ""
-          edpm_ovn_dbs: ""
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+      value: "True"
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    nodes: {}
+  services:
+    - kuttl-service

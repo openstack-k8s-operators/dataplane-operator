@@ -1,95 +1,79 @@
 ---
 apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlane
+kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: openstack-edpm-no-nodes
-  namespace: openstack
-spec:
-  deployStrategy:
-    deploy: true
-status:
-  conditions:
-  - message: DataPlane ready
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Deployment completed
-    reason: Ready
-    status: "True"
-    type: DeploymentReady
-  - message: Setup complete
-    reason: Ready
-    status: "True"
-    type: SetupReady
-  deployed: true
----
-apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlaneRole
-metadata:
-  labels:
-    openstackdataplane: openstack-edpm-no-nodes
   name: edpm-compute-no-nodes
   namespace: openstack
-  ownerReferences:
-  - apiVersion: dataplane.openstack.org/v1beta1
-    blockOwnerDeletion: true
-    controller: true
-    kind: OpenStackDataPlane
-    name: openstack-edpm-no-nodes
 spec:
-  dataPlane: openstack-edpm-no-nodes
+  services:
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - run-os
+    - ovn
+    - libvirt
+    - nova
   deployStrategy:
-    deploy: true
+      deploy: true
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+      value: "True"
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    nodes: {}
 status:
   conditions:
-  - message: DataPlaneRole ready
-    reason: Ready
-    status: "True"
-    type: Ready
-  - message: Deployment completed
-    reason: Ready
-    status: "True"
-    type: DeploymentReady
-  - message: Input data complete
-    reason: Ready
-    status: "True"
-    type: InputReady
-  - message: Setup complete
-    reason: Ready
-    status: "True"
-    type: SetupReady
-  - message: configure-network service ready
-    reason: Ready
-    status: "True"
-    type: configure-network service ready
-  - message: configure-os service ready
-    reason: Ready
-    status: "True"
-    type: configure-os service ready
-  - message: install-os service ready
-    reason: Ready
-    status: "True"
-    type: install-os service ready
-  - message: libvirt service ready
-    reason: Ready
-    status: "True"
-    type: libvirt service ready
-  - message: nova service ready
-    reason: Ready
-    status: "True"
-    type: nova service ready
-  - message: ovn service ready
-    reason: Ready
-    status: "True"
-    type: ovn service ready
-  - message: run-os service ready
-    reason: Ready
-    status: "True"
-    type: run-os service ready
-  - message: validate-network service ready
-    reason: Ready
-    status: "True"
-    type: validate-network service ready
+    - message: Setup complete
+      reason: Ready
+      status: "True"
+      type: Ready
+    - message: Deployment completed
+      reason: Ready
+      status: "True"
+      type: DeploymentReady
+    - message: Input data complete
+      reason: Ready
+      status: "True"
+      type: InputReady
+    - message: Setup complete
+      reason: Ready
+      status: "True"
+      type: SetupReady
+    - message: configure-network service ready
+      reason: Ready
+      status: "True"
+      type: configure-network service ready
+    - message: configure-os service ready
+      reason: Ready
+      status: "True"
+      type: configure-os service ready
+    - message: install-os service ready
+      reason: Ready
+      status: "True"
+      type: install-os service ready
+    - message: libvirt service ready
+      reason: Ready
+      status: "True"
+      type: libvirt service ready
+    - message: nova service ready
+      reason: Ready
+      status: "True"
+      type: nova service ready
+    - message: ovn service ready
+      reason: Ready
+      status: "True"
+      type: ovn service ready
+    - message: run-os service ready
+      reason: Ready
+      status: "True"
+      type: run-os service ready
+    - message: validate-network service ready
+      reason: Ready
+      status: "True"
+      type: validate-network service ready
   deployed: true
 ---
 apiVersion: ansibleee.openstack.org/v1alpha1
@@ -101,7 +85,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneRole
+    kind: OpenStackDataPlaneNodeSet
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
@@ -130,7 +114,7 @@ spec:
           path: inventory
         - key: network
           path: network
-        secretName: dataplanerole-edpm-compute-no-nodes
+        secretName: dataplanenodeset-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
@@ -157,7 +141,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneRole
+    kind: OpenStackDataPlaneNodeSet
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
@@ -186,7 +170,7 @@ spec:
           path: inventory
         - key: network
           path: network
-        secretName: dataplanerole-edpm-compute-no-nodes
+        secretName: dataplanenodeset-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
@@ -213,7 +197,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneRole
+    kind: OpenStackDataPlaneNodeSet
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
@@ -242,7 +226,7 @@ spec:
           path: inventory
         - key: network
           path: network
-        secretName: dataplanerole-edpm-compute-no-nodes
+        secretName: dataplanenodeset-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
@@ -270,7 +254,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneRole
+    kind: OpenStackDataPlaneNodeSet
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
@@ -299,7 +283,7 @@ spec:
           path: inventory
         - key: network
           path: network
-        secretName: dataplanerole-edpm-compute-no-nodes
+        secretName: dataplanenodeset-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
@@ -326,7 +310,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneRole
+    kind: OpenStackDataPlaneNodeSet
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
@@ -355,7 +339,7 @@ spec:
           path: inventory
         - key: network
           path: network
-        secretName: dataplanerole-edpm-compute-no-nodes
+        secretName: dataplanenodeset-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
@@ -383,7 +367,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneRole
+    kind: OpenStackDataPlaneNodeSet
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
@@ -393,12 +377,12 @@ spec:
       name: ovncontroller-config-0
       subPath: ovsdb-config
     volumes:
-    - name: ovncontroller-config-0
-      configMap:
+    - configMap:
         items:
         - key: ovsdb-config
           path: ovsdb-config
         name: ovncontroller-config
+      name: ovncontroller-config-0
   - mounts:
     - mountPath: /runner/env/ssh_key
       name: ssh-key
@@ -423,7 +407,7 @@ spec:
           path: inventory
         - key: network
           path: network
-        secretName: dataplanerole-edpm-compute-no-nodes
+        secretName: dataplanenodeset-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
@@ -450,12 +434,13 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneRole
+    kind: OpenStackDataPlaneNodeSet
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
   debug: false
   envConfigMapName: openstack-aee-default-env
+
   extraMounts:
   - mounts:
     - mountPath: /runner/env/ssh_key
@@ -481,7 +466,7 @@ spec:
           path: inventory
         - key: network
           path: network
-        secretName: dataplanerole-edpm-compute-no-nodes
+        secretName: dataplanenodeset-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   preserveJobs: true
@@ -511,24 +496,15 @@ spec:
   envConfigMapName: openstack-aee-default-env
   extraMounts:
   - mounts:
-    - mountPath: /var/lib/openstack/configs/nova/01-nova.conf
+    - mountPath: /var/lib/openstack/configs/nova/00-ansibleVars
       name: nova-cell1-compute-config-0
-      subPath: 01-nova.conf
-    - mountPath: /var/lib/openstack/configs/nova/nova-blank.conf
-      name: nova-cell1-compute-config-1
-      subPath: nova-blank.conf
+      subPath: 00-ansibleVars
     volumes:
     - name: nova-cell1-compute-config-0
       secret:
         items:
-        - key: 01-nova.conf
-          path: 01-nova.conf
-        secretName: nova-cell1-compute-config
-    - name: nova-cell1-compute-config-1
-      secret:
-        items:
-        - key: nova-blank.conf
-          path: nova-blank.conf
+        - key: 00-ansibleVars
+          path: 00-ansibleVars
         secretName: nova-cell1-compute-config
   - mounts:
     - mountPath: /runner/env/ssh_key
@@ -554,7 +530,7 @@ spec:
           path: inventory
         - key: network
           path: network
-        secretName: dataplanerole-edpm-compute-no-nodes
+        secretName: dataplanenodeset-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   preserveJobs: true

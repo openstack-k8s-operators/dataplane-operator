@@ -21,23 +21,8 @@ import (
 )
 
 const (
-	// DataPlaneNodeReadyMessage ready
-	DataPlaneNodeReadyMessage = "DataPlaneNode ready"
-
-	// DataPlaneNodeErrorMessage error
-	DataPlaneNodeErrorMessage = "DataPlaneNode error occurred %s"
-
-	// DataPlaneRoleReadyMessage ready
-	DataPlaneRoleReadyMessage = "DataPlaneRole ready"
-
-	// DataPlaneRoleErrorMessage error
-	DataPlaneRoleErrorMessage = "DataPlaneRole error occurred %s"
-
-	// DataPlaneReadyMessage ready
-	DataPlaneReadyMessage = "DataPlane ready"
-
-	// DataPlaneErrorMessage error
-	DataPlaneErrorMessage = "DataPlane error occurred %s"
+	// DataPlaneNodeSetErrorMessage error
+	DataPlaneNodeSetErrorMessage = "DataPlaneNodeSet error occurred %s"
 
 	// ServiceReadyCondition Status=True condition indicates if the
 	// service is finished and successful.
@@ -59,40 +44,44 @@ const (
 	// all baremetal nodes provisioned for the Role.
 	RoleBareMetalProvisionReadyCondition condition.Type = "RoleBaremetalProvisionReady"
 
-	// RoleBaremetalProvisionReadyMessage ready
-	RoleBaremetalProvisionReadyMessage = "RoleBaremetalProvisionReady ready"
+	// NodeSetBareMetalProvisionReadyCondition Status=True condition indicates
+	// all baremetal nodes provisioned for the NodeSet.
+	NodeSetBareMetalProvisionReadyCondition condition.Type = "NodeSetBaremetalProvisionReady"
 
-	// RoleBaremetalProvisionReadyWaitingMessage not yet ready
-	RoleBaremetalProvisionReadyWaitingMessage = "RoleBaremetalProvisionReady not yet ready"
+	// NodeSetBaremetalProvisionReadyMessage ready
+	NodeSetBaremetalProvisionReadyMessage = "NodeSetBaremetalProvisionReady ready"
 
-	// RoleBaremetalProvisionErrorMessage error
-	RoleBaremetalProvisionErrorMessage = "RoleBaremetalProvisionReady error occurred"
+	// NodeSetBaremetalProvisionReadyWaitingMessage not yet ready
+	NodeSetBaremetalProvisionReadyWaitingMessage = "NodeSetBaremetalProvisionReady not yet ready"
 
-	// RoleIPReservationReadyCondition Status=True condition indicates
-	// IPSets reserved for all nodes in a Role.
-	RoleIPReservationReadyCondition condition.Type = "RoleIPReservationReady"
+	// NodeSetBaremetalProvisionErrorMessage error
+	NodeSetBaremetalProvisionErrorMessage = "NodeSetBaremetalProvisionReady error occurred"
 
-	// RoleIPReservationReadyMessage ready
-	RoleIPReservationReadyMessage = "RoleIPReservationReady ready"
+	// NodeSetIPReservationReadyCondition Status=True condition indicates
+	// IPSets reserved for all nodes in a NodeSet.
+	NodeSetIPReservationReadyCondition condition.Type = "NodeSetIPReservationReady"
 
-	// RoleIPReservationReadyWaitingMessage not yet ready
-	RoleIPReservationReadyWaitingMessage = "RoleIPReservationReady not yet ready"
+	// NodeSetIPReservationReadyMessage ready
+	NodeSetIPReservationReadyMessage = "NodeSetIPReservationReady ready"
 
-	// RoleIPReservationReadyErrorMessage error
-	RoleIPReservationReadyErrorMessage = "RoleIPReservationReady error occurred"
+	// NodeSetIPReservationReadyWaitingMessage not yet ready
+	NodeSetIPReservationReadyWaitingMessage = "NodeSetIPReservationReady not yet ready"
 
-	// RoleDNSDataReadyCondition Status=True condition indicates
-	// DNSData created for the Role.
-	RoleDNSDataReadyCondition condition.Type = "RoleDNSDataReady"
+	// NodeSetIPReservationReadyErrorMessage error
+	NodeSetIPReservationReadyErrorMessage = "NodeSetIPReservationReady error occurred"
 
-	// RoleDNSDataReadyMessage ready
-	RoleDNSDataReadyMessage = "RoleDNSDataReady ready"
+	// NodeSetDNSDataReadyCondition Status=True condition indicates
+	// DNSData created for the NodeSet.
+	NodeSetDNSDataReadyCondition condition.Type = "NodeSetDNSDataReady"
 
-	// RoleDNSDataReadyWaitingMessage not yet ready
-	RoleDNSDataReadyWaitingMessage = "RoleDNSDataReady not yet ready"
+	// NodeSetDNSDataReadyMessage ready
+	NodeSetDNSDataReadyMessage = "NodeSetDNSDataReady ready"
 
-	// RoleDNSDataReadyErrorMessage error
-	RoleDNSDataReadyErrorMessage = "RoleDNSDataReady error occurred"
+	// NodeSetDNSDataReadyWaitingMessage not yet ready
+	NodeSetDNSDataReadyWaitingMessage = "NodeSetDNSDataReady not yet ready"
+
+	// NodeSetDNSDataReadyErrorMessage error
+	NodeSetDNSDataReadyErrorMessage = "NodeSetDNSDataReady error occurred"
 
 	// InputReadyWaitingMessage not yet ready
 	InputReadyWaitingMessage = "Waiting for input %s, not yet ready"

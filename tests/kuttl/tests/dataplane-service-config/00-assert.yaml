@@ -1,3 +1,4 @@
+---
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
@@ -7,9 +8,15 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneRole
+    kind: OpenStackDataPlaneNodeSet
     name: edpm-compute-no-nodes
 spec:
+  debug: false
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+      value: "True"
   backoffLimit: 6
   envConfigMapName: openstack-aee-default-env
   extraMounts:
@@ -83,7 +90,7 @@ spec:
           path: inventory
         - key: network
           path: network
-        secretName: dataplanerole-edpm-compute-no-nodes
+        secretName: dataplanenodeset-edpm-compute-no-nodes
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   play: |

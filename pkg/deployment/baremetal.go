@@ -31,10 +31,16 @@ import (
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 )
 
+// ManagedHostMap defines a struct to hold our HostMap. This HostMap is a map
+// of NodeSet names and Baremetalv1 InstanceSpec.
+type ManagedHostMap struct {
+	HostMap map[string]map[string]baremetalv1.InstanceSpec
+}
+
 // DeployBaremetalSet Deploy OpenStackBaremetalSet
 func DeployBaremetalSet(
-	ctx context.Context, helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneRole,
-	nodes *dataplanev1.OpenStackDataPlaneNodeList, ipSets map[string]infranetworkv1.IPSet,
+	ctx context.Context, helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneNodeSet,
+	ipSets map[string]infranetworkv1.IPSet,
 	dnsAddresses []string,
 ) (bool, error) {
 	baremetalSet := &baremetalv1.OpenStackBaremetalSet{
@@ -44,15 +50,30 @@ func DeployBaremetalSet(
 		},
 	}
 
+	// Check if nodes need to be provisioned and set the relevant BaremetalHost field.
+	nodeSetManagedHostMap := ManagedHostMap{}
+	err := BuildBMHHostMap(ctx, helper, instance, &nodeSetManagedHostMap)
+	if err != nil {
+		return false, err
+	}
+
 	utils.LogForObject(helper, "Reconciling BaremetalSet", instance)
-	_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), baremetalSet, func() error {
+	_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), baremetalSet, func() error {
+		hostMap, ok := nodeSetManagedHostMap.HostMap[instance.Name]
+		if ok {
+			bmsTemplate := instance.Spec.BaremetalSetTemplate.DeepCopy()
+			bmsTemplate.BaremetalHosts = hostMap
+			instance.Spec.BaremetalSetTemplate = *bmsTemplate
+		}
 		instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec)
-		for _, node := range nodes.Items {
-			ipSet, ok := ipSets[node.Name]
-			instanceSpec := baremetalSet.Spec.BaremetalHosts[node.Spec.HostName]
+
+		for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
+			hostName := node.HostName
+			ipSet, ok := ipSets[nodeName]
+			instanceSpec := baremetalSet.Spec.BaremetalHosts[hostName]
 			if !ok {
 				utils.LogForObject(helper, "IPAM Not configured for use, skipping", instance)
-				instanceSpec.CtlPlaneIP = node.Spec.AnsibleHost
+				instanceSpec.CtlPlaneIP = node.Ansible.AnsibleHost
 			} else {
 				for _, res := range ipSet.Status.Reservation {
 					if res.Network == CtlPlaneNetwork {
@@ -67,11 +88,8 @@ func DeployBaremetalSet(
 					}
 				}
 			}
-			baremetalSet.Spec.BaremetalHosts[node.Spec.HostName] = instanceSpec
-			commonSecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
-			if baremetalSet.Spec.DeploymentSSHSecret == "" {
-				baremetalSet.Spec.DeploymentSSHSecret = commonSecret
-			}
+			baremetalSet.Spec.BaremetalHosts[hostName] = instanceSpec
+
 		}
 		err := controllerutil.SetControllerReference(
 			helper.GetBeforeObject(), baremetalSet, helper.GetScheme())
@@ -80,9 +98,9 @@ func DeployBaremetalSet(
 
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
-			dataplanev1.RoleBareMetalProvisionReadyCondition,
+			dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			dataplanev1.RoleBaremetalProvisionErrorMessage)
+			dataplanev1.NodeSetBaremetalProvisionErrorMessage)
 		return false, err
 	}
 
@@ -90,39 +108,34 @@ func DeployBaremetalSet(
 	if !baremetalSet.IsReady() {
 		utils.LogForObject(helper, "BaremetalSet not ready, waiting...", instance)
 		instance.Status.Conditions.MarkFalse(
-			dataplanev1.RoleBareMetalProvisionReadyCondition,
+			dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 			condition.RequestedReason, condition.SeverityInfo,
-			dataplanev1.RoleBaremetalProvisionReadyWaitingMessage)
+			dataplanev1.NodeSetBaremetalProvisionReadyWaitingMessage)
 		return false, nil
 	}
 	instance.Status.Conditions.MarkTrue(
-		dataplanev1.RoleBareMetalProvisionReadyCondition,
-		dataplanev1.RoleBaremetalProvisionReadyMessage)
+		dataplanev1.NodeSetBareMetalProvisionReadyCondition,
+		dataplanev1.NodeSetBaremetalProvisionReadyMessage)
 	return true, nil
 }
 
 // BuildBMHHostMap  Build managed host map for all roles
 func BuildBMHHostMap(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlane,
-	nodes *dataplanev1.OpenStackDataPlaneNodeList,
-	roleManagedHostMap map[string]map[string]baremetalv1.InstanceSpec) error {
-	for _, node := range nodes.Items {
-		labels := node.GetObjectMeta().GetLabels()
-		roleName, ok := labels["openstackdataplanerole"]
-		if !ok {
-			// Node does not have a label
-			continue
+	instance *dataplanev1.OpenStackDataPlaneNodeSet,
+	nodeSetManagedHostMap *ManagedHostMap) error {
+	for _, node := range instance.Spec.NodeTemplate.Nodes {
+		if nodeSetManagedHostMap.HostMap == nil {
+			nodeSetManagedHostMap.HostMap = make(map[string]map[string]baremetalv1.InstanceSpec)
 		}
-		if roleManagedHostMap[roleName] == nil {
-			roleManagedHostMap[roleName] = make(map[string]baremetalv1.InstanceSpec)
+		if nodeSetManagedHostMap.HostMap[instance.Name] == nil {
+			nodeSetManagedHostMap.HostMap[instance.Name] = make(map[string]baremetalv1.InstanceSpec)
 		}
 
-		if !instance.Spec.Roles[roleName].PreProvisioned {
+		if !instance.Spec.PreProvisioned {
 			instanceSpec := baremetalv1.InstanceSpec{}
-			instanceSpec.UserData = node.Spec.Node.UserData
-			instanceSpec.NetworkData = node.Spec.Node.NetworkData
-			roleManagedHostMap[roleName][node.Spec.HostName] = instanceSpec
-
+			instanceSpec.UserData = node.UserData
+			instanceSpec.NetworkData = node.NetworkData
+			nodeSetManagedHostMap.HostMap[instance.Name][node.HostName] = instanceSpec
 		}
 	}
 	return nil

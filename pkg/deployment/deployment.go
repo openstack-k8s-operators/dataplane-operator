@@ -46,13 +46,12 @@ func Deploy(
 	ctx context.Context,
 	helper *helper.Helper,
 	obj client.Object,
-	nodes *dataplanev1.OpenStackDataPlaneNodeList,
 	sshKeySecret string,
 	inventorySecret string,
-	status *dataplanev1.OpenStackDataPlaneStatus,
+	status *dataplanev1.OpenStackDataPlaneNodeSetStatus,
 	aeeSpec dataplanev1.AnsibleEESpec,
 	services []string,
-	role *dataplanev1.OpenStackDataPlaneRole,
+	nodeSet *dataplanev1.OpenStackDataPlaneNodeSet,
 ) (*ctrl.Result, error) {
 
 	log := helper.GetLogger()
@@ -114,7 +113,7 @@ func Deploy(
 		)
 		// Some OpenStackDataPlaneService might need Kubernetes Services to be created
 		if len(foundService.Spec.Services) > 0 {
-			errKube := CreateKubeServices(&foundService, nodes, helper, make(map[string]string))
+			errKube := CreateKubeServices(&foundService, nodeSet, helper, make(map[string]string))
 			if errKube != nil {
 				return &ctrl.Result{}, errKube
 			}
@@ -127,7 +126,6 @@ func Deploy(
 	}
 
 	return nil, nil
-
 }
 
 // ConditionalDeploy function encapsulating primary deloyment handling with
@@ -138,7 +136,7 @@ func ConditionalDeploy(
 	obj client.Object,
 	sshKeySecret string,
 	inventorySecret string,
-	status *dataplanev1.OpenStackDataPlaneStatus,
+	status *dataplanev1.OpenStackDataPlaneNodeSetStatus,
 	readyCondition condition.Type,
 	readyMessage string,
 	readyWaitingMessage string,

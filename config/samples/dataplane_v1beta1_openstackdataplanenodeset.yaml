@@ -19,7 +19,7 @@ spec:
     - nova
   preProvisioned: true
   deployStrategy:
-      deploy: false
+      deploy: true
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     nodes:

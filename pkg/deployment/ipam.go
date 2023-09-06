@@ -33,14 +33,13 @@ import (
 
 // EnsureIPSets Creates the IPSets
 func EnsureIPSets(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlaneRole,
-	nodes *dataplanev1.OpenStackDataPlaneNodeList) (map[string]infranetworkv1.IPSet, bool, error) {
-	allIPSets, err := reserveIPs(ctx, helper, instance, nodes)
+	instance *dataplanev1.OpenStackDataPlaneNodeSet) (map[string]infranetworkv1.IPSet, bool, error) {
+	allIPSets, err := reserveIPs(ctx, helper, instance)
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
-			dataplanev1.RoleIPReservationReadyCondition,
+			dataplanev1.NodeSetIPReservationReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			dataplanev1.RoleIPReservationReadyErrorMessage)
+			dataplanev1.NodeSetIPReservationReadyErrorMessage)
 		return nil, false, err
 	}
 
@@ -51,43 +50,39 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 	for _, s := range allIPSets {
 		if s.Status.Conditions.IsFalse(condition.ReadyCondition) {
 			instance.Status.Conditions.MarkFalse(
-				dataplanev1.RoleIPReservationReadyCondition,
+				dataplanev1.NodeSetIPReservationReadyCondition,
 				condition.RequestedReason, condition.SeverityInfo,
-				dataplanev1.RoleIPReservationReadyWaitingMessage)
+				dataplanev1.NodeSetIPReservationReadyWaitingMessage)
 			return nil, false, nil
 		}
 	}
 	instance.Status.Conditions.MarkTrue(
-		dataplanev1.RoleIPReservationReadyCondition,
-		dataplanev1.RoleIPReservationReadyMessage)
+		dataplanev1.NodeSetIPReservationReadyCondition,
+		dataplanev1.NodeSetIPReservationReadyMessage)
 	return allIPSets, true, nil
 
 }
 
 // createOrPatchDNSData builds the DNSData
 func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlaneRole,
-	nodes *dataplanev1.OpenStackDataPlaneNodeList,
+	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allIPSets map[string]infranetworkv1.IPSet) (string, error) {
 
 	var allDNSRecords []infranetworkv1.DNSHost
 	var ctlplaneSearchDomain string
 	// Build DNSData CR
-	for _, node := range nodes.Items {
-		nets := node.Spec.Node.Networks
-		if len(nets) == 0 {
-			nets = instance.Spec.NodeTemplate.Networks
-		}
+	for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
+		nets := node.Networks
 
 		if len(nets) > 0 {
 			// Get IPSet
-			ipSet, ok := allIPSets[node.Name]
+			ipSet, ok := allIPSets[nodeName]
 			if ok {
 				for _, res := range ipSet.Status.Reservation {
 					dnsRecord := infranetworkv1.DNSHost{}
 					dnsRecord.IP = res.Address
 					var fqdnNames []string
-					fqdnName := strings.Join([]string{node.Spec.HostName, res.DNSDomain}, ".")
+					fqdnName := strings.Join([]string{nodeName, res.DNSDomain}, ".")
 					fqdnNames = append(fqdnNames, fqdnName)
 					dnsRecord.Hostnames = fqdnNames
 					allDNSRecords = append(allDNSRecords, dnsRecord)
@@ -126,8 +121,7 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 
 // EnsureDNSData Ensures DNSData is created
 func EnsureDNSData(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlaneRole,
-	nodes *dataplanev1.OpenStackDataPlaneNodeList,
+	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allIPSets map[string]infranetworkv1.IPSet) ([]string, []string, string, bool, error) {
 
 	// Verify dnsmasq CR exists
@@ -137,29 +131,29 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	if err != nil || !isReady || dnsAddresses == nil {
 		if err != nil {
 			instance.Status.Conditions.MarkFalse(
-				dataplanev1.RoleDNSDataReadyCondition,
+				dataplanev1.NodeSetDNSDataReadyCondition,
 				condition.ErrorReason, condition.SeverityError,
-				dataplanev1.RoleDNSDataReadyErrorMessage)
+				dataplanev1.NodeSetDNSDataReadyErrorMessage)
 		}
 		if !isReady {
 			instance.Status.Conditions.MarkFalse(
-				dataplanev1.RoleDNSDataReadyCondition,
+				dataplanev1.NodeSetDNSDataReadyCondition,
 				condition.RequestedReason, condition.SeverityInfo,
-				dataplanev1.RoleDNSDataReadyWaitingMessage)
+				dataplanev1.NodeSetDNSDataReadyWaitingMessage)
 		}
 		if dnsAddresses == nil {
-			instance.Status.Conditions.Remove(dataplanev1.RoleDNSDataReadyCondition)
+			instance.Status.Conditions.Remove(dataplanev1.NodeSetDNSDataReadyCondition)
 		}
 		return nil, nil, "", isReady, err
 	}
 	// Create or Patch DNSData
 	ctlplaneSearchDomain, err := createOrPatchDNSData(
-		ctx, helper, instance, nodes, allIPSets)
+		ctx, helper, instance, allIPSets)
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
-			dataplanev1.RoleDNSDataReadyCondition,
+			dataplanev1.NodeSetDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			dataplanev1.RoleDNSDataReadyErrorMessage)
+			dataplanev1.NodeSetDNSDataReadyErrorMessage)
 		return nil, nil, "", false, err
 	}
 
@@ -173,30 +167,29 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	err = helper.GetClient().Get(ctx, key, dnsData)
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
-			dataplanev1.RoleDNSDataReadyCondition,
+			dataplanev1.NodeSetDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			dataplanev1.RoleDNSDataReadyErrorMessage)
+			dataplanev1.NodeSetDNSDataReadyErrorMessage)
 		return nil, nil, "", false, err
 	}
 
 	if !dnsData.IsReady() {
 		util.LogForObject(helper, "DNSData not ready yet waiting", instance)
 		instance.Status.Conditions.MarkFalse(
-			dataplanev1.RoleDNSDataReadyCondition,
+			dataplanev1.NodeSetDNSDataReadyCondition,
 			condition.RequestedReason, condition.SeverityInfo,
-			dataplanev1.RoleDNSDataReadyWaitingMessage)
+			dataplanev1.NodeSetDNSDataReadyWaitingMessage)
 		return nil, nil, "", false, nil
 	}
 	instance.Status.Conditions.MarkTrue(
-		dataplanev1.RoleDNSDataReadyCondition,
-		dataplanev1.RoleDNSDataReadyMessage)
+		dataplanev1.NodeSetDNSDataReadyCondition,
+		dataplanev1.NodeSetDNSDataReadyMessage)
 	return dnsAddresses, dnsClusterAddresses, ctlplaneSearchDomain, true, nil
 }
 
 // reserveIPs Reserves IPs by creating IPSets
 func reserveIPs(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlaneRole,
-	nodes *dataplanev1.OpenStackDataPlaneNodeList) (map[string]infranetworkv1.IPSet, error) {
+	instance *dataplanev1.OpenStackDataPlaneNodeSet) (map[string]infranetworkv1.IPSet, error) {
 
 	// Verify NetConfig CRs exist
 	netConfigList := &infranetworkv1.NetConfigList{}
@@ -209,24 +202,29 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 	}
 	if len(netConfigList.Items) == 0 {
 		util.LogForObject(helper, "No NetConfig CR exists yet, IPAM won't be used", instance)
-		instance.Status.Conditions.Remove(dataplanev1.RoleIPReservationReadyCondition)
+		instance.Status.Conditions.Remove(dataplanev1.NodeSetIPReservationReadyCondition)
 		return nil, nil
 	}
 
 	allIPSets := make(map[string]infranetworkv1.IPSet)
 	// CreateOrPatch IPSets
-	for _, node := range nodes.Items {
-		nets := node.Spec.Node.Networks
+	for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
+		nets := node.Networks
 
-		if len(nets) == 0 {
-			nets = instance.Spec.NodeTemplate.Networks
+		if instance.Spec.PreProvisioned {
+			// Drop CtlPlaneNetwork
+			for i, v := range nets {
+				if v.Name == CtlPlaneNetwork {
+					nets = append(nets[:i], nets[i+1:]...)
+				}
+			}
 		}
 		if len(nets) > 0 {
 			util.LogForObject(helper, "Reconciling IPSet", instance)
 			ipSet := &infranetworkv1.IPSet{
 				ObjectMeta: metav1.ObjectMeta{
 					Namespace: instance.Namespace,
-					Name:      node.Name,
+					Name:      nodeName,
 				},
 			}
 			_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ipSet, func() error {
@@ -239,7 +237,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 			if err != nil {
 				return nil, err
 			}
-			allIPSets[node.Name] = *ipSet
+			allIPSets[nodeName] = *ipSet
 		}
 	}
 

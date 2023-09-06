@@ -40,7 +40,9 @@ import (
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/controllers"
+	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	aee "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 
 	test "github.com/openstack-k8s-operators/lib-common/modules/test"
 	. "github.com/openstack-k8s-operators/lib-common/modules/test/helpers"
@@ -64,9 +66,9 @@ const (
 	SecretName           = "test-secret"
 	MessageBusSecretName = "rabbitmq-secret"
 	ContainerImage       = "test://nova"
-	timeout              = 10 * time.Second
+	timeout              = 40 * time.Second
 	// have maximum 100 retries before the timeout hits
-	interval = timeout / 100
+	interval = 100
 )
 
 func TestAPIs(t *testing.T) {
@@ -85,12 +87,20 @@ var _ = BeforeSuite(func() {
 	aeeCRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
+	baremetalCRDs, err := test.GetCRDDirFromModule(
+		"github.com/openstack-k8s-operators/openstack-baremetal-operator/api", gomod, "bases")
+	Expect(err).ShouldNot(HaveOccurred())
+	infraCRDs, err := test.GetCRDDirFromModule(
+		"github.com/openstack-k8s-operators/infra-operator/apis", gomod, "bases")
+	Expect(err).ShouldNot(HaveOccurred())
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("..", "..", "config", "crd", "bases"),
 			aeeCRDs,
+			baremetalCRDs,
+			infraCRDs,
 		},
 		ErrorIfCRDPathMissing: true,
 	}
@@ -114,6 +124,10 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	err = appsv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
+	err = baremetalv1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = infrav1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
 	//+kubebuilder:scaffold:scheme
 
 	logger = ctrl.Log.WithName("---Test---")
@@ -136,23 +150,7 @@ var _ = BeforeSuite(func() {
 
 	kclient, err := kubernetes.NewForConfig(cfg)
 	Expect(err).ToNot(HaveOccurred(), "failed to create kclient")
-	err = (&controllers.OpenStackDataPlaneReconciler{
-		Client:  k8sManager.GetClient(),
-		Scheme:  k8sManager.GetScheme(),
-		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("Dataplane"),
-	}).SetupWithManager(k8sManager)
-	Expect(err).ToNot(HaveOccurred())
-
-	err = (&controllers.OpenStackDataPlaneNodeReconciler{
-		Client:  k8sManager.GetClient(),
-		Scheme:  k8sManager.GetScheme(),
-		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("DataplaneNode"),
-	}).SetupWithManager(k8sManager)
-	Expect(err).ToNot(HaveOccurred())
-
-	err = (&controllers.OpenStackDataPlaneRoleReconciler{
+	err = (&controllers.OpenStackDataPlaneNodeSetReconciler{
 		Client:  k8sManager.GetClient(),
 		Scheme:  k8sManager.GetScheme(),
 		Kclient: kclient,

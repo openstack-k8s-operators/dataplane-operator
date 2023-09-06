@@ -20,7 +20,6 @@ import (
 	"flag"
 	"os"
 	"strconv"
-	"strings"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -117,42 +116,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.OpenStackDataPlaneReconciler{
+	if err = (&controllers.OpenStackDataPlaneNodeSetReconciler{
 		Client:  mgr.GetClient(),
 		Scheme:  mgr.GetScheme(),
 		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackDataPlane"),
+		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackDataPlaneNodeSet"),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlane")
-		os.Exit(1)
-	}
-	if err = (&controllers.OpenStackDataPlaneRoleReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackDataPlaneRole"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneRole")
-		os.Exit(1)
-	}
-	if err = (&controllers.OpenStackDataPlaneNodeReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackDataPlaneNode"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneNode")
+		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneNodeSet")
 		os.Exit(1)
 	}
 
 	checker := healthz.Ping
-	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) != "false" {
-		if err = (&dataplanev1.OpenStackDataPlane{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackDataPlane")
-			os.Exit(1)
-		}
-		checker = mgr.GetWebhookServer().StartedChecker()
-	}
 
 	//+kubebuilder:scaffold:builder
 

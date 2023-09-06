@@ -1,55 +1,19 @@
 ---
 apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlane
+kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: openstack-edpm-no-nodes
-  namespace: openstack
+  name: edpm-no-nodes-custom-service
 spec:
-  deployStrategy:
-    deploy: true
-  roles:
-    edpm-compute-no-nodes:
-      nodeTemplate:
-        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-      services:
-      - custom-image-service
-status:
-  conditions:
-  - message: Deployment in progress
-    reason: Requested
-    severity: Info
-    status: "False"
-    type: Ready
-  - message: Deployment in progress
-    reason: Requested
-    severity: Info
-    status: "False"
-    type: DeploymentReady
-  - message: Setup complete
-    reason: Ready
-    status: "True"
-    type: SetupReady
----
-apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlaneRole
-metadata:
-  labels:
-    openstackdataplane: openstack-edpm-no-nodes
-  name: edpm-compute-no-nodes
-  namespace: openstack
-  ownerReferences:
-  - apiVersion: dataplane.openstack.org/v1beta1
-    blockOwnerDeletion: true
-    controller: true
-    kind: OpenStackDataPlane
-    name: openstack-edpm-no-nodes
-spec:
-  dataPlane: openstack-edpm-no-nodes
+  preProvisioned: true
   deployStrategy:
     deploy: true
   services:
-  - custom-image-service
+    - custom-image-service
   nodeTemplate:
+    nodes: {}
+    ansible:
+      ansibleUser: cloud-admin
+      ansiblePort: 22
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
 status:
   conditions:
@@ -80,14 +44,14 @@ status:
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
-  name: dataplane-deployment-custom-image-service-edpm-compute-no-nodes
+  name: dp-custom-image-service-edpm-no-nodes-custom-service
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneRole
-    name: edpm-compute-no-nodes
+    kind: OpenStackDataPlaneNodeSet
+    name: edpm-no-nodes-custom-service
 spec:
   backoffLimit: 6
   extraMounts:
@@ -115,11 +79,10 @@ spec:
           path: inventory
         - key: network
           path: network
-        secretName: dataplanerole-edpm-compute-no-nodes
+        secretName: dataplanenodeset-edpm-no-nodes-custom-service
   image: example.com/repo/runner-image:latest
   name: openstackansibleee
   restartPolicy: Never
-  playbook: osp.edpm.test_playbook
   uid: 1001
 status:
   JobStatus: Running

@@ -25,8 +25,6 @@ import (
 	"strings"
 
 	yaml "gopkg.in/yaml.v3"
-	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
@@ -36,10 +34,9 @@ import (
 	utils "github.com/openstack-k8s-operators/lib-common/modules/common/util"
 )
 
-// GenerateRoleInventory yields a parsed Inventory for role
-func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlaneRole,
-	nodes []dataplanev1.OpenStackDataPlaneNode,
+// GenerateNodeSetInventory yields a parsed Inventory for role
+func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
+	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allIPSets map[string]infranetworkv1.IPSet, dnsAddresses []string) (string, error) {
 	var err error
 
@@ -50,21 +47,80 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 		return "", err
 	}
 
-	for _, node := range nodes {
-		host := roleNameGroup.AddHost(node.Name)
-		// Use if provided else use hostname
-		if node.Spec.AnsibleHost != "" {
-			host.Vars["ansible_host"] = node.Spec.AnsibleHost
+	for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
+		host := roleNameGroup.AddHost(nodeName)
+		var dnsSearchDomains []string
+
+		// Use ansible_host if provided else use hostname. Fall back to
+		// nodeName if all else fails.
+		if node.Ansible.AnsibleHost != "" {
+			host.Vars["ansible_host"] = node.Ansible.AnsibleHost
+		} else if node.HostName != "" {
+			host.Vars["ansible_host"] = node.HostName
 		} else {
-			host.Vars["ansible_host"] = node.Spec.HostName
+			host.Vars["ansible_host"] = nodeName
 		}
 
-		err = resolveAnsibleVars(&node.Spec.Node, &host, &ansible.Group{})
+		ipSet, ok := allIPSets[nodeName]
+		if ok {
+			populateInventoryFromIPAM(&ipSet, host, dnsAddresses)
+			for _, res := range ipSet.Status.Reservation {
+				// Build the vars for ips/routes etc
+				switch n := res.Network; n {
+				case CtlPlaneNetwork:
+					host.Vars["ctlplane_ip"] = res.Address
+					_, ipnet, err := net.ParseCIDR(res.Cidr)
+					if err == nil {
+						netCidr, _ := ipnet.Mask.Size()
+						host.Vars["ctlplane_subnet_cidr"] = netCidr
+					}
+					host.Vars["ctlplane_mtu"] = res.MTU
+					host.Vars["gateway_ip"] = res.Gateway
+					host.Vars["ctlplane_dns_nameservers"] = dnsAddresses
+					host.Vars["ctlplane_host_routes"] = res.Routes
+					dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
+				default:
+					entry := toSnakeCase(string(n))
+					host.Vars[entry+"_ip"] = res.Address
+					_, ipnet, err := net.ParseCIDR(res.Cidr)
+					if err == nil {
+						netCidr, _ := ipnet.Mask.Size()
+						host.Vars[entry+"_cidr"] = netCidr
+					}
+					host.Vars[entry+"_vlan_id"] = res.Vlan
+					host.Vars[entry+"_mtu"] = res.MTU
+					//host.Vars[string.Join(entry, "_gateway_ip")] = res.Gateway
+					host.Vars[entry+"_host_routes"] = res.Routes
+					dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
+				}
+				networkConfig := getAnsibleNetworkConfig(instance, nodeName)
+
+				if networkConfig.Template != "" {
+					host.Vars["edpm_network_config_template"] = NicConfigTemplateFile
+				}
+
+				host.Vars["ansible_user"] = getAnsibleUser(instance, nodeName)
+				host.Vars["ansible_port"] = getAnsiblePort(instance, nodeName)
+				host.Vars["management_network"] = getAnsibleManagementNetwork(instance, nodeName)
+				host.Vars["networks"] = getAnsibleNetworks(instance, nodeName)
+
+				ansibleVarsData, err := getAnsibleVars(helper, instance, nodeName)
+				if err != nil {
+					return "", err
+				}
+				for key, value := range ansibleVarsData {
+					host.Vars[key] = value
+				}
+				host.Vars["dns_search_domains"] = dnsSearchDomains
+			}
+		}
+
+		err = resolveNodeAnsibleVars(&node, &host, &ansible.Group{})
 		if err != nil {
 			return "", err
 		}
 
-		ipSet, ok := allIPSets[node.Name]
+		ipSet, ok = allIPSets[nodeName]
 		if ok {
 			populateInventoryFromIPAM(&ipSet, host, dnsAddresses)
 		}
@@ -73,94 +129,14 @@ func GenerateRoleInventory(ctx context.Context, helper *helper.Helper,
 
 	invData, err := inventory.MarshalYAML()
 	if err != nil {
-		utils.LogErrorForObject(helper, err, "Could not parse Role inventory", instance)
+		utils.LogErrorForObject(helper, err, "Could not parse NodeSet inventory", instance)
 		return "", err
 	}
 	secretData := map[string]string{
 		"inventory": string(invData),
 		"network":   string(instance.Spec.NodeTemplate.NetworkConfig.Template),
 	}
-	secretName := fmt.Sprintf("dataplanerole-%s", instance.Name)
-	template := []utils.Template{
-		// Secret
-		{
-			Name:         secretName,
-			Namespace:    instance.Namespace,
-			Type:         utils.TemplateTypeNone,
-			InstanceType: instance.Kind,
-			CustomData:   secretData,
-			Labels:       instance.ObjectMeta.Labels,
-		},
-	}
-	err = secret.EnsureSecrets(ctx, helper, instance, template, nil)
-	return secretName, err
-}
-
-// GenerateNodeInventory yields a parsed Inventory for node
-func GenerateNodeInventory(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlaneNode,
-	instanceRole *dataplanev1.OpenStackDataPlaneRole) (string, error) {
-	var (
-		err      error
-		hostName string
-	)
-
-	inventory := ansible.MakeInventory()
-	all := inventory.AddGroup("all")
-	host := all.AddHost(instance.Name)
-
-	ipSet := &infranetworkv1.IPSet{}
-	err = helper.GetClient().Get(ctx,
-		types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, ipSet)
-	if err != nil {
-		if !k8s_errors.IsNotFound(err) {
-			return "", err
-		}
-		// Don't try to popluare inventory
-		utils.LogForObject(helper, "Networks not configured for Role", instance)
-	} else {
-		dnsAddresses, _, _, err := checkDNSService(ctx, helper, instance)
-		if err != nil {
-			return "", err
-		}
-		populateInventoryFromIPAM(ipSet, host, dnsAddresses)
-	}
-	networkConfig := getAnsibleNetworkConfig(instance, instanceRole)
-
-	if networkConfig.Template != "" {
-		host.Vars["edpm_network_config_template"] = NicConfigTemplateFile
-	}
-
-	host.Vars["ansible_user"] = getAnsibleUser(instance, instanceRole)
-	host.Vars["ansible_port"] = getAnsiblePort(instance, instanceRole)
-	host.Vars["management_network"] = getAnsibleManagementNetwork(instance, instanceRole)
-	host.Vars["networks"] = getAnsibleNetworks(instance, instanceRole)
-
-	if instance.Spec.AnsibleHost == "" {
-		hostName = instance.Spec.HostName
-	} else {
-		hostName = instance.Spec.AnsibleHost
-	}
-	host.Vars["ansible_host"] = hostName
-
-	ansibleVarsData, err := getAnsibleVars(helper, instance, instanceRole)
-	if err != nil {
-		return "", err
-	}
-	for key, value := range ansibleVarsData {
-		host.Vars[key] = value
-	}
-
-	invData, err := inventory.MarshalYAML()
-	if err != nil {
-		utils.LogErrorForObject(helper, err, "Could not Parse node inventory", instance)
-		return "", err
-	}
-	secretData := map[string]string{
-		"inventory": string(invData),
-		"network":   string(networkConfig.Template),
-	}
-	secretName := fmt.Sprintf("dataplanenode-%s", instance.Name)
+	secretName := fmt.Sprintf("dataplanenodeset-%s", instance.Name)
 	template := []utils.Template{
 		// Secret
 		{
@@ -214,76 +190,73 @@ func populateInventoryFromIPAM(
 }
 
 // getAnsibleUser returns the string value from the template unless it is set in the node
-func getAnsibleUser(instance *dataplanev1.OpenStackDataPlaneNode, instanceRole *dataplanev1.OpenStackDataPlaneRole) string {
-	if instance.Spec.Node.AnsibleUser != "" {
-		return instance.Spec.Node.AnsibleUser
+func getAnsibleUser(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) string {
+	if instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsibleUser != "" {
+		return instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsibleUser
 	}
-	return instanceRole.Spec.NodeTemplate.AnsibleUser
+	return instance.Spec.NodeTemplate.Ansible.AnsibleUser
 }
 
 // getAnsiblePort returns the string value from the template unless it is set in the node
-func getAnsiblePort(instance *dataplanev1.OpenStackDataPlaneNode,
-	instanceRole *dataplanev1.OpenStackDataPlaneRole) string {
-	if instance.Spec.Node.AnsiblePort > 0 {
-		return strconv.Itoa(instance.Spec.Node.AnsiblePort)
+func getAnsiblePort(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) string {
+	if instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsiblePort > 0 {
+		return strconv.Itoa(instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsiblePort)
 	}
-	return strconv.Itoa(instanceRole.Spec.NodeTemplate.AnsiblePort)
+	return strconv.Itoa(instance.Spec.NodeTemplate.Ansible.AnsiblePort)
 }
 
 // getAnsibleManagementNetwork returns the string value from the template unless it is set in the node
 func getAnsibleManagementNetwork(
-	instance *dataplanev1.OpenStackDataPlaneNode,
-	instanceRole *dataplanev1.OpenStackDataPlaneRole) string {
-	if instance.Spec.Node.ManagementNetwork != "" {
-		return instance.Spec.Node.ManagementNetwork
+	instance *dataplanev1.OpenStackDataPlaneNodeSet,
+	nodeName string) string {
+	if instance.Spec.NodeTemplate.Nodes[nodeName].ManagementNetwork != "" {
+		return instance.Spec.NodeTemplate.Nodes[nodeName].ManagementNetwork
 	}
-	return instanceRole.Spec.NodeTemplate.ManagementNetwork
+	return instance.Spec.NodeTemplate.ManagementNetwork
 }
 
 // getAnsibleNetworkConfig returns a JSON string value from the template unless it is set in the node
-func getAnsibleNetworkConfig(instance *dataplanev1.OpenStackDataPlaneNode,
-	instanceRole *dataplanev1.OpenStackDataPlaneRole) dataplanev1.NetworkConfigSection {
-	if instance.Spec.Node.NetworkConfig.Template != "" {
-		return instance.Spec.Node.NetworkConfig
+func getAnsibleNetworkConfig(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) dataplanev1.NetworkConfigSection {
+	if instance.Spec.NodeTemplate.Nodes[nodeName].NetworkConfig.Template != "" {
+		return instance.Spec.NodeTemplate.Nodes[nodeName].NetworkConfig
 	}
-	return instanceRole.Spec.NodeTemplate.NetworkConfig
+	return instance.Spec.NodeTemplate.NetworkConfig
 }
 
 // getAnsibleNetworks returns a JSON string mapping fixedIP and/or network name to their valules
-func getAnsibleNetworks(instance *dataplanev1.OpenStackDataPlaneNode,
-	instanceRole *dataplanev1.OpenStackDataPlaneRole) []infranetworkv1.IPSetNetwork {
-	if len(instance.Spec.Node.Networks) > 0 {
-		return instance.Spec.Node.Networks
+func getAnsibleNetworks(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) []infranetworkv1.IPSetNetwork {
+	if len(instance.Spec.NodeTemplate.Nodes[nodeName].Networks) > 0 {
+		return instance.Spec.NodeTemplate.Nodes[nodeName].Networks
 	}
-	return instanceRole.Spec.NodeTemplate.Networks
+	return instance.Spec.NodeTemplate.Networks
 }
 
 // getAnsibleVars returns ansible vars for a node
-func getAnsibleVars(helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneNode,
-	instanceRole *dataplanev1.OpenStackDataPlaneRole) (map[string]interface{}, error) {
+func getAnsibleVars(
+	helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) (map[string]interface{}, error) {
 	// Merge the ansibleVars from the role into the value set on the node.
 	// Top level keys set on the node ansibleVars should override top level keys from the role AnsibleVars.
 	// However, there is no "deep" merge of values. Only top level keys are comvar matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
 
 	// Unmarshal the YAML strings into two maps
-	role := make(map[string]interface{})
+	nodeSet := make(map[string]interface{})
 	node := make(map[string]interface{})
-	var roleYamlError, nodeYamlError error
-	for key, val := range instanceRole.Spec.NodeTemplate.AnsibleVars {
+	var nodeSetYamlError, nodeYamlError error
+	for key, val := range instance.Spec.NodeTemplate.Ansible.AnsibleVars {
 		var v interface{}
-		roleYamlError = yaml.Unmarshal(val, &v)
-		if roleYamlError != nil {
+		nodeSetYamlError = yaml.Unmarshal(val, &v)
+		if nodeSetYamlError != nil {
 			utils.LogErrorForObject(
 				helper,
-				roleYamlError,
+				nodeSetYamlError,
 				fmt.Sprintf("Failed to unmarshal YAML data from role AnsibleVar '%s'",
 					key), instance)
-			return nil, roleYamlError
+			return nil, nodeSetYamlError
 		}
-		role[key] = v
+		nodeSet[key] = v
 	}
 
-	for key, val := range instance.Spec.Node.AnsibleVars {
+	for key, val := range instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsibleVars {
 		var v interface{}
 		nodeYamlError = yaml.Unmarshal(val, &v)
 		if nodeYamlError != nil {
@@ -296,28 +269,73 @@ func getAnsibleVars(helper *helper.Helper, instance *dataplanev1.OpenStackDataPl
 		}
 		node[key] = v
 	}
-	if role == nil && node != nil {
+
+	if nodeSet == nil && node != nil {
 		return node, nil
 	}
-	if role != nil && node == nil {
-		return role, nil
+	if nodeSet != nil && node == nil {
+		return nodeSet, nil
 	}
 
 	// Merge the two maps
 	for k, v := range node {
-		role[k] = v
+		nodeSet[k] = v
 	}
-	return role, nil
+	return nodeSet, nil
 }
 
-func resolveAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host, group *ansible.Group) error {
+func resolveAnsibleVars(nodeTemplate *dataplanev1.NodeTemplate, host *ansible.Host, group *ansible.Group) error {
 	ansibleVarsData := make(map[string]interface{})
 
-	if node.AnsibleUser != "" {
-		ansibleVarsData["ansible_user"] = node.AnsibleUser
+	if nodeTemplate.Ansible.AnsibleHost != "" {
+		ansibleVarsData["ansible_user"] = nodeTemplate.Ansible.AnsibleUser
 	}
-	if node.AnsiblePort > 0 {
-		ansibleVarsData["ansible_port"] = node.AnsiblePort
+	if nodeTemplate.Ansible.AnsiblePort > 0 {
+		ansibleVarsData["ansible_port"] = nodeTemplate.Ansible.AnsiblePort
+	}
+	if nodeTemplate.ManagementNetwork != "" {
+		ansibleVarsData["management_network"] = nodeTemplate.ManagementNetwork
+	}
+	if nodeTemplate.NetworkConfig.Template != "" {
+		ansibleVarsData["edpm_network_config_template"] = NicConfigTemplateFile
+	}
+	if len(nodeTemplate.Networks) > 0 {
+		ansibleVarsData["networks"] = nodeTemplate.Networks
+	}
+
+	var err error
+	for key, val := range nodeTemplate.Ansible.AnsibleVars {
+		var v interface{}
+		err = yaml.Unmarshal(val, &v)
+		if err != nil {
+			return err
+		}
+		ansibleVarsData[key] = v
+	}
+
+	if host.Vars != nil {
+		for key, value := range ansibleVarsData {
+			host.Vars[key] = value
+		}
+	}
+
+	if group.Vars != nil {
+		for key, value := range ansibleVarsData {
+			group.Vars[key] = value
+		}
+	}
+
+	return nil
+}
+
+func resolveNodeAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host, group *ansible.Group) error {
+	ansibleVarsData := make(map[string]interface{})
+
+	if node.Ansible.AnsibleUser != "" {
+		ansibleVarsData["ansible_user"] = node.Ansible.AnsibleUser
+	}
+	if node.Ansible.AnsiblePort > 0 {
+		ansibleVarsData["ansible_port"] = node.Ansible.AnsiblePort
 	}
 	if node.ManagementNetwork != "" {
 		ansibleVarsData["management_network"] = node.ManagementNetwork
@@ -329,7 +347,7 @@ func resolveAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host, group
 		ansibleVarsData["networks"] = node.Networks
 	}
 	var err error
-	for key, val := range node.AnsibleVars {
+	for key, val := range node.Ansible.AnsibleVars {
 		var v interface{}
 		err = yaml.Unmarshal(val, &v)
 		if err != nil {

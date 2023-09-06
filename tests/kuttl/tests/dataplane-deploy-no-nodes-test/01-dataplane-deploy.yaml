@@ -1,7 +1,8 @@
+---
 apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlane
+kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: openstack-edpm-no-nodes
+  name: edpm-compute-no-nodes
 spec:
   deployStrategy:
-    deploy: True
+      deploy: true

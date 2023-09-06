@@ -18,7 +18,6 @@ package v1beta1
 
 import (
 	"fmt"
-	"reflect"
 
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
@@ -26,19 +25,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// OpenStackDataPlaneRoleSpec defines the desired state of OpenStackDataPlaneRole
-type OpenStackDataPlaneRoleSpec struct {
+// OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNodeSet
+type OpenStackDataPlaneNodeSetSpec struct {
 	// +kubebuilder:validation:Optional
-	// DataPlane name of OpenStackDataPlane for this role
-	DataPlane string `json:"dataPlane,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// BaremetalSetTemplate Template for BaremetalSet for the Role
+	// BaremetalSetTemplate Template for BaremetalSet for the NodeSet
 	BaremetalSetTemplate baremetalv1.OpenStackBaremetalSetSpec `json:"baremetalSetTemplate,omitempty"`
 
-	// +kubebuilder:validation:Optional
-	// NodeTemplate - node attributes specific to this roles
-	NodeTemplate NodeSection `json:"nodeTemplate,omitempty"`
+	// +kubebuilder:validation:Required
+	// NodeTemplate - node attributes specific to nodes defined by this resource. These
+	// attributes can be overriden at the individual node level, else take their defaults
+	// from valus in this section.
+	NodeTemplate NodeTemplate `json:"nodeTemplate"`
 
 	// +kubebuilder:validation:Optional
 	//
@@ -67,51 +64,65 @@ type OpenStackDataPlaneRoleSpec struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-//+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane Role"
-// +kubebuilder:resource:shortName=osdprole;osdproles
+//+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane NodeSet"
+//+kubebuilder:resource:shortName=osdpns;osdpnodeset;osdpnodesets
 //+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
 //+kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
 
-// OpenStackDataPlaneRole is the Schema for the openstackdataplaneroles API
-type OpenStackDataPlaneRole struct {
+// OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets API
+type OpenStackDataPlaneNodeSet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   OpenStackDataPlaneRoleSpec `json:"spec,omitempty"`
-	Status OpenStackDataPlaneStatus   `json:"status,omitempty"`
+	Spec   OpenStackDataPlaneNodeSetSpec   `json:"spec,omitempty"`
+	Status OpenStackDataPlaneNodeSetStatus `json:"status,omitempty"`
+}
+
+// OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlaneNodeSet
+type OpenStackDataPlaneNodeSetStatus struct {
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
+	// Conditions
+	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
+
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Deployed
+	Deployed bool `json:"deployed,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true
 
-// OpenStackDataPlaneRoleList contains a list of OpenStackDataPlaneRole
-type OpenStackDataPlaneRoleList struct {
+// OpenStackDataPlaneNodeSetList contains a list of OpenStackDataPlaneNodeSets
+type OpenStackDataPlaneNodeSetList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []OpenStackDataPlaneRole `json:"items"`
+	Items           []OpenStackDataPlaneNodeSet `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&OpenStackDataPlaneRole{}, &OpenStackDataPlaneRoleList{})
+	SchemeBuilder.Register(&OpenStackDataPlaneNodeSet{}, &OpenStackDataPlaneNodeSetList{})
 }
 
 // IsReady - returns true if the DataPlane is ready
-func (instance OpenStackDataPlaneRole) IsReady() bool {
+func (instance OpenStackDataPlaneNodeSet) IsReady() bool {
 	return instance.Status.Conditions.IsTrue(condition.ReadyCondition)
 }
 
 // InitConditions - Initializes Status Conditons
-func (instance *OpenStackDataPlaneRole) InitConditions() {
+func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 	instance.Status.Conditions = condition.Conditions{}
 
 	cl := condition.CreateList(
 		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(condition.InputReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(NodeSetIPReservationReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(NodeSetDNSDataReadyCondition, condition.InitReason, condition.InitReason),
 	)
 
-	// Only set Baremetal condition for baremetal provisioning
+	// Only set Baremetal related conditions if we have baremetal hosts included in the
+	// baremetalSetTemplate.
 	if len(instance.Spec.BaremetalSetTemplate.BaremetalHosts) > 0 {
-		cl = append(cl, *condition.UnknownCondition(RoleBareMetalProvisionReadyCondition, condition.InitReason, condition.InitReason))
+		cl = append(cl, *condition.UnknownCondition(NodeSetBareMetalProvisionReadyCondition, condition.InitReason, condition.InitReason))
 	}
 
 	if instance.Spec.Services != nil && instance.Spec.DeployStrategy.Deploy {
@@ -125,51 +136,8 @@ func (instance *OpenStackDataPlaneRole) InitConditions() {
 	instance.Status.Deployed = false
 }
 
-// Validate - validates the shared data between role and nodes
-func (instance OpenStackDataPlaneRole) Validate(nodes []OpenStackDataPlaneNode) error {
-	var errorMsgs []string
-	containsEmptyField := false
-	for _, field := range UniqueSpecFields {
-		if reflect.ValueOf(instance.Spec).FieldByName(field).IsZero() {
-			containsEmptyField = true
-			break
-		}
-	}
-
-	if !containsEmptyField {
-		for _, node := range nodes {
-			suffix := fmt.Sprintf("node: %s and role: %s", node.Name, instance.Name)
-			msgs := AssertUniquenessBetween(node.Spec, instance.Spec, suffix)
-			errorMsgs = append(errorMsgs, msgs...)
-		}
-	}
-
-	// Compare nodes when role fields are empty
-	if containsEmptyField {
-		nodeMap := make(map[string]OpenStackDataPlaneNode)
-
-		for _, node := range nodes {
-			for _, field := range UniqueSpecFields {
-				if len(nodeMap[field].Name) > 0 {
-					suffix := fmt.Sprintf("node: %s and node: %s", node.Name, nodeMap[field].Name)
-					msgs := AssertUniquenessBetween(node.Spec, nodeMap[field].Spec, suffix)
-					errorMsgs = append(errorMsgs, msgs...)
-				}
-				if len(nodeMap[field].Name) == 0 && !reflect.ValueOf(node.Spec).FieldByName(field).IsZero() {
-					nodeMap[field] = node
-				}
-			}
-		}
-	}
-
-	if len(errorMsgs) > 0 {
-		return fmt.Errorf("validation error(s): %s", errorMsgs)
-	}
-	return nil
-}
-
 // GetAnsibleEESpec - get the fields that will be passed to AEE
-func (instance OpenStackDataPlaneRole) GetAnsibleEESpec() AnsibleEESpec {
+func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 	return AnsibleEESpec{
 		NetworkAttachments: instance.Spec.NetworkAttachments,
 		AnsibleTags:        instance.Spec.DeployStrategy.AnsibleTags,

@@ -3,27 +3,30 @@ kind: OpenStackDataPlaneService
 metadata:
   name: custom-image-service
 spec:
-  label: dataplane-deployment-custom-image-service
+  label: dp-custom-image-service
   openStackAnsibleEERunnerImage: example.com/repo/runner-image:latest
-  playbook: osp.edpm.test_playbook
+  role:
+    name: "test role"
+    hosts: "all"
+    strategy: "linear"
+    tasks:
+      - name: "test task"
+        import_role:
+          name: "test role"
 ---
 apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlane
+kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: openstack-edpm-no-nodes
+  name: edpm-no-nodes-custom-service
 spec:
+  preProvisioned: true
   deployStrategy:
       deploy: true
-  roles:
-    edpm-compute-no-nodes:
-      nodeTemplate:
-        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-        ansibleVars:
-          edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
-          edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
-          edpm_ovn_dbs:
-          - 192.168.24.1
-          edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: ""
-      services:
-        - custom-image-service
----
+  services:
+    - custom-image-service
+  nodeTemplate:
+    nodes: {}
+    ansible:
+      ansibleUser: cloud-admin
+      ansiblePort: 22
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret

@@ -4,8 +4,7 @@ kind: Secret
 metadata:
   name: nova-cell1-compute-config
 data:
-  01-nova.conf: Zm9vCg==
-  nova-blank.conf: Zm9vCg==
+  00-ansibleVars: Zm9vCg==
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -15,28 +14,27 @@ data:
   ovsdb-config: test-ovn-config
 ---
 apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlane
+kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: openstack-edpm-no-nodes
+  name: edpm-compute-no-nodes
 spec:
+  preProvisioned: true
+  services:
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - run-os
+    - ovn
+    - libvirt
+    - nova
   deployStrategy:
       deploy: false
-  roles:
-    edpm-compute-no-nodes:
-      nodeTemplate:
-        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-        ansibleVars:
-          edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
-          edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
-          edpm_ovn_dbs:
-          - 192.168.24.1
-          edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: ""
-      services:
-        - configure-network
-        - validate-network
-        - install-os
-        - configure-os
-        - run-os
-        - ovn
-        - libvirt
-        - nova
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+      value: "True"
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    nodes: {}

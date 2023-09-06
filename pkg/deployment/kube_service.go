@@ -30,7 +30,7 @@ import (
 // CreateKubeServices creates a service in Kubernetes for each each port
 func CreateKubeServices(
 	instance *dataplanev1.OpenStackDataPlaneService,
-	nodes *dataplanev1.OpenStackDataPlaneNodeList,
+	nodeSet *dataplanev1.OpenStackDataPlaneNodeSet,
 	helper *helper.Helper,
 	labels map[string]string,
 ) error {
@@ -43,9 +43,9 @@ func CreateKubeServices(
 			return err
 		}
 
-		addresses := make([]string, len(nodes.Items))
-		for i, item := range nodes.Items {
-			addresses[i] = item.Spec.AnsibleHost
+		addresses := make([]string, len(nodeSet.Spec.NodeTemplate.Nodes))
+		for _, item := range nodeSet.Spec.NodeTemplate.Nodes {
+			addresses = append(addresses, item.Ansible.AnsibleHost)
 		}
 
 		index := 0
@@ -64,7 +64,6 @@ func CreateKubeServices(
 		}
 
 	}
-
 	return nil
 }
 
