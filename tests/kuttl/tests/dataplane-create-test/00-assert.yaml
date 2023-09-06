@@ -53,6 +53,7 @@ spec:
     - ovn
     - libvirt
     - nova
+    - telemetry
   nodeTemplate:
     ansiblePort: 22
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret

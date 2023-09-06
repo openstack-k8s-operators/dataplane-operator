@@ -60,6 +60,7 @@ spec:
         - ovn
         - libvirt
         - nova
+        - telemetry
       nodeTemplate:
         # The Ansible Pod will mount these files and copy them to nodes in role
         extraMounts:

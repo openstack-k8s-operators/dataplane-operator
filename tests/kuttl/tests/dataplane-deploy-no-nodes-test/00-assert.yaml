@@ -20,6 +20,7 @@ spec:
         - ovn
         - libvirt
         - nova
+        - telemetry
 status:
   conditions:
   - message: Deployment not started

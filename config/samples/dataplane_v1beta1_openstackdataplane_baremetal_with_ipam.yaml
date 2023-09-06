@@ -35,6 +35,7 @@ spec:
         - ovn
         - libvirt
         - nova
+        - telemetry
       networkAttachments:
         - ctlplane
       baremetalSetTemplate:

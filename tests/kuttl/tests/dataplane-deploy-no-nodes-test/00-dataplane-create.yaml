@@ -40,3 +40,4 @@ spec:
         - ovn
         - libvirt
         - nova
+        - telemetry

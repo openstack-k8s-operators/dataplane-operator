@@ -1992,6 +1992,7 @@ spec:
                       - ovn
                       - libvirt
                       - nova
+                      - telemetry
                       items:
                         type: string
                       type: array

@@ -36,6 +36,7 @@ The default list of services as they will appear on the `services` field on an
       - run-os
       - libvirt
       - nova
+      - telemetry
 
 If the `services` field is ommitted from the `OpenStackDataPlaneRole` spec,
 then the above list will be used.
@@ -232,6 +233,7 @@ service to execute for the `edpm-compute` role.
             - run-os
             - libvirt
             - nova
+            - telemetry
 
 When customizing the services list, the default list of services must be
 reproduced and then customized if the intent is to still deploy those services.

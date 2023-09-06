@@ -12,6 +12,7 @@ spec:
     - ovn
     - libvirt
     - nova
+    - telemetry
   nodeTemplate:
     managed: false
     managementNetwork: ctlplane

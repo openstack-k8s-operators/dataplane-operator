@@ -90,6 +90,10 @@ status:
     reason: Ready
     status: "True"
     type: validate-network service ready
+  - message: telemetry service ready
+    reason: Ready
+    status: "True"
+    type: telemetry service ready
   deployed: true
 ---
 apiVersion: ansibleee.openstack.org/v1alpha1

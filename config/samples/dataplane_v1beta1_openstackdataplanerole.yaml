@@ -12,6 +12,7 @@ spec:
     - ovn
     - libvirt
     - nova
+    - telemetry
   nodeTemplate:
     networkConfig:
       template: |
