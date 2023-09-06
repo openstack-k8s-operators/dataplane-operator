@@ -387,6 +387,13 @@ edpm-compute-0   True    DataPlaneNode Ready
 edpm-compute-1   True    DataPlaneNode Ready
 ```
 
+If the deployment involved adding new compute nodes then after the deployment
+is ready those compute nodes need to be mapped in nova. To do that run the
+following command:
+```console
+oc rsh nova-cell0-conductor-0 nova-manage cell_v2 discover_hosts --verbose
+```
+
 ### Understanding dataplane conditions
 
 Each dataplane resource has a series of conditions within their `status`
