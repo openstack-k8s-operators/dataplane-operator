@@ -49,7 +49,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	When("A Dataplane resorce is created with PreProvisioned nodes", func() {
+	When("A Dataplane resorce is created with PreProvisioned nodes, no deployment", func() {
 		BeforeEach(func() {
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))
 		})
@@ -76,6 +76,55 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				dataplaneNodeSetName,
 				ConditionGetterFunc(DataplaneConditionGetter),
 				dataplanev1.SetupReadyCondition,
+				corev1.ConditionFalse,
+			)
+		})
+
+		It("Should not have created a Secret", func() {
+			th.AssertSecretDoesNotExist(dataplaneSecretName)
+		})
+	})
+
+	When("A Dataplane resorce is created without PreProvisioned nodes and ordered deployment", func() {
+		BeforeEach(func() {
+			spec := DefaultDataPlaneNoNodeSetSpec()
+			spec.DeployStrategy.Deploy = true
+			spec.NodeTemplate.AnsibleSSHPrivateKeySecret = ""
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, spec))
+		})
+		It("should have the Spec fields initialized", func() {
+			dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
+			Expect(dataplaneNodeSetInstance.Spec.DeployStrategy.Deploy).Should(BeTrue())
+		})
+
+		It("should have the Status fields initialized", func() {
+			dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
+			Expect(dataplaneNodeSetInstance.Status.Deployed).Should(BeFalse())
+		})
+
+		It("should have ConditionReady and DeploymentReadyCondition set to false, and SetupReadyCondition and InputReadyCondition set to true", func() {
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.ReadyCondition,
+				corev1.ConditionFalse,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionTrue,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				dataplanev1.SetupReadyCondition,
+				corev1.ConditionTrue,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.DeploymentReadyCondition,
 				corev1.ConditionFalse,
 			)
 		})
