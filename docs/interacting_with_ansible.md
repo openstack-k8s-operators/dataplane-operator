@@ -89,7 +89,7 @@ fields.
 Example usage of these fields:
 
     apiVersion: dataplane.openstack.org/v1beta1
-    kind: OpenStackDataPlane
+    kind: OpenStackDataPlaneNodeSet
     metadata:
       name: openstack-edpm
     spec:
