@@ -7,7 +7,6 @@
 
 * [AnsibleEESpec](#ansibleeespec)
 * [AnsibleOpts](#ansibleopts)
-* [NetworkConfigSection](#networkconfigsection)
 * [NodeSection](#nodesection)
 * [NodeTemplate](#nodetemplate)
 * [OpenStackDataPlaneNodeSetList](#openstackdataplanenodesetlist)
@@ -44,16 +43,6 @@ AnsibleOpts defines a logical grouping of Ansible related configuration options.
 
 [Back to Custom Resources](#custom-resources)
 
-#### NetworkConfigSection
-
-NetworkConfigSection is a specification of the Network configuration details
-
-| Field | Description | Scheme | Required |
-| ----- | ----------- | ------ | -------- |
-| template | Template - Contains a Ansible j2 nic config template to use when applying node network configuration | string | false |
-
-[Back to Custom Resources](#custom-resources)
-
 #### NodeSection
 
 NodeSection defines the top level attributes inherited by nodes in the CR.
@@ -61,7 +50,6 @@ NodeSection defines the top level attributes inherited by nodes in the CR.
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | hostName | HostName - node name | string | false |
-| networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | true |
 | networks | Networks - Instance networks | []infranetworkv1.IPSetNetwork | false |
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
 | ansible | Ansible is the group of Ansible related configuration options. | [AnsibleOpts](#ansibleopts) | false |
@@ -78,7 +66,6 @@ NodeTemplate is a specification of the node attributes that override top level a
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | ansibleSSHPrivateKeySecret | AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing private SSH key for connecting to node. The named secret must be of the form: Secret.data.ssh-privatekey: <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets> | string | true |
-| networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | false |
 | networks | Networks - Instance networks | []infranetworkv1.IPSetNetwork | false |
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
 | ansible | Ansible is the group of Ansible related configuration options. | [AnsibleOpts](#ansibleopts) | false |

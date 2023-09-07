@@ -93,11 +93,6 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 					host.Vars[entry+"_host_routes"] = res.Routes
 					dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
 				}
-				networkConfig := getAnsibleNetworkConfig(instance, nodeName)
-
-				if networkConfig.Template != "" {
-					host.Vars["edpm_network_config_template"] = NicConfigTemplateFile
-				}
 
 				host.Vars["ansible_user"] = getAnsibleUser(instance, nodeName)
 				host.Vars["ansible_port"] = getAnsiblePort(instance, nodeName)
@@ -134,7 +129,6 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	}
 	secretData := map[string]string{
 		"inventory": string(invData),
-		"network":   string(instance.Spec.NodeTemplate.NetworkConfig.Template),
 	}
 	secretName := fmt.Sprintf("dataplanenodeset-%s", instance.Name)
 	template := []utils.Template{
@@ -215,14 +209,6 @@ func getAnsibleManagementNetwork(
 	return instance.Spec.NodeTemplate.ManagementNetwork
 }
 
-// getAnsibleNetworkConfig returns a JSON string value from the template unless it is set in the node
-func getAnsibleNetworkConfig(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) dataplanev1.NetworkConfigSection {
-	if instance.Spec.Nodes[nodeName].NetworkConfig.Template != "" {
-		return instance.Spec.Nodes[nodeName].NetworkConfig
-	}
-	return instance.Spec.NodeTemplate.NetworkConfig
-}
-
 // getAnsibleNetworks returns a JSON string mapping fixedIP and/or network name to their valules
 func getAnsibleNetworks(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) []infranetworkv1.IPSetNetwork {
 	if len(instance.Spec.Nodes[nodeName].Networks) > 0 {
@@ -296,9 +282,6 @@ func resolveAnsibleVars(nodeTemplate *dataplanev1.NodeTemplate, host *ansible.Ho
 	if nodeTemplate.ManagementNetwork != "" {
 		ansibleVarsData["management_network"] = nodeTemplate.ManagementNetwork
 	}
-	if nodeTemplate.NetworkConfig.Template != "" {
-		ansibleVarsData["edpm_network_config_template"] = NicConfigTemplateFile
-	}
 	if len(nodeTemplate.Networks) > 0 {
 		ansibleVarsData["networks"] = nodeTemplate.Networks
 	}
@@ -339,9 +322,6 @@ func resolveNodeAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host, g
 	}
 	if node.ManagementNetwork != "" {
 		ansibleVarsData["management_network"] = node.ManagementNetwork
-	}
-	if node.NetworkConfig.Template != "" {
-		ansibleVarsData["edpm_network_config_template"] = NicConfigTemplateFile
 	}
 	if len(node.Networks) > 0 {
 		ansibleVarsData["networks"] = node.Networks

@@ -52,11 +52,6 @@ type NodeSection struct {
 	// +kubebuilder:validation:Optional
 	HostName string `json:"hostName,omitempty"`
 
-	// NetworkConfig - Network configuration details. Contains os-net-config
-	// related properties.
-	// +kubebuilder:validation:Optional
-	NetworkConfig NetworkConfigSection `json:"networkConfig"`
-
 	// Networks - Instance networks
 	// +kubebuilder:validation:Optional
 	Networks []infranetworkv1.IPSetNetwork `json:"networks,omitempty"`
@@ -93,11 +88,6 @@ type NodeTemplate struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
 	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret"`
 
-	// NetworkConfig - Network configuration details. Contains os-net-config
-	// related properties.
-	// +kubebuilder:validation:Optional
-	NetworkConfig NetworkConfigSection `json:"networkConfig,omitempty"`
-
 	// Networks - Instance networks
 	// +kubebuilder:validation:Optional
 	Networks []infranetworkv1.IPSetNetwork `json:"networks,omitempty"`
@@ -121,15 +111,6 @@ type NodeTemplate struct {
 	// NetworkData  node specific network-data
 	// +kubebuilder:validation:Optional
 	NetworkData *corev1.SecretReference `json:"networkData,omitempty"`
-}
-
-// NetworkConfigSection is a specification of the Network configuration details
-type NetworkConfigSection struct {
-
-	// Template - Contains a Ansible j2 nic config template to use when applying node
-	// network configuration
-	// +kubebuilder:validation:Optional
-	Template string `json:"template,omitempty" yaml:"template,omitempty"`
 }
 
 // AnsibleEESpec is a specification of the ansible EE attributes
