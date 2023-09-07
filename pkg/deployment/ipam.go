@@ -73,7 +73,9 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 	// Build DNSData CR
 	for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
 		nets := node.Networks
-
+		if len(nets) == 0 {
+			nets = instance.Spec.NodeTemplate.Networks
+		}
 		if len(nets) > 0 {
 			// Get IPSet
 			ipSet, ok := allIPSets[nodeName]
@@ -211,14 +213,10 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 	for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
 		nets := node.Networks
 
-		if instance.Spec.PreProvisioned {
-			// Drop CtlPlaneNetwork
-			for i, v := range nets {
-				if v.Name == CtlPlaneNetwork {
-					nets = append(nets[:i], nets[i+1:]...)
-				}
-			}
+		if len(nets) == 0 {
+			nets = instance.Spec.NodeTemplate.Networks
 		}
+
 		if len(nets) > 0 {
 			util.LogForObject(helper, "Reconciling IPSet", instance)
 			ipSet := &infranetworkv1.IPSet{
