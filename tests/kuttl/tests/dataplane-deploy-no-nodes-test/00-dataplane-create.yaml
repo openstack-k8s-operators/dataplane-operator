@@ -20,6 +20,7 @@ metadata:
 spec:
   preProvisioned: true
   services:
+    - download-cache
     - configure-network
     - validate-network
     - install-os

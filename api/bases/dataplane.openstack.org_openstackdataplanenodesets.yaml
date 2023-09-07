@@ -1889,6 +1889,7 @@ spec:
                 type: boolean
               services:
                 default:
+                - download-cache
                 - configure-network
                 - validate-network
                 - install-os

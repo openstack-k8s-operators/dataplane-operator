@@ -303,6 +303,7 @@ Verify the services were created.
 The output should be similar to:
 
     NAME                AGE
+    download-cache      6d7h
     configure-network   6d7h
     configure-os        6d6h
     install-os          6d6h
@@ -417,6 +418,7 @@ $ oc get openstackdataplanerole edpm-compute -o json | jq .status.conditions[].t
 "DeploymentReady"
 "RoleBaremetalProvisionReady"
 "SetupReady"
+"download-cache service ready"
 "configure-network service ready"
 "configure-os service ready"
 "install-os service ready"
@@ -433,6 +435,7 @@ $ oc get openstackdataplanenode edpm-compute-0 -o json | jq .status.conditions[]
 "Ready"
 "DeploymentReady"
 "SetupReady"
+"download-cache service ready"
 "configure-network service ready"
 "configure-os service ready"
 "install-os service ready"
