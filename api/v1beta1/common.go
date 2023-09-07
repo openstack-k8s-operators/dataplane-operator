@@ -85,8 +85,9 @@ type NodeSection struct {
 
 // NodeTemplate is a specification of the node attributes that override top level attributes.
 type NodeTemplate struct {
-	// AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH
-	// key for connecting to node. Must be of the form:
+	// AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing
+	// private SSH key for connecting to node.
+	// The named secret must be of the form:
 	// Secret.data.ssh-privatekey: <base64 encoded private key contents>
 	// <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>
 	// +kubebuilder:validation:Optional
