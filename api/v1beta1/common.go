@@ -18,7 +18,6 @@ package v1beta1
 
 import (
 	"encoding/json"
-	"reflect"
 
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
@@ -160,28 +159,6 @@ type NetworkConfigSection struct {
 	// network configuration
 	// +kubebuilder:validation:Optional
 	Template string `json:"template,omitempty" yaml:"template,omitempty"`
-}
-
-// UniqueSpecFields - the array of fields that must be unique between role and nodes
-var UniqueSpecFields = []string{"NetworkAttachments"}
-
-// AssertUniquenessBetween - compare specs for uniqueness
-func AssertUniquenessBetween(spec interface{}, otherSpec interface{}, suffix string) []string {
-	vSpec := reflect.ValueOf(spec)
-	vOtherSpec := reflect.ValueOf(otherSpec)
-
-	var errorMsgs []string
-	for _, field := range UniqueSpecFields {
-		value := vSpec.FieldByName(field)
-		otherValue := vOtherSpec.FieldByName(field)
-		if value.IsZero() || otherValue.IsZero() {
-			continue
-		}
-		if !reflect.DeepEqual(value.Interface(), otherValue.Interface()) {
-			errorMsgs = append(errorMsgs, field+" mismatch between "+suffix)
-		}
-	}
-	return errorMsgs
 }
 
 // AnsibleEESpec is a specification of the ansible EE attributes
