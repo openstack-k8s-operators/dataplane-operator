@@ -9,7 +9,6 @@ spec:
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
   services:
-    - repo-setup
     - configure-network
     - validate-network
     - install-os

@@ -25,15 +25,16 @@ spec:
     nodes:
        edpm-compute-0:
          hostName: edpm-compute-0
-         ansible:
-           ansibleHost: 192.168.122.100
-           ansibleUser: root
-           ansibleVars:
-             ctlplane_ip: 192.168.122.100
-             internal_api_ip: 172.17.0.100
-             storage_ip: 172.18.0.100
-             tenant_ip: 172.19.0.100
-             fqdn_internal_api: edpm-compute-0.example.com
+    networks:
+      - name: CtlPlane
+        subnetName: subnet1
+        defaultRoute: true
+      - name: InternalApi
+        subnetName: subnet1
+      - name: Storage
+        subnetName: subnet1
+      - name: Tenant
+        subnetName: subnet1
     managementNetwork: ctlplane
     ansible:
       ansibleUser: root
@@ -53,28 +54,6 @@ spec:
          # considered EDPM network defaults.
          neutron_physical_bridge_name: br-ex
          neutron_public_interface_name: eth0
-         ctlplane_mtu: 1500
-         ctlplane_subnet_cidr: 24
-         ctlplane_gateway_ip: 192.168.122.1
-         ctlplane_host_routes:
-         - ip_netmask: 0.0.0.0/0
-           next_hop: 192.168.122.1
-         external_mtu: 1500
-         external_vlan_id: 44
-         external_cidr: '24'
-         external_host_routes: []
-         internal_api_mtu: 1500
-         internal_api_vlan_id: 20
-         internal_api_cidr: '24'
-         internal_api_host_routes: []
-         storage_mtu: 1500
-         storage_vlan_id: 21
-         storage_cidr: '24'
-         storage_host_routes: []
-         tenant_mtu: 1500
-         tenant_vlan_id: 22
-         tenant_cidr: '24'
-         tenant_host_routes: []
          role_networks:
          - InternalApi
          - Storage
@@ -92,9 +71,6 @@ spec:
          edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
          edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
          edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
-         ctlplane_dns_nameservers:
-         - 192.168.122.1
-         dns_search_domains: []
          edpm_ovn_dbs:
          - 192.168.122.1
          registry_url: quay.io/podified-antelope-centos9
