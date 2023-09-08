@@ -2,9 +2,7 @@
 actor "Human Operator" as user #blue;line:blue;line.bold;text:blue
 
 file "OpenStack Control Plane CR" as OCPCR #pink;line:red;line.bold;text:red
-file "OpenStack Data Plane CR" as ODPCR #pink;line:red;line.bold;text:red
-file "OpenStack Data Plane Node CR" as ODPNCR #line:red;line.bold;text:red
-file "OpenStack Data Plane Role CR" as ODPRCR #line:red;line.bold;text:red
+file "OpenStack Data Plane NodeSet CR" as ODPCR #pink;line:red;line.bold;text:red
 file "OpenStack AnsibleEE CR" as AEECR #line:red;line.bold;text:red
 
 rectangle "OpenStack Operator" as OSOp #line.bold
@@ -19,11 +17,7 @@ folder AEEconfigmap #line.bold
 user --> OCPCR #line:red;line.bold;text:red  : applies
 user --> ODPCR #line:red;line.bold;text:red  : applies
 OCPCR <-- OSOp #line:brown;line.bold;text:brown : reconciles
-ODPCR <-- OSOp #line:brown;line.bold;text:brown : reconciles
-OSOp --> ODPNCR #line:purple;line.bold;text:purple  : creates
-OSOp --> ODPRCR #line:purple;line.bold;text:purple  : creates
-ODPNCR <-- DOp #line:brown;line.bold;text:brown : reconciles
-ODPRCR <-- DOp #line:brown;line.bold;text:brown : reconciles
+ODPCR <-- DOp #line:brown;line.bold;text:brown : reconciles
 DOp --> AEECR #line:purple;line.bold;text:purple  : creates
 AEECR <-- AEEOp #line:brown;line.bold;text:brown : reconciles
 AEEOp --> AJI #line:blue;line.bold;text:blue : yields
