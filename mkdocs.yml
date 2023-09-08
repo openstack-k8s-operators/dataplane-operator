@@ -27,14 +27,12 @@ theme:
 nav:
   - Home: index.md
   - Custom Resources:
-      - OpenStackDataPlane: openstack_dataplane.md
-      - OpenStackDataPlaneNode: openstack_dataplanenode.md
-      - OpenStackDataPlaneRole: openstack_dataplanerole.md
+      - OpenStackDataPlaneNodeSet: openstack_dataplanenodeset.md
       - OpenStackDataPlaneService: openstack_dataplaneservice.md
   - Architecture: architecture.md
   - Design: design.md
   - Inheritance: inheritance.md
-  - Deploying a DataPlane:
+  - Deploying a DataPlaneNodeSet:
       - deploying.md
       - composable_services.md
       - common_configurations.md
