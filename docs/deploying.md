@@ -1,11 +1,10 @@
-# Deploying a DataPlane
+# Deploying a DataPlaneNodeSet
 
-Deploying a dataplane consists of creating the custom resources (whether
-OpenStackDataPlane, OpenStackDataPlaneRole, or OpenStackDataPlaneNode) that
+Deploying a dataplane consists of creating the OpenStackDataPlaneNodeSet custom resource that
 define the layout of the dataplane.
 
 This documentation will cover using each resource individually, as well as
-using the OpenStackDataPlane resource to deploy everything in a single
+using the OpenStackDataPlaneNodeSet resource to deploy everything in a single
 resource.
 
 ## Samples
@@ -73,17 +72,17 @@ Verify the secret was created:
 
     oc describe secret dataplane-ansible-ssh-private-key-secret
 
-### Create OpenStackDataPlane
+### Create OpenStackDataPlaneNodeSet
 
 This document will cover writing the `YAML` document for an
-`OpenStackDataPlane` resource. Once the document is ready, it will be created
+`OpenStackDataPlaneNodeSet` resource. Once the document is ready, it will be created
 with `oc` as the last step.
 
 Start the `YAML` document in an `openstack-edpm.yaml` file and give the
 dataplane a name.
 
     apiVersion: dataplane.openstack.org/v1beta1
-    kind: OpenStackDataPlane
+    kind: OpenStackDataPlaneNodeSet
     metadata:
       name: openstack-edpm
 
@@ -92,7 +91,7 @@ added to the spec that contains `deploy: false`. This allows for creating
 the dataplane resources without triggering an Ansible execution immediately.
 
     apiVersion: dataplane.openstack.org/v1beta1
-    kind: OpenStackDataPlane
+    kind: OpenStackDataPlaneNodeSet
     metadata:
       name: openstack-edpm
     spec:
@@ -109,7 +108,7 @@ inheritance works. Within `nodeTemplate`, the fields shown are documented
 inline in the example.
 
     apiVersion: dataplane.openstack.org/v1beta1
-    kind: OpenStackDataPlane
+    kind: OpenStackDataPlaneNodeSet
     metadata:
       name: openstack-edpm
     spec:
@@ -135,7 +134,7 @@ inline in the example.
               # These vars are edpm_network_config role vars
               edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
 
-              # See config/samples/dataplane_v1beta1_openstackdataplane.yaml
+              # See config/samples/dataplane_v1beta1_openstackdataplanenodeset.yaml
               # for the other most common ansible varialbes that need to be set.
 
 The list of ansible variables that can be set under `ansibleVars` is extensive.
@@ -192,7 +191,7 @@ With the nodes and the controlplane specific variables added, the full
 `openstack-datplane` `YAML` document looks like the following:
 
     apiVersion: dataplane.openstack.org/v1beta1
-    kind: OpenStackDataPlane
+    kind: OpenStackDataPlaneNodeSet
     metadata:
       name: openstack-edpm
     spec:
@@ -227,7 +226,7 @@ With the nodes and the controlplane specific variables added, the full
               edpm_ovn_dbs:
               - 192.168.24.1
 
-              # See config/samples/dataplane_v1beta1_openstackdataplane.yaml
+              # See config/samples/dataplane_v1beta1_openstackdataplanenodeset.yaml
               # for the other most common ansible varialbes that need to be set.
 
       nodes:
@@ -258,25 +257,16 @@ Create the dataplane using the `oc` command.
 
     oc create -f openstack-edpm.yaml
 
-Verify that the dataplane, role, and nodes were created.
+Verify that the dataplane nodeset were created.
 
-    oc get openstackdataplane
-    oc get openstackdataplanerole
-    oc get openstackdataplanenode
+    oc get openstackdataplanenodeset
 
 The output should be similar to:
 
 ```console
-$ oc get openstackdataplane
+$ oc get openstackdataplanenodeset
 NAME             STATUS   MESSAGE
 openstack-edpm   False    Deployment not started
-$ oc get openstackdataplanerole
-NAME           STATUS   MESSAGE
-edpm-compute   False    Deployment not started
-$ oc get openstackdataplanenode
-NAME             STATUS   MESSAGE
-edpm-compute-0   False    Deployment not started
-edpm-compute-1   False    Deployment not started
 ```
 
 ### Understanding OpenStackDataPlaneServices
@@ -365,10 +355,10 @@ To deploy the `openstack-edpm` dataplane resource, the
 the deployment of all the configured services across the nodes. The field can
 be set with the following command to start the deployment:
 
-    oc patch openstackdataplane openstack-edpm  -p='[{"op": "replace", "path": "/spec/deployStrategy/deploy", "value":true}]' --type json
+    oc patch openstackdataplanenodeset openstack-edpm  -p='[{"op": "replace", "path": "/spec/deployStrategy/deploy", "value":true}]' --type json
 
 The `oc patch` command sets the `deploy` field to `True`, which starts the
-deployment. `oc edit openstackdataplane openstack-edpm` could alternatively be
+deployment. `oc edit OpenStackDataPlaneNodeSet openstack-edpm` could alternatively be
 used to edit the resource directly in an editor to set the field to `True`.
 
 With the deployment started, ansible will be executed to configure the nodes.
@@ -376,16 +366,9 @@ When the deployment is complete, the status messages will change to indicate
 the deployment is ready.
 
 ```console
-$ oc get openstackdataplane
+$ oc get openstackdataplanenodeset
 NAME             STATUS   MESSAGE
 openstack-edpm   True    DataPlane Ready
-$ oc get openstackdataplanerole
-NAME           STATUS   MESSAGE
-edpm-compute   True    DataPlaneRole Ready
-$ oc get openstackdataplanenode
-NAME             STATUS   MESSAGE
-edpm-compute-0   True    DataPlaneNode Ready
-edpm-compute-1   True    DataPlaneNode Ready
 ```
 
 If the deployment involved adding new compute nodes then after the deployment
@@ -401,48 +384,13 @@ Each dataplane resource has a series of conditions within their `status`
 subresource that indicate the overall state of the resource, including its
 deployment progress.
 
-`OpenStackDataPlane` resource conditions:
+`OpenStackDataPlaneNodeSet` resource conditions:
 
 ```console
-$ oc get openstackdataplane openstack-edpm -o json | jq .status.conditions[].type
+$ oc get openstackdataplanenodeset openstack-edpm -o json | jq .status.conditions[].type
 "Ready"
 "DeploymentReady"
 "SetupReady"
-```
-
-`OpenStackDataPlaneRole` resource conditions:
-
-```console
-$ oc get openstackdataplanerole edpm-compute -o json | jq .status.conditions[].type
-"Ready"
-"DeploymentReady"
-"RoleBaremetalProvisionReady"
-"SetupReady"
-"download-cache service ready"
-"configure-network service ready"
-"configure-os service ready"
-"install-os service ready"
-"libvirt service ready"
-"nova service ready"
-"run-os service ready"
-"validate-network service ready"
-```
-
-`OpenStackDataPlaneNode` resource conditions:
-
-```console
-$ oc get openstackdataplanenode edpm-compute-0 -o json | jq .status.conditions[].type
-"Ready"
-"DeploymentReady"
-"SetupReady"
-"download-cache service ready"
-"configure-network service ready"
-"configure-os service ready"
-"install-os service ready"
-"install-os service ready"
-"libvirt service ready"
-"run-os service ready"
-"validate-network service ready"
 ```
 
 Each resource has a `Ready`, `DeploymentReady`, and `SetupReady` conditions.
