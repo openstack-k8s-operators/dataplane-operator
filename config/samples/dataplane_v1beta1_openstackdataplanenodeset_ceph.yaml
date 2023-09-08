@@ -58,7 +58,7 @@ spec:
           secretName: ceph-conf-files
     managementNetwork: ctlplane
     ansible:
-      ansibleUser: root
+      ansibleUser: cloud-admin
       ansiblePort: 22
       ansibleVars:
         service_net_map:

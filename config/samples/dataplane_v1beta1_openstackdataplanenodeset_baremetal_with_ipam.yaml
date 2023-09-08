@@ -34,7 +34,7 @@ spec:
        edpm-compute-0:
          hostName: edpm-compute-0
          ansible:
-           ansibleUser: root
+           ansibleUser: cloud-admin
            ansibleHost: 192.168.122.100
            ansibleVars:
              ctlplane_ip: 192.168.122.100
@@ -55,7 +55,7 @@ spec:
            subnetName: subnet1
     managementNetwork: ctlplane
     ansible:
-      ansibleUser: root
+      ansibleUser: cloud-admin
       ansiblePort: 22
       ansibleVars:
          service_net_map:
