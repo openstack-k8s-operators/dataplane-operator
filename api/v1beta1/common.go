@@ -18,7 +18,6 @@ package v1beta1
 
 import (
 	"encoding/json"
-	"reflect"
 
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
@@ -85,8 +84,9 @@ type NodeSection struct {
 
 // NodeTemplate is a specification of the node attributes that override top level attributes.
 type NodeTemplate struct {
-	// AnsibleSSHPrivateKeySecret Private SSH Key secret containing private SSH
-	// key for connecting to node. Must be of the form:
+	// AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing
+	// private SSH key for connecting to node.
+	// The named secret must be of the form:
 	// Secret.data.ssh-privatekey: <base64 encoded private key contents>
 	// <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>
 	// +kubebuilder:validation:Optional
@@ -160,28 +160,6 @@ type NetworkConfigSection struct {
 	// network configuration
 	// +kubebuilder:validation:Optional
 	Template string `json:"template,omitempty" yaml:"template,omitempty"`
-}
-
-// UniqueSpecFields - the array of fields that must be unique between role and nodes
-var UniqueSpecFields = []string{"NetworkAttachments"}
-
-// AssertUniquenessBetween - compare specs for uniqueness
-func AssertUniquenessBetween(spec interface{}, otherSpec interface{}, suffix string) []string {
-	vSpec := reflect.ValueOf(spec)
-	vOtherSpec := reflect.ValueOf(otherSpec)
-
-	var errorMsgs []string
-	for _, field := range UniqueSpecFields {
-		value := vSpec.FieldByName(field)
-		otherValue := vOtherSpec.FieldByName(field)
-		if value.IsZero() || otherValue.IsZero() {
-			continue
-		}
-		if !reflect.DeepEqual(value.Interface(), otherValue.Interface()) {
-			errorMsgs = append(errorMsgs, field+" mismatch between "+suffix)
-		}
-	}
-	return errorMsgs
 }
 
 // AnsibleEESpec is a specification of the ansible EE attributes

@@ -10,17 +10,16 @@ software on the nodes.
 
 ## DataPlane Design and Resources
 
-The dataplane-operator exposes the concepts of dataplanes, roles, nodes, and
+The dataplane-operator exposes the concepts of nodesets and
 services as CRD's:
 
-* [OpenStackDataPlane](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplanes.yaml)
 * [OpenStackDataPlaneNodeSet](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplanenodesets.yaml)
 * [OpenStackDataPlaneService](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplaneservices.yaml)
 
 Each `NodeSet` in a dataplane is represented by a corresponding
 OpenStackDataPlaneNodeSet resource.  The OpenStackDataPlaneNodeSet CRD provides for a
 logical grouping of nodes of a similar type. This is analogous to the concept of "roles"
-in TripleO. Similarities within a `NodeSet` are defined by the user, and could be of a 
+in TripleO. Similarities within a `NodeSet` are defined by the user, and could be of a
 small scope (ansible port), or a large scope (same network config, nova config,
 provisioning config, etc). The properties that all nodes in a `NodeSet` share is set
 in the NodeTemplate field of the `NodeSet`'s Spec. Node specific parameters are then
