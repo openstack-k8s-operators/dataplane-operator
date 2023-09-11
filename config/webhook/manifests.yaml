@@ -11,9 +11,9 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplane
+      path: /mutate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
   failurePolicy: Fail
-  name: mopenstackdataplane.kb.io
+  name: mopenstackdataplanenodeset.kb.io
   rules:
   - apiGroups:
     - dataplane.openstack.org
@@ -23,7 +23,7 @@ webhooks:
     - CREATE
     - UPDATE
     resources:
-    - openstackdataplanes
+    - openstackdataplanenodesets
   sideEffects: None
 ---
 apiVersion: admissionregistration.k8s.io/v1
@@ -38,9 +38,9 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-dataplane-openstack-org-v1beta1-openstackdataplane
+      path: /validate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
   failurePolicy: Fail
-  name: vopenstackdataplane.kb.io
+  name: vopenstackdataplanenodeset.kb.io
   rules:
   - apiGroups:
     - dataplane.openstack.org
@@ -50,5 +50,5 @@ webhooks:
     - CREATE
     - UPDATE
     resources:
-    - openstackdataplanes
+    - openstackdataplanenodesets
   sideEffects: None

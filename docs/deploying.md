@@ -293,6 +293,7 @@ Verify the services were created.
 The output should be similar to:
 
     NAME                AGE
+    download-cache      6d7h
     configure-network   6d7h
     configure-os        6d6h
     install-os          6d6h

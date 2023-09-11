@@ -1,4 +1,3 @@
----
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
@@ -6,75 +5,136 @@ metadata:
   namespace: openstack
 spec:
   services:
-    - configure-network
-    - validate-network
-    - install-os
-    - configure-os
-    - run-os
-    - ovn
-    - libvirt
-    - nova
+  - download-cache
+  - configure-network
+  - validate-network
+  - install-os
+  - configure-os
+  - run-os
+  - ovn
+  - libvirt
+  - nova
   deployStrategy:
-      deploy: true
+    deploy: true
   env:
-    - name: ANSIBLE_FORCE_COLOR
-      value: "True"
-    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-      value: "True"
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+    value: "True"
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     nodes: {}
 status:
   conditions:
-    - message: Setup complete
-      reason: Ready
-      status: "True"
-      type: Ready
-    - message: Deployment completed
-      reason: Ready
-      status: "True"
-      type: DeploymentReady
-    - message: Input data complete
-      reason: Ready
-      status: "True"
-      type: InputReady
-    - message: Setup complete
-      reason: Ready
-      status: "True"
-      type: SetupReady
-    - message: configure-network service ready
-      reason: Ready
-      status: "True"
-      type: configure-network service ready
-    - message: configure-os service ready
-      reason: Ready
-      status: "True"
-      type: configure-os service ready
-    - message: install-os service ready
-      reason: Ready
-      status: "True"
-      type: install-os service ready
-    - message: libvirt service ready
-      reason: Ready
-      status: "True"
-      type: libvirt service ready
-    - message: nova service ready
-      reason: Ready
-      status: "True"
-      type: nova service ready
-    - message: ovn service ready
-      reason: Ready
-      status: "True"
-      type: ovn service ready
-    - message: run-os service ready
-      reason: Ready
-      status: "True"
-      type: run-os service ready
-    - message: validate-network service ready
-      reason: Ready
-      status: "True"
-      type: validate-network service ready
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Deployment completed
+    reason: Ready
+    status: "True"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
+  - message: configure-network service ready
+    reason: Ready
+    status: "True"
+    type: configure-network service ready
+  - message: configure-os service ready
+    reason: Ready
+    status: "True"
+    type: configure-os service ready
+  - message: download-cache service ready
+    reason: Ready
+    status: "True"
+    type: download-cache service ready
+  - message: install-os service ready
+    reason: Ready
+    status: "True"
+    type: install-os service ready
+  - message: libvirt service ready
+    reason: Ready
+    status: "True"
+    type: libvirt service ready
+  - message: nova service ready
+    reason: Ready
+    status: "True"
+    type: nova service ready
+  - message: ovn service ready
+    reason: Ready
+    status: "True"
+    type: ovn service ready
+  - message: run-os service ready
+    reason: Ready
+    status: "True"
+    type: run-os service ready
+  - message: validate-network service ready
+    reason: Ready
+    status: "True"
+    type: validate-network service ready
   deployed: true
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: dataplane-deployment-download-cache-edpm-compute-no-nodes
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneNodeSet
+    name: edpm-compute-no-nodes
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    - mountPath: /runner/network/nic-config-template
+      name: inventory
+      subPath: network
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        - key: network
+          path: network
+        secretName: dataplanenodeset-edpm-compute-no-nodes
+  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.download_cache
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
 ---
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE

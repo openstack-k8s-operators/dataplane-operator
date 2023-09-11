@@ -9,6 +9,7 @@ spec:
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
   services:
+    - download-cache
     - configure-network
     - validate-network
     - install-os
@@ -44,7 +45,7 @@ spec:
            nova_api_network: internal_api
            nova_libvirt_network: internal_api
          edpm_chrony_ntp_servers:
-           - clock.redhat.com
+           - pool.ntp.org
          # edpm_network_config
          # Default nic config template for a EDPM compute node
          # These vars are edpm_network_config role vars
