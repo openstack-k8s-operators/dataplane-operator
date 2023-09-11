@@ -35,16 +35,16 @@ cat >> ${TMPDIR}/patch_webhook_configurations.yaml <<EOF_CAT
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: vopenstackdataplane.kb.io
+  name: vopenstackdataplanenodeset.kb.io
 webhooks:
 - admissionReviewVersions:
   - v1
   clientConfig:
     caBundle: ${CA_BUNDLE}
-    url: https://${CRC_IP}:9443/validate-dataplane-openstack-org-v1beta1-openstackdataplane
+    url: https://${CRC_IP}:9443/validate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
   failurePolicy: Fail
   matchPolicy: Equivalent
-  name: vopenstackdataplane.kb.io
+  name: vopenstackdataplanenodeset.kb.io
   objectSelector: {}
   rules:
   - apiGroups:
@@ -55,7 +55,7 @@ webhooks:
     - CREATE
     - UPDATE
     resources:
-    - openstackdataplanes
+    - openstackdataplanenodesets
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
@@ -63,16 +63,16 @@ webhooks:
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: mopenstackdataplane.kb.io
+  name: mopenstackdataplanenodeset.kb.io
 webhooks:
 - admissionReviewVersions:
   - v1
   clientConfig:
     caBundle: ${CA_BUNDLE}
-    url: https://${CRC_IP}:9443/mutate-dataplane-openstack-org-v1beta1-openstackdataplane
+    url: https://${CRC_IP}:9443/mutate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
   failurePolicy: Fail
   matchPolicy: Equivalent
-  name: mopenstackdataplane.kb.io
+  name: mopenstackdataplanenodeset.kb.io
   objectSelector: {}
   rules:
   - apiGroups:
@@ -83,7 +83,7 @@ webhooks:
     - CREATE
     - UPDATE
     resources:
-    - openstackdataplanes
+    - openstackdataplanenodesets
     scope: '*'
   sideEffects: None
   timeoutSeconds: 10
