@@ -102,6 +102,7 @@ spec:
         hostName: edpm-compute-0
   preProvisioned: true
   services:
+  - download-cache
   - configure-network
   - validate-network
   - install-os
