@@ -28,7 +28,7 @@ spec:
          hostName: edpm-compute-0
          ansible:
            ansibleHost: 192.168.122.100
-           ansibleUser: root
+           ansibleUser: cloud-admin
            ansibleVars:
              ctlplane_ip: 192.168.122.100
              internal_api_ip: 172.17.0.100
@@ -37,7 +37,7 @@ spec:
              fqdn_internal_api: edpm-compute-0.example.com
     managementNetwork: ctlplane
     ansible:
-      ansibleUser: root
+      ansibleUser: cloud-admin
       ansiblePort: 22
       ansibleVars:
          service_net_map:
