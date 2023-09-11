@@ -87,7 +87,7 @@ func Deploy(
 
 		// Reset ExtraMounts to its original value, and then add in service
 		// specific mounts.
-		aeeSpec.ExtraMounts = []storage.VolMounts{}
+		aeeSpec.ExtraMounts = make([]storage.VolMounts, len(aeeSpecMounts))
 		copy(aeeSpec.ExtraMounts, aeeSpecMounts)
 		aeeSpec, err = addServiceExtraMounts(ctx, helper, aeeSpec, foundService)
 
