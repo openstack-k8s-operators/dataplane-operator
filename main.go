@@ -20,6 +20,7 @@ import (
 	"flag"
 	"os"
 	"strconv"
+	"strings"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -127,7 +128,13 @@ func main() {
 	}
 
 	checker := healthz.Ping
-
+	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) != "false" {
+		if err = (&dataplanev1.OpenStackDataPlaneNodeSet{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackDataPlaneNodeSet")
+			os.Exit(1)
+		}
+		checker = mgr.GetWebhookServer().StartedChecker()
+	}
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", checker); err != nil {

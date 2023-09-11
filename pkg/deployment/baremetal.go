@@ -18,6 +18,7 @@ package deployment
 
 import (
 	"context"
+	"fmt"
 	"net"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,12 +31,6 @@ import (
 	utils "github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 )
-
-// ManagedHostMap defines a struct to hold our HostMap. This HostMap is a map
-// of NodeSet names and Baremetalv1 InstanceSpec.
-type ManagedHostMap struct {
-	HostMap map[string]map[string]baremetalv1.InstanceSpec
-}
 
 // DeployBaremetalSet Deploy OpenStackBaremetalSet
 func DeployBaremetalSet(
@@ -50,23 +45,12 @@ func DeployBaremetalSet(
 		},
 	}
 
-	// Check if nodes need to be provisioned and set the relevant BaremetalHost field.
-	nodeSetManagedHostMap := ManagedHostMap{}
-	err := BuildBMHHostMap(ctx, helper, instance, &nodeSetManagedHostMap)
-	if err != nil {
-		return false, err
+	if instance.Spec.BaremetalSetTemplate.BaremetalHosts == nil {
+		return false, fmt.Errorf("no baremetal hosts set in baremetalSetTemplate")
 	}
-
 	utils.LogForObject(helper, "Reconciling BaremetalSet", instance)
-	_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), baremetalSet, func() error {
-		hostMap, ok := nodeSetManagedHostMap.HostMap[instance.Name]
-		if ok {
-			bmsTemplate := instance.Spec.BaremetalSetTemplate.DeepCopy()
-			bmsTemplate.BaremetalHosts = hostMap
-			instance.Spec.BaremetalSetTemplate = *bmsTemplate
-		}
+	_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), baremetalSet, func() error {
 		instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec)
-
 		for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
 			hostName := node.HostName
 			ipSet, ok := ipSets[nodeName]
@@ -117,26 +101,4 @@ func DeployBaremetalSet(
 		dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 		dataplanev1.NodeSetBaremetalProvisionReadyMessage)
 	return true, nil
-}
-
-// BuildBMHHostMap  Build managed host map for all roles
-func BuildBMHHostMap(ctx context.Context, helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	nodeSetManagedHostMap *ManagedHostMap) error {
-	for _, node := range instance.Spec.NodeTemplate.Nodes {
-		if nodeSetManagedHostMap.HostMap == nil {
-			nodeSetManagedHostMap.HostMap = make(map[string]map[string]baremetalv1.InstanceSpec)
-		}
-		if nodeSetManagedHostMap.HostMap[instance.Name] == nil {
-			nodeSetManagedHostMap.HostMap[instance.Name] = make(map[string]baremetalv1.InstanceSpec)
-		}
-
-		if !instance.Spec.PreProvisioned {
-			instanceSpec := baremetalv1.InstanceSpec{}
-			instanceSpec.UserData = node.UserData
-			instanceSpec.NetworkData = node.NetworkData
-			nodeSetManagedHostMap.HostMap[instance.Name][node.HostName] = instanceSpec
-		}
-	}
-	return nil
 }
