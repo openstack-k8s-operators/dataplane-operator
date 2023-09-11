@@ -11,15 +11,6 @@ spec:
       value: "True"
   deployStrategy:
       deploy: false
-  baremetalSetTemplate:
-    deploymentSSHSecret: dataplane-ansible-ssh-private-key-secret
-    ctlplaneInterface: enp1s0
-    provisionServerName: openstackprovisionserver
-    ctlplaneGateway: 172.22.0.3
-    ctlplaneNetmask: 255.255.255.0
-    bmhNamespace: openstack
-    domainName: osptest.openstack.org
-    cloudUserName: root
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     nodes:
@@ -115,7 +106,6 @@ spec:
         edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
         edpm_chrony_ntp_servers:
         - clock.redhat.com
-        - clock2.redhat.com
         ctlplane_dns_nameservers:
         - 192.168.122.1
         dns_search_domains: []

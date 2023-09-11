@@ -24,8 +24,6 @@ spec:
     bmhLabelSelector:
       app: openstack
     ctlplaneInterface: enp1s0
-    dnsSearchDomains:
-      - osptest.openstack.org
     cloudUserName: cloud-admin
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
@@ -51,7 +49,7 @@ spec:
            nova_api_network: internal_api
            nova_libvirt_network: internal_api
          edpm_chrony_ntp_servers:
-           - clock.redhat.com
+           - pool.ntp.org
          # edpm_network_config
          # Default nic config template for a EDPM compute node
          # These vars are edpm_network_config role vars
@@ -79,7 +77,7 @@ spec:
          edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
          edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
          edpm_ovn_dbs:
-         - 192.168.122.1
+         - 192.168.111.1
          registry_url: quay.io/podified-antelope-centos9
          image_tag: current-podified
          edpm_ovn_controller_agent_image: "{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}"
@@ -92,6 +90,6 @@ spec:
          enable_debug: false
          # edpm firewall, change the allowed CIDR if needed
          edpm_sshd_configure_firewall: true
-         edpm_sshd_allowed_ranges: ['192.168.122.0/24']
+         edpm_sshd_allowed_ranges: ['192.168.111.0/24']
          # SELinux module
          edpm_selinux_mode: enforcing
