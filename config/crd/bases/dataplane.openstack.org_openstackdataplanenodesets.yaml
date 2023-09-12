@@ -1035,10 +1035,6 @@ spec:
                     type: array
                   managementNetwork:
                     type: string
-                  networkAttachments:
-                    items:
-                      type: string
-                    type: array
                   networkConfig:
                     properties:
                       template:
@@ -1883,6 +1879,7 @@ spec:
                     type: object
                     x-kubernetes-map-type: atomic
                 required:
+                - ansibleSSHPrivateKeySecret
                 - nodes
                 type: object
               preProvisioned:
