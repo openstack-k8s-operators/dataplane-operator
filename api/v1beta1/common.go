@@ -89,19 +89,14 @@ type NodeTemplate struct {
 	// The named secret must be of the form:
 	// Secret.data.ssh-privatekey: <base64 encoded private key contents>
 	// <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
-	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret,omitempty"`
+	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret"`
 
 	// Nodes - Map of Node Names and node specific data. Values here override defaults in the
 	// upper level section.
 	// +kubebuilder:validation:Required
 	Nodes map[string]NodeSection `json:"nodes"`
-
-	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
-	// which allows to connect the ansibleee runner to the given network
-	// +kubebuilder:validation:Optional
-	NetworkAttachments []string `json:"networkAttachments,omitempty"`
 
 	// NetworkConfig - Network configuration details. Contains os-net-config
 	// related properties.

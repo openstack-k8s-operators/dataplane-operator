@@ -177,38 +177,36 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 
-	if ansibleSSHPrivateKeySecret != "" {
-		var secretKeys = []string{}
-		secretKeys = append(secretKeys, AnsibleSSHPrivateKey)
-		if !instance.Spec.PreProvisioned {
-			secretKeys = append(secretKeys, AnsibleSSHAuthorizedKeys)
-		}
-		_, result, err = secret.VerifySecret(
-			ctx,
-			types.NamespacedName{Namespace: instance.Namespace,
-				Name: ansibleSSHPrivateKeySecret},
-			secretKeys,
-			helper.GetClient(),
-			time.Second*5,
-		)
+	var secretKeys = []string{}
+	secretKeys = append(secretKeys, AnsibleSSHPrivateKey)
+	if !instance.Spec.PreProvisioned {
+		secretKeys = append(secretKeys, AnsibleSSHAuthorizedKeys)
+	}
+	_, result, err = secret.VerifySecret(
+		ctx,
+		types.NamespacedName{Namespace: instance.Namespace,
+			Name: ansibleSSHPrivateKeySecret},
+		secretKeys,
+		helper.GetClient(),
+		time.Second*5,
+	)
 
-		if err != nil {
-			if (result != ctrl.Result{}) {
-				instance.Status.Conditions.MarkFalse(
-					condition.InputReadyCondition,
-					condition.RequestedReason,
-					condition.SeverityInfo,
-					dataplanev1.InputReadyWaitingMessage,
-					"secret/"+ansibleSSHPrivateKeySecret)
-			} else {
-				instance.Status.Conditions.MarkFalse(
-					condition.InputReadyCondition,
-					condition.RequestedReason,
-					condition.SeverityWarning,
-					err.Error())
-			}
-			return result, err
+	if err != nil {
+		if (result != ctrl.Result{}) {
+			instance.Status.Conditions.MarkFalse(
+				condition.InputReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityInfo,
+				dataplanev1.InputReadyWaitingMessage,
+				"secret/"+ansibleSSHPrivateKeySecret)
+		} else {
+			instance.Status.Conditions.MarkFalse(
+				condition.InputReadyCondition,
+				condition.RequestedReason,
+				condition.SeverityWarning,
+				err.Error())
 		}
+		return result, err
 	}
 
 	// all our input checks out so report InputReady
@@ -216,7 +214,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	// Reconcile BaremetalSet if required
 	if !instance.Spec.PreProvisioned {
-
 		// Reset the NodeSetBareMetalProvisionReadyCondition to unknown
 		instance.Status.Conditions.MarkUnknown(dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 			condition.InitReason, condition.InitReason)
@@ -225,8 +222,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		if err != nil || !isReady {
 			return ctrl.Result{}, err
 		}
-	} else {
-		instance.Status.Conditions.Remove(dataplanev1.NodeSetBareMetalProvisionReadyCondition)
 	}
 
 	// TODO: if the input hash changes or the nodes in the role is updated we should

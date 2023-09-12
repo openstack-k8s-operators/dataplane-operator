@@ -10,6 +10,7 @@ spec:
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
   services:
+    - download-cache
     - configure-network
     - validate-network
     - install-os
@@ -21,7 +22,6 @@ spec:
   deployStrategy:
       deploy: false
   baremetalSetTemplate:
-    deploymentSSHSecret: dataplane-ansible-ssh-private-key-secret
     bmhLabelSelector:
       app: openstack
     ctlplaneInterface: enp1s0

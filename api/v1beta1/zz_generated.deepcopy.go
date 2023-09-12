@@ -195,11 +195,6 @@ func (in *NodeTemplate) DeepCopyInto(out *NodeTemplate) {
 			(*out)[key] = *val.DeepCopy()
 		}
 	}
-	if in.NetworkAttachments != nil {
-		in, out := &in.NetworkAttachments, &out.NetworkAttachments
-		*out = make([]string, len(*in))
-		copy(*out, *in)
-	}
 	out.NetworkConfig = in.NetworkConfig
 	if in.Networks != nil {
 		in, out := &in.Networks, &out.Networks
