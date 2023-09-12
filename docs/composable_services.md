@@ -236,7 +236,7 @@ service to execute for the `edpm-compute` `NodeSet`.
             ansible:
               ansibleHost: 172.20.12.67
               ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-              ansibleUser: root
+              ansibleUser: cloud-admin
               ansibleVars:
                 ansible_ssh_transfer_method: scp
                 ctlplane_ip: 172.20.12.67

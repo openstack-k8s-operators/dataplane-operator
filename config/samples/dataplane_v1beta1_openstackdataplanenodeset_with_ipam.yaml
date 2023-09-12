@@ -3,7 +3,6 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: openstack-edpm-ipam
 spec:
-  ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
   env:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
@@ -22,6 +21,7 @@ spec:
     - libvirt
     - nova
   nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     nodes:
        edpm-compute-0:
          hostName: edpm-compute-0
@@ -88,9 +88,6 @@ spec:
          edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
          edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
          edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
-         ctlplane_dns_nameservers:
-         - 192.168.122.1
-         dns_search_domains: []
          edpm_ovn_dbs:
          - 192.168.122.1
          registry_url: quay.io/podified-antelope-centos9
