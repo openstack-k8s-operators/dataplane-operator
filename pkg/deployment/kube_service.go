@@ -43,8 +43,8 @@ func CreateKubeServices(
 			return err
 		}
 
-		addresses := make([]string, len(nodeSet.Spec.NodeTemplate.Nodes))
-		for _, item := range nodeSet.Spec.NodeTemplate.Nodes {
+		addresses := make([]string, len(nodeSet.Spec.Nodes))
+		for _, item := range nodeSet.Spec.Nodes {
 			addresses = append(addresses, item.Ansible.AnsibleHost)
 		}
 

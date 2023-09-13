@@ -48,11 +48,11 @@ func (r *OpenStackDataPlaneNodeSet) Default() {
 
 // Default - set defaults for this OpenStackDataPlaneNodeSet Spec
 func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
-	for nodeName, node := range spec.NodeTemplate.Nodes {
+	for nodeName, node := range spec.Nodes {
 		if node.HostName == "" {
 			node.HostName = nodeName
 		}
-		spec.NodeTemplate.Nodes[nodeName] = *node.DeepCopy()
+		spec.Nodes[nodeName] = *node.DeepCopy()
 	}
 
 	if spec.BaremetalSetTemplate.DeploymentSSHSecret == "" {
@@ -61,7 +61,7 @@ func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
 
 	if !spec.PreProvisioned && spec.BaremetalSetTemplate.BaremetalHosts == nil {
 		nodeSetHostMap := make(map[string]baremetalv1.InstanceSpec)
-		for _, node := range spec.NodeTemplate.Nodes {
+		for _, node := range spec.Nodes {
 			instanceSpec := baremetalv1.InstanceSpec{}
 			instanceSpec.UserData = node.UserData
 			instanceSpec.NetworkData = node.NetworkData

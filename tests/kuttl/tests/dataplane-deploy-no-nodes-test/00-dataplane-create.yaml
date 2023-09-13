@@ -35,6 +35,6 @@ spec:
     value: "True"
   - name: ANSIBLE_ENABLE_TASK_DEBUGGER
     value: "True"
+  nodes: {}
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-    nodes: {}

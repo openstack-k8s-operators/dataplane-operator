@@ -20,39 +20,39 @@ spec:
     - ovn
     - libvirt
     - nova
+  nodes:
+      edpm-compute-0:
+        hostName: edpm-compute-0
+        ansible:
+          ansibleHost: 192.168.122.100
+        networks:
+        - name: CtlPlane
+          subnetName: subnet1
+          defaultRoute: true
+          fixedIP: 192.168.122.100
+        - name: InternalApi
+          subnetName: subnet1
+        - name: Storage
+          subnetName: subnet1
+        - name: Tenant
+          subnetName: subnet1
+      edpm-compute-1:
+        hostName: edpm-compute-1
+        ansible:
+          ansibleHost: 192.168.122.101
+        networks:
+        - name: CtlPlane
+          subnetName: subnet1
+          defaultRoute: true
+          fixedIP: 192.168.122.101
+        - name: InternalApi
+          subnetName: subnet1
+        - name: Storage
+          subnetName: subnet1
+        - name: Tenant
+          subnetName: subnet1
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-    nodes:
-       edpm-compute-0:
-         hostName: edpm-compute-0
-         ansible:
-           ansibleHost: 192.168.122.100
-         networks:
-         - name: CtlPlane
-           subnetName: subnet1
-           defaultRoute: true
-           fixedIP: 192.168.122.100
-         - name: InternalApi
-           subnetName: subnet1
-         - name: Storage
-           subnetName: subnet1
-         - name: Tenant
-           subnetName: subnet1
-       edpm-compute-1:
-         hostName: edpm-compute-1
-         ansible:
-           ansibleHost: 192.168.122.101
-         networks:
-         - name: CtlPlane
-           subnetName: subnet1
-           defaultRoute: true
-           fixedIP: 192.168.122.101
-         - name: InternalApi
-           subnetName: subnet1
-         - name: Storage
-           subnetName: subnet1
-         - name: Tenant
-           subnetName: subnet1
     managementNetwork: ctlplane
     ansible:
       ansibleUser: cloud-admin

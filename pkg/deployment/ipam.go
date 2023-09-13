@@ -71,7 +71,7 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 	var allDNSRecords []infranetworkv1.DNSHost
 	var ctlplaneSearchDomain string
 	// Build DNSData CR
-	for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
+	for nodeName, node := range instance.Spec.Nodes {
 		nets := node.Networks
 		if len(nets) == 0 {
 			nets = instance.Spec.NodeTemplate.Networks
@@ -210,7 +210,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 
 	allIPSets := make(map[string]infranetworkv1.IPSet)
 	// CreateOrPatch IPSets
-	for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
+	for nodeName, node := range instance.Spec.Nodes {
 		nets := node.Networks
 
 		if len(nets) == 0 {

@@ -9,8 +9,8 @@ spec:
     deploy: true
   services:
     - test-service
+  nodes: {}
   nodeTemplate:
-    nodes: {}
     extraMounts:
     - extraVolType: edpm-ansible
       mounts:
