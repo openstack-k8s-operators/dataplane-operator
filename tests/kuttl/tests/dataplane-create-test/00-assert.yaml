@@ -10,6 +10,18 @@ spec:
     value: "True"
   - name: ANSIBLE_ENABLE_TASK_DEBUGGER
     value: "True"
+  nodes:
+    edpm-compute-0:
+      ansible:
+        ansibleHost: 192.168.122.100
+        ansibleUser: cloud-admin
+        ansibleVars:
+          ctlplane_ip: 192.168.122.100
+          fqdn_internal_api: edpm-compute-0.example.com
+          internal_api_ip: 172.17.0.100
+          storage_ip: 172.18.0.100
+          tenant_ip: 172.19.0.100
+      hostName: edpm-compute-0
   nodeTemplate:
     ansible:
       ansiblePort: 22
@@ -88,18 +100,6 @@ spec:
         tenant_vlan_id: 22
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     managementNetwork: ctlplane
-    nodes:
-      edpm-compute-0:
-        ansible:
-          ansibleHost: 192.168.122.100
-          ansibleUser: cloud-admin
-          ansibleVars:
-            ctlplane_ip: 192.168.122.100
-            fqdn_internal_api: edpm-compute-0.example.com
-            internal_api_ip: 172.17.0.100
-            storage_ip: 172.18.0.100
-            tenant_ip: 172.19.0.100
-        hostName: edpm-compute-0
   preProvisioned: true
   services:
   - download-cache

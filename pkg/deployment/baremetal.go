@@ -51,7 +51,7 @@ func DeployBaremetalSet(
 	utils.LogForObject(helper, "Reconciling BaremetalSet", instance)
 	_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), baremetalSet, func() error {
 		instance.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSet.Spec)
-		for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
+		for nodeName, node := range instance.Spec.Nodes {
 			hostName := node.HostName
 			ipSet, ok := ipSets[nodeName]
 			instanceSpec := baremetalSet.Spec.BaremetalHosts[hostName]

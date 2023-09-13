@@ -24,8 +24,8 @@ spec:
       deploy: true
   services:
     - custom-image-service
+  nodes: {}
   nodeTemplate:
-    nodes: {}
     ansible:
       ansibleUser: cloud-admin
       ansiblePort: 22

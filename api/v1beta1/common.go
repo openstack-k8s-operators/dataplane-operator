@@ -93,11 +93,6 @@ type NodeTemplate struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
 	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret"`
 
-	// Nodes - Map of Node Names and node specific data. Values here override defaults in the
-	// upper level section.
-	// +kubebuilder:validation:Required
-	Nodes map[string]NodeSection `json:"nodes"`
-
 	// NetworkConfig - Network configuration details. Contains os-net-config
 	// related properties.
 	// +kubebuilder:validation:Optional

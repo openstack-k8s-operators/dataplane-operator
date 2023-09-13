@@ -25,11 +25,11 @@ spec:
       app: openstack
     ctlplaneInterface: enp1s0
     cloudUserName: cloud-admin
+  nodes:
+    edpm-compute-0:
+      hostName: edpm-compute-0
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-    nodes:
-       edpm-compute-0:
-         hostName: edpm-compute-0
     networks:
       - name: CtlPlane
         subnetName: subnet1

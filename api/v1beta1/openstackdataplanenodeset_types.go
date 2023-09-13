@@ -37,6 +37,11 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	// from valus in this section.
 	NodeTemplate NodeTemplate `json:"nodeTemplate"`
 
+	// Nodes - Map of Node Names and node specific data. Values here override defaults in the
+	// upper level section.
+	// +kubebuilder:validation:Required
+	Nodes map[string]NodeSection `json:"nodes"`
+
 	// +kubebuilder:validation:Optional
 	//
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}

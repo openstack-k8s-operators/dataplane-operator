@@ -47,7 +47,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		return "", err
 	}
 
-	for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
+	for nodeName, node := range instance.Spec.Nodes {
 		host := roleNameGroup.AddHost(nodeName)
 		var dnsSearchDomains []string
 
@@ -191,16 +191,16 @@ func populateInventoryFromIPAM(
 
 // getAnsibleUser returns the string value from the template unless it is set in the node
 func getAnsibleUser(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) string {
-	if instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsibleUser != "" {
-		return instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsibleUser
+	if instance.Spec.Nodes[nodeName].Ansible.AnsibleUser != "" {
+		return instance.Spec.Nodes[nodeName].Ansible.AnsibleUser
 	}
 	return instance.Spec.NodeTemplate.Ansible.AnsibleUser
 }
 
 // getAnsiblePort returns the string value from the template unless it is set in the node
 func getAnsiblePort(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) string {
-	if instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsiblePort > 0 {
-		return strconv.Itoa(instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsiblePort)
+	if instance.Spec.Nodes[nodeName].Ansible.AnsiblePort > 0 {
+		return strconv.Itoa(instance.Spec.Nodes[nodeName].Ansible.AnsiblePort)
 	}
 	return strconv.Itoa(instance.Spec.NodeTemplate.Ansible.AnsiblePort)
 }
@@ -209,24 +209,24 @@ func getAnsiblePort(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName st
 func getAnsibleManagementNetwork(
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	nodeName string) string {
-	if instance.Spec.NodeTemplate.Nodes[nodeName].ManagementNetwork != "" {
-		return instance.Spec.NodeTemplate.Nodes[nodeName].ManagementNetwork
+	if instance.Spec.Nodes[nodeName].ManagementNetwork != "" {
+		return instance.Spec.Nodes[nodeName].ManagementNetwork
 	}
 	return instance.Spec.NodeTemplate.ManagementNetwork
 }
 
 // getAnsibleNetworkConfig returns a JSON string value from the template unless it is set in the node
 func getAnsibleNetworkConfig(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) dataplanev1.NetworkConfigSection {
-	if instance.Spec.NodeTemplate.Nodes[nodeName].NetworkConfig.Template != "" {
-		return instance.Spec.NodeTemplate.Nodes[nodeName].NetworkConfig
+	if instance.Spec.Nodes[nodeName].NetworkConfig.Template != "" {
+		return instance.Spec.Nodes[nodeName].NetworkConfig
 	}
 	return instance.Spec.NodeTemplate.NetworkConfig
 }
 
 // getAnsibleNetworks returns a JSON string mapping fixedIP and/or network name to their valules
 func getAnsibleNetworks(instance *dataplanev1.OpenStackDataPlaneNodeSet, nodeName string) []infranetworkv1.IPSetNetwork {
-	if len(instance.Spec.NodeTemplate.Nodes[nodeName].Networks) > 0 {
-		return instance.Spec.NodeTemplate.Nodes[nodeName].Networks
+	if len(instance.Spec.Nodes[nodeName].Networks) > 0 {
+		return instance.Spec.Nodes[nodeName].Networks
 	}
 	return instance.Spec.NodeTemplate.Networks
 }
@@ -256,7 +256,7 @@ func getAnsibleVars(
 		nodeSet[key] = v
 	}
 
-	for key, val := range instance.Spec.NodeTemplate.Nodes[nodeName].Ansible.AnsibleVars {
+	for key, val := range instance.Spec.Nodes[nodeName].Ansible.AnsibleVars {
 		var v interface{}
 		nodeYamlError = yaml.Unmarshal(val, &v)
 		if nodeYamlError != nil {

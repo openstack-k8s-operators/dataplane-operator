@@ -27,10 +27,10 @@ func DefaultDataPlaneNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
 		PreProvisioned: false,
 		NodeTemplate: dataplanev1.NodeTemplate{
 			AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-			Nodes: map[string]dataplanev1.NodeSection{
-				"edpm-compute-node-set": {
-					HostName: "edpm-bm-compute-1",
-				},
+		},
+		Nodes: map[string]dataplanev1.NodeSection{
+			"edpm-compute-node-set": {
+				HostName: "edpm-bm-compute-1",
 			},
 		},
 	}
@@ -44,8 +44,8 @@ func DefaultDataPlaneNoNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
 		PreProvisioned: true,
 		NodeTemplate: dataplanev1.NodeTemplate{
 			AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-			Nodes:                      map[string]dataplanev1.NodeSection{},
 		},
+		Nodes: map[string]dataplanev1.NodeSection{},
 	}
 }
 

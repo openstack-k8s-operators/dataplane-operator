@@ -16,9 +16,9 @@ spec:
       deploy: true
   services:
     - test-service
+  nodes: {}
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-    nodes: {}
     extraMounts:
       - extraVolType: edpm-ansible
         mounts:
