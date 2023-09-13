@@ -27,6 +27,7 @@ theme:
 nav:
   - Home: index.md
   - Custom Resources:
+      - OpenStackDataPlaneDeployment: openstack_dataplanedeployment.md
       - OpenStackDataPlaneNodeSet: openstack_dataplanenodeset.md
       - OpenStackDataPlaneService: openstack_dataplaneservice.md
   - Architecture: architecture.md
