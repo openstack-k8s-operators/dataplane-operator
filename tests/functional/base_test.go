@@ -4,6 +4,7 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
@@ -102,6 +103,37 @@ func GetDataplaneNodeSet(name types.NamespacedName) *dataplanev1.OpenStackDataPl
 		return nil
 	}, timeout, interval).Should(Succeed())
 	return instance
+}
+
+// Create an empty OpenStackDataPlaneService struct
+// containing only given NamespacedName as metadata
+func DefaultDataplaneService(name types.NamespacedName) map[string]interface{} {
+
+	return map[string]interface{}{
+
+		"apiVersion": "dataplane.openstack.org/v1beta1",
+		"kind":       "OpenStackDataPlaneService",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		}}
+}
+
+// Create an OpenStackDataPlaneService with a given NamespacedName, assert on success
+func CreateDataplaneService(name types.NamespacedName) *unstructured.Unstructured {
+	raw := DefaultDataplaneService(name)
+
+	return th.CreateUnstructured(raw)
+}
+
+// Get service with given NamespacedName, assert on successful retrieval
+func GetService(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneService {
+	foundService := &dataplanev1.OpenStackDataPlaneService{}
+	Eventually(func(g Gomega) error {
+		g.Expect(k8sClient.Get(ctx, name, foundService)).Should(Succeed())
+		return nil
+	}, timeout, interval).Should(Succeed())
+	return foundService
 }
 
 func DeleteNamespace(name string) {
