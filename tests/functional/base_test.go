@@ -1,7 +1,9 @@
 package functional
 
 import (
-	. "github.com/onsi/gomega"
+	"encoding/json"
+
+	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -29,6 +31,69 @@ func CreateDataplaneDeployment(name types.NamespacedName, spec map[string]interf
 func CreateDataplaneService(name types.NamespacedName) *unstructured.Unstructured {
 	raw := DefaultDataplaneService(name)
 	return th.CreateUnstructured(raw)
+}
+
+func DefaultDataPlaneNoNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
+	return dataplanev1.OpenStackDataPlaneNodeSetSpec{
+		DeployStrategy: dataplanev1.DeployStrategySection{
+			Deploy: false,
+		},
+		PreProvisioned: true,
+		NodeTemplate: dataplanev1.NodeTemplate{
+			AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
+		},
+		Nodes: map[string]dataplanev1.NodeSection{},
+	}
+}
+
+func CustomServiceImageSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
+	return dataplanev1.OpenStackDataPlaneNodeSetSpec{
+		DeployStrategy: dataplanev1.DeployStrategySection{
+			Deploy: false,
+		},
+		PreProvisioned: true,
+		NodeTemplate: dataplanev1.NodeTemplate{
+			AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
+			Ansible: dataplanev1.AnsibleOpts{
+				AnsibleVars: map[string]json.RawMessage{
+					"edpm_nova_compute_image": json.RawMessage([]byte(`"blah.test-image:latest"`)),
+				},
+			},
+		},
+		Nodes: map[string]dataplanev1.NodeSection{},
+	}
+}
+
+func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneNodeSetSpec) *dataplanev1.OpenStackDataPlaneNodeSet {
+	return &dataplanev1.OpenStackDataPlaneNodeSet{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "dataplane.openstack.org/v1beta1",
+			Kind:       "OpenStackDataPlaneNodeSet",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name.Name,
+			Namespace: name.Namespace,
+		},
+		Spec: spec,
+	}
+}
+
+func GetDataplaneNodeSet(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneNodeSet {
+	instance := &dataplanev1.OpenStackDataPlaneNodeSet{}
+	gomega.Eventually(func(g gomega.Gomega) error {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+		return nil
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+func DeleteNamespace(name string) {
+	ns := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
+	gomega.Expect(k8sClient.Delete(ctx, ns)).Should(gomega.Succeed())
 }
 
 // Create SSHSecret

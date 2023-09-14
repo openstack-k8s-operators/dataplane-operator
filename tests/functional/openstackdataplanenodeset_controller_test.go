@@ -32,6 +32,16 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 	var dataplaneNodeSetName types.NamespacedName
 	var dataplaneSecretName types.NamespacedName
 	var dataplaneSSHSecretName types.NamespacedName
+	defaultEdpmServiceList := []string{
+		"edpm_frr_image",
+		"edpm_iscsid_image",
+		"edpm_logrotate_crond_image",
+		"edpm_nova_compute_image",
+		"edpm_nova_libvirt_image",
+		"edpm_ovn_controller_agent_image",
+		"edpm_ovn_metadata_agent_image",
+		"edpm_ovn_bgp_agent_image",
+	}
 
 	BeforeEach(func() {
 		dataplaneNodeSetName = types.NamespacedName{
@@ -272,6 +282,32 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				condition.InputReadyCondition,
 				corev1.ConditionTrue,
 			)
+		})
+	})
+
+	When("No default service image is provided", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+		})
+		It("Should have default service values provided", func() {
+			secret := th.GetSecret(dataplaneSecretName)
+			for _, svcImage := range defaultEdpmServiceList {
+				Expect(secret.Data["inventory"]).Should(
+					ContainSubstring(svcImage))
+			}
+		})
+	})
+
+	When("A user provides a custom service image", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, CustomServiceImageSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+		})
+		It("Should have the user defined image in the inventory", func() {
+			secret := th.GetSecret(dataplaneSecretName)
+			Expect(secret.Data["inventory"]).Should(
+				ContainSubstring("blah.test-image"))
 		})
 	})
 })

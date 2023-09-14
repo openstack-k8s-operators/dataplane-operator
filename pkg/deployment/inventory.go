@@ -38,13 +38,11 @@ import (
 func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allIPSets map[string]infranetworkv1.IPSet, dnsAddresses []string, defaultImages dataplanev1.DataplaneAnsibleImageDefaults) (string, error) {
-	// FIXME: set ansible vars for defaultImages. NOTE: user provided Ansible vars for these
-	// should override the defaults set here
 	var err error
 
 	inventory := ansible.MakeInventory()
 	roleNameGroup := inventory.AddGroup(instance.Name)
-	err = resolveAnsibleVars(&instance.Spec.NodeTemplate, &ansible.Host{}, &roleNameGroup)
+	err = resolveAnsibleVars(&instance.Spec.NodeTemplate, &ansible.Host{}, &roleNameGroup, defaultImages)
 	if err != nil {
 		return "", err
 	}
@@ -286,7 +284,7 @@ func getAnsibleVars(
 	return nodeSet, nil
 }
 
-func resolveAnsibleVars(nodeTemplate *dataplanev1.NodeTemplate, host *ansible.Host, group *ansible.Group) error {
+func resolveAnsibleVars(nodeTemplate *dataplanev1.NodeTemplate, host *ansible.Host, group *ansible.Group, defaultImages dataplanev1.DataplaneAnsibleImageDefaults) error {
 	ansibleVarsData := make(map[string]interface{})
 
 	if nodeTemplate.Ansible.AnsibleHost != "" {
@@ -303,6 +301,33 @@ func resolveAnsibleVars(nodeTemplate *dataplanev1.NodeTemplate, host *ansible.Ho
 	}
 	if len(nodeTemplate.Networks) > 0 {
 		ansibleVarsData["networks"] = nodeTemplate.Networks
+	}
+
+	// Set default Service Image Variables in they are not provided by the user.
+	// This uses the default values provided by dataplanev1.DataplaneAnsibleImageDefaults
+	if nodeTemplate.Ansible.AnsibleVars["edpm_frr_image"] == nil {
+		ansibleVarsData["edpm_frr_image"] = defaultImages.Frr
+	}
+	if nodeTemplate.Ansible.AnsibleVars["edpm_iscsid_image"] == nil {
+		ansibleVarsData["edpm_iscsid_image"] = defaultImages.IscsiD
+	}
+	if nodeTemplate.Ansible.AnsibleVars["edpm_logrotate_crond_image"] == nil {
+		ansibleVarsData["edpm_logrotate_crond_image"] = defaultImages.Logrotate
+	}
+	if nodeTemplate.Ansible.AnsibleVars["edpm_nova_compute_image"] == nil {
+		ansibleVarsData["edpm_nova_compute_image"] = defaultImages.NovaCompute
+	}
+	if nodeTemplate.Ansible.AnsibleVars["edpm_nova_libvirt_container_image"] == nil {
+		ansibleVarsData["edpm_nova_libvirt_image"] = defaultImages.NovaLibvirt
+	}
+	if nodeTemplate.Ansible.AnsibleVars["edpm_ovn_controller_agent_image"] == nil {
+		ansibleVarsData["edpm_ovn_controller_agent_image"] = defaultImages.OvnControllerAgent
+	}
+	if nodeTemplate.Ansible.AnsibleVars["edpm_ovn_metadata_agent_image"] == nil {
+		ansibleVarsData["edpm_ovn_metadata_agent_image"] = defaultImages.OvnMetadataAgent
+	}
+	if nodeTemplate.Ansible.AnsibleVars["edpm_ovn_bgp_agent_image"] == nil {
+		ansibleVarsData["edpm_ovn_bgp_agent_image"] = defaultImages.OvnBgpAgent
 	}
 
 	var err error
