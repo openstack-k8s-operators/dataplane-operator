@@ -444,6 +444,28 @@ spec:
         name: ovncontroller-config
       name: ovncontroller-config-0
   - mounts:
+    - mountPath: /var/lib/openstack/configs/ovn/10-neutron-metadata.conf
+      name: neutron-ovn-metadata-agent-neutron-config-0
+      subPath: 10-neutron-metadata.conf
+    volumes:
+    - secret:
+        items:
+        - key: 10-neutron-metadata.conf
+          path: 10-neutron-metadata.conf
+        secretName: neutron-ovn-metadata-agent-neutron-config
+      name: neutron-ovn-metadata-agent-neutron-config-0
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/ovn/05-nova-metadata.conf
+      name: nova-metadata-neutron-config-0
+      subPath: 05-nova-metadata.conf
+    volumes:
+    - secret:
+        items:
+        - key: 05-nova-metadata.conf
+          path: 05-nova-metadata.conf
+        secretName: nova-metadata-neutron-config
+      name: nova-metadata-neutron-config-0
+  - mounts:
     - mountPath: /runner/env/ssh_key
       name: ssh-key
       subPath: ssh_key
