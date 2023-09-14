@@ -16,6 +16,7 @@ limitations under the License.
 package functional
 
 import (
+	"fmt"
 	"os"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -306,8 +307,38 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		})
 		It("Should have the user defined image in the inventory", func() {
 			secret := th.GetSecret(dataplaneSecretName)
-			Expect(secret.Data["inventory"]).Should(
-				ContainSubstring("blah.test-image"))
+			for _, svcAnsibleVar := range DefaultEdpmServiceAnsibleVarList {
+				Expect(secret.Data["inventory"]).Should(
+					ContainSubstring(fmt.Sprintf("%s.%s", svcAnsibleVar, CustomEdpmServiceDomainTag)))
+			}
+		})
+	})
+
+	When("No default service image is provided", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+		})
+		It("Should have default service values provided", func() {
+			secret := th.GetSecret(dataplaneSecretName)
+			for _, svcAnsibleVar := range DefaultEdpmServiceAnsibleVarList {
+				Expect(secret.Data["inventory"]).Should(
+					ContainSubstring(svcAnsibleVar))
+			}
+		})
+	})
+
+	When("A user provides a custom service image", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, CustomServiceImageSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+		})
+		It("Should have the user defined image in the inventory", func() {
+			secret := th.GetSecret(dataplaneSecretName)
+			for _, svcAnsibleVar := range DefaultEdpmServiceAnsibleVarList {
+				Expect(secret.Data["inventory"]).Should(
+					ContainSubstring(fmt.Sprintf("%s.%s", svcAnsibleVar, CustomEdpmServiceDomainTag)))
+			}
 		})
 	})
 })

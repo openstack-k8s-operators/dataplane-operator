@@ -1,6 +1,8 @@
 package functional
 
 import (
+	"fmt"
+
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -11,7 +13,18 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 )
 
-// Resource creation
+var DefaultEdpmServiceAnsibleVarList = []string{
+	"edpm_frr_image",
+	"edpm_iscsid_image",
+	"edpm_logrotate_crond_image",
+	"edpm_nova_compute_image",
+	"edpm_nova_libvirt_image",
+	"edpm_ovn_controller_agent_image",
+	"edpm_ovn_metadata_agent_image",
+	"edpm_ovn_bgp_agent_image",
+}
+
+var CustomEdpmServiceDomainTag string = "test-image:latest"
 
 // Create OpenstackDataPlaneNodeSet in k8s and test that no errors occur
 func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
@@ -34,21 +47,24 @@ func CreateDataplaneService(name types.NamespacedName) *unstructured.Unstructure
 // Build CustomServiceImageSpec struct with empty `Nodes` list
 func CustomServiceImageSpec() map[string]interface{} {
 
+	var ansibleServiceVars = make(map[string]interface{})
+	for _, svcName := range DefaultEdpmServiceAnsibleVarList {
+		imageAddress := fmt.Sprintf(`"%s.%s"`, svcName, CustomEdpmServiceDomainTag)
+		ansibleServiceVars[svcName] = imageAddress
+	}
+
 	return map[string]interface{}{
 		"preProvisioned": true,
 		"nodeTemplate": map[string]interface{}{
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 			"ansible": map[string]interface{}{
-				"ansibleVars": map[string]interface{}{
-					"edpm_nova_compute_image": "blah.test-image:latest",
-				},
+				"ansibleVars": ansibleServiceVars,
 			},
 		},
 		"nodes": map[string]interface{}{},
 	}
 }
 
-// Create SSHSecret
 func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
 	return th.CreateSecret(
 		types.NamespacedName{Namespace: name.Namespace, Name: name.Name},
