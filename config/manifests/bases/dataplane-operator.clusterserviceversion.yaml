@@ -4,6 +4,7 @@ metadata:
   annotations:
     alm-examples: '[]'
     capabilities: Basic Install
+    operators.openshift.io/infrastructure-features: '["disconnected"]'
     operators.operatorframework.io/operator-type: non-standalone
   name: dataplane-operator.v0.0.0
   namespace: placeholder
@@ -28,8 +29,6 @@ spec:
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       version: v1beta1
-    - description: OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets
-        API
       displayName: OpenStack Data Plane NodeSet
       kind: OpenStackDataPlaneNodeSet
       name: openstackdataplanenodesets.dataplane.openstack.org

@@ -1,0 +1,29 @@
+# This patch inject custom ENV settings to the manager container
+# Used to set our default image locations
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-manager
+  namespace: system
+spec:
+  template:
+    spec:
+      containers:
+      - name: manager
+        env:
+        - name: RELATED_IMAGE_OPENSTACK_EDPM_FRR_DEFAULT_IMG
+          value: quay.io/podified-antelope-centos9/openstack-frr:current-podified
+        - name: RELATED_IMAGE_OPENSTACK_EDPM_ISCSID_DEFAULT_IMG
+          value: quay.io/podified-antelope-centos9/openstack-iscsid:current-podified
+        - name: RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG
+          value: quay.io/podified-antelope-centos9/openstack-cron:current-podified
+        - name: RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG
+          value: quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified
+        - name: RELATED_IMAGE_OPENSTACK_EDPM_NOVA_LIBVIRT_DEFAULT_IMG
+          value: quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified
+        - name: RELATED_IMAGE_OPENSTACK_EDPM_OVN_CONTROLLER_AGENT_DEFAULT_IMG
+          value: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
+        - name: RELATED_IMAGE_OPENSTACK_EDPM_OVN_METADATA_AGENT_DEFAULT_IMG
+          value: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
+        - name: RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE
+          value: quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified

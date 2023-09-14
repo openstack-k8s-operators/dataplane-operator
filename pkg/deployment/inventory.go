@@ -37,7 +37,9 @@ import (
 // GenerateNodeSetInventory yields a parsed Inventory for role
 func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	allIPSets map[string]infranetworkv1.IPSet, dnsAddresses []string) (string, error) {
+	allIPSets map[string]infranetworkv1.IPSet, dnsAddresses []string, defaultImages dataplanev1.DataplaneAnsibleImageDefaults) (string, error) {
+	// FIXME: set ansible vars for defaultImages. NOTE: user provided Ansible vars for these
+	// should override the defaults set here
 	var err error
 
 	inventory := ansible.MakeInventory()

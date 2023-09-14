@@ -46,6 +46,41 @@ import (
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 )
 
+var dataplaneAnsibleImageDefaults dataplanev1.DataplaneAnsibleImageDefaults
+
+const (
+	// FrrDefaultImage -
+	FrrDefaultImage = "quay.io/podified-antelope-centos9/openstack-frr:current-podified"
+	// IscsiDDefaultImage -
+	IscsiDDefaultImage = "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
+	// LogrotateDefaultImage -
+	LogrotateDefaultImage = "quay.io/podified-antelope-centos9/openstack-cron:current-podified"
+	// NovaComputeDefaultImage -
+	NovaComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
+	// NovaLibvirtDefaultImage -
+	NovaLibvirtDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified"
+	// OvnControllerAgentDefaultImage -
+	OvnControllerAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
+	// OvnMetadataAgentDefaultImage -
+	OvnMetadataAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
+	// OvnBgpAgentDefaultImage -
+	OvnBgpAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
+)
+
+// SetupAnsibleImageDefaults -
+func SetupAnsibleImageDefaults() {
+	dataplaneAnsibleImageDefaults = dataplanev1.DataplaneAnsibleImageDefaults{
+		Frr:                util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_FRR_DEFAULT_IMG", FrrDefaultImage),
+		IscsiD:             util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_ISCSID_DEFAULT_IMG", IscsiDDefaultImage),
+		Logrotate:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG", LogrotateDefaultImage),
+		NovaCompute:        util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG", NovaComputeDefaultImage),
+		NovaLibvirt:        util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NOVA_LIBVIRT_DEFAULT_IMG", NovaLibvirtDefaultImage),
+		OvnControllerAgent: util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_CONTROLLER_AGENT_DEFAULT_IMG", OvnControllerAgentDefaultImage),
+		OvnMetadataAgent:   util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_METADATA_AGENT_DEFAULT_IMG", OvnMetadataAgentDefaultImage),
+		OvnBgpAgent:        util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE", OvnBgpAgentDefaultImage),
+	}
+}
+
 const (
 	// AnsibleSSHPrivateKey ssh private key
 	AnsibleSSHPrivateKey = "ssh-privatekey"
@@ -244,7 +279,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	// Generate NodeSet Inventory
 	_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
-		allIPSets, dnsAddresses)
+		allIPSets, dnsAddresses, dataplaneAnsibleImageDefaults)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
 		return ctrl.Result{}, err
