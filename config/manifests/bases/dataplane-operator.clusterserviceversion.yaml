@@ -12,6 +12,7 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
+<<<<<<< HEAD
     - description: OpenStackDataPlaneDeployment is the Schema for the openstackdataplanedeployments
         API
       displayName: OpenStack Data Plane Deployments
@@ -29,6 +30,10 @@ spec:
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       version: v1beta1
+=======
+    - description: OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets
+        API
+>>>>>>> 01644eb (Support disconnected network environments)
       displayName: OpenStack Data Plane NodeSet
       kind: OpenStackDataPlaneNodeSet
       name: openstackdataplanenodesets.dataplane.openstack.org
