@@ -145,31 +145,6 @@ OpenStackDataPlaneServices](#create-openstackdataplaneservices) section.
 Common configurations that can be enabled with `ansibleVars` are also
 documented at [Common Configurations](common_configurations.md).
 
-Some of the ansible variables will need to be set based on values from the
-controlplane that is already deployed. This set of ansible variables and the
-`oc` command that can be used to get their values are shown below.
-
-```console
-export EDPM_OVN_METADATA_AGENT_TRANSPORT_URL=$(oc get secret rabbitmq-transport-url-neutron-neutron-transport -o json | jq -r .data.transport_url | base64 -d)
-export EDPM_OVN_METADATA_AGENT_SB_CONNECTION=$(oc get ovndbcluster ovndbcluster-sb -o json | jq -r .status.dbAddress)
-export EDPM_OVN_METADATA_AGENT_NOVA_METADATA_HOST=$(oc get svc nova-metadata-internal -o json |jq -r '.status.loadBalancer.ingress[0].ip')
-export EDPM_OVN_METADATA_AGENT_PROXY_SHARED_SECRET=$(oc get secret osp-secret -o json | jq -r .data.MetadataSecret  | base64 -d)
-export EDPM_OVN_METADATA_AGENT_BIND_HOST=127.0.0.1
-export EDPM_OVN_DBS=$(oc get ovndbcluster ovndbcluster-sb -o json | jq -r '.status.networkAttachments."openstack/internalapi"')
-
-echo "
-edpm_ovn_metadata_agent_DEFAULT_transport_url: ${EDPM_OVN_METADATA_AGENT_TRANSPORT_URL}
-edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: ${EDPM_OVN_METADATA_AGENT_SB_CONNECTION}
-edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: ${EDPM_OVN_METADATA_AGENT_NOVA_METADATA_HOST}
-edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: ${EDPM_OVN_METADATA_AGENT_PROXY_SHARED_SECRET}
-edpm_ovn_metadata_agent_DEFAULT_bind_host: ${EDPM_OVN_METADATA_AGENT_BIND_HOST}
-edpm_ovn_dbs: ${EDPM_OVN_DBS}
-"
-```
-
-Add the output to the `ansibleVars` field to configure the values on the
-role.
-
 Add nodes to the dataplane. Each node should have its `role` field set to the
 name of its role. Since we are using a single role in this example, that role
 name will be `edpm-compute`. Each node will also inherit values
@@ -217,17 +192,8 @@ With the nodes and the controlplane specific variables added, the full
               # These vars are edpm_network_config role vars
               edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
 
-              # Variables set with values from the controlplane
-              edpm_ovn_metadata_agent_default_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
-              edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
-              edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
-              edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
-              edpm_ovn_metadata_agent_default_bind_host: 127.0.0.1
-              edpm_ovn_dbs:
-              - 192.168.24.1
-
               # See config/samples/dataplane_v1beta1_openstackdataplanenodeset.yaml
-              # for the other most common ansible varialbes that need to be set.
+              # for the other most common ansible variables that need to be set.
 
       nodes:
         edpm-compute-0:
