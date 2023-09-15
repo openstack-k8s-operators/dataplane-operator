@@ -28,7 +28,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
@@ -235,16 +234,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 				condition.TrueCondition(
 					condition.Type(fmt.Sprintf(dataplanev1.NodeSetDeploymentReadyCondition, nodeSet.Name)),
 					condition.DeploymentReadyMessage))
-
-			logger.Info("Set NodeSet DeploymentReadyCondition true", "nodeSet", nodeSet.Name)
-			_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), &nodeSet, func() error {
-				nodeSet.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
-				return nil
-			})
-			if err != nil {
-				util.LogErrorForObject(helper, err, "Unable to set Status on NodeSet", &nodeSet)
-				return ctrl.Result{}, err
-			}
 		}
 	}
 
