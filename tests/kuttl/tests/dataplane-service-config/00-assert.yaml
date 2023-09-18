@@ -8,7 +8,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneNodeSet
+    kind: OpenStackDataPlaneDeployment
     name: edpm-compute-no-nodes
 spec:
   debug: false

@@ -14,8 +14,6 @@ spec:
   - ovn
   - libvirt
   - nova
-  deployStrategy:
-    deploy: true
   env:
   - name: ANSIBLE_FORCE_COLOR
     value: "True"
@@ -42,43 +40,6 @@ status:
     reason: Ready
     status: "True"
     type: SetupReady
-  - message: configure-network service ready
-    reason: Ready
-    status: "True"
-    type: configure-network service ready
-  - message: configure-os service ready
-    reason: Ready
-    status: "True"
-    type: configure-os service ready
-  - message: download-cache service ready
-    reason: Ready
-    status: "True"
-    type: download-cache service ready
-  - message: install-os service ready
-    reason: Ready
-    status: "True"
-    type: install-os service ready
-  - message: libvirt service ready
-    reason: Ready
-    status: "True"
-    type: libvirt service ready
-  - message: nova service ready
-    reason: Ready
-    status: "True"
-    type: nova service ready
-  - message: ovn service ready
-    reason: Ready
-    status: "True"
-    type: ovn service ready
-  - message: run-os service ready
-    reason: Ready
-    status: "True"
-    type: run-os service ready
-  - message: validate-network service ready
-    reason: Ready
-    status: "True"
-    type: validate-network service ready
-  deployed: true
 ---
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
@@ -89,7 +50,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneNodeSet
+    kind: OpenStackDataPlaneDeployment
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
@@ -145,7 +106,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneNodeSet
+    kind: OpenStackDataPlaneDeployment
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
@@ -201,7 +162,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneNodeSet
+    kind: OpenStackDataPlaneDeployment
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
@@ -257,7 +218,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneNodeSet
+    kind: OpenStackDataPlaneDeployment
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
@@ -314,7 +275,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneNodeSet
+    kind: OpenStackDataPlaneDeployment
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
@@ -370,7 +331,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneNodeSet
+    kind: OpenStackDataPlaneDeployment
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
@@ -427,7 +388,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneNodeSet
+    kind: OpenStackDataPlaneDeployment
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
@@ -516,7 +477,7 @@ metadata:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: OpenStackDataPlaneNodeSet
+    kind: OpenStackDataPlaneDeployment
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6

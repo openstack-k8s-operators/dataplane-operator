@@ -3,8 +3,6 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: openstack-edpm
 spec:
-  deployStrategy:
-    deploy: false
   env:
   - name: ANSIBLE_FORCE_COLOR
     value: "True"
@@ -108,12 +106,10 @@ status:
   conditions:
   - message: Deployment not started
     reason: NotRequested
-    severity: Info
     status: "False"
     type: Ready
   - message: Deployment not started
     reason: NotRequested
-    severity: Info
     status: "False"
     type: DeploymentReady
   - message: Input data complete

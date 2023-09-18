@@ -174,6 +174,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	if err != nil || !isReady {
 		return ctrl.Result{}, err
 	}
+	instance.Status.DNSClusterAddresses = dnsClusterAddresses
+	instance.Status.CtlplaneSearchDomain = ctlplaneSearchDomain
 
 	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 
@@ -240,7 +242,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	// Generate NodeSet Inventory
-	roleSecret, err := deployment.GenerateNodeSetInventory(ctx, helper, instance,
+	_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
 		allIPSets, dnsAddresses)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
@@ -250,58 +252,70 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	// all setup tasks complete, mark SetupReadyCondition True
 	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
 
-	// Trigger executions based on the OpenStackDataPlane Controller state.
-	r.Log.Info("NodeSet", "DeployStrategy", instance.Spec.DeployStrategy.Deploy,
-		"NodeSet.Namespace", instance.Namespace, "NodeSet.Name", instance.Name)
-	if instance.Spec.DeployStrategy.Deploy {
-		logger.Info(fmt.Sprintf("Deploying NodeSet: %s", instance.Name))
-		logger.Info("Set Status.Deployed to false", "instance", instance)
-		instance.Status.Deployed = false
-		logger.Info("Set DeploymentReadyCondition false", "instance", instance)
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			condition.DeploymentReadyCondition, condition.RequestedReason,
-			condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
-		ansibleEESpec := instance.GetAnsibleEESpec()
-		if dnsClusterAddresses != nil && ctlplaneSearchDomain != "" {
-			ansibleEESpec.DNSConfig = &corev1.PodDNSConfig{
-				Nameservers: dnsClusterAddresses,
-				Searches:    []string{ctlplaneSearchDomain},
-			}
-		}
-		deployResult, err := deployment.Deploy(
-			ctx, helper, instance, ansibleSSHPrivateKeySecret,
-			roleSecret, &instance.Status, ansibleEESpec,
-			instance.Spec.Services, instance)
-		if err != nil {
-			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to deploy %s", instance.Name), instance)
-			instance.Status.Conditions.Set(condition.FalseCondition(
-				condition.ReadyCondition,
-				condition.ErrorReason,
-				condition.SeverityWarning,
-				dataplanev1.DataPlaneNodeSetErrorMessage,
-				err.Error()))
-			return ctrl.Result{}, err
-		}
-		if deployResult != nil {
-			result = *deployResult
-			return result, nil
-		}
-		logger.Info("Set status deploy true", "instance", instance)
-		instance.Status.Deployed = true
-		logger.Info("Set DeploymentReadyCondition true", "instance", instance)
-		instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
-
-	}
-
 	// Set DeploymentReadyCondition to False if it was unknown.
-	// Handles the case where the NodeSet is created with
-	// DeployStrategy.Deploy=false.
+	// Handles the case where the NodeSet is created, but not yet deployed.
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
 		logger.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
 	}
 
+	deployedDeploymentsForNodeSet, err := r.GetDeployedDeploymentsForNodeSet(instance.Name)
+	if err != nil {
+		logger.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
+		return ctrl.Result{}, err
+	}
+	if len(deployedDeploymentsForNodeSet.Items) > 0 {
+		logger.Info("Set NodeSet DeploymentReadyCondition true")
+		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
+	}
+
 	return ctrl.Result{}, nil
+}
+
+// GetDeployedDeploymentsForNodeSet - Get the OpenStackDataPlaneDeployment
+// resources that have been deployed and are for the given
+// OpenStackDataPlaneNodeSet.
+func (r *OpenStackDataPlaneNodeSetReconciler) GetDeployedDeploymentsForNodeSet(nodeSetName string) (*dataplanev1.OpenStackDataPlaneDeploymentList, error) {
+	// Get all deployments
+	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
+	err := r.Client.List(context.Background(), deployments)
+	if err != nil {
+		r.Log.Error(err, "Unable to retrieve OpenStackDataPlaneDeployment CRs %v")
+		return deployments, nil
+	}
+	deployedDeploymentsForNodeSet := &dataplanev1.OpenStackDataPlaneDeploymentList{}
+	for _, deployment := range deployments.Items {
+		for _, nodeSet := range deployment.Spec.NodeSets {
+			if nodeSet == nodeSetName {
+				if deployment.Status.Conditions.IsTrue(condition.Type(fmt.Sprintf(dataplanev1.NodeSetDeploymentReadyCondition, nodeSetName))) {
+					deployedDeploymentsForNodeSet.Items = append(deployedDeploymentsForNodeSet.Items, deployment)
+				}
+			}
+		}
+	}
+
+	return deployedDeploymentsForNodeSet, err
+}
+
+// GetNodeSetsForDeployment - Get the OpenStackDataPlaneNodeSet
+// resources for the given OpenStackDataPlaneDeployment
+func (r *OpenStackDataPlaneNodeSetReconciler) GetNodeSetsForDeployment(namespace string, deployment *dataplanev1.OpenStackDataPlaneDeployment) (dataplanev1.OpenStackDataPlaneNodeSetList, error) {
+	nodeSets := dataplanev1.OpenStackDataPlaneNodeSetList{}
+	var err error
+	for _, nodeSetName := range deployment.Spec.NodeSets {
+		nodeSet := &dataplanev1.OpenStackDataPlaneNodeSet{}
+		namespacedName := client.ObjectKey{
+			Namespace: namespace,
+			Name:      nodeSetName}
+		err = r.Client.Get(context.Background(), namespacedName, nodeSet)
+		if err != nil {
+			r.Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSet CR %v")
+			return nodeSets, nil
+		}
+		nodeSets.Items = append(nodeSets.Items, *nodeSet)
+	}
+
+	return nodeSets, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -338,6 +352,25 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		return nil
 	})
 
+	deploymentWatcher := handler.EnqueueRequestsFromMapFunc(func(obj client.Object) []reconcile.Request {
+		var namespace string = obj.GetNamespace()
+		result := []reconcile.Request{}
+
+		deployment := obj.(*dataplanev1.OpenStackDataPlaneDeployment)
+		nodeSets, err := r.GetNodeSetsForDeployment(namespace, deployment)
+		if err != nil {
+			r.Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSets %w")
+			return nil
+		}
+		for _, nodeSet := range nodeSets.Items {
+			name := client.ObjectKey{
+				Namespace: namespace,
+				Name:      nodeSet.Name}
+			result = append(result, reconcile.Request{NamespacedName: name})
+		}
+		return result
+	})
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1.OpenStackDataPlaneNodeSet{}).
 		Owns(&v1alpha1.OpenStackAnsibleEE{}).
@@ -347,5 +380,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		Owns(&corev1.Secret{}).
 		Watches(&source.Kind{Type: &infranetworkv1.DNSMasq{}},
 			reconcileFunction).
+		Watches(&source.Kind{Type: &dataplanev1.OpenStackDataPlaneDeployment{}},
+			deploymentWatcher).
 		Complete(r)
 }

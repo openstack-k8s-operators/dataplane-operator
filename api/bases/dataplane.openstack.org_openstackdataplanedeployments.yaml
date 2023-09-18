@@ -1,0 +1,91 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.1
+  creationTimestamp: null
+  name: openstackdataplanedeployments.dataplane.openstack.org
+spec:
+  group: dataplane.openstack.org
+  names:
+    kind: OpenStackDataPlaneDeployment
+    listKind: OpenStackDataPlaneDeploymentList
+    plural: openstackdataplanedeployments
+    shortNames:
+    - osdpd
+    - osdpdeployment
+    - osdpdeployments
+    singular: openstackdataplanedeployment
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: NodeSets
+      jsonPath: .spec.NodeSets
+      name: NodeSets
+      type: string
+    - description: Status
+      jsonPath: .status.conditions[0].status
+      name: Status
+      type: string
+    - description: Message
+      jsonPath: .status.conditions[0].message
+      name: Message
+      type: string
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              ansibleLimit:
+                type: string
+              ansibleSkipTags:
+                type: string
+              ansibleTags:
+                type: string
+              nodeSets:
+                items:
+                  type: string
+                type: array
+            required:
+            - nodeSets
+            type: object
+          status:
+            properties:
+              conditions:
+                items:
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    reason:
+                      type: string
+                    severity:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              deployed:
+                type: boolean
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

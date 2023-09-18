@@ -21,9 +21,6 @@ func CreateDataplaneNodeSet(name types.NamespacedName, spec dataplanev1.OpenStac
 
 func DefaultDataPlaneNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
 	return dataplanev1.OpenStackDataPlaneNodeSetSpec{
-		DeployStrategy: dataplanev1.DeployStrategySection{
-			Deploy: false,
-		},
 		PreProvisioned: false,
 		NodeTemplate: dataplanev1.NodeTemplate{
 			AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
@@ -38,9 +35,6 @@ func DefaultDataPlaneNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
 
 func DefaultDataPlaneNoNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
 	return dataplanev1.OpenStackDataPlaneNodeSetSpec{
-		DeployStrategy: dataplanev1.DeployStrategySection{
-			Deploy: false,
-		},
 		PreProvisioned: true,
 		NodeTemplate: dataplanev1.NodeTemplate{
 			AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",

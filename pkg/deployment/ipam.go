@@ -127,7 +127,7 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	allIPSets map[string]infranetworkv1.IPSet) ([]string, []string, string, bool, error) {
 
 	// Verify dnsmasq CR exists
-	dnsAddresses, dnsClusterAddresses, isReady, err := checkDNSService(
+	dnsAddresses, dnsClusterAddresses, isReady, err := CheckDNSService(
 		ctx, helper, instance)
 
 	if err != nil || !isReady || dnsAddresses == nil {
@@ -242,8 +242,8 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 	return allIPSets, nil
 }
 
-// checkDNSService checks if DNS is configured and ready
-func checkDNSService(ctx context.Context, helper *helper.Helper,
+// CheckDNSService checks if DNS is configured and ready
+func CheckDNSService(ctx context.Context, helper *helper.Helper,
 	instance client.Object) ([]string, []string, bool, error) {
 	dnsmasqList := &infranetworkv1.DNSMasqList{}
 	listOpts := []client.ListOption{
