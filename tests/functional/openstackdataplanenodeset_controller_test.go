@@ -96,5 +96,13 @@ var _ = Describe("Dataplane Role Test", func() {
 			Expect(secret.Data["inventory"]).Should(
 				ContainSubstring("edpm-compute-nodeset"))
 		})
+		It("Should set Input ready", func() {
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionTrue,
+			)
+		})
 	})
 })
