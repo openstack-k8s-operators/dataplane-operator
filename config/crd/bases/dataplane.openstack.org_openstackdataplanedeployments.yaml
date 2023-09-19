@@ -21,7 +21,7 @@ spec:
   versions:
   - additionalPrinterColumns:
     - description: NodeSets
-      jsonPath: .spec.NodeSets
+      jsonPath: .spec.nodeSets
       name: NodeSets
       type: string
     - description: Status

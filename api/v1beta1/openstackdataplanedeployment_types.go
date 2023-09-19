@@ -58,7 +58,7 @@ type OpenStackDataPlaneDeploymentStatus struct {
 //+kubebuilder:subresource:status
 //+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane Deployments"
 //+kubebuilder:resource:shortName=osdpd;osdpdeployment;osdpdeployments
-//+kubebuilder:printcolumn:name="NodeSets",type="string",JSONPath=".spec.NodeSets",description="NodeSets"
+//+kubebuilder:printcolumn:name="NodeSets",type="string",JSONPath=".spec.nodeSets",description="NodeSets"
 //+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
 //+kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
 
