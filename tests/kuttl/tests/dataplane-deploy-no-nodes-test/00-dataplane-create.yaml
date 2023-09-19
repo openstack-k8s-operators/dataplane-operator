@@ -26,6 +26,13 @@ metadata:
 data:
   05-nova-metadata.conf: dGVzdC1ub3ZhLW1ldGFkYXRhLWNvbXB1dGUtY29uZmln
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: neutron-sriov-agent-neutron-config
+data:
+  10-neutron-sriov.conf: dGVzdC1uZXV0cm9uLXNyaW92LWFnZW50LXNlY3JldC1jb25maWcK
+---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
@@ -40,6 +47,7 @@ spec:
   - configure-os
   - run-os
   - ovn
+  - neutron-sriov
   - libvirt
   - nova
   env:

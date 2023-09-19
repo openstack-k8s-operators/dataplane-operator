@@ -1,0 +1,9 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: neutron-sriov
+spec:
+  label: dataplane-deployment-neutron-sriov
+  playbook: osp.edpm.neutron_sriov
+  secrets:
+  - neutron-sriov-agent-neutron-config
