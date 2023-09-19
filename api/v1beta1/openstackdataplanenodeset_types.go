@@ -17,8 +17,6 @@ limitations under the License.
 package v1beta1
 
 import (
-	"fmt"
-
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -37,6 +35,11 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	// from valus in this section.
 	NodeTemplate NodeTemplate `json:"nodeTemplate"`
 
+	// Nodes - Map of Node Names and node specific data. Values here override defaults in the
+	// upper level section.
+	// +kubebuilder:validation:Required
+	Nodes map[string]NodeSection `json:"nodes"`
+
 	// +kubebuilder:validation:Optional
 	//
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
@@ -46,10 +49,6 @@ type OpenStackDataPlaneNodeSetSpec struct {
 
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// DeployStrategy section to control how the node is deployed
-	DeployStrategy DeployStrategySection `json:"deployStrategy,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
@@ -88,6 +87,12 @@ type OpenStackDataPlaneNodeSetStatus struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Deployed
 	Deployed bool `json:"deployed,omitempty" optional:"true"`
+
+	// DNSClusterAddresses
+	DNSClusterAddresses []string `json:"DNSClusterAddresses,omitempty" optional:"true"`
+
+	// CtlplaneSearchDomain
+	CtlplaneSearchDomain string `json:"CtlplaneSearchDomain,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true
@@ -126,13 +131,6 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 		cl = append(cl, *condition.UnknownCondition(NodeSetBareMetalProvisionReadyCondition, condition.InitReason, condition.InitReason))
 	}
 
-	if instance.Spec.Services != nil && instance.Spec.DeployStrategy.Deploy {
-		for _, service := range instance.Spec.Services {
-			readyCondition := condition.Type(fmt.Sprintf(ServiceReadyCondition, service))
-			cl = append(cl, *condition.UnknownCondition(readyCondition, condition.InitReason, condition.InitReason))
-		}
-	}
-
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.Deployed = false
 }
@@ -141,9 +139,6 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 	return AnsibleEESpec{
 		NetworkAttachments: instance.Spec.NetworkAttachments,
-		AnsibleTags:        instance.Spec.DeployStrategy.AnsibleTags,
-		AnsibleLimit:       instance.Spec.DeployStrategy.AnsibleLimit,
-		AnsibleSkipTags:    instance.Spec.DeployStrategy.AnsibleSkipTags,
 		ExtraMounts:        instance.Spec.NodeTemplate.ExtraMounts,
 		Env:                instance.Spec.Env,
 	}

@@ -31,7 +31,7 @@ spec:
         network: ctlplane
   nodeTemplate:
     ansiblePort: 22
-    ansibleUser: root
+    ansibleUser: cloud-admin
     managed: false
     managementNetwork: ctlplane
     networkConfig:
@@ -46,7 +46,7 @@ following from the `nodeTemplate` in node 1 and 2 above.
 
 ```yaml
     ansiblePort: 22
-    ansibleUser: root
+    ansibleUser: cloud-admin
     managed: false
     managementNetwork: ctlplane
     networkConfig:

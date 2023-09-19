@@ -85,4 +85,30 @@ const (
 
 	// InputReadyWaitingMessage not yet ready
 	InputReadyWaitingMessage = "Waiting for input %s, not yet ready"
+
+	// NodeSetDeploymentReadyCondition Status=True condition indicates if the
+	// NodeSet Deployment is finished and successful.
+	NodeSetDeploymentReadyCondition string = "%s Deployment ready"
+
+	// NodeSetDeploymentReadyMessage ready
+	NodeSetDeploymentReadyMessage = "%s Deployment ready"
+
+	// NodeSetDeploymentReadyWaitingMessage not yet ready
+	NodeSetDeploymentReadyWaitingMessage = "%s Deployment not yet ready"
+
+	// NodeSetDeploymentErrorMessage error
+	NodeSetDeploymentErrorMessage = "%s Deployment error occurred %s"
+
+	// NodeSetServiceDeploymentReadyCondition Status=True condition indicates if the
+	// NodeSet Deployment is finished and successful.
+	NodeSetServiceDeploymentReadyCondition string = "%s %s Deployment ready"
+
+	// NodeSetServiceDeploymentReadyMessage ready
+	NodeSetServiceDeploymentReadyMessage = "%s %s Deployment ready"
+
+	// NodeSetServiceDeploymentReadyWaitingMessage not yet ready
+	NodeSetServiceDeploymentReadyWaitingMessage = "%s %s Deployment not yet ready"
+
+	// NodeSetServiceDeploymentErrorMessage error
+	NodeSetServiceDeploymentErrorMessage = "%s %s Deployment error occurred"
 )

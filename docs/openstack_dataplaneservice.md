@@ -7,7 +7,6 @@
 
 * [AnsibleEESpec](#ansibleeespec)
 * [AnsibleOpts](#ansibleopts)
-* [DeployStrategySection](#deploystrategysection)
 * [NetworkConfigSection](#networkconfigsection)
 * [NodeSection](#nodesection)
 * [NodeTemplate](#nodetemplate)
@@ -46,19 +45,6 @@ AnsibleOpts defines a logical grouping of Ansible related configuration options.
 
 [Back to Custom Resources](#custom-resources)
 
-#### DeployStrategySection
-
-DeployStrategySection for fields controlling the deployment
-
-| Field | Description | Scheme | Required |
-| ----- | ----------- | ------ | -------- |
-| deploy | Deploy boolean to trigger ansible execution | bool | true |
-| ansibleTags | AnsibleTags for ansible execution | string | false |
-| ansibleLimit | AnsibleLimit for ansible execution | string | false |
-| ansibleSkipTags | AnsibleSkipTags for ansible execution | string | false |
-
-[Back to Custom Resources](#custom-resources)
-
 #### NetworkConfigSection
 
 NetworkConfigSection is a specification of the Network configuration details
@@ -92,9 +78,7 @@ NodeTemplate is a specification of the node attributes that override top level a
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| ansibleSSHPrivateKeySecret | AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing private SSH key for connecting to node. The named secret must be of the form: Secret.data.ssh-privatekey: <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets> | string | false |
-| nodes | Nodes - Map of Node Names and node specific data. Values here override defaults in the upper level section. | map[string][NodeSection](#nodesection) | true |
-| networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | false |
+| ansibleSSHPrivateKeySecret | AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing private SSH key for connecting to node. The named secret must be of the form: Secret.data.ssh-privatekey: <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets> | string | true |
 | networkConfig | NetworkConfig - Network configuration details. Contains os-net-config related properties. | [NetworkConfigSection](#networkconfigsection) | false |
 | networks | Networks - Instance networks | []infranetworkv1.IPSetNetwork | false |
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |

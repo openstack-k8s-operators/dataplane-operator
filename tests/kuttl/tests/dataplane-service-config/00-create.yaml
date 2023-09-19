@@ -51,15 +51,21 @@ metadata:
   name: edpm-compute-no-nodes
 spec:
   preProvisioned: true
-  deployStrategy:
-      deploy: true
   env:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
+  nodes: {}
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-    nodes: {}
   services:
     - kuttl-service
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-compute-no-nodes
+spec:
+  nodeSets:
+    - edpm-compute-no-nodes

@@ -37,8 +37,9 @@ The default list of services as they will appear on the `services` field on an
       - run-os
       - libvirt
       - nova
+      - ovn
 
-If the `services` field is ommitted from the `OpenStackDataPlaneNodeSet` spec,
+If the `services` field is omitted from the `OpenStackDataPlaneNodeSet` spec,
 then the above list will be used.
 
 The default list of services are reconciled during `NodeSet` reconciliation if the
@@ -86,7 +87,7 @@ getting the list of `OpenStackDataPlaneService` resources.
 
     oc get openstackdataplaneservice
 
-If no custom services have been defined, the default avaiable services are
+If no custom services have been defined, the default available services are
 returned.
 
     NAME                AGE
@@ -99,6 +100,7 @@ returned.
     validate-network    8d
     libvirt             8d
     nova                8d
+    ovn                 8d
 
 A service can be examined in more detail by looking at the YAML representation
 of the resource.
@@ -236,7 +238,7 @@ service to execute for the `edpm-compute` `NodeSet`.
             ansible:
               ansibleHost: 172.20.12.67
               ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-              ansibleUser: root
+              ansibleUser: cloud-admin
               ansibleVars:
                 ansible_ssh_transfer_method: scp
                 ctlplane_ip: 172.20.12.67

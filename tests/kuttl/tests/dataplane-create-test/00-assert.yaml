@@ -3,17 +3,27 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: openstack-edpm
 spec:
-  deployStrategy:
-    deploy: false
   env:
   - name: ANSIBLE_FORCE_COLOR
     value: "True"
   - name: ANSIBLE_ENABLE_TASK_DEBUGGER
     value: "True"
+  nodes:
+    edpm-compute-0:
+      ansible:
+        ansibleHost: 192.168.122.100
+        ansibleUser: cloud-admin
+        ansibleVars:
+          ctlplane_ip: 192.168.122.100
+          fqdn_internal_api: edpm-compute-0.example.com
+          internal_api_ip: 172.17.0.100
+          storage_ip: 172.18.0.100
+          tenant_ip: 172.19.0.100
+      hostName: edpm-compute-0
   nodeTemplate:
     ansible:
       ansiblePort: 22
-      ansibleUser: root
+      ansibleUser: cloud-admin
       ansibleVars:
         ctlplane_dns_nameservers:
         - 192.168.122.1
@@ -39,15 +49,8 @@ spec:
           image_tag }}'
         edpm_ovn_controller_agent_image: '{{ registry_url }}/openstack-ovn-controller:{{
           image_tag }}'
-        edpm_ovn_dbs:
-        - 192.168.122.1
-        edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
-        edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
         edpm_ovn_metadata_agent_image: '{{ registry_url }}/openstack-neutron-metadata-agent-ovn:{{
           image_tag }}'
-        edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
-        edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
-        edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
         edpm_selinux_mode: enforcing
         edpm_sshd_allowed_ranges:
         - 192.168.122.0/24
@@ -88,18 +91,6 @@ spec:
         tenant_vlan_id: 22
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     managementNetwork: ctlplane
-    nodes:
-      edpm-compute-0:
-        ansible:
-          ansibleHost: 192.168.122.100
-          ansibleUser: root
-          ansibleVars:
-            ctlplane_ip: 192.168.122.100
-            fqdn_internal_api: edpm-compute-0.example.com
-            internal_api_ip: 172.17.0.100
-            storage_ip: 172.18.0.100
-            tenant_ip: 172.19.0.100
-        hostName: edpm-compute-0
   preProvisioned: true
   services:
   - download-cache
@@ -115,12 +106,10 @@ status:
   conditions:
   - message: Deployment not started
     reason: NotRequested
-    severity: Info
     status: "False"
     type: Ready
   - message: Deployment not started
     reason: NotRequested
-    severity: Info
     status: "False"
     type: DeploymentReady
   - message: Input data complete

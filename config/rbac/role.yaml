@@ -80,6 +80,32 @@ rules:
 - apiGroups:
   - dataplane.openstack.org
   resources:
+  - openstackdataplanedeployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplanedeployments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
+  - openstackdataplanedeployments/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dataplane.openstack.org
+  resources:
   - openstackdataplanenodesets
   verbs:
   - create

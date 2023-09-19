@@ -21,31 +21,41 @@ func CreateDataplaneNodeSet(name types.NamespacedName, spec dataplanev1.OpenStac
 
 func DefaultDataPlaneNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
 	return dataplanev1.OpenStackDataPlaneNodeSetSpec{
-		DeployStrategy: dataplanev1.DeployStrategySection{
-			Deploy: false,
-		},
 		PreProvisioned: false,
 		NodeTemplate: dataplanev1.NodeTemplate{
 			AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-			Nodes: map[string]dataplanev1.NodeSection{
-				"edpm-compute-node-set": {
-					HostName: "edpm-bm-compute-1",
-				},
+		},
+		Nodes: map[string]dataplanev1.NodeSection{
+			"edpm-compute-node-set": {
+				HostName: "edpm-bm-compute-1",
 			},
+		},
+	}
+}
+
+func CreateDataplaneDeployment(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneDeploymentSpec) *dataplanev1.OpenStackDataPlaneDeployment {
+	instance := DefaultDataplaneDeploymentTemplate(name, spec)
+	err := k8sClient.Create(ctx, instance)
+	Expect(err).NotTo(HaveOccurred())
+
+	return instance
+}
+
+func DefaultDataPlaneDeploymentSpec() dataplanev1.OpenStackDataPlaneDeploymentSpec {
+	return dataplanev1.OpenStackDataPlaneDeploymentSpec{
+		NodeSets: []string{
+			"edpm-compute-nodeset",
 		},
 	}
 }
 
 func DefaultDataPlaneNoNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
 	return dataplanev1.OpenStackDataPlaneNodeSetSpec{
-		DeployStrategy: dataplanev1.DeployStrategySection{
-			Deploy: false,
-		},
 		PreProvisioned: true,
 		NodeTemplate: dataplanev1.NodeTemplate{
 			AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-			Nodes:                      map[string]dataplanev1.NodeSection{},
 		},
+		Nodes: map[string]dataplanev1.NodeSection{},
 	}
 }
 
@@ -61,6 +71,29 @@ func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec dataplanev1
 		},
 		Spec: spec,
 	}
+}
+
+func DefaultDataplaneDeploymentTemplate(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneDeploymentSpec) *dataplanev1.OpenStackDataPlaneDeployment {
+	return &dataplanev1.OpenStackDataPlaneDeployment{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "dataplane.openstack.org/v1beta1",
+			Kind:       "OpenStackDataPlaneDeployment",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name.Name,
+			Namespace: name.Namespace,
+		},
+		Spec: spec,
+	}
+}
+
+func GetDataplaneDeployment(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneDeployment {
+	instance := &dataplanev1.OpenStackDataPlaneDeployment{}
+	gomega.Eventually(func(g gomega.Gomega) error {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+		return nil
+	}, timeout, interval).Should(Succeed())
+	return instance
 }
 
 func GetDataplaneNodeSet(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneNodeSet {
@@ -92,5 +125,10 @@ func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
 
 func DataplaneConditionGetter(name types.NamespacedName) condition.Conditions {
 	instance := GetDataplaneNodeSet(name)
+	return instance.Status.Conditions
+}
+
+func DataplaneDeploymentConditionGetter(name types.NamespacedName) condition.Conditions {
+	instance := GetDataplaneDeployment(name)
 	return instance.Status.Conditions
 }

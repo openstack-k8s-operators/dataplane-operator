@@ -71,7 +71,7 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 	var allDNSRecords []infranetworkv1.DNSHost
 	var ctlplaneSearchDomain string
 	// Build DNSData CR
-	for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
+	for nodeName, node := range instance.Spec.Nodes {
 		nets := node.Networks
 		if len(nets) == 0 {
 			nets = instance.Spec.NodeTemplate.Networks
@@ -127,7 +127,7 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	allIPSets map[string]infranetworkv1.IPSet) ([]string, []string, string, bool, error) {
 
 	// Verify dnsmasq CR exists
-	dnsAddresses, dnsClusterAddresses, isReady, err := checkDNSService(
+	dnsAddresses, dnsClusterAddresses, isReady, err := CheckDNSService(
 		ctx, helper, instance)
 
 	if err != nil || !isReady || dnsAddresses == nil {
@@ -210,7 +210,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 
 	allIPSets := make(map[string]infranetworkv1.IPSet)
 	// CreateOrPatch IPSets
-	for nodeName, node := range instance.Spec.NodeTemplate.Nodes {
+	for nodeName, node := range instance.Spec.Nodes {
 		nets := node.Networks
 
 		if len(nets) == 0 {
@@ -242,8 +242,8 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 	return allIPSets, nil
 }
 
-// checkDNSService checks if DNS is configured and ready
-func checkDNSService(ctx context.Context, helper *helper.Helper,
+// CheckDNSService checks if DNS is configured and ready
+func CheckDNSService(ctx context.Context, helper *helper.Helper,
 	instance client.Object) ([]string, []string, bool, error) {
 	dnsmasqList := &infranetworkv1.DNSMasqList{}
 	listOpts := []client.ListOption{

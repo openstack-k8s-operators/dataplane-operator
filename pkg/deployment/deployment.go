@@ -35,23 +35,18 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
-
-// deployFuncDef so we can pass a function to ConditionalDeploy
-type deployFuncDef func(context.Context, *helper.Helper, client.Object, string, string, dataplanev1.AnsibleEESpec, dataplanev1.OpenStackDataPlaneService) error
 
 // Deploy function encapsulating primary deloyment handling
 func Deploy(
 	ctx context.Context,
 	helper *helper.Helper,
-	obj client.Object,
-	sshKeySecret string,
+	nodeSet *dataplanev1.OpenStackDataPlaneNodeSet,
+	deployment *dataplanev1.OpenStackDataPlaneDeployment,
 	inventorySecret string,
-	status *dataplanev1.OpenStackDataPlaneNodeSetStatus,
+	status *dataplanev1.OpenStackDataPlaneDeploymentStatus,
 	aeeSpec dataplanev1.AnsibleEESpec,
 	services []string,
-	nodeSet *dataplanev1.OpenStackDataPlaneNodeSet,
 ) (*ctrl.Result, error) {
 
 	log := helper.GetLogger()
@@ -60,7 +55,6 @@ func Deploy(
 	var readyMessage string
 	var readyWaitingMessage string
 	var readyErrorMessage string
-	var deployFunc deployFuncDef
 	var deployName string
 	var deployLabel string
 
@@ -76,18 +70,17 @@ func Deploy(
 		if err != nil {
 			return &ctrl.Result{}, err
 		}
-		deployFunc = DeployService
 		deployName = foundService.Name
 		deployLabel = foundService.Spec.Label
-		readyCondition = condition.Type(fmt.Sprintf(dataplanev1.ServiceReadyCondition, service))
-		readyWaitingMessage = fmt.Sprintf(dataplanev1.ServiceReadyWaitingMessage, deployName)
-		readyMessage = fmt.Sprintf(dataplanev1.ServiceReadyMessage, deployName)
-		readyErrorMessage = dataplanev1.ServiceErrorMessage
+		readyCondition = condition.Type(fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyCondition, nodeSet.Name, service))
+		readyWaitingMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyWaitingMessage, nodeSet.Name, deployName)
+		readyMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyMessage, nodeSet.Name, deployName)
+		readyErrorMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentErrorMessage, nodeSet.Name, deployName)
 		aeeSpec.OpenStackAnsibleEERunnerImage = foundService.Spec.OpenStackAnsibleEERunnerImage
 
 		// Reset ExtraMounts to its original value, and then add in service
 		// specific mounts.
-		aeeSpec.ExtraMounts = []storage.VolMounts{}
+		aeeSpec.ExtraMounts = make([]storage.VolMounts, len(aeeSpecMounts))
 		copy(aeeSpec.ExtraMounts, aeeSpecMounts)
 		aeeSpec, err = addServiceExtraMounts(ctx, helper, aeeSpec, foundService)
 
@@ -97,15 +90,14 @@ func Deploy(
 		err = ConditionalDeploy(
 			ctx,
 			helper,
-			obj,
-			sshKeySecret,
+			nodeSet,
+			deployment,
 			inventorySecret,
 			status,
 			readyCondition,
 			readyMessage,
 			readyWaitingMessage,
 			readyErrorMessage,
-			deployFunc,
 			deployName,
 			deployLabel,
 			aeeSpec,
@@ -120,6 +112,7 @@ func Deploy(
 		}
 
 		if err != nil || !status.Conditions.IsTrue(readyCondition) {
+			log.Info(fmt.Sprintf("Condition %s not ready", readyCondition))
 			return &ctrl.Result{}, err
 		}
 		log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
@@ -133,15 +126,14 @@ func Deploy(
 func ConditionalDeploy(
 	ctx context.Context,
 	helper *helper.Helper,
-	obj client.Object,
-	sshKeySecret string,
+	nodeSet *dataplanev1.OpenStackDataPlaneNodeSet,
+	deployment *dataplanev1.OpenStackDataPlaneDeployment,
 	inventorySecret string,
-	status *dataplanev1.OpenStackDataPlaneNodeSetStatus,
+	status *dataplanev1.OpenStackDataPlaneDeploymentStatus,
 	readyCondition condition.Type,
 	readyMessage string,
 	readyWaitingMessage string,
 	readyErrorMessage string,
-	deployFunc deployFuncDef,
 	deployName string,
 	deployLabel string,
 	aeeSpec dataplanev1.AnsibleEESpec,
@@ -153,9 +145,16 @@ func ConditionalDeploy(
 
 	if status.Conditions.IsUnknown(readyCondition) {
 		log.Info(fmt.Sprintf("%s Unknown, starting %s", readyCondition, deployName))
-		err = deployFunc(ctx, helper, obj, sshKeySecret, inventorySecret, aeeSpec, foundService)
+		err = DeployService(
+			ctx,
+			helper,
+			deployment,
+			nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret,
+			inventorySecret,
+			aeeSpec,
+			foundService)
 		if err != nil {
-			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to %s for %s", deployName, obj.GetName()), obj)
+			util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to %s for %s", deployName, nodeSet.Name), nodeSet)
 			return err
 		}
 
@@ -165,13 +164,12 @@ func ConditionalDeploy(
 			condition.SeverityInfo,
 			readyWaitingMessage))
 
-		log.Info(fmt.Sprintf("Condition %s unknown", readyCondition))
 		return nil
 
 	}
 
 	if status.Conditions.IsFalse(readyCondition) {
-		ansibleEE, err := dataplaneutil.GetAnsibleExecution(ctx, helper, obj, deployLabel)
+		ansibleEE, err := dataplaneutil.GetAnsibleExecution(ctx, helper, deployment, deployLabel)
 		if err != nil && k8s_errors.IsNotFound(err) {
 			log.Info(fmt.Sprintf("%s OpenStackAnsibleEE not yet found", readyCondition))
 			return nil

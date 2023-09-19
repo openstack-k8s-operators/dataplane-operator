@@ -7,3 +7,6 @@ spec:
   playbook: osp.edpm.ovn
   configMaps:
   - ovncontroller-config
+  secrets:
+  - neutron-ovn-metadata-agent-neutron-config
+  - nova-metadata-neutron-config

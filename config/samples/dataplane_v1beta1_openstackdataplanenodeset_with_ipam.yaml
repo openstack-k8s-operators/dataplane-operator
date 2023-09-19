@@ -3,7 +3,6 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: openstack-edpm-ipam
 spec:
-  ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
   env:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
@@ -22,38 +21,39 @@ spec:
     - libvirt
     - nova
     - telemetry
+  nodes:
+      edpm-compute-0:
+        hostName: edpm-compute-0
+        ansible:
+          ansibleHost: 192.168.122.100
+        networks:
+        - name: CtlPlane
+          subnetName: subnet1
+          defaultRoute: true
+          fixedIP: 192.168.122.100
+        - name: InternalApi
+          subnetName: subnet1
+        - name: Storage
+          subnetName: subnet1
+        - name: Tenant
+          subnetName: subnet1
+      edpm-compute-1:
+        hostName: edpm-compute-1
+        ansible:
+          ansibleHost: 192.168.122.101
+        networks:
+        - name: CtlPlane
+          subnetName: subnet1
+          defaultRoute: true
+          fixedIP: 192.168.122.101
+        - name: InternalApi
+          subnetName: subnet1
+        - name: Storage
+          subnetName: subnet1
+        - name: Tenant
+          subnetName: subnet1
   nodeTemplate:
-    nodes:
-       edpm-compute-0:
-         hostName: edpm-compute-0
-         ansible:
-           ansibleHost: 192.168.122.100
-         networks:
-         - name: CtlPlane
-           subnetName: subnet1
-           defaultRoute: true
-           fixedIP: 192.168.122.100
-         - name: InternalApi
-           subnetName: subnet1
-         - name: Storage
-           subnetName: subnet1
-         - name: Tenant
-           subnetName: subnet1
-       edpm-compute-1:
-         hostName: edpm-compute-1
-         ansible:
-           ansibleHost: 192.168.122.101
-         networks:
-         - name: CtlPlane
-           subnetName: subnet1
-           defaultRoute: true
-           fixedIP: 192.168.122.101
-         - name: InternalApi
-           subnetName: subnet1
-         - name: Storage
-           subnetName: subnet1
-         - name: Tenant
-           subnetName: subnet1
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     managementNetwork: ctlplane
     ansible:
       ansibleUser: cloud-admin
@@ -84,16 +84,6 @@ spec:
          # edpm_nodes_validation
          edpm_nodes_validation_validate_controllers_icmp: false
          edpm_nodes_validation_validate_gateway_icmp: false
-         edpm_ovn_metadata_agent_DEFAULT_transport_url: rabbit://default_user@rabbitmq.openstack.svc:5672
-         edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: tcp:10.217.5.121:6642
-         edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: 127.0.0.1
-         edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: 12345678
-         edpm_ovn_metadata_agent_DEFAULT_bind_host: 127.0.0.1
-         ctlplane_dns_nameservers:
-         - 192.168.122.1
-         dns_search_domains: []
-         edpm_ovn_dbs:
-         - 192.168.122.1
          registry_url: quay.io/podified-antelope-centos9
          image_tag: current-podified
          edpm_ovn_controller_agent_image: "{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}"

@@ -89,19 +89,9 @@ type NodeTemplate struct {
 	// The named secret must be of the form:
 	// Secret.data.ssh-privatekey: <base64 encoded private key contents>
 	// <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
-	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret,omitempty"`
-
-	// Nodes - Map of Node Names and node specific data. Values here override defaults in the
-	// upper level section.
 	// +kubebuilder:validation:Required
-	Nodes map[string]NodeSection `json:"nodes"`
-
-	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
-	// which allows to connect the ansibleee runner to the given network
-	// +kubebuilder:validation:Optional
-	NetworkAttachments []string `json:"networkAttachments,omitempty"`
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
+	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret"`
 
 	// NetworkConfig - Network configuration details. Contains os-net-config
 	// related properties.
@@ -131,26 +121,6 @@ type NodeTemplate struct {
 	// NetworkData  node specific network-data
 	// +kubebuilder:validation:Optional
 	NetworkData *corev1.SecretReference `json:"networkData,omitempty"`
-}
-
-// DeployStrategySection for fields controlling the deployment
-type DeployStrategySection struct {
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Deploy boolean to trigger ansible execution
-	// +kubebuilder:default=true
-	Deploy bool `json:"deploy"`
-
-	// AnsibleTags for ansible execution
-	// +kubebuilder:validation:Optional
-	AnsibleTags string `json:"ansibleTags,omitempty"`
-
-	// AnsibleLimit for ansible execution
-	// +kubebuilder:validation:Optional
-	AnsibleLimit string `json:"ansibleLimit,omitempty"`
-
-	// AnsibleSkipTags for ansible execution
-	// +kubebuilder:validation:Optional
-	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
 }
 
 // NetworkConfigSection is a specification of the Network configuration details

@@ -27,7 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-var _ = Describe("Dataplane Role Test", func() {
+var _ = Describe("Dataplane NodeSet Test", func() {
 	var dataplaneNodeSetName types.NamespacedName
 	var dataplaneSecretName types.NamespacedName
 	var dataplaneSSHSecretName types.NamespacedName
@@ -52,10 +52,6 @@ var _ = Describe("Dataplane Role Test", func() {
 	When("A Dataplane resorce is created with PreProvisioned nodes", func() {
 		BeforeEach(func() {
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))
-		})
-		It("should have the Spec fields initialized", func() {
-			dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-			Expect(dataplaneNodeSetInstance.Spec.DeployStrategy.Deploy).Should(BeFalse())
 		})
 
 		It("should have the Status fields initialized", func() {
@@ -82,12 +78,6 @@ var _ = Describe("Dataplane Role Test", func() {
 				dataplanev1.SetupReadyCondition,
 				corev1.ConditionFalse,
 			)
-			th.ExpectCondition(
-				dataplaneNodeSetName,
-				ConditionGetterFunc(DataplaneConditionGetter),
-				condition.DeploymentReadyCondition,
-				corev1.ConditionUnknown,
-			)
 		})
 
 		It("Should not have created a Secret", func() {
@@ -105,6 +95,14 @@ var _ = Describe("Dataplane Role Test", func() {
 			secret := th.GetSecret(dataplaneSecretName)
 			Expect(secret.Data["inventory"]).Should(
 				ContainSubstring("edpm-compute-nodeset"))
+		})
+		It("Should set Input ready", func() {
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionTrue,
+			)
 		})
 	})
 })
