@@ -27,7 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-var _ = Describe("Dataplane Role Test", func() {
+var _ = Describe("Dataplane NodeSet Test", func() {
 	var dataplaneNodeSetName types.NamespacedName
 	var dataplaneSecretName types.NamespacedName
 	var dataplaneSSHSecretName types.NamespacedName
