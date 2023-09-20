@@ -100,7 +100,7 @@ func (instance *OpenStackDataPlaneDeployment) InitConditions() {
 
 	if instance.Spec.NodeSets != nil {
 		for _, nodeSet := range instance.Spec.NodeSets {
-			readyCondition := condition.Type(fmt.Sprintf(NodeSetDeploymentReadyCondition, nodeSet))
+			readyCondition := condition.Type(fmt.Sprintf(NodeSetDeploymentReadyMessage, nodeSet))
 			cl = append(cl, *condition.UnknownCondition(readyCondition, condition.InitReason, condition.InitReason))
 		}
 	}

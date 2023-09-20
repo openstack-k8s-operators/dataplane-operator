@@ -287,7 +287,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) GetDeployedDeploymentsForNodeSet(n
 	for _, deployment := range deployments.Items {
 		for _, nodeSet := range deployment.Spec.NodeSets {
 			if nodeSet == nodeSetName {
-				if deployment.Status.Conditions.IsTrue(condition.Type(fmt.Sprintf(dataplanev1.NodeSetDeploymentReadyCondition, nodeSetName))) {
+				if deployment.Status.Conditions.IsTrue(condition.Type(fmt.Sprintf(dataplanev1.NodeSetDeploymentReadyMessage, nodeSetName))) {
 					deployedDeploymentsForNodeSet.Items = append(deployedDeploymentsForNodeSet.Items, deployment)
 				}
 			}

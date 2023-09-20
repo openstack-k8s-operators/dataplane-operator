@@ -34,6 +34,33 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
+	When("A dataplaneDeployment is created without a matching NodeSet", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+		})
+
+		It("It should have status conditions initialised", func() {
+			th.ExpectCondition(
+				dataplaneDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				dataplanev1.SetupReadyCondition,
+				corev1.ConditionTrue,
+			)
+
+			for _, cond := range []condition.Type{
+				condition.DeploymentReadyCondition,
+				condition.InputReadyCondition,
+			} {
+				th.ExpectCondition(
+					dataplaneDeploymentName,
+					ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+					cond,
+					corev1.ConditionUnknown,
+				)
+			}
+		})
+	})
+
 	When("A dataplaneDeployment is created with matching NodeSet", func() {
 		BeforeEach(func() {
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))

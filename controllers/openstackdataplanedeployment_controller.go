@@ -232,7 +232,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			logger.Info("Set NodeSetDeploymentReadyCondition true", "nodeSet", nodeSet.Name)
 			instance.Status.Conditions.Set(
 				condition.TrueCondition(
-					condition.Type(fmt.Sprintf(dataplanev1.NodeSetDeploymentReadyCondition, nodeSet.Name)),
+					condition.Type(fmt.Sprintf(dataplanev1.NodeSetDeploymentReadyMessage, nodeSet.Name)),
 					condition.DeploymentReadyMessage))
 		}
 	}

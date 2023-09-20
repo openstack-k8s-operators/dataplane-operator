@@ -88,7 +88,7 @@ const (
 
 	// NodeSetDeploymentReadyCondition Status=True condition indicates if the
 	// NodeSet Deployment is finished and successful.
-	NodeSetDeploymentReadyCondition string = "%s Deployment ready"
+	NodeSetDeploymentReadyCondition condition.Type = "NodeSetDeploymentReady"
 
 	// NodeSetDeploymentReadyMessage ready
 	NodeSetDeploymentReadyMessage = "%s Deployment ready"
