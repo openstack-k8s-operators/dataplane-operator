@@ -80,7 +80,6 @@ spec:
         - key: network
           path: network
         secretName: dataplanenodeset-edpm-compute-no-nodes
-  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.download_cache
@@ -136,7 +135,6 @@ spec:
         - key: network
           path: network
         secretName: dataplanenodeset-edpm-compute-no-nodes
-  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.configure_network
@@ -192,7 +190,6 @@ spec:
         - key: network
           path: network
         secretName: dataplanenodeset-edpm-compute-no-nodes
-  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.validate_network
@@ -248,7 +245,6 @@ spec:
         - key: network
           path: network
         secretName: dataplanenodeset-edpm-compute-no-nodes
-  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.install_os
@@ -305,7 +301,6 @@ spec:
         - key: network
           path: network
         secretName: dataplanenodeset-edpm-compute-no-nodes
-  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.configure_os
@@ -361,7 +356,6 @@ spec:
         - key: network
           path: network
         secretName: dataplanenodeset-edpm-compute-no-nodes
-  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.run_os
@@ -451,7 +445,6 @@ spec:
         - key: network
           path: network
         secretName: dataplanenodeset-edpm-compute-no-nodes
-  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.ovn
@@ -510,7 +503,6 @@ spec:
         - key: network
           path: network
         secretName: dataplanenodeset-edpm-compute-no-nodes
-  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   preserveJobs: true
   restartPolicy: Never
@@ -574,7 +566,6 @@ spec:
         - key: network
           path: network
         secretName: dataplanenodeset-edpm-compute-no-nodes
-  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   preserveJobs: true
   restartPolicy: Never

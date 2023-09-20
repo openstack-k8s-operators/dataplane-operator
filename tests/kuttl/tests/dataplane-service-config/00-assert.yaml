@@ -91,7 +91,6 @@ spec:
         - key: network
           path: network
         secretName: dataplanenodeset-edpm-compute-no-nodes
-  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   play: |
     - hosts: localhost
