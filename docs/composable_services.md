@@ -42,8 +42,9 @@ The default list of services as they will appear on the `services` field on an
 If the `services` field is omitted from the `OpenStackDataPlaneNodeSet` spec,
 then the above list will be used.
 
-The default list of services are reconciled during `NodeSet` reconciliation if the
-service is in the NodeSets' service list.
+The associated `OpenStackDataPlaneService` resources are reconciled during
+`OpenStackDataPlaneNodeSet` reconciliation if the service is in the NodeSets'
+service list.
 
 ## dataplane-operator provided optional services
 
@@ -76,7 +77,7 @@ configuration. For more information see the
 
 Do not create a custom service with the same name as one of the default
 services. The default service will overwrite the custom service with the same
-name during `NodeSet` reconciliation.
+name during `OpenStackDataPlaneNodeSet` reconciliation.
 
 ---
 
@@ -108,21 +109,14 @@ of the resource.
     oc get openstackdataplaneservice configure-network -o yaml
 
 In the `spec` output of the `configure-network` service, the ansible content
-that is used by the service is shown. While the content is very similar to the
-exact ansible syntax that will be used when the service executes ansible, it
-may not always be proper ansible syntax. The API for defining the ansible
-content of a service matches that of the
+that is used by the service is shown. The ansible content is either the play
+contents (free form text) or a playbook name. The content is set using the `play` or `playbook`
+fields. The type of these fields are defined by the
 ['OpenStackAnsibleEE'](https://openstack-k8s-operators.github.io/openstack-ansibleee-operator/openstack_ansibleee/)
 CRD from
 [openstack-ansible-operator](https://github.com/openstack-k8s-operators/openstack-ansibleee-operator).
 
-The 'role' field on `OpenStackDataPlaneService` is the same API as the `role`
-field on `OpenStackAnsibleEE'.
-
-The 'play' field on `OpenStackDataPlaneService` is free form string content
-that will be passed directly as playbook content when ansible executes.
-
-Either `role` or `play` can define ansible content for a service, but both can
+Either `play` or `playbook` can define ansible content for a service, but both can
 not be used in the same service.
 
 ## Composing services
@@ -158,13 +152,57 @@ with the following contents:
           - name: Show output
             debug:
               msg: "{{ output.stdout }}"
+          - name: Hello World role
+            import_role: hello_world
+      configMaps:
+        - hello-world-cm-0
+        - hello-world-cm-1
+      secrets:
+        - hello-world-secret-0
+        - hello-world-secret-1
 
 Note that the `play` field is a string, and not YAML. However, it should be
 proper ansible playbook syntax when parsed as YAML.
 
-Create the service:
+#### Configuring a custom service
+
+The `configMaps` and `secrets` fields allow for passing in configuration and
+secret data into the container started by the `OpenStackAnsibleEE` resource. It
+is the responsibility of the ansible content to then consume that content
+however is needed.
+
+Mounts are created in the `OpenStackAnsibleEE` job pod with the filenames
+matching the keys in the data field of the ConfigMaps and Secrets. The file
+contents are the corresponding values from the data field. The mounts are
+created under `/var/lib/openstack/configs/<service name>`.
+
+Using the above example, if the `hello-world-cm-0` ConfigMap has the following
+contents:
+
+    apiVersion: 1
+    data:
+        hello-world-0.txt: Hello World 0!
+        hello-world-1.txt: Hello World 1!
+
+It would result in the following mounts within the `OpenStackAnsibleEE` job
+pod:
+
+    /var/lib/openstack/configs/hello-world/hello-world-0.txt # With file contents: "Hello World 0!"
+    /var/lib/openstack/configs/hello-world/hello-world-1.txt # With file contents: "Hello World 1!"
+
+Other operators can create and manage the ConfigMaps and Secrets used by an
+`OpenStackDataPlaneService`. This allows other operators to generate the needed
+configuration for dataplane nodes.
+
+### Creating a custom service
+
+Finally, use the `oc apply` command to create the service:
 
     oc apply -f hello-world.yaml
+
+The service must be created prior to an `OpenStackDataPlaneDeployment` resource
+starting a deployment for an `OpenStackDataPlaneNodeSet` with that service in
+its `services` list.
 
 #### Customizing the ansible-runner image used by a service
 
@@ -232,27 +270,30 @@ service to execute for the `edpm-compute` `NodeSet`.
         - install-os
         - configure-os
         - run-os
-      nodeTemplate:
-        nodes:
-          edpm-compute:
-            ansible:
-              ansibleHost: 172.20.12.67
-              ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-              ansibleUser: cloud-admin
-              ansibleVars:
-                ansible_ssh_transfer_method: scp
-                ctlplane_ip: 172.20.12.67
-                external_ip: 172.20.12.76
-                fqdn_internal_api: edpm-compute-1.example.com
-                internal_api_ip: 172.17.0.101
-                storage_ip: 172.18.0.101
-                tenant_ip: 172.10.0.101
-            hostName: edpm-compute-0
-            networkConfig: {}
-            nova:
-              cellName: cell1
-              deploy: true
-              novaInstance: nova
+        - ovn
+        - libvirt
+        - nova
+      nodes:
+        edpm-compute:
+          ansible:
+            ansibleHost: 172.20.12.67
+            ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+            ansibleUser: cloud-admin
+            ansibleVars:
+              ansible_ssh_transfer_method: scp
+              ctlplane_ip: 172.20.12.67
+              external_ip: 172.20.12.76
+              fqdn_internal_api: edpm-compute-1.example.com
+              internal_api_ip: 172.17.0.101
+              storage_ip: 172.18.0.101
+              tenant_ip: 172.10.0.101
+          hostName: edpm-compute-0
+          networkConfig: {}
+          nova:
+            cellName: cell1
+            deploy: true
+            novaInstance: nova
+      nodeTemplate: {}
 
 When customizing the services list, the default list of services must be
 reproduced and then customized if the intent is to still deploy those services.
