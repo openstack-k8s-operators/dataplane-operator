@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
 
+	"golang.org/x/exp/slices"
 	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -259,12 +260,12 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
 	}
 
-	deployedDeploymentsForNodeSet, err := r.GetDeployedDeploymentsForNodeSet(instance.Name)
+	isDeploymentReady, err := checkDeploymentReady(helper, req)
 	if err != nil {
 		logger.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
 		return ctrl.Result{}, err
 	}
-	if len(deployedDeploymentsForNodeSet.Items) > 0 {
+	if isDeploymentReady {
 		logger.Info("Set NodeSet DeploymentReadyCondition true")
 		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
 	}
@@ -272,50 +273,25 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	return ctrl.Result{}, nil
 }
 
-// GetDeployedDeploymentsForNodeSet - Get the OpenStackDataPlaneDeployment
-// resources that have been deployed and are for the given
-// OpenStackDataPlaneNodeSet.
-func (r *OpenStackDataPlaneNodeSetReconciler) GetDeployedDeploymentsForNodeSet(nodeSetName string) (*dataplanev1.OpenStackDataPlaneDeploymentList, error) {
-	// Get all deployments
+func checkDeploymentReady(helper *helper.Helper,
+	request ctrl.Request) (bool, error) {
+	// Get all completed deployments
 	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
-	err := r.Client.List(context.Background(), deployments)
+	opts := []client.ListOption{
+		client.InNamespace(request.NamespacedName.Namespace),
+	}
+	err := helper.GetClient().List(context.Background(), deployments, opts...)
 	if err != nil {
-		r.Log.Error(err, "Unable to retrieve OpenStackDataPlaneDeployment CRs %v")
-		return deployments, nil
+		helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneDeployment CRs %v")
+		return false, err
 	}
-	deployedDeploymentsForNodeSet := &dataplanev1.OpenStackDataPlaneDeploymentList{}
 	for _, deployment := range deployments.Items {
-		for _, nodeSet := range deployment.Spec.NodeSets {
-			if nodeSet == nodeSetName {
-				if deployment.Status.Conditions.IsTrue(condition.Type(fmt.Sprintf(dataplanev1.NodeSetDeploymentReadyCondition, nodeSetName))) {
-					deployedDeploymentsForNodeSet.Items = append(deployedDeploymentsForNodeSet.Items, deployment)
-				}
-			}
+		if slices.Contains(
+			deployment.Spec.NodeSets, request.NamespacedName.Name) && deployment.Status.Deployed {
+			return true, nil
 		}
 	}
-
-	return deployedDeploymentsForNodeSet, err
-}
-
-// GetNodeSetsForDeployment - Get the OpenStackDataPlaneNodeSet
-// resources for the given OpenStackDataPlaneDeployment
-func (r *OpenStackDataPlaneNodeSetReconciler) GetNodeSetsForDeployment(namespace string, deployment *dataplanev1.OpenStackDataPlaneDeployment) (dataplanev1.OpenStackDataPlaneNodeSetList, error) {
-	nodeSets := dataplanev1.OpenStackDataPlaneNodeSetList{}
-	var err error
-	for _, nodeSetName := range deployment.Spec.NodeSets {
-		nodeSet := &dataplanev1.OpenStackDataPlaneNodeSet{}
-		namespacedName := client.ObjectKey{
-			Namespace: namespace,
-			Name:      nodeSetName}
-		err = r.Client.Get(context.Background(), namespacedName, nodeSet)
-		if err != nil {
-			r.Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSet CR %v")
-			return nodeSets, nil
-		}
-		nodeSets.Items = append(nodeSets.Items, *nodeSet)
-	}
-
-	return nodeSets, err
+	return false, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -344,12 +320,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 			}
 			result = append(result, reconcile.Request{NamespacedName: name})
 		}
-		if len(result) > 0 {
-			r.Log.Info(fmt.Sprintf("Reconcile request for: %+v", result))
-
-			return result
-		}
-		return nil
+		return result
 	})
 
 	deploymentWatcher := handler.EnqueueRequestsFromMapFunc(func(obj client.Object) []reconcile.Request {
@@ -357,15 +328,10 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		result := []reconcile.Request{}
 
 		deployment := obj.(*dataplanev1.OpenStackDataPlaneDeployment)
-		nodeSets, err := r.GetNodeSetsForDeployment(namespace, deployment)
-		if err != nil {
-			r.Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSets %w")
-			return nil
-		}
-		for _, nodeSet := range nodeSets.Items {
+		for _, nodeSet := range deployment.Spec.NodeSets {
 			name := client.ObjectKey{
 				Namespace: namespace,
-				Name:      nodeSet.Name}
+				Name:      nodeSet}
 			result = append(result, reconcile.Request{NamespacedName: name})
 		}
 		return result

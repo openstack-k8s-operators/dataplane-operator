@@ -18,6 +18,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.1.2-0.20230913075424-2680ce4b6ad2
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.1.1-0.20230913102927-2edee48d935a
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.1.1-0.20230915055858-ecb378f804c9
+	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.9
 	k8s.io/apimachinery v0.26.9
@@ -68,7 +69,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	go.uber.org/zap v1.25.0 // indirect
-	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
