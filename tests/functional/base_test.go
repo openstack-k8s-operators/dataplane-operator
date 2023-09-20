@@ -11,6 +11,9 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 )
 
+// Resource creation
+
+// Create OpenstackDataPlaneNodeSet in k8s and test that no errors occur
 func CreateDataplaneNodeSet(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneNodeSetSpec) *dataplanev1.OpenStackDataPlaneNodeSet {
 	instance := DefaultDataplaneNodeSetTemplate(name, spec)
 	err := k8sClient.Create(ctx, instance)
@@ -19,6 +22,35 @@ func CreateDataplaneNodeSet(name types.NamespacedName, spec dataplanev1.OpenStac
 	return instance
 }
 
+// Create OpenStackDataPlaneDeployment in k8s and test that no errors occur
+func CreateDataplaneDeployment(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneDeploymentSpec) *dataplanev1.OpenStackDataPlaneDeployment {
+	instance := DefaultDataplaneDeploymentTemplate(name, spec)
+	err := k8sClient.Create(ctx, instance)
+	Expect(err).NotTo(HaveOccurred())
+
+	return instance
+}
+
+// Create an OpenStackDataPlaneService with a given NamespacedName, assert on success
+func CreateDataplaneService(name types.NamespacedName) *unstructured.Unstructured {
+	raw := DefaultDataplaneService(name)
+
+	return th.CreateUnstructured(raw)
+}
+
+// Create SSHSecret
+func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
+	return th.CreateSecret(
+		types.NamespacedName{Namespace: name.Namespace, Name: name.Name},
+		map[string][]byte{
+			"ssh-privatekey": []byte("blah"),
+		},
+	)
+}
+
+// Struct initialization
+
+// Build OpenStackDataPlaneNodeSetSpec struct and fill it with preset values
 func DefaultDataPlaneNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
 	return dataplanev1.OpenStackDataPlaneNodeSetSpec{
 		PreProvisioned: false,
@@ -33,22 +65,7 @@ func DefaultDataPlaneNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
 	}
 }
 
-func CreateDataplaneDeployment(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneDeploymentSpec) *dataplanev1.OpenStackDataPlaneDeployment {
-	instance := DefaultDataplaneDeploymentTemplate(name, spec)
-	err := k8sClient.Create(ctx, instance)
-	Expect(err).NotTo(HaveOccurred())
-
-	return instance
-}
-
-func DefaultDataPlaneDeploymentSpec() dataplanev1.OpenStackDataPlaneDeploymentSpec {
-	return dataplanev1.OpenStackDataPlaneDeploymentSpec{
-		NodeSets: []string{
-			"edpm-compute-nodeset",
-		},
-	}
-}
-
+// Build OpenStackDataPlaneNodeSetSpec struct with empty `Nodes` list
 func DefaultDataPlaneNoNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
 	return dataplanev1.OpenStackDataPlaneNodeSetSpec{
 		PreProvisioned: true,
@@ -59,6 +76,16 @@ func DefaultDataPlaneNoNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
 	}
 }
 
+// Build OpenStackDataPlnaeDeploymentSpec and fill it with preset values
+func DefaultDataPlaneDeploymentSpec() dataplanev1.OpenStackDataPlaneDeploymentSpec {
+	return dataplanev1.OpenStackDataPlaneDeploymentSpec{
+		NodeSets: []string{
+			"edpm-compute-nodeset",
+		},
+	}
+}
+
+// Build OpenStackDataPlaneNodeSet struct and fill it with preset values
 func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneNodeSetSpec) *dataplanev1.OpenStackDataPlaneNodeSet {
 	return &dataplanev1.OpenStackDataPlaneNodeSet{
 		TypeMeta: metav1.TypeMeta{
@@ -73,6 +100,7 @@ func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec dataplanev1
 	}
 }
 
+// Build OpenStackDataPlaneDeployment struct and fill it with preset values
 func DefaultDataplaneDeploymentTemplate(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneDeploymentSpec) *dataplanev1.OpenStackDataPlaneDeployment {
 	return &dataplanev1.OpenStackDataPlaneDeployment{
 		TypeMeta: metav1.TypeMeta{
@@ -85,24 +113,6 @@ func DefaultDataplaneDeploymentTemplate(name types.NamespacedName, spec dataplan
 		},
 		Spec: spec,
 	}
-}
-
-func GetDataplaneDeployment(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneDeployment {
-	instance := &dataplanev1.OpenStackDataPlaneDeployment{}
-	Eventually(func(g Gomega) error {
-		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
-		return nil
-	}, timeout, interval).Should(Succeed())
-	return instance
-}
-
-func GetDataplaneNodeSet(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneNodeSet {
-	instance := &dataplanev1.OpenStackDataPlaneNodeSet{}
-	Eventually(func(g Gomega) error {
-		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
-		return nil
-	}, timeout, interval).Should(Succeed())
-	return instance
 }
 
 // Create an empty OpenStackDataPlaneService struct
@@ -119,11 +129,26 @@ func DefaultDataplaneService(name types.NamespacedName) map[string]interface{} {
 		}}
 }
 
-// Create an OpenStackDataPlaneService with a given NamespacedName, assert on success
-func CreateDataplaneService(name types.NamespacedName) *unstructured.Unstructured {
-	raw := DefaultDataplaneService(name)
+// Get resources
 
-	return th.CreateUnstructured(raw)
+// Retrieve OpenStackDataPlaneDeployment and check for errors
+func GetDataplaneDeployment(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneDeployment {
+	instance := &dataplanev1.OpenStackDataPlaneDeployment{}
+	Eventually(func(g Gomega) error {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+		return nil
+	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// Retrieve OpenStackDataPlaneDeployment and check for errors
+func GetDataplaneNodeSet(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneNodeSet {
+	instance := &dataplanev1.OpenStackDataPlaneNodeSet{}
+	Eventually(func(g Gomega) error {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+		return nil
+	}, timeout, interval).Should(Succeed())
+	return instance
 }
 
 // Get service with given NamespacedName, assert on successful retrieval
@@ -136,6 +161,21 @@ func GetService(name types.NamespacedName) *dataplanev1.OpenStackDataPlaneServic
 	return foundService
 }
 
+// Get OpenStackDataPlaneNodeSet conditions
+func DataplaneConditionGetter(name types.NamespacedName) condition.Conditions {
+	instance := GetDataplaneNodeSet(name)
+	return instance.Status.Conditions
+}
+
+// Get OpenStackDataPlaneDeployment conditions
+func DataplaneDeploymentConditionGetter(name types.NamespacedName) condition.Conditions {
+	instance := GetDataplaneDeployment(name)
+	return instance.Status.Conditions
+}
+
+// Delete resources
+
+// Delete namespace from k8s, check for errors
 func DeleteNamespace(name string) {
 	ns := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
@@ -143,23 +183,4 @@ func DeleteNamespace(name string) {
 		},
 	}
 	Expect(k8sClient.Delete(ctx, ns)).Should(Succeed())
-}
-
-func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
-	return th.CreateSecret(
-		types.NamespacedName{Namespace: name.Namespace, Name: name.Name},
-		map[string][]byte{
-			"ssh-privatekey": []byte("blah"),
-		},
-	)
-}
-
-func DataplaneConditionGetter(name types.NamespacedName) condition.Conditions {
-	instance := GetDataplaneNodeSet(name)
-	return instance.Status.Conditions
-}
-
-func DataplaneDeploymentConditionGetter(name types.NamespacedName) condition.Conditions {
-	instance := GetDataplaneDeployment(name)
-	return instance.Status.Conditions
 }
