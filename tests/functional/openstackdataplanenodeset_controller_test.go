@@ -62,14 +62,14 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					OSImage:               "",
 					UserData:              nil,
 					NetworkData:           nil,
-					AutomatedCleaningMode: "metadata",
+					AutomatedCleaningMode: "",
 					ProvisionServerName:   "",
 					ProvisioningInterface: "",
 					DeploymentSSHSecret:   "",
 					CtlplaneInterface:     "",
 					CtlplaneGateway:       "",
-					CtlplaneNetmask:       "255.255.255.0",
-					BmhNamespace:          "openshift-machine-api",
+					CtlplaneNetmask:       "",
+					BmhNamespace:          "",
 					BmhLabelSelector:      nil,
 					HardwareReqs: v1beta1.HardwareReqs{
 						CPUReqs: v1beta1.CPUReqs{
@@ -160,8 +160,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 	When("A Dataplane resorce is created without PreProvisioned nodes and ordered deployment", func() {
 		BeforeEach(func() {
 			spec := DefaultDataPlaneNoNodeSetSpec()
-			spec.NodeTemplate.AnsibleSSHPrivateKeySecret = ""
-			spec.PreProvisioned = false
+			spec["metadata"] = map[string]interface{}{"ansiblesshprivatekeysecret": ""}
+			spec["preProvisioned"] = false
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, spec))
 		})
 		It("should have the Spec fields initialized", func() {
@@ -209,7 +209,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 	When("A Dataplane resorce is created without PreProvisioned nodes but is marked as PreProvisioned, with ordered deployment", func() {
 		BeforeEach(func() {
 			spec := DefaultDataPlaneNoNodeSetSpec()
-			spec.NodeTemplate.AnsibleSSHPrivateKeySecret = ""
+			spec["metadata"] = map[string]interface{}{"ansiblesshprivatekeysecret": ""}
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, spec))
 		})
 		It("should have the Spec fields initialized", func() {

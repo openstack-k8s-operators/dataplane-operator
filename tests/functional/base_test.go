@@ -14,27 +14,20 @@ import (
 // Resource creation
 
 // Create OpenstackDataPlaneNodeSet in k8s and test that no errors occur
-func CreateDataplaneNodeSet(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneNodeSetSpec) *dataplanev1.OpenStackDataPlaneNodeSet {
+func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
 	instance := DefaultDataplaneNodeSetTemplate(name, spec)
-	err := k8sClient.Create(ctx, instance)
-	Expect(err).NotTo(HaveOccurred())
-
-	return instance
+	return th.CreateUnstructured(instance)
 }
 
 // Create OpenStackDataPlaneDeployment in k8s and test that no errors occur
-func CreateDataplaneDeployment(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneDeploymentSpec) *dataplanev1.OpenStackDataPlaneDeployment {
+func CreateDataplaneDeployment(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
 	instance := DefaultDataplaneDeploymentTemplate(name, spec)
-	err := k8sClient.Create(ctx, instance)
-	Expect(err).NotTo(HaveOccurred())
-
-	return instance
+	return th.CreateUnstructured(instance)
 }
 
 // Create an OpenStackDataPlaneService with a given NamespacedName, assert on success
 func CreateDataplaneService(name types.NamespacedName) *unstructured.Unstructured {
 	raw := DefaultDataplaneService(name)
-
 	return th.CreateUnstructured(raw)
 }
 
@@ -51,67 +44,69 @@ func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
 // Struct initialization
 
 // Build OpenStackDataPlaneNodeSetSpec struct and fill it with preset values
-func DefaultDataPlaneNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
-	return dataplanev1.OpenStackDataPlaneNodeSetSpec{
-		PreProvisioned: false,
-		NodeTemplate: dataplanev1.NodeTemplate{
-			AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
+func DefaultDataPlaneNodeSetSpec() map[string]interface{} {
+
+	return map[string]interface{}{
+		"preProvisioned": false,
+		"nodeTemplate": map[string]interface{}{
+			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 		},
-		Nodes: map[string]dataplanev1.NodeSection{
-			"edpm-compute-node-set": {
-				HostName: "edpm-bm-compute-1",
+		"nodes": map[string]interface{}{
+			"edpm-compute-node-set": map[string]interface{}{
+				"hostname": "edpm-bm-compute-1",
 			},
 		},
 	}
 }
 
 // Build OpenStackDataPlaneNodeSetSpec struct with empty `Nodes` list
-func DefaultDataPlaneNoNodeSetSpec() dataplanev1.OpenStackDataPlaneNodeSetSpec {
-	return dataplanev1.OpenStackDataPlaneNodeSetSpec{
-		PreProvisioned: true,
-		NodeTemplate: dataplanev1.NodeTemplate{
-			AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
+func DefaultDataPlaneNoNodeSetSpec() map[string]interface{} {
+
+	return map[string]interface{}{
+		"preProvisioned": true,
+		"nodeTemplate": map[string]interface{}{
+			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 		},
-		Nodes: map[string]dataplanev1.NodeSection{},
+		"nodes": map[string]interface{}{},
 	}
 }
 
 // Build OpenStackDataPlnaeDeploymentSpec and fill it with preset values
-func DefaultDataPlaneDeploymentSpec() dataplanev1.OpenStackDataPlaneDeploymentSpec {
-	return dataplanev1.OpenStackDataPlaneDeploymentSpec{
-		NodeSets: []string{
+func DefaultDataPlaneDeploymentSpec() map[string]interface{} {
+
+	return map[string]interface{}{
+		"nodeSets": []string{
 			"edpm-compute-nodeset",
 		},
 	}
 }
 
 // Build OpenStackDataPlaneNodeSet struct and fill it with preset values
-func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneNodeSetSpec) *dataplanev1.OpenStackDataPlaneNodeSet {
-	return &dataplanev1.OpenStackDataPlaneNodeSet{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "dataplane.openstack.org/v1beta1",
-			Kind:       "OpenStackDataPlaneNodeSet",
+func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec map[string]interface{}) map[string]interface{} {
+	return map[string]interface{}{
+
+		"apiVersion": "dataplane.openstack.org/v1beta1",
+		"kind":       "OpenStackDataPlaneNodeSet",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
 		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name.Name,
-			Namespace: name.Namespace,
-		},
-		Spec: spec,
+		"spec": spec,
 	}
 }
 
 // Build OpenStackDataPlaneDeployment struct and fill it with preset values
-func DefaultDataplaneDeploymentTemplate(name types.NamespacedName, spec dataplanev1.OpenStackDataPlaneDeploymentSpec) *dataplanev1.OpenStackDataPlaneDeployment {
-	return &dataplanev1.OpenStackDataPlaneDeployment{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "dataplane.openstack.org/v1beta1",
-			Kind:       "OpenStackDataPlaneDeployment",
+func DefaultDataplaneDeploymentTemplate(name types.NamespacedName, spec map[string]interface{}) map[string]interface{} {
+	return map[string]interface{}{
+
+		"apiVersion": "dataplane.openstack.org/v1beta1",
+		"kind":       "OpenStackDataPlaneDeployment",
+
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
 		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name.Name,
-			Namespace: name.Namespace,
-		},
-		Spec: spec,
+		"spec": spec,
 	}
 }
 
