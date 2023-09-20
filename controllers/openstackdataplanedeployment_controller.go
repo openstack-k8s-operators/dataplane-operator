@@ -246,11 +246,10 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		return ctrl.Result{}, nil
 	}
 
-	logger.Info("Set status deploy true", "instance", instance)
-	instance.Status.Deployed = true
 	logger.Info("Set DeploymentReadyCondition true", "instance", instance)
 	instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
-
+	instance.Status.Deployed = true
+	logger.Info("Set status deploy true", "instance", instance)
 	return ctrl.Result{}, nil
 }
 
