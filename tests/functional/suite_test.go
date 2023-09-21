@@ -68,7 +68,7 @@ const (
 	ContainerImage       = "test://nova"
 	timeout              = 40 * time.Second
 	// have maximum 100 retries before the timeout hits
-	interval = 100
+	interval = timeout / 100
 )
 
 func TestAPIs(t *testing.T) {
