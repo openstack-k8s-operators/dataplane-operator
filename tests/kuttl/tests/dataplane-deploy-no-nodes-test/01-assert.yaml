@@ -25,7 +25,7 @@ spec:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
 status:
   conditions:
-  - message: Setup complete
+  - message: NodeSet Ready
     reason: Ready
     status: "True"
     type: Ready

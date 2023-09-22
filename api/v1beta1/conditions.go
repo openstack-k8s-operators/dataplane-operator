@@ -40,9 +40,8 @@ const (
 	// SetupReadyCondition - Overall setup condition
 	SetupReadyCondition condition.Type = "SetupReady"
 
-	// RoleBareMetalProvisionReadyCondition Status=True condition indicates
-	// all baremetal nodes provisioned for the Role.
-	RoleBareMetalProvisionReadyCondition condition.Type = "RoleBaremetalProvisionReady"
+	// NodeSetReadyMessage - NodeSet Ready
+	NodeSetReadyMessage = "NodeSet Ready"
 
 	// NodeSetBareMetalProvisionReadyCondition Status=True condition indicates
 	// all baremetal nodes provisioned for the NodeSet.
