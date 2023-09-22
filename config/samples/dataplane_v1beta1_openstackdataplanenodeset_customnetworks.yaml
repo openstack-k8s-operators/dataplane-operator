@@ -48,8 +48,8 @@ spec:
         # edpm_network_config
         # Default nic config template for a EDPM compute node
         # These vars are edpm_network_config role vars
-        edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
-        edpm_network_config_override: |
+        edpm_network_config_override: ""
+        edpm_network_config_template: |
              ---
              {% set mtu_list = [ctlplane_mtu] %}
              {% for network in role_networks %}
