@@ -9,8 +9,6 @@ spec:
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
   preProvisioned: true
-  deployStrategy:
-    deploy: true
   services:
     - configure-network
     - validate-network

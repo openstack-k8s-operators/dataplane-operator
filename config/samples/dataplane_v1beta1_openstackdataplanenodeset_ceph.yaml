@@ -9,8 +9,6 @@ spec:
       value: "True"
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
-  deployStrategy:
-      deploy: false
   nodes:
     edpm-compute-0:
       hostName: edpm-compute-0

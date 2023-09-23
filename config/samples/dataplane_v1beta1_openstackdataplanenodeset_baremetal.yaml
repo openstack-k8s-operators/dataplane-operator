@@ -19,8 +19,6 @@ spec:
     - ovn
     - libvirt
     - nova
-  deployStrategy:
-      deploy: false
   baremetalSetTemplate:
     bmhLabelSelector:
       app: openstack

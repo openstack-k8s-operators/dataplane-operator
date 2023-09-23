@@ -70,13 +70,11 @@ Using the job name, the ansible logs can be retrieved:
 
 ## Controlling the Ansible execution
 
-The deployStrategy field on OpenStackDataPlane, OpenStackDataPlaneRole, and
-OpenStackDataPlaneNode has support for specifying the ansible [tags,
-skip-tags](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html#selecting-or-skipping-tags-when-you-run-a-playbook),
-and
-[limit](https://docs.ansible.com/ansible/latest/inventory_guide/intro_patterns.html#patterns-and-ad-hoc-commands)
+The ansibleEESpec field on OpenStackDataPlaneNodeSet has support for specifying the
+ansible [tags, skip-tags](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html#selecting-or-skipping-tags-when-you-run-a-playbook),
+and [limit](https://docs.ansible.com/ansible/latest/inventory_guide/intro_patterns.html#patterns-and-ad-hoc-commands)
 
-The fields in deployStrategy that correspond to these options are:
+The fields in ansibleEESpec that correspond to these options are:
 
     ansibleTags
     ansibleSkipTags
@@ -93,8 +91,7 @@ Example usage of these fields:
     metadata:
       name: openstack-edpm
     spec:
-      deployStrategy:
-          deploy: false
+      ansibleEESpec :
           ansibleTags: containers
           ansibleSkipTags: packages
           ansibleLimit: compute1*,compute2*
