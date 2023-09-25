@@ -1,11 +1,9 @@
-# Deploying a DataPlaneNodeSet
+# Deploying an OpenStackDataPlaneNodeSet
 
-Deploying a dataplane consists of creating the OpenStackDataPlaneNodeSet custom resource that
-define the layout of the dataplane.
-
-This documentation will cover using each resource individually, as well as
-using the OpenStackDataPlaneNodeSet resource to deploy everything in a single
-resource.
+Deploying a dataplane consists of creating the set of OpenStackDataPlaneNodeSet
+custom resources that define the layout of the dataplane, and the
+OpenStackDataPlaneDeployment custom resources that trigger the ansible
+execution to deploy and configure software.
 
 ## Samples
 
@@ -79,46 +77,44 @@ This document will cover writing the `YAML` document for an
 with `oc` as the last step.
 
 Start the `YAML` document in an `openstack-edpm.yaml` file and give the
-dataplane a name.
+OpenStackDataPlaneNodeSet a name.
 
     apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneNodeSet
     metadata:
       name: openstack-edpm
 
-Begin writing the dataplane spec. Initially, a `deployStrategy` field will be
-added to the spec that contains `deploy: false`. This allows for creating
-the dataplane resources without triggering an Ansible execution immediately.
+An OpenStackDataPlaneNodeSet represents a set of nodes that are configured in a
+similar way. Nodes that are deployed with common configurations and that share
+a set of common ansible variables can be deployed using the same
+OpenStackDataPlaneNodeSet.
+
+Consider using different OpenStackDataPlaneNodeSets to logically group nodes in
+a way that makes sense. Differences between nodes are likely to include
+configurations due to hardware, location, or networking.  As differences grow,
+use different OpenStackDataPlaneNodeSets to manage similarly configured nodes.
+
+The `preProvisioned` field indicates that the nodes are already provisioned,
+powered on, and booted into an installed operating system.
+
+A `nodeTemplate` field on the OpenStackDataPlaneNodeSet contains the fields
+whose values are inherited by each node in the OpenStackDataPlaneNodeSet.
+Within `nodeTemplate`, the fields shown are documented inline in the example.
 
     apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneNodeSet
     metadata:
       name: openstack-edpm
     spec:
-      deployStrategy:
-          deploy: false
 
-Add roles to the dataplane. This example uses a single role, but any number
-could be added. A single role called `dataplane-role` is added for this
-example. Under the role, a `preProvisioned` field is set to `True` since these
-nodes are preprovisioned. A `nodeTemplate` field is also started that contains
-the fields that will have their values inherited by each node in the role. See
-[Inheritance](inheritance.md) for more details about how role and node
-inheritance works. Within `nodeTemplate`, the fields shown are documented
-inline in the example.
+      preProvisioned: True
 
-    apiVersion: dataplane.openstack.org/v1beta1
-    kind: OpenStackDataPlaneNodeSet
-    metadata:
-      name: openstack-edpm
-    spec:
-      deployStrategy:
-        deploy: false
-      roles:
-        edpm-compute:
-          preProvisioned: true
-          nodeTemplate:
+      nodeTemplate:
 
+        # Secret containing the SSH private key used by ansible
+        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+
+        ansible:
             # User that has the SSH key for access
             ansibleUser: rhel-user
             # Secret name containing SSH key. Use the same secret name as
@@ -152,6 +148,13 @@ from the `nodeTemplate` field on its role into the `node` field on the node.
 However, certain fields will need to be overridden given that they are specific
 to a node. In this example, `ansibleVars` has the node specific variables.
 
+Adding nodes to the nodeSet is done under the `spec.Nodes` key, which is a map
+with the node names as keys and the values are of type
+[NodeSection](openstack_dataplanenodeset.md#nodesection). Nodes within `NodeSection`
+can contain the same `ansible` key that also exists in `NodeTemplate`. In this
+case, where both are specified, the node specific values override those from
+`NodeTemplate`.
+
 ---
 **NOTE**
 
@@ -162,21 +165,24 @@ values.
 
 ---
 
-With the nodes and the controlplane specific variables added, the full
-`openstack-datplane` `YAML` document looks like the following:
+With the nodes added, the full `openstack-edpm` OpenStackDataPlaneNodeSet
+`YAML` document looks like the following:
+
 
     apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneNodeSet
     metadata:
       name: openstack-edpm
     spec:
-      deployStrategy:
-        deploy: false
-      roles:
-        edpm-compute:
-          preProvisioned: true
-          nodeTemplate:
 
+      preProvisioned: True
+
+      nodeTemplate:
+
+        # Secret containing the SSH private key used by ansible
+        ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+
+        ansible:
             # User that has the SSH key for access
             ansibleUser: rhel-user
             # Secret name containing SSH key. Use the same secret name as
@@ -193,14 +199,12 @@ With the nodes and the controlplane specific variables added, the full
               edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
 
               # See config/samples/dataplane_v1beta1_openstackdataplanenodeset.yaml
-              # for the other most common ansible variables that need to be set.
-
+              # for the other most common ansible varialbes that need to be set.
       nodes:
         edpm-compute-0:
-          role: edpm-compute
           hostName: edpm-compute-0
-          ansibleHost: 192.168.122.100
-          node:
+          ansible:
+            ansibleHost: 192.168.122.100
             ansibleVars:
               ctlplane_ip: 192.168.122.100
               internal_api_ip: 172.17.0.100
@@ -208,10 +212,9 @@ With the nodes and the controlplane specific variables added, the full
               tenant_ip: 172.19.0.100
               fqdn_internal_api: edpm-compute-0.example.com
         edpm-compute-1:
-          role: edpm-compute
           hostName: edpm-compute-1
-          ansibleHost: 192.168.122.101
-          node:
+          ansible:
+            ansibleHost: 192.168.122.101
             ansibleVars:
               ctlplane_ip: 192.168.122.101
               internal_api_ip: 172.17.0.101
@@ -219,11 +222,11 @@ With the nodes and the controlplane specific variables added, the full
               tenant_ip: 172.19.0.101
               fqdn_internal_api: edpm-compute-1.example.com
 
-Create the dataplane using the `oc` command.
+Create the OpenStackDataPlaneNodeSet using the `oc` command.
 
     oc create -f openstack-edpm.yaml
 
-Verify that the dataplane nodeset were created.
+Verify that the OpenStackDataPlaneNodeSet is created.
 
     oc get openstackdataplanenodeset
 
@@ -237,8 +240,8 @@ openstack-edpm   False    Deployment not started
 
 ### Understanding OpenStackDataPlaneServices
 
-A dataplane is configured with a set of services that define the Ansible roles
-and task files that are executed to complete the deployment. The
+A dataplane is configured with a set of services that define the Ansible plays
+or playbooks that are executed to complete the deployment. The
 dataplane-operator has a default list of services that are deployed by default
 (unless the `services` field is overridden). The default services are provided
 within the
@@ -247,7 +250,9 @@ directory.
 
 Each service is a custom resource of type
 [OpenStackDataPlaneService](openstack_dataplaneservice.md). The services will
-be created and updated automatically during OpenStackDataPlaneRole reconciliation.
+be created and updated automatically during OpenStackDataPlaneNodeSet
+reconciliation, when that service is in the list of services for the
+OpenStackDataPlaneNodeSet.
 
 See [Composable Services](composable_services.md) for further documentation
 about services and customizing services.
@@ -265,43 +270,35 @@ The output should be similar to:
     install-os          6d6h
     run-os              6d6h
     validate-network    6d6h
+    ovn                 6d6h
     libvirt             6d6h
     nova                6d6h
     telemetry           6d6h
 
 Each service uses the
-[`role`](https://openstack-k8s-operators.github.io/openstack-ansibleee-operator/openstack_ansibleee/#role)
+[`playbook`](https://openstack-k8s-operators.github.io/openstack-ansibleee-operator/openstack_ansibleee/#playbook)
+or 
+[`play`](https://openstack-k8s-operators.github.io/openstack-ansibleee-operator/openstack_ansibleee/#play)
 field from the `OpenStackAnsibleEE` CRD provided
 by
 [openstack-ansibleee-operator](https://github.com/openstack-k8s-operators/openstack-ansibleee-operator)
-to define the Ansible roles and task files that are executed as part of that
-service.
+to define the Ansible execution for the service.
 
-For example, the list of roles for the `install-os` service can be seen by
+For example, the playbooks for the `install-os` service can be seen by
 describing the resource.
 
     oc describe openstackdataplaneservice install-os
 
-Any role listed in the `osp.edpm` namespace is provided by the
+Any playook listed in the `osp.edpm` namespace is provided by the
 [edpm-ansible](https://github.com/openstack-k8s-operators/edpm-ansible)
 project. Within that project, the ansible variables that can be used to
 configure the role are documented.
 
 For example, in the describe output for the `install-os` service, the
-`osp.edpm.edpm_sshd` role is seen.
+`osp.edpm.install_os` playbook is seen.
 
-```console
-import_role:
-  Name:        osp.edpm.edpm_sshd
-  tasks_from:  install.yml
-Name:          Install edpm_sshd
-Tags:
-  edpm_sshd
-```
-
-The ansible variables that configure the
-behavior of the `osp.edpm.edpm_sshd` role are available at
-<https://github.com/openstack-k8s-operators/edpm-ansible/blob/main/roles/edpm_sshd/tasks/main.yml>.
+The playbooks are available at
+<https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/playbooks>.
 
 ---
 **NOTE**
@@ -313,29 +310,51 @@ further role reconciliations.
 
 ### Deploy the dataplane
 
-With the dataplane resources created, it can be seen from their status message
-that they have not yet been deployed. This means no ansible has been executed
-to configure any of the services on the nodes. They still need to be deployed.
+With the OpenStackDataPlaneNodeSet resources created, it can be seen from their
+status message that they have not yet been deployed. This means no ansible has
+been executed to configure any of the services on the nodes. They still need to
+be deployed.
 
-To deploy the `openstack-edpm` dataplane resource, the
-`spec.deployStrategy.deploy` field needs to be set to `True`. This will trigger
-the deployment of all the configured services across the nodes. The field can
-be set with the following command to start the deployment:
+To deploy the `openstack-edpm` OpenStackDataPlaneNodeSet resource, an
+OpenStackDataPlaneDeployment resource must be created. An
+OpenStackDataPlaneDeployment works similarly to a [Kubernetes
+Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/), in that
+is triggers and continues to reconcile the resources necessary to complete the
+ansible execution for the OpenStackDataPlaneNodeSet until it succeeds. Once
+succeeded, the OpenStackDataPlaneDeployment is considered complete. To start
+another ansible execution, another OpenStackDataPlaneDeployment resource is
+created. This allows for tracking the history of all the ansible executions
+that have been completed for the dataplane.
 
-    oc patch openstackdataplanenodeset openstack-edpm  -p='[{"op": "replace", "path": "/spec/deployStrategy/deploy", "value":true}]' --type json
+Create an OpenStackDataPlaneDeployment resource with the following sample
+`YAML`.
 
-The `oc patch` command sets the `deploy` field to `True`, which starts the
-deployment. `oc edit OpenStackDataPlaneNodeSet openstack-edpm` could alternatively be
-used to edit the resource directly in an editor to set the field to `True`.
+    apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneDeployment
+    metadata:
+      name: openstack-edpm
+    spec:
 
-With the deployment started, ansible will be executed to configure the nodes.
-When the deployment is complete, the status messages will change to indicate
-the deployment is ready.
+      # ansible related fields that control the ansible execution
+      ansibleTags: ""
+      ansibleLimit: ""
+      ansibleSkipTags: ""
+
+      # List of OpenStackDataPlaneNodeSet names included in the ansible
+      # execution.
+      nodeSets:
+        - openstack-edpm
+
+With the OpenStackDataPlaneDeployment started, ansible will be executed to
+configure the nodes within the list OpenStackDataPlaneNodeSets. List additional
+OpenStackDataPlaneNodeSets within the `nodeSets` list to deploy
+OpenStackDataPlaneNodeSets simultaneously. When the deployment is complete, the
+status messages will change to indicate the deployment is ready.
 
 ```console
 $ oc get openstackdataplanenodeset
 NAME             STATUS   MESSAGE
-openstack-edpm   True    DataPlane Ready
+openstack-edpm   True     Ready
 ```
 
 If the deployment involved adding new compute nodes then after the deployment

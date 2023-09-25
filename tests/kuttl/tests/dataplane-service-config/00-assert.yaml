@@ -73,9 +73,6 @@ spec:
     - mountPath: /runner/inventory/hosts
       name: inventory
       subPath: inventory
-    - mountPath: /runner/network/nic-config-template
-      name: inventory
-      subPath: network
     volumes:
     - name: ssh-key
       secret:
@@ -88,10 +85,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        - key: network
-          path: network
         secretName: dataplanenodeset-edpm-compute-no-nodes
-  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
   play: |
     - hosts: localhost

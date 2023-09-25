@@ -22,6 +22,16 @@ will be executed as early as possible in the deployment as part of the
 that execute prior to `configure-network` then the command(s) specified by
 `edpm_bootstrap_command` would run after the custom services.
 
+The string value for `edpm_bootstrap_command` is passed directly to the ansible
+[shell](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html).
+As such, when using multiple shell commands, the `|` character must be used to
+preserve new lines in the `YAML` value:
+
+    edpm_bootstrap_command: |
+        command 1
+        command 2
+        etc.
+
 ### Using `edpm_bootstrap_command` for system registration
 
 `edpm_bootstrap_command` can be used to perform system registration in order to
@@ -68,11 +78,11 @@ routes, etc). Templates provided with the edpm_network_config role are at
 
 Custom templates can also be used, but they must be avaialable to ansible in
 the ansible-runner image used by the `configure-network` service. Use the
-[`ExtraMounts`](../composable_services/#using-extramounts) field to mount custom
+[`ExtraMounts`](../composable_services.md/#using-extramounts) field to mount custom
 content into the ansible-runner image.
 
 The following is an example
-[`ansibleVars`](http://127.0.0.1:8000/dataplane-operator/openstack_dataplanerole/#nodesection)
+[`ansibleVars`](openstack_dataplanenodeset.md/#nodesection)
 field that shows defining the variables that configure the
 `edpm_network_config` role.
 
@@ -85,13 +95,17 @@ field that shows defining the variables that configure the
       fqdn_internal_api: edpm-compute-0.example.com
 
 This configuration would be applied by the
-[`configure-network`](../composable_services/#dataplane-operator-provided-services) service when
+[`configure-network`](../composable_services.md/#dataplane-operator-provided-services) service when
 it's executed.
 
 ### Network attachment definitions
 
 The
-[`NetworkAttachmentDefinition`](https://github.com/openstack-k8s-operators/docs/blob/main/networking.md#network-attachment-definitions) resource is used to describe how pods can be attached to different networks. Network attachment definitions can be specified on the [`OpenStackDataPlaneRole`](openstack_dataplanerole.md) and [`OpenStackDataPlaneNode`](openstack_dataplanenode.md) resources using the `NetworkAttachments` field.
+[`NetworkAttachmentDefinition`](https://github.com/openstack-k8s-operators/docs/blob/main/networking.md#network-attachment-definitions)
+resource is used to describe how pods can be attached to different networks.
+Network attachment definitions can be specified on the
+[`OpenStackDataPlaneNodeSet`](openstack_dataplanenodeset.md) resource using the
+`NetworkAttachments` field.
 
 The network attachments are used to describe which networks will be connected
 to the pod that is running ansible-runner. They do not enable networks on the

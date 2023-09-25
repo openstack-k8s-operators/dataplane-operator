@@ -12,8 +12,6 @@ metadata:
   name: edpm-extramounts
 spec:
   preProvisioned: true
-  deployStrategy:
-      deploy: true
   services:
     - test-service
   nodes: {}

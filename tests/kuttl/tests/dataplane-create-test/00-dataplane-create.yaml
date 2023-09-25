@@ -9,9 +9,9 @@ spec:
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
   services:
-    - download-cache
     - configure-network
     - validate-network
+    - download-cache
     - install-os
     - configure-os
     - run-os
@@ -19,8 +19,6 @@ spec:
     - libvirt
     - nova
   preProvisioned: true
-  deployStrategy:
-      deploy: false
   nodes:
       edpm-compute-0:
         hostName: edpm-compute-0
