@@ -29,9 +29,9 @@ The default list of services as they will appear on the `services` field on an
 `OpenStackDataPlaneNodeSet` spec is:
 
     services:
+      - download-cache
       - configure-network
       - validate-network
-      - download-cache
       - install-os
       - configure-os
       - run-os
@@ -264,9 +264,9 @@ service to execute for the `edpm-compute` `NodeSet`.
     spec:
       services:
         - hello-world
+        - download-cache
         - configure-network
         - validate-network
-        - download-cache
         - install-os
         - configure-os
         - run-os
