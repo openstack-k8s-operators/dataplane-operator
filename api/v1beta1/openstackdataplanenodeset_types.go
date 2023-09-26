@@ -142,3 +142,15 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 		Env:                instance.Spec.Env,
 	}
 }
+
+// DataplaneAnsibleImageDefaults default images for dataplane services
+type DataplaneAnsibleImageDefaults struct {
+	Frr                string
+	IscsiD             string
+	Logrotate          string
+	NovaCompute        string
+	NovaLibvirt        string
+	OvnControllerAgent string
+	OvnMetadataAgent   string
+	OvnBgpAgent        string
+}
