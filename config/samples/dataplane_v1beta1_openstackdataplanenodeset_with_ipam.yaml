@@ -50,6 +50,8 @@ spec:
           subnetName: subnet1
         - name: Tenant
           subnetName: subnet1
+  networkAttachments:
+    - ctlplane
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     managementNetwork: ctlplane
