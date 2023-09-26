@@ -30,6 +30,8 @@ spec:
             storage_ip: 172.18.0.100
             tenant_ip: 172.19.0.100
             fqdn_internal_api: edpm-compute-0.example.com
+  networkAttachments:
+    - ctlplane
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     managementNetwork: ctlplane
