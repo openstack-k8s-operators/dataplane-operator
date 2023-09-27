@@ -129,45 +129,42 @@ func populateInventoryFromIPAM(
 
 func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.Group,
 	defaultImages dataplanev1.DataplaneAnsibleImageDefaults) error {
-	groupVars := make(map[string]interface{})
 
 	if template.Ansible.AnsibleUser != "" {
-		groupVars["ansible_user"] = template.Ansible.AnsibleUser
+		group.Vars["ansible_user"] = template.Ansible.AnsibleUser
 	}
 	if template.Ansible.AnsiblePort > 0 {
-		groupVars["ansible_port"] = strconv.Itoa(template.Ansible.AnsiblePort)
+		group.Vars["ansible_port"] = strconv.Itoa(template.Ansible.AnsiblePort)
 	}
 	if template.ManagementNetwork != "" {
-		groupVars["management_network"] = template.ManagementNetwork
+		group.Vars["management_network"] = template.ManagementNetwork
 	}
-	if len(template.Networks) > 0 {
-		groupVars["networks"] = template.Networks
-	}
+
 	// Set default Service Image Variables in they are not provided by the user.
 	// This uses the default values provided by dataplanev1.DataplaneAnsibleImageDefaults
 	if template.Ansible.AnsibleVars["edpm_frr_image"] == nil {
-		groupVars["edpm_frr_image"] = defaultImages.Frr
+		group.Vars["edpm_frr_image"] = defaultImages.Frr
 	}
 	if template.Ansible.AnsibleVars["edpm_iscsid_image"] == nil {
-		groupVars["edpm_iscsid_image"] = defaultImages.IscsiD
+		group.Vars["edpm_iscsid_image"] = defaultImages.IscsiD
 	}
 	if template.Ansible.AnsibleVars["edpm_logrotate_crond_image"] == nil {
-		groupVars["edpm_logrotate_crond_image"] = defaultImages.Logrotate
+		group.Vars["edpm_logrotate_crond_image"] = defaultImages.Logrotate
 	}
 	if template.Ansible.AnsibleVars["edpm_nova_compute_image"] == nil {
-		groupVars["edpm_nova_compute_image"] = defaultImages.NovaCompute
+		group.Vars["edpm_nova_compute_image"] = defaultImages.NovaCompute
 	}
 	if template.Ansible.AnsibleVars["edpm_nova_libvirt_container_image"] == nil {
-		groupVars["edpm_nova_libvirt_image"] = defaultImages.NovaLibvirt
+		group.Vars["edpm_nova_libvirt_image"] = defaultImages.NovaLibvirt
 	}
 	if template.Ansible.AnsibleVars["edpm_ovn_controller_agent_image"] == nil {
-		groupVars["edpm_ovn_controller_agent_image"] = defaultImages.OvnControllerAgent
+		group.Vars["edpm_ovn_controller_agent_image"] = defaultImages.OvnControllerAgent
 	}
 	if template.Ansible.AnsibleVars["edpm_ovn_metadata_agent_image"] == nil {
-		groupVars["edpm_ovn_metadata_agent_image"] = defaultImages.OvnMetadataAgent
+		group.Vars["edpm_ovn_metadata_agent_image"] = defaultImages.OvnMetadataAgent
 	}
 	if template.Ansible.AnsibleVars["edpm_ovn_bgp_agent_image"] == nil {
-		groupVars["edpm_ovn_bgp_agent_image"] = defaultImages.OvnBgpAgent
+		group.Vars["edpm_ovn_bgp_agent_image"] = defaultImages.OvnBgpAgent
 	}
 
 	for key, val := range template.Ansible.AnsibleVars {
@@ -176,30 +173,21 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 		if err != nil {
 			return err
 		}
-		groupVars[key] = v
-	}
-	if group.Vars != nil {
-		for key, value := range groupVars {
-			group.Vars[key] = value
-		}
+		group.Vars[key] = v
 	}
 	return nil
 }
 
 func resolveHostAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host) error {
-	hostVars := make(map[string]interface{})
 
 	if node.Ansible.AnsibleUser != "" {
-		hostVars["ansible_user"] = node.Ansible.AnsibleUser
+		host.Vars["ansible_user"] = node.Ansible.AnsibleUser
 	}
 	if node.Ansible.AnsiblePort > 0 {
-		hostVars["ansible_port"] = strconv.Itoa(node.Ansible.AnsiblePort)
+		host.Vars["ansible_port"] = strconv.Itoa(node.Ansible.AnsiblePort)
 	}
 	if node.ManagementNetwork != "" {
-		hostVars["management_network"] = node.ManagementNetwork
-	}
-	if len(node.Networks) > 0 {
-		hostVars["networks"] = node.Networks
+		host.Vars["management_network"] = node.ManagementNetwork
 	}
 
 	for key, val := range node.Ansible.AnsibleVars {
@@ -208,13 +196,7 @@ func resolveHostAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host) e
 		if err != nil {
 			return err
 		}
-		hostVars[key] = v
-	}
-
-	if host.Vars != nil {
-		for key, value := range hostVars {
-			host.Vars[key] = value
-		}
+		host.Vars[key] = v
 	}
 	return nil
 }
