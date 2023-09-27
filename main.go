@@ -41,6 +41,8 @@ import (
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	certmgrmetav1 "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/controllers"
@@ -61,6 +63,8 @@ func init() {
 	utilruntime.Must(baremetalv1.AddToScheme(scheme))
 	utilruntime.Must(infranetworkv1.AddToScheme(scheme))
 	utilruntime.Must(dataplanev1beta1.AddToScheme(scheme))
+	utilruntime.Must(certmgrv1.AddToScheme(scheme))
+	utilruntime.Must(certmgrmetav1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

@@ -34,6 +34,8 @@ spec:
                 items:
                   type: string
                 type: array
+              hasTLSCerts:
+                type: boolean
               label:
                 maxLength: 53
                 pattern: '[a-z]([-a-z0-9]*[a-z0-9])'

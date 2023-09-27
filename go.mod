@@ -8,6 +8,7 @@ replace golang.org/x/net => golang.org/x/net v0.18.0 //allow-merging
 replace github.com/openstack-k8s-operators/dataplane-operator/api => ./api
 
 require (
+	github.com/cert-manager/cert-manager v1.11.5
 	github.com/go-logr/logr v1.3.0
 	github.com/google/uuid v1.4.0
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
@@ -16,6 +17,7 @@ require (
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230724101130-2d6fe1f4706b
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231122104142-3b449040167e
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20231128145648-956f4d361a63
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231006072650-7fe7fe16bcd1
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231128145648-956f4d361a63
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231128145648-956f4d361a63
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231128145648-956f4d361a63

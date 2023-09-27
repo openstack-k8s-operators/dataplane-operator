@@ -11,3 +11,4 @@ spec:
     # and ssh-publickey
     - nova-migration-ssh-key
   playbook: osp.edpm.nova
+  hasTLSCerts: True

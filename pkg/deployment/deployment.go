@@ -81,7 +81,7 @@ func Deploy(
 		// specific mounts.
 		aeeSpec.ExtraMounts = make([]storage.VolMounts, len(aeeSpecMounts))
 		copy(aeeSpec.ExtraMounts, aeeSpecMounts)
-		aeeSpec, err = addServiceExtraMounts(ctx, helper, aeeSpec, foundService)
+		aeeSpec, err = addServiceExtraMounts(ctx, helper, aeeSpec, foundService, nodeSet)
 
 		if err != nil {
 			return &ctrl.Result{}, err
@@ -225,6 +225,7 @@ func addServiceExtraMounts(
 	helper *helper.Helper,
 	aeeSpec dataplanev1.AnsibleEESpec,
 	service dataplanev1.OpenStackDataPlaneService,
+	nodeSet *dataplanev1.OpenStackDataPlaneNodeSet,
 ) (dataplanev1.AnsibleEESpec, error) {
 	client := helper.GetClient()
 	baseMountPath := path.Join(ConfigPaths, service.Name)
@@ -321,6 +322,35 @@ func addServiceExtraMounts(
 		}
 
 		aeeSpec.ExtraMounts = append(aeeSpec.ExtraMounts, volMounts)
+	}
+
+	// Add mount for TLS certs
+	if service.Spec.HasTLSCerts != nil && *service.Spec.HasTLSCerts {
+		volMounts := storage.VolMounts{}
+		secretName := GetServiceCertsSecretName(nodeSet, service.Name)
+		sec := &corev1.Secret{}
+		err := client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, sec)
+		if err != nil {
+			return aeeSpec, err
+		}
+		volume := corev1.Volume{
+			Name: secretName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: secretName,
+				},
+			},
+		}
+
+		volumeMount := corev1.VolumeMount{
+			Name:      secretName,
+			MountPath: path.Join(CertPaths, service.Name),
+		}
+
+		volMounts.Volumes = append(volMounts.Volumes, volume)
+		volMounts.Mounts = append(volMounts.Mounts, volumeMount)
+		aeeSpec.ExtraMounts = append(aeeSpec.ExtraMounts, volMounts)
+
 	}
 	return aeeSpec, nil
 }

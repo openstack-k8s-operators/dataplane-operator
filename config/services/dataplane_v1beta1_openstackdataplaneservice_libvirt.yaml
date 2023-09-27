@@ -5,3 +5,4 @@ metadata:
 spec:
   label: libvirt
   playbook: osp.edpm.libvirt
+  hasTLSCerts: True

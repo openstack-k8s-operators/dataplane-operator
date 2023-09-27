@@ -67,10 +67,14 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 // createOrPatchDNSData builds the DNSData
 func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	allIPSets map[string]infranetworkv1.IPSet) (string, error) {
+	allIPSets map[string]infranetworkv1.IPSet) (
+	string, map[string][]string, map[string][]string, error) {
 
 	var allDNSRecords []infranetworkv1.DNSHost
 	var ctlplaneSearchDomain string
+	allHostnames := map[string][]string{}
+	allIPs := map[string][]string{}
+
 	// Build DNSData CR
 	for nodeName, node := range instance.Spec.Nodes {
 		var shortName string
@@ -101,6 +105,8 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 					if isFQDN(hostName) && res.Network == CtlPlaneNetwork {
 						fqdnNames = append(fqdnNames, hostName)
 					}
+					allHostnames[nodeName] = append(allHostnames[nodeName], fqdnNames...)
+					allIPs[nodeName] = append(allIPs[nodeName], res.Address)
 					dnsRecord.Hostnames = fqdnNames
 					allDNSRecords = append(allDNSRecords, dnsRecord)
 					// Adding only ctlplane domain for ansibleee.
@@ -130,16 +136,17 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 		return err
 	})
 	if err != nil {
-		return "", err
+		return "", allHostnames, allIPs, err
 	}
-	return ctlplaneSearchDomain, nil
+	return ctlplaneSearchDomain, allHostnames, allIPs, nil
 
 }
 
 // EnsureDNSData Ensures DNSData is created
 func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	allIPSets map[string]infranetworkv1.IPSet) ([]string, []string, string, bool, error) {
+	allIPSets map[string]infranetworkv1.IPSet) (
+	[]string, []string, string, bool, map[string][]string, map[string][]string, error) {
 
 	// Verify dnsmasq CR exists
 	dnsAddresses, dnsClusterAddresses, isReady, err := CheckDNSService(
@@ -161,17 +168,17 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 		if dnsAddresses == nil {
 			instance.Status.Conditions.Remove(dataplanev1.NodeSetDNSDataReadyCondition)
 		}
-		return nil, nil, "", isReady, err
+		return nil, nil, "", isReady, nil, nil, err
 	}
 	// Create or Patch DNSData
-	ctlplaneSearchDomain, err := createOrPatchDNSData(
+	ctlplaneSearchDomain, allHostnames, allIPs, err := createOrPatchDNSData(
 		ctx, helper, instance, allIPSets)
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
 			dataplanev1.NodeSetDNSDataReadyErrorMessage)
-		return nil, nil, "", false, err
+		return nil, nil, "", false, nil, nil, err
 	}
 
 	dnsData := &infranetworkv1.DNSData{
@@ -187,7 +194,7 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 			dataplanev1.NodeSetDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
 			dataplanev1.NodeSetDNSDataReadyErrorMessage)
-		return nil, nil, "", false, err
+		return nil, nil, "", false, nil, nil, err
 	}
 
 	if !dnsData.IsReady() {
@@ -196,12 +203,12 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 			dataplanev1.NodeSetDNSDataReadyCondition,
 			condition.RequestedReason, condition.SeverityInfo,
 			dataplanev1.NodeSetDNSDataReadyWaitingMessage)
-		return nil, nil, "", false, nil
+		return nil, nil, "", false, nil, nil, nil
 	}
 	instance.Status.Conditions.MarkTrue(
 		dataplanev1.NodeSetDNSDataReadyCondition,
 		dataplanev1.NodeSetDNSDataReadyMessage)
-	return dnsAddresses, dnsClusterAddresses, ctlplaneSearchDomain, true, nil
+	return dnsAddresses, dnsClusterAddresses, ctlplaneSearchDomain, true, allHostnames, allIPs, nil
 }
 
 // reserveIPs Reserves IPs by creating IPSets
