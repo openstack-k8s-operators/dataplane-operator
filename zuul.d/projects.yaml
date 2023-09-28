@@ -4,5 +4,12 @@
     github-check:
       jobs:
         - dataplane-operator-docs-preview
-    templates:
-      - podified-multinode-edpm-baremetal-pipeline
+        - openstack-k8s-operators-content-provider
+        - podified-multinode-edpm-deployment-crc: &content_provider
+            dependencies:
+              - openstack-k8s-operators-content-provider
+        - dataplane-operator-crc-podified-edpm-baremetal: *content_provider
+        - dataplane-operator-crc-podified-edpm-baremetal-1: *content_provider
+        - dataplane-operator-crc-podified-edpm-baremetal-2: *content_provider
+        - dataplane-operator-crc-podified-edpm-baremetal-3: *content_provider
+        - dataplane-operator-crc-podified-edpm-baremetal-4: *content_provider

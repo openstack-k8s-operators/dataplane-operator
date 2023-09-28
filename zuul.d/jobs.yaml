@@ -1,7 +1,42 @@
 ---
 - job:
+    name: dataplane-operator-crc-podified-edpm-baremetal
+    parent: cifmw-crc-podified-edpm-baremetal
+    irrelevant-files: &openstack_if
+      - ^tests/.*$
+      - docs
+      - containers/ci
+      - .github/workflows
+      - .ci-operator.yaml
+      - .dockerignore
+      - .gitignore
+      - .golangci.yaml
+      - .pre-commit-config.yaml
+      - LICENSE
+      - OWNERS*
+      - PROJECT
+      - .*/*.md
+      - kuttl-test.yaml
+      - renovate.json
+- job:
     name: dataplane-operator-docs-preview
     parent: cifmw-doc
     vars:
       # This var is specific to ci-framework docs directory using sphinx
       doc_available: false
+
+- job:
+    name: dataplane-operator-crc-podified-edpm-baremetal-1
+    parent: dataplane-operator-crc-podified-edpm-baremetal
+
+- job:
+    name: dataplane-operator-crc-podified-edpm-baremetal-2
+    parent: dataplane-operator-crc-podified-edpm-baremetal
+
+- job:
+    name: dataplane-operator-crc-podified-edpm-baremetal-3
+    parent: dataplane-operator-crc-podified-edpm-baremetal
+
+- job:
+    name: dataplane-operator-crc-podified-edpm-baremetal-4
+    parent: dataplane-operator-crc-podified-edpm-baremetal
