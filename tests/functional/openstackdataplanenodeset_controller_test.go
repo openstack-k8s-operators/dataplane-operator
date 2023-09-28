@@ -56,6 +56,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 	var dataplaneSSHSecretName types.NamespacedName
 	var dataplaneNetConfigName types.NamespacedName
 	var dataplaneIPSetName types.NamespacedName
+	var dataplaneDeploymentName types.NamespacedName
 
 	defaultEdpmServiceList := []string{
 		"edpm_frr_image",
@@ -88,6 +89,10 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		dataplaneIPSetName = types.NamespacedName{
 			Namespace: namespace,
 			Name:      "edpm-compute-node-1",
+		}
+		dataplaneDeploymentName = types.NamespacedName{
+			Name:      "edpm-deployment",
+			Namespace: namespace,
 		}
 		err := os.Setenv("OPERATOR_SERVICES", "../../config/services")
 		Expect(err).NotTo(HaveOccurred())
@@ -305,7 +310,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			Expect(secret.Data["inventory"]).Should(
 				ContainSubstring("edpm-compute-nodeset"))
 		})
-		It("Should set Input ready", func() {
+		It("Should set Input and Setup ready", func() {
+
 			th.ExpectCondition(
 				dataplaneNodeSetName,
 				ConditionGetterFunc(DataplaneConditionGetter),
@@ -449,6 +455,28 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				secret := th.GetSecret(dataplaneSecretName)
 				return getCtlPlaneIP(&secret)
 			}).Should(Equal("172.20.12.76"))
+		})
+	})
+
+	When("A DataPlaneNodeSet is created with NoNodes and a OpenStackDataPlaneDeployment is created", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+		})
+		It("Should reach Input and Setup Ready completion", func() {
+			var conditionList = []condition.Type{
+				condition.InputReadyCondition,
+				dataplanev1.SetupReadyCondition,
+			}
+			for _, cond := range conditionList {
+				th.ExpectCondition(
+					dataplaneNodeSetName,
+					ConditionGetterFunc(DataplaneConditionGetter),
+					cond,
+					corev1.ConditionTrue,
+				)
+			}
 		})
 	})
 })
