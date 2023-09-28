@@ -5,9 +5,9 @@ metadata:
   namespace: openstack
 spec:
   services:
+  - download-cache
   - configure-network
   - validate-network
-  - download-cache
   - install-os
   - configure-os
   - run-os
