@@ -18,6 +18,7 @@ spec:
     - ovn
     - libvirt
     - nova
+    - telemetry
   preProvisioned: true
   nodes:
       edpm-compute-0:

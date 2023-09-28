@@ -166,7 +166,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					"run-os",
 					"ovn",
 					"libvirt",
-					"nova"},
+					"nova",
+					"telemetry"},
 			}
 			Expect(dataplaneNodeSetInstance.Spec).Should(Equal(emptyNodeSpec))
 		})

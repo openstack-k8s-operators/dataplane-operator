@@ -1,0 +1,9 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: telemetry
+spec:
+  label: dataplane-deployment-telemetry
+  secrets:
+    - ceilometer-compute-config-data
+  playbook: osp.edpm.telemetry

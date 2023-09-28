@@ -19,6 +19,7 @@ spec:
     - ovn
     - libvirt
     - nova
+    - telemetry
   baremetalSetTemplate:
     bmhLabelSelector:
       app: openstack

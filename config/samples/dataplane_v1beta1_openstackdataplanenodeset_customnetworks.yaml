@@ -23,6 +23,7 @@ spec:
     - ovn
     - libvirt
     - nova
+    - telemetry
   nodes:
     edpm-compute-0:
       hostName: edpm-compute-0
