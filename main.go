@@ -119,6 +119,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	controllers.SetupAnsibleImageDefaults()
 	if err = (&controllers.OpenStackDataPlaneNodeSetReconciler{
 		Client:  mgr.GetClient(),
 		Scheme:  mgr.GetScheme(),
@@ -128,6 +129,7 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneNodeSet")
 		os.Exit(1)
 	}
+	controllers.SetupAnsibleImageDefaults()
 
 	checker := healthz.Ping
 	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) != "false" {

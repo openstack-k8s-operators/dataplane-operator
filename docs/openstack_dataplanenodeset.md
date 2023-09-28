@@ -9,6 +9,7 @@
 * [AnsibleOpts](#ansibleopts)
 * [NodeSection](#nodesection)
 * [NodeTemplate](#nodetemplate)
+* [DataplaneAnsibleImageDefaults](#dataplaneansibleimagedefaults)
 * [OpenStackDataPlaneNodeSetList](#openstackdataplanenodesetlist)
 * [OpenStackDataPlaneNodeSetSpec](#openstackdataplanenodesetspec)
 * [OpenStackDataPlaneNodeSetStatus](#openstackdataplanenodesetstatus)
@@ -72,6 +73,23 @@ NodeTemplate is a specification of the node attributes that override top level a
 | extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | false |
 | userData | UserData  node specific user-data | *corev1.SecretReference | false |
 | networkData | NetworkData  node specific network-data | *corev1.SecretReference | false |
+
+[Back to Custom Resources](#custom-resources)
+
+#### DataplaneAnsibleImageDefaults
+
+DataplaneAnsibleImageDefaults default images for dataplane services
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| Frr |  | string | false |
+| IscsiD |  | string | false |
+| Logrotate |  | string | false |
+| NovaCompute |  | string | false |
+| NovaLibvirt |  | string | false |
+| OvnControllerAgent |  | string | false |
+| OvnMetadataAgent |  | string | false |
+| OvnBgpAgent |  | string | false |
 
 [Back to Custom Resources](#custom-resources)
 

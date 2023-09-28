@@ -170,10 +170,12 @@ func ConditionalDeploy(
 
 	if status.Conditions.IsFalse(readyCondition) {
 		ansibleEE, err := dataplaneutil.GetAnsibleExecution(ctx, helper, deployment, deployLabel)
-		if err != nil && k8s_errors.IsNotFound(err) {
-			log.Info(fmt.Sprintf("%s OpenStackAnsibleEE not yet found", readyCondition))
-			return nil
-		} else if err != nil {
+		if err != nil {
+			// Return nil if we don't have AnsibleEE available yet
+			if k8s_errors.IsNotFound(err) {
+				log.Info(fmt.Sprintf("%s OpenStackAnsibleEE not yet found", readyCondition))
+				return nil
+			}
 			log.Error(err, fmt.Sprintf("Error getting ansibleEE job for %s", deployName))
 			status.Conditions.Set(condition.FalseCondition(
 				readyCondition,

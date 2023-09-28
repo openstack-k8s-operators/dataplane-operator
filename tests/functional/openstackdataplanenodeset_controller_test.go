@@ -16,6 +16,7 @@ limitations under the License.
 package functional
 
 import (
+	"fmt"
 	"os"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -24,14 +25,49 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	"github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
+
+// Ansible Inventory Structs for testing specific values
+type AnsibleInventory struct {
+	EdpmComputeNodeset struct {
+		Vars struct {
+			AnsibleUser string `yaml:"ansible_user"`
+		} `yaml:"vars"`
+		Hosts struct {
+			Node struct {
+				AnsibleHost       string        `yaml:"ansible_host"`
+				AnsiblePort       string        `yaml:"ansible_port"`
+				AnsibleUser       string        `yaml:"ansible_user"`
+				CtlPlaneIP        string        `yaml:"ctlplane_ip"`
+				DNSSearchDomains  []interface{} `yaml:"dns_search_domains"`
+				ManagementNetwork string        `yaml:"management_network"`
+				Networks          []interface{} `yaml:"networks"`
+			} `yaml:"edpm-compute-node-1"`
+		} `yaml:"hosts"`
+	} `yaml:"edpm-compute-nodeset"`
+}
 
 var _ = Describe("Dataplane NodeSet Test", func() {
 	var dataplaneNodeSetName types.NamespacedName
 	var dataplaneSecretName types.NamespacedName
 	var dataplaneSSHSecretName types.NamespacedName
+	var dataplaneNetConfigName types.NamespacedName
+	var dataplaneIPSetName types.NamespacedName
+	var dataplaneDeploymentName types.NamespacedName
+
+	defaultEdpmServiceList := []string{
+		"edpm_frr_image",
+		"edpm_iscsid_image",
+		"edpm_logrotate_crond_image",
+		"edpm_nova_compute_image",
+		"edpm_nova_libvirt_image",
+		"edpm_ovn_controller_agent_image",
+		"edpm_ovn_metadata_agent_image",
+		"edpm_ovn_bgp_agent_image",
+	}
 
 	BeforeEach(func() {
 		dataplaneNodeSetName = types.NamespacedName{
@@ -45,6 +81,18 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		dataplaneSSHSecretName = types.NamespacedName{
 			Namespace: namespace,
 			Name:      "dataplane-ansible-ssh-private-key-secret",
+		}
+		dataplaneNetConfigName = types.NamespacedName{
+			Namespace: namespace,
+			Name:      "dataplane-netconfig",
+		}
+		dataplaneIPSetName = types.NamespacedName{
+			Namespace: namespace,
+			Name:      "edpm-compute-node-1",
+		}
+		dataplaneDeploymentName = types.NamespacedName{
+			Name:      "edpm-deployment",
+			Namespace: namespace,
 		}
 		err := os.Setenv("OPERATOR_SERVICES", "../../config/services")
 		Expect(err).NotTo(HaveOccurred())
@@ -118,7 +166,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					"run-os",
 					"ovn",
 					"libvirt",
-					"nova"},
+					"nova",
+					"telemetry"},
 			}
 			Expect(dataplaneNodeSetInstance.Spec).Should(Equal(emptyNodeSpec))
 		})
@@ -262,13 +311,173 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			Expect(secret.Data["inventory"]).Should(
 				ContainSubstring("edpm-compute-nodeset"))
 		})
-		It("Should set Input ready", func() {
+		It("Should set Input and Setup ready", func() {
+
 			th.ExpectCondition(
 				dataplaneNodeSetName,
 				ConditionGetterFunc(DataplaneConditionGetter),
 				condition.InputReadyCondition,
 				corev1.ConditionTrue,
 			)
+		})
+	})
+
+	When("No default service image is provided", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+		})
+		It("Should have default service values provided", func() {
+			secret := th.GetSecret(dataplaneSecretName)
+			for _, svcImage := range defaultEdpmServiceList {
+				Expect(secret.Data["inventory"]).Should(
+					ContainSubstring(svcImage))
+			}
+		})
+	})
+
+	When("A user provides a custom service image", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, CustomServiceImageSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+		})
+		It("Should have the user defined image in the inventory", func() {
+			secret := th.GetSecret(dataplaneSecretName)
+			for _, svcAnsibleVar := range DefaultEdpmServiceAnsibleVarList {
+				Expect(secret.Data["inventory"]).Should(
+					ContainSubstring(fmt.Sprintf("%s.%s", svcAnsibleVar, CustomEdpmServiceDomainTag)))
+			}
+		})
+	})
+
+	When("No default service image is provided", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+		})
+		It("Should have default service values provided", func() {
+			secret := th.GetSecret(dataplaneSecretName)
+			for _, svcAnsibleVar := range DefaultEdpmServiceAnsibleVarList {
+				Expect(secret.Data["inventory"]).Should(
+					ContainSubstring(svcAnsibleVar))
+			}
+		})
+	})
+
+	When("A user provides a custom service image", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, CustomServiceImageSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+		})
+		It("Should have the user defined image in the inventory", func() {
+			secret := th.GetSecret(dataplaneSecretName)
+			for _, svcAnsibleVar := range DefaultEdpmServiceAnsibleVarList {
+				Expect(secret.Data["inventory"]).Should(
+					ContainSubstring(fmt.Sprintf("%s.%s", svcAnsibleVar, CustomEdpmServiceDomainTag)))
+			}
+		})
+	})
+
+	When("The nodeTemplate contains a ansibleUser but the individual node does not", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+			SimulateIPSetComplete(dataplaneIPSetName)
+		})
+		It("Should not have set the node specific ansible_user variable", func() {
+			secret := th.GetSecret(dataplaneSecretName)
+			secretData := secret.Data["inventory"]
+
+			var inv AnsibleInventory
+			err := yaml.Unmarshal(secretData, &inv)
+			if err != nil {
+				fmt.Printf("Error: %v", err)
+			}
+			Expect(inv.EdpmComputeNodeset.Vars.AnsibleUser).Should(Equal("cloud-user"))
+			Expect(inv.EdpmComputeNodeset.Hosts.Node.AnsibleUser).Should(BeEmpty())
+		})
+	})
+
+	When("The individual node has a AnsibleUser override", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			nodeOverrideSpec := map[string]interface{}{
+				"hostname": "edpm-bm-compute-1",
+				"networks": []map[string]interface{}{{
+					"name":       "CtlPlane",
+					"fixedIP":    "172.20.12.76",
+					"subnetName": "ctlplane_subnet",
+				},
+				},
+				"ansible": map[string]interface{}{
+					"ansibleUser": "test-user",
+				},
+			}
+
+			nodeTemplateOverrideSpec := map[string]interface{}{
+				"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
+				"ansible": map[string]interface{}{
+					"ansibleUser": "cloud-user",
+				},
+			}
+
+			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec()
+			nodeSetSpec["nodes"].(map[string]interface{})["edpm-compute-node-1"] = nodeOverrideSpec
+			nodeSetSpec["nodeTemplate"] = nodeTemplateOverrideSpec
+
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+			CreateSSHSecret(dataplaneSSHSecretName)
+			SimulateIPSetComplete(dataplaneIPSetName)
+		})
+		It("Should have a node specific override that is different to the group", func() {
+			secret := th.GetSecret(dataplaneSecretName)
+			secretData := secret.Data["inventory"]
+
+			var inv AnsibleInventory
+			err := yaml.Unmarshal(secretData, &inv)
+			if err != nil {
+				fmt.Printf("Error: %v", err)
+			}
+			Expect(inv.EdpmComputeNodeset.Hosts.Node.AnsibleUser).Should(Equal("test-user"))
+			Expect(inv.EdpmComputeNodeset.Vars.AnsibleUser).Should(Equal("cloud-user"))
+		})
+	})
+
+	When("A nodeSet is created with IPAM", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+			SimulateIPSetComplete(dataplaneIPSetName)
+		})
+		It("Should set the ctlplane_ip variable in the Ansible inventory secret", func() {
+			Eventually(func() string {
+				secret := th.GetSecret(dataplaneSecretName)
+				return getCtlPlaneIP(&secret)
+			}).Should(Equal("172.20.12.76"))
+		})
+	})
+
+	When("A DataPlaneNodeSet is created with NoNodes and a OpenStackDataPlaneDeployment is created", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+			CreateSSHSecret(dataplaneSSHSecretName)
+		})
+		It("Should reach Input and Setup Ready completion", func() {
+			var conditionList = []condition.Type{
+				condition.InputReadyCondition,
+				dataplanev1.SetupReadyCondition,
+			}
+			for _, cond := range conditionList {
+				th.ExpectCondition(
+					dataplaneNodeSetName,
+					ConditionGetterFunc(DataplaneConditionGetter),
+					cond,
+					corev1.ConditionTrue,
+				)
+			}
 		})
 	})
 })

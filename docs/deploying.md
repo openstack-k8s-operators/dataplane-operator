@@ -273,6 +273,7 @@ The output should be similar to:
     ovn                 6d6h
     libvirt             6d6h
     nova                6d6h
+    telemetry           6d6h
 
 Each service uses the
 [`playbook`](https://openstack-k8s-operators.github.io/openstack-ansibleee-operator/openstack_ansibleee/#playbook)

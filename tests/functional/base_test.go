@@ -1,17 +1,32 @@
 package functional
 
 import (
+	"fmt"
+
 	. "github.com/onsi/gomega"
+	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 )
 
-// Resource creation
+var DefaultEdpmServiceAnsibleVarList = []string{
+	"edpm_frr_image",
+	"edpm_iscsid_image",
+	"edpm_logrotate_crond_image",
+	"edpm_nova_compute_image",
+	"edpm_nova_libvirt_image",
+	"edpm_ovn_controller_agent_image",
+	"edpm_ovn_metadata_agent_image",
+	"edpm_ovn_bgp_agent_image",
+}
+
+var CustomEdpmServiceDomainTag string = "test-image:latest"
 
 // Create OpenstackDataPlaneNodeSet in k8s and test that no errors occur
 func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
@@ -31,6 +46,32 @@ func CreateDataplaneService(name types.NamespacedName) *unstructured.Unstructure
 	return th.CreateUnstructured(raw)
 }
 
+// Build CustomServiceImageSpec struct with empty `Nodes` list
+func CustomServiceImageSpec() map[string]interface{} {
+
+	var ansibleServiceVars = make(map[string]interface{})
+	for _, svcName := range DefaultEdpmServiceAnsibleVarList {
+		imageAddress := fmt.Sprintf(`"%s.%s"`, svcName, CustomEdpmServiceDomainTag)
+		ansibleServiceVars[svcName] = imageAddress
+	}
+
+	return map[string]interface{}{
+		"preProvisioned": true,
+		"nodeTemplate": map[string]interface{}{
+			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
+			"ansible": map[string]interface{}{
+				"ansibleVars": ansibleServiceVars,
+			},
+		},
+		"nodes": map[string]interface{}{},
+	}
+}
+
+func CreateNetConfig(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
+	raw := DefaultNetConfig(name, spec)
+	return th.CreateUnstructured(raw)
+}
+
 // Create SSHSecret
 func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
 	return th.CreateSecret(
@@ -47,13 +88,22 @@ func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
 func DefaultDataPlaneNodeSetSpec() map[string]interface{} {
 
 	return map[string]interface{}{
-		"preProvisioned": false,
+		"preProvisioned": true,
 		"nodeTemplate": map[string]interface{}{
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
+			"ansible": map[string]interface{}{
+				"ansibleUser": "cloud-user",
+			},
 		},
 		"nodes": map[string]interface{}{
-			"edpm-compute-node-set": map[string]interface{}{
+			"edpm-compute-node-1": map[string]interface{}{
 				"hostname": "edpm-bm-compute-1",
+				"networks": []map[string]interface{}{{
+					"name":       "CtlPlane",
+					"fixedIP":    "172.20.12.76",
+					"subnetName": "ctlplane_subnet",
+				},
+				},
 			},
 		},
 	}
@@ -81,6 +131,49 @@ func DefaultDataPlaneDeploymentSpec() map[string]interface{} {
 	}
 }
 
+func DefaultNetConfigSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"networks": []map[string]interface{}{{
+			"dnsDomain": "test-domain.test",
+			"mtu":       1500,
+			"name":      "CtlPLane",
+			"subnets": []map[string]interface{}{{
+				"allocationRanges": []map[string]interface{}{{
+					"end":   "172.20.12.120",
+					"start": "172.20.12.0",
+				},
+				},
+				"name": "ctlplane_subnet",
+				"cidr": "172.20.12.0/16",
+			},
+			},
+		},
+		},
+	}
+}
+
+// SimulateIPSetComplete - Simulates the result of the IPSet status
+func SimulateIPSetComplete(name types.NamespacedName) {
+	Eventually(func(g Gomega) {
+		IPSet := &infrav1.IPSet{}
+		g.Expect(th.K8sClient.Get(th.Ctx, name, IPSet)).Should(Succeed())
+		IPSet.Status.Reservation = []infrav1.IPSetReservation{
+			{
+				Address: "172.20.12.76",
+				Cidr:    "172.20.12.0/16",
+				MTU:     1500,
+				Network: "CtlPlane",
+				Subnet:  "subnet1",
+			},
+		}
+		// This can return conflict so we have the gomega.Eventually block to retry
+		g.Expect(th.K8sClient.Status().Update(th.Ctx, IPSet)).To(Succeed())
+
+	}, th.Timeout, th.Interval).Should(Succeed())
+
+	th.Logger.Info("Simulated DB completed", "on", name)
+}
+
 // Build OpenStackDataPlaneNodeSet struct and fill it with preset values
 func DefaultDataplaneNodeSetTemplate(name types.NamespacedName, spec map[string]interface{}) map[string]interface{} {
 	return map[string]interface{}{
@@ -102,6 +195,18 @@ func DefaultDataplaneDeploymentTemplate(name types.NamespacedName, spec map[stri
 		"apiVersion": "dataplane.openstack.org/v1beta1",
 		"kind":       "OpenStackDataPlaneDeployment",
 
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		},
+		"spec": spec,
+	}
+}
+
+func DefaultNetConfig(name types.NamespacedName, spec map[string]interface{}) map[string]interface{} {
+	return map[string]interface{}{
+		"apiVersion": "network.openstack.org/v1beta1",
+		"kind":       "NetConfig",
 		"metadata": map[string]interface{}{
 			"name":      name.Name,
 			"namespace": name.Namespace,
@@ -178,4 +283,15 @@ func DeleteNamespace(name string) {
 		},
 	}
 	Expect(k8sClient.Delete(ctx, ns)).Should(Succeed())
+}
+
+func getCtlPlaneIP(secret *corev1.Secret) string {
+	secretData := secret.Data["inventory"]
+
+	var inv AnsibleInventory
+	err := yaml.Unmarshal(secretData, &inv)
+	if err != nil {
+		fmt.Printf("Error unmarshalling secretData: %v", err)
+	}
+	return inv.EdpmComputeNodeset.Hosts.Node.CtlPlaneIP
 }

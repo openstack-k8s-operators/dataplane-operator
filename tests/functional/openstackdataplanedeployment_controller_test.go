@@ -41,6 +41,17 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
 		})
 
+		It("Should have Spec fields initialized", func() {
+			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
+			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
+				NodeSets:        []string{"edpm-compute-nodeset"},
+				AnsibleTags:     "",
+				AnsibleLimit:    "",
+				AnsibleSkipTags: "",
+			}
+			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
+		})
+
 		It("should have conditions set", func() {
 			th.ExpectCondition(
 				dataplaneDeploymentName,

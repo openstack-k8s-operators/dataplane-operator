@@ -18,6 +18,7 @@ spec:
     - ovn
     - libvirt
     - nova
+    - telemetry
   nodes:
       edpm-compute-0:
         hostName: edpm-compute-0
@@ -49,6 +50,8 @@ spec:
           subnetName: subnet1
         - name: Tenant
           subnetName: subnet1
+  networkAttachments:
+    - ctlplane
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     managementNetwork: ctlplane

@@ -23,6 +23,7 @@ spec:
     - ovn
     - libvirt
     - nova
+    - telemetry
   nodes:
     edpm-compute-0:
       hostName: edpm-compute-0
@@ -36,6 +37,8 @@ spec:
           external_ip: 172.20.12.76
           fqdn_internal_api: edpm-compute-1.example.com
           ansible_ssh_transfer_method: scp
+  networkAttachments:
+    - ctlplane
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     managementNetwork: ctlplane
@@ -124,12 +127,8 @@ spec:
         ctlplane_dns_nameservers:
         - 192.168.1.254
         dns_search_domains: []
-        edpm_ovn_controller_agent_image: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
-        edpm_iscsid_image: quay.io/podified-antelope-centos9/openstack-iscsid:current-podified
-        edpm_logrotate_crond_image: quay.io/podified-antelope-centos9/openstack-cron:current-podified
-        edpm_nova_compute_container_image: quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified
-        edpm_nova_libvirt_container_image: quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified
-        edpm_ovn_metadata_agent_image: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
+        edpm_ovn_dbs:
+        - 192.168.24.1
         gather_facts: false
         enable_debug: false
         # edpm firewall, change the allowed CIDR if needed

@@ -18,6 +18,7 @@ spec:
     - ovn
     - libvirt
     - nova
+    - telemetry
   baremetalSetTemplate:
     bmhLabelSelector:
       app: openstack
@@ -26,6 +27,8 @@ spec:
   nodes:
     edpm-compute-0:
       hostName: edpm-compute-0
+  networkAttachments:
+    - ctlplane
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     networks:
