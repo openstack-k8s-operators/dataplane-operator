@@ -172,7 +172,16 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	}
 
 	err := unmarshalAnsibleVars(template.Ansible.AnsibleVars, group.Vars)
-	return err
+	if err != nil {
+		return err
+	}
+	if len(template.Networks) != 0 {
+		nets, netsLower := buildNetworkVars(template.Networks)
+		group.Vars["role_networks"] = nets
+		group.Vars["networks_lower"] = netsLower
+	}
+
+	return nil
 }
 
 // set host ansible vars from NodeSection
@@ -189,7 +198,16 @@ func resolveHostAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host) e
 	}
 
 	err := unmarshalAnsibleVars(node.Ansible.AnsibleVars, host.Vars)
-	return err
+	if err != nil {
+		return err
+	}
+	if len(node.Networks) != 0 {
+		nets, netsLower := buildNetworkVars(node.Networks)
+		host.Vars["role_networks"] = nets
+		host.Vars["networks_lower"] = netsLower
+	}
+	return nil
+
 }
 
 // unmarshal raw strings into an ansible vars dictionary
@@ -204,7 +222,6 @@ func unmarshalAnsibleVars(ansibleVars map[string]json.RawMessage,
 		}
 		parsedVars[key] = v
 	}
-
 	return nil
 }
 
@@ -215,4 +232,18 @@ func toSnakeCase(str string) string {
 	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
 	return strings.ToLower(snake)
+}
+
+func buildNetworkVars(networks []infranetworkv1.IPSetNetwork) ([]string, map[string]string) {
+	netsLower := make(map[string]string)
+	var nets []string
+	for _, network := range networks {
+		netName := string(network.Name)
+		if netName == CtlPlaneNetwork {
+			continue
+		}
+		nets = append(nets, netName)
+		netsLower[netName] = toSnakeCase(netName)
+	}
+	return nets, netsLower
 }
