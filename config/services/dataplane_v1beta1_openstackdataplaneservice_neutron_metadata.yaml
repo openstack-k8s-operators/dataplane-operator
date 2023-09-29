@@ -1,0 +1,10 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: neutron-metadata
+spec:
+  label: dataplane-deployment-neutron-metadata
+  playbook: osp.edpm.neutron_metadata
+  secrets:
+  - neutron-ovn-metadata-agent-neutron-config
+  - nova-metadata-neutron-config

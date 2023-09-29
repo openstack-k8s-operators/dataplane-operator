@@ -85,10 +85,10 @@ DataplaneAnsibleImageDefaults default images for dataplane services
 | Frr |  | string | false |
 | IscsiD |  | string | false |
 | Logrotate |  | string | false |
+| NeutronMetadataAgent |  | string | false |
 | NovaCompute |  | string | false |
 | NovaLibvirt |  | string | false |
 | OvnControllerAgent |  | string | false |
-| OvnMetadataAgent |  | string | false |
 | OvnBgpAgent |  | string | false |
 
 [Back to Custom Resources](#custom-resources)

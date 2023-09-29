@@ -271,6 +271,7 @@ The output should be similar to:
     run-os              6d6h
     validate-network    6d6h
     ovn                 6d6h
+    neutron-metadata    6d6h
     libvirt             6d6h
     nova                6d6h
     telemetry           6d6h

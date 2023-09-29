@@ -56,7 +56,7 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	NetworkAttachments []string `json:"networkAttachments,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default={download-cache,configure-network,validate-network,install-os,configure-os,run-os,ovn,libvirt,nova,telemetry}
+	// +kubebuilder:default={download-cache,configure-network,validate-network,install-os,configure-os,run-os,ovn,neutron-metadata,libvirt,nova,telemetry}
 	// Services list
 	Services []string `json:"services"`
 }
@@ -145,12 +145,12 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 
 // DataplaneAnsibleImageDefaults default images for dataplane services
 type DataplaneAnsibleImageDefaults struct {
-	Frr                string
-	IscsiD             string
-	Logrotate          string
-	NovaCompute        string
-	NovaLibvirt        string
-	OvnControllerAgent string
-	OvnMetadataAgent   string
-	OvnBgpAgent        string
+	Frr                  string
+	IscsiD               string
+	Logrotate            string
+	NeutronMetadataAgent string
+	NovaCompute          string
+	NovaLibvirt          string
+	OvnControllerAgent   string
+	OvnBgpAgent          string
 }

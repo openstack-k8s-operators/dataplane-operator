@@ -155,6 +155,9 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	if template.Ansible.AnsibleVars["edpm_logrotate_crond_image"] == nil {
 		group.Vars["edpm_logrotate_crond_image"] = defaultImages.Logrotate
 	}
+	if template.Ansible.AnsibleVars["edpm_neutron_metadata_agent_image"] == nil {
+		group.Vars["edpm_neutron_metadata_agent_image"] = defaultImages.NeutronMetadataAgent
+	}
 	if template.Ansible.AnsibleVars["edpm_nova_compute_image"] == nil {
 		group.Vars["edpm_nova_compute_image"] = defaultImages.NovaCompute
 	}
@@ -163,9 +166,6 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	}
 	if template.Ansible.AnsibleVars["edpm_ovn_controller_agent_image"] == nil {
 		group.Vars["edpm_ovn_controller_agent_image"] = defaultImages.OvnControllerAgent
-	}
-	if template.Ansible.AnsibleVars["edpm_ovn_metadata_agent_image"] == nil {
-		group.Vars["edpm_ovn_metadata_agent_image"] = defaultImages.OvnMetadataAgent
 	}
 	if template.Ansible.AnsibleVars["edpm_ovn_bgp_agent_image"] == nil {
 		group.Vars["edpm_ovn_bgp_agent_image"] = defaultImages.OvnBgpAgent
