@@ -337,6 +337,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		// For each DNSMasq change event get the list of all
 		// OpenStackDataPlaneNodeSet to trigger reconcile for the
 		// ones in the same namespace.
+		// test
 		nodeSets := &dataplanev1.OpenStackDataPlaneNodeSetList{}
 
 		listOpts := []client.ListOption{
