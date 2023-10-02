@@ -34,6 +34,7 @@ func CreateKubeServices(
 	helper *helper.Helper,
 	labels map[string]string,
 ) error {
+	log := helper.GetLogger()
 	// We create one Service per port and per node, as the Service configuration states that if we
 	// just add all the compute nodes IPs to one service, the Service will round-robin between them.
 	// Our wanted behaviour is to expose all the compute nodes services at the same time.
@@ -46,6 +47,11 @@ func CreateKubeServices(
 		addresses := make([]string, len(nodeSet.Spec.Nodes))
 		for _, item := range nodeSet.Spec.Nodes {
 			addresses = append(addresses, item.Ansible.AnsibleHost)
+		}
+
+		if len(addresses) == 0 {
+			log.Info("There are no addresses in the NodeSet, cannot create Services")
+			return nil
 		}
 
 		index := 0
