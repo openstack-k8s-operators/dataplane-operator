@@ -35,9 +35,9 @@ func CreateKubeServices(
 	labels map[string]string,
 ) error {
 	log := helper.GetLogger()
-	// We create one Service per port and per node, as the Service configuration states that if we
-	// just add all the compute nodes IPs to one service, the Service will round-robin between them.
-	// Our wanted behaviour is to expose all the compute nodes services at the same time.
+
+	// We create only one KubeService per port. All the nodes will be IPs on the endpointslices
+	// This will round-robin requests to the nodes, but it is also useful for Prometheus configuration
 	for _, kubeService := range instance.Spec.Services {
 		_, err := service(kubeService, instance, helper, labels)
 		if err != nil {
@@ -47,13 +47,12 @@ func CreateKubeServices(
 		addresses := make([]string, len(nodeSet.Spec.Nodes))
 		i := 0
 		for _, item := range nodeSet.Spec.Nodes {
+			if len(item.Ansible.AnsibleHost) == 0 {
+				log.Info("Creating Services in an IPAM environment is not supported")
+				return nil
+			}
 			addresses[i] = item.Ansible.AnsibleHost
 			i++
-		}
-
-		if len(addresses) == 0 {
-			log.Info("There are no addresses in the NodeSet, cannot create Services")
-			return nil
 		}
 
 		index := 0
@@ -134,7 +133,7 @@ func endpointSlice(
 	_, err := controllerutil.CreateOrUpdate(context.TODO(), helper.GetClient(), endpointSlice, func() error {
 		labels["kubernetes.io/service-name"] = kubeService.Name
 		endpointSlice.Labels = labels
-		endpointSlice.AddressType = "IPv4"
+		endpointSlice.AddressType = discoveryv1.AddressTypeIPv4
 		appProtocol := kubeService.Protocol
 		protocol := corev1.ProtocolTCP
 		port := int32(kubeService.Port)
