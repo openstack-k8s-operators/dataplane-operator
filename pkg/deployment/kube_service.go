@@ -45,8 +45,10 @@ func CreateKubeServices(
 		}
 
 		addresses := make([]string, len(nodeSet.Spec.Nodes))
+		i := 0
 		for _, item := range nodeSet.Spec.Nodes {
-			addresses = append(addresses, item.Ansible.AnsibleHost)
+			addresses[i] = item.Ansible.AnsibleHost
+			i++
 		}
 
 		if len(addresses) == 0 {
@@ -141,6 +143,7 @@ func endpointSlice(
 			Protocol:    &protocol,
 			Port:        &port,
 		}}
+
 		endpointSlice.Endpoints = []discoveryv1.Endpoint{{
 			Addresses: addresses,
 		}}
