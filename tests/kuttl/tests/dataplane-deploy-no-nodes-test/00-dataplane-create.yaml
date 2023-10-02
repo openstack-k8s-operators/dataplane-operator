@@ -33,6 +33,13 @@ metadata:
 data:
   10-neutron-sriov.conf: dGVzdC1uZXV0cm9uLXNyaW92LWFnZW50LXNlY3JldC1jb25maWcK
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: neutron-dhcp-agent-neutron-config
+data:
+  10-neutron-dhcp.conf: dGVzdC1uZXV0cm9uLWRoY3AtYWdlbnQtc2VjcmV0LWNvbmZpZwo=
+---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
@@ -48,6 +55,7 @@ spec:
   - run-os
   - ovn
   - neutron-sriov
+  - neutron-dhcp
   - libvirt
   - nova
   env:
