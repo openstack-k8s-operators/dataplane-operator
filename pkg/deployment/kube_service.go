@@ -15,10 +15,14 @@ package deployment
 import (
 	"context"
 	"fmt"
+	"net"
+	"regexp"
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -34,8 +38,6 @@ func CreateKubeServices(
 	helper *helper.Helper,
 	labels map[string]string,
 ) error {
-	log := helper.GetLogger()
-
 	// We create only one KubeService per port. All the nodes will be IPs on the endpointslices
 	// This will round-robin requests to the nodes, but it is also useful for Prometheus configuration
 	for _, kubeService := range instance.Spec.Services {
@@ -44,14 +46,23 @@ func CreateKubeServices(
 			return err
 		}
 
+		var addressType discoveryv1.AddressType
 		addresses := make([]string, len(nodeSet.Spec.Nodes))
 		i := 0
-		for _, item := range nodeSet.Spec.Nodes {
-			if len(item.Ansible.AnsibleHost) == 0 {
-				log.Info("Creating Services in an IPAM environment is not supported")
+		for name, item := range nodeSet.Spec.Nodes {
+			namespacedName := &types.NamespacedName{
+				Name:      name,
+				Namespace: instance.GetNamespace(),
+			}
+			if len(item.Ansible.AnsibleHost) > 0 {
+				addresses[i], addressType = getAddressFromAnsibleHost(&item, namespacedName, helper)
+			} else {
+				addresses[i], addressType = getAddressFromIPSet(&item, namespacedName, helper)
+			}
+			if addresses[i] == "" {
+				// we were unable to find an IP or HostName for a node, so we do not go further
 				return nil
 			}
-			addresses[i] = item.Ansible.AnsibleHost
 			i++
 		}
 
@@ -63,7 +74,7 @@ func CreateKubeServices(
 				end = len(addresses)
 			}
 
-			_, err = endpointSlice(kubeService, instance, addresses[i:end], index, helper, labels)
+			_, err = endpointSlice(kubeService, instance, addresses[i:end], &addressType, index, helper, labels)
 			if err != nil {
 				return err
 			}
@@ -72,6 +83,60 @@ func CreateKubeServices(
 
 	}
 	return nil
+}
+
+func getAddressFromIPSet(item *dataplanev1.NodeSection,
+	namespacedName *types.NamespacedName,
+	helper *helper.Helper,
+) (string, discoveryv1.AddressType) {
+	// we go search for an IPSet
+	ipset := &infranetworkv1.IPSet{}
+	err := helper.GetClient().Get(context.Background(), *namespacedName, ipset)
+	if err != nil {
+		// No IPsets found, lets try to get the HostName as last resource
+		if isValidDomain(item.HostName) {
+			return item.HostName, discoveryv1.AddressTypeFQDN
+		}
+		// No IP address or valid hostname found anywhere
+		helper.GetLogger().Info("Did not found a valid hostname or IP address")
+		return "", ""
+	}
+	// check that the reservations list is not empty
+	if len(ipset.Status.Reservation) > 0 {
+		// use the first IP in the reservations list. This is CtlPlane network.
+		return ipset.Status.Reservation[0].Address, discoveryv1.AddressTypeIPv4
+	}
+	// if the reservations list is empty, we go find if HostName is a valid domain
+	if isValidDomain(item.HostName) {
+		return item.HostName, discoveryv1.AddressTypeFQDN
+	}
+	// No IP address or valid hostname found anywhere
+	helper.GetLogger().Info("Did not found a valid hostname or IP address")
+	return "", ""
+}
+
+func getAddressFromAnsibleHost(
+	item *dataplanev1.NodeSection,
+	namespacedName *types.NamespacedName,
+	helper *helper.Helper,
+) (string, discoveryv1.AddressType) {
+	// check if ansiblehost is an IP
+	addr := net.ParseIP(item.Ansible.AnsibleHost)
+	if addr != nil {
+		// it is an ip
+		return item.Ansible.AnsibleHost, discoveryv1.AddressTypeIPv4
+	}
+	// it is not an ip, is it a valid hostname?
+	if isValidDomain(item.Ansible.AnsibleHost) {
+		// it is an valid domain name
+		return item.Ansible.AnsibleHost, discoveryv1.AddressTypeFQDN
+	}
+	if isValidDomain(item.HostName) {
+		// Maybe we find a valid domain name in HostName
+		return item.HostName, discoveryv1.AddressTypeFQDN
+	}
+	// we did not find anything on the NodeSet, lets search in the IPSets
+	return getAddressFromIPSet(item, namespacedName, helper)
 }
 
 // service creates a service in Kubernetes for the appropiate port
@@ -114,6 +179,7 @@ func endpointSlice(
 	kubeService dataplanev1.KubeService,
 	instance *dataplanev1.OpenStackDataPlaneService,
 	addresses []string,
+	addressType *discoveryv1.AddressType,
 	index int,
 	helper *helper.Helper,
 	labels map[string]string,
@@ -133,7 +199,7 @@ func endpointSlice(
 	_, err := controllerutil.CreateOrUpdate(context.TODO(), helper.GetClient(), endpointSlice, func() error {
 		labels["kubernetes.io/service-name"] = kubeService.Name
 		endpointSlice.Labels = labels
-		endpointSlice.AddressType = discoveryv1.AddressTypeIPv4
+		endpointSlice.AddressType = *addressType
 		appProtocol := kubeService.Protocol
 		protocol := corev1.ProtocolTCP
 		port := int32(kubeService.Port)
@@ -156,4 +222,10 @@ func endpointSlice(
 	})
 
 	return endpointSlice, err
+}
+
+// isValidDomain returns true if the domain is valid.
+func isValidDomain(domain string) bool {
+	var domainRegexp = regexp.MustCompile(`^(?i)[a-z0-9-]+(\.[a-z0-9-]+)+\.?$`)
+	return domainRegexp.MatchString(domain)
 }
