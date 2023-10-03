@@ -18,6 +18,7 @@ package deployment
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
 	"regexp"
@@ -42,6 +43,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	nodeSetGroup := inventory.AddGroup(instance.Name)
 	err := resolveGroupAnsibleVars(&instance.Spec.NodeTemplate, &nodeSetGroup, defaultImages)
 	if err != nil {
+		utils.LogErrorForObject(helper, err, "Could not resolve ansible group vars", instance)
 		return "", err
 	}
 	for nodeName, node := range instance.Spec.Nodes {
@@ -56,6 +58,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 
 		err = resolveHostAnsibleVars(&node, &host)
 		if err != nil {
+			utils.LogErrorForObject(helper, err, "Could not resolve ansible host vars", instance)
 			return "", err
 		}
 
@@ -127,6 +130,7 @@ func populateInventoryFromIPAM(
 	host.Vars["dns_search_domains"] = dnsSearchDomains
 }
 
+// set group ansible vars from NodeTemplate
 func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.Group,
 	defaultImages dataplanev1.DataplaneAnsibleImageDefaults) error {
 
@@ -167,17 +171,11 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 		group.Vars["edpm_ovn_bgp_agent_image"] = defaultImages.OvnBgpAgent
 	}
 
-	for key, val := range template.Ansible.AnsibleVars {
-		var v interface{}
-		err := yaml.Unmarshal(val, &v)
-		if err != nil {
-			return err
-		}
-		group.Vars[key] = v
-	}
-	return nil
+	err := unmarshalAnsibleVars(template.Ansible.AnsibleVars, group.Vars)
+	return err
 }
 
+// set host ansible vars from NodeSection
 func resolveHostAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host) error {
 
 	if node.Ansible.AnsibleUser != "" {
@@ -190,14 +188,23 @@ func resolveHostAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host) e
 		host.Vars["management_network"] = node.ManagementNetwork
 	}
 
-	for key, val := range node.Ansible.AnsibleVars {
+	err := unmarshalAnsibleVars(node.Ansible.AnsibleVars, host.Vars)
+	return err
+}
+
+// unmarshal raw strings into an ansible vars dictionary
+func unmarshalAnsibleVars(ansibleVars map[string]json.RawMessage,
+	parsedVars map[string]interface{}) error {
+
+	for key, val := range ansibleVars {
 		var v interface{}
 		err := yaml.Unmarshal(val, &v)
 		if err != nil {
 			return err
 		}
-		host.Vars[key] = v
+		parsedVars[key] = v
 	}
+
 	return nil
 }
 
