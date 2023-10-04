@@ -289,7 +289,7 @@ describing the resource.
 
     oc describe openstackdataplaneservice install-os
 
-Any playook listed in the `osp.edpm` namespace is provided by the
+Any playbook listed in the `osp.edpm` namespace is provided by the
 [edpm-ansible](https://github.com/openstack-k8s-operators/edpm-ansible)
 project. Within that project, the ansible variables that can be used to
 configure the role are documented.
@@ -363,6 +363,50 @@ following command:
 ```console
 oc rsh nova-cell0-conductor-0 nova-manage cell_v2 discover_hosts --verbose
 ```
+
+#### Overriding services for the deployment
+
+The list of services that will be deployed when an
+`OpenStackDataPlaneDeployment` is created is set on each
+`OpenStackDataPlaneNodeSet` that is included in the `nodeSets` list on the
+`OpenStackDataPlaneDeployment`.
+
+This allows for deploying a different set of services on different
+`OpenStackDataPlaneNodeSets` using the same `OpenStackDataPlaneDeployment`
+resource simultaneously. It also maintains the association between services and
+nodeSets on the nodeSet itself. This association is important when nodeSets are
+used to group nodes with hardware and configuration differences that require
+the need for deploying different services on different nodeSets.
+
+In some specific cases, it may be needed to override what services are deployed
+on all nodeSets included in an `OpenStackDataPlaneDeployment`. These cases can
+vary, but are often related to day 2 workflows such as update, upgrade, and
+scale out. In these cases, it may be needed to execute a smaller subset of
+services, or just a single service, across all nodeSets in the
+`OpenStackDataPlaneDeployment`.
+
+The `servicesOverride` field on `OpenStackDataPlaneDeployment` allow for this
+behavior. Setting this field changes what services are deployed when the
+`OpenStackDataPlaneDeployment` is created. If the field is set, only the
+services listed in the field will be deployed on all nodeSets.
+
+The following example `OpenStackDataPlaneDeployment` resource illustrates using
+`servicesOverride` to perform a pre-upgrade task of executing just the ovn
+service.
+
+    apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneDeployment
+    metadata:
+      name: openstack-edpm-pre-upgrade-ovn
+    spec:
+
+      nodeSets:
+        - openstack-edpm
+
+      // Only the services here will be executed. Overriding any services value
+      // on the openstack-edpm nodeSet.
+      servicesOverride:
+        - ovn
 
 ### Understanding dataplane conditions
 
