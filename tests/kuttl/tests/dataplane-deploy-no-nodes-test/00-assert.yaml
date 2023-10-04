@@ -14,6 +14,7 @@ spec:
   - run-os
   - ovn
   - neutron-sriov
+  - neutron-dhcp
   - libvirt
   - nova
   env:

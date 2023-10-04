@@ -72,6 +72,13 @@ configuration. For more information see the
     services:
       - ceph-hci-pre
 
+### neutron-dhcp
+
+Include this service to run Neutron DHCP agent on the EDPM nodes. This agent is needed in some cases not supported by the native OVN DHCP implementation.
+
+    services:
+      - neutron-dhcp
+
 ### neutron-sriov
 
 Include this service to run [Neutron SR-IOV NIC
