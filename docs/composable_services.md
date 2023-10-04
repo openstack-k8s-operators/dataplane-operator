@@ -72,6 +72,15 @@ configuration. For more information see the
     services:
       - ceph-hci-pre
 
+### neutron-sriov
+
+Include this service to run [Neutron SR-IOV NIC
+agent](https://docs.openstack.org/neutron/latest/admin/config-sriov.html) on the
+EDPM nodes.
+
+    services:
+      - neutron-sriov
+
 ---
 **NOTE**
 
@@ -142,7 +151,7 @@ with the following contents:
       name: hello-world
     spec:
       label: dataplane-deployment-hello-world
-      openstackAnsibleEEImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+      openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
       play: |
         hosts: all
         tasks:
@@ -206,7 +215,7 @@ its `services` list.
 
 #### Customizing the ansible-runner image used by a service
 
-The `openstackAnsibleEEImage` field is the container image used by the
+The `openStackAnsibleEERunnerImage` field is the container image used by the
 ansible-runner execution environment to execute ansible. The default image is
 built with the content from
 [edpm-ansible](https://github.com/openstack-k8s-operators/edpm-ansible).
@@ -230,7 +239,7 @@ Build and push the image to a container registry:
     podman push quay.io/example_user/my_custom_role:latest
 
 In the `OpenStackDataPlaneService` YAML, specify the custom image for the
-`openstackAnsibleEEImage` field:
+`openStackAnsibleEERunnerImage` field:
 
     apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneService
@@ -238,7 +247,7 @@ In the `OpenStackDataPlaneService` YAML, specify the custom image for the
       name: hello-world
     spec:
       label: dataplane-deployment-hello-world
-      openstackAnsibleEEImage: quay.io/example_user/my_custom_role:latest
+      openStackAnsibleEERunnerImage: quay.io/example_user/my_custom_role:latest
       ...
 
 ##### Using ExtraMounts
