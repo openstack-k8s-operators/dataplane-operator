@@ -20,6 +20,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 )
 
 // KubeService represents a Kubernetes Service. It is called like this to avoid the extreme overloading of the
@@ -36,6 +37,10 @@ type KubeService struct {
 	// Protocol is the protocol used to connect to the endpoint
 	// +kubebuilder:default=http
 	Protocol string `json:"protocol,omitempty"`
+
+	// Network is the network that will be used to connect to the endpoint
+	// +kubebuilder:default=CtlPlane
+	Network infranetworkv1.NetNameStr `json:"network,omitempty"`
 }
 
 // OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService
