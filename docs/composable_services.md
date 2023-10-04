@@ -72,6 +72,15 @@ configuration. For more information see the
     services:
       - ceph-hci-pre
 
+### neutron-sriov
+
+Include this service to run [Neutron SR-IOV NIC
+agent](https://docs.openstack.org/neutron/latest/admin/config-sriov.html) on the
+EDPM nodes.
+
+    services:
+      - neutron-sriov
+
 ---
 **NOTE**
 
