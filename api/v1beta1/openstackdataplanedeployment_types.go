@@ -41,6 +41,10 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// AnsibleSkipTags for ansible execution
 	// +kubebuilder:validation:Optional
 	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// ServicesOverride list
+	ServicesOverride []string `json:"servicesOverride"`
 }
 
 // OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPlaneDeployment

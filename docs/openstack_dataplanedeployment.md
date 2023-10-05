@@ -108,6 +108,7 @@ OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlane
 | ansibleTags | AnsibleTags for ansible execution | string | false |
 | ansibleLimit | AnsibleLimit for ansible execution | string | false |
 | ansibleSkipTags | AnsibleSkipTags for ansible execution | string | false |
+| servicesOverride | ServicesOverride list | []string | true |
 
 [Back to Custom Resources](#custom-resources)
 

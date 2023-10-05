@@ -54,6 +54,10 @@ spec:
                 items:
                   type: string
                 type: array
+              servicesOverride:
+                items:
+                  type: string
+                type: array
             required:
             - nodeSets
             type: object
