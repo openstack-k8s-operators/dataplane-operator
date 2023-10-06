@@ -15,12 +15,14 @@ spec:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
 status:
   conditions:
-  - message: Deployment not started
-    reason: NotRequested
+  - message: Deployment in progress
+    reason: Requested
+    severity: Info
     status: "False"
     type: Ready
-  - message: Deployment not started
-    reason: NotRequested
+  - message: Deployment in progress
+    reason: Requested
+    severity: Info
     status: "False"
     type: DeploymentReady
   - message: Input data complete

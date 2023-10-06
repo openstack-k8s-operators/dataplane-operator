@@ -292,24 +292,31 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	// Handles the case where the NodeSet is created, but not yet deployed.
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
 		logger.Info("Set DeploymentReadyCondition false")
-		instance.Status.Conditions.Set(condition.FalseCondition(condition.DeploymentReadyCondition, condition.NotRequestedReason, condition.SeverityInfo, condition.DeploymentReadyInitMessage))
+		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
+			condition.NotRequestedReason, condition.SeverityInfo,
+			condition.DeploymentReadyInitMessage)
 	}
 
-	isDeploymentReady, err := checkDeploymentReady(helper, req)
+	deploymentExists, isDeploymentReady, err := checkDeployment(helper, req)
 	if err != nil {
 		logger.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
 		return ctrl.Result{}, err
 	}
 	if isDeploymentReady {
 		logger.Info("Set NodeSet DeploymentReadyCondition true")
-		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
+		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
+			condition.DeploymentReadyMessage)
+	} else if deploymentExists {
+		logger.Info("Set NodeSet DeploymentReadyCondition false")
+		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
+			condition.RequestedReason, condition.SeverityInfo,
+			condition.DeploymentReadyRunningMessage)
 	}
-
 	return ctrl.Result{}, nil
 }
 
-func checkDeploymentReady(helper *helper.Helper,
-	request ctrl.Request) (bool, error) {
+func checkDeployment(helper *helper.Helper,
+	request ctrl.Request) (bool, bool, error) {
 	// Get all completed deployments
 	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
 	opts := []client.ListOption{
@@ -318,15 +325,18 @@ func checkDeploymentReady(helper *helper.Helper,
 	err := helper.GetClient().List(context.Background(), deployments, opts...)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneDeployment CRs %v")
-		return false, err
+		return false, false, err
 	}
 	for _, deployment := range deployments.Items {
 		if slices.Contains(
-			deployment.Spec.NodeSets, request.NamespacedName.Name) && deployment.Status.Deployed {
-			return true, nil
+			deployment.Spec.NodeSets, request.NamespacedName.Name) {
+			if deployment.Status.Deployed {
+				return true, true, nil
+			}
+			return true, false, nil
 		}
 	}
-	return false, nil
+	return false, false, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
