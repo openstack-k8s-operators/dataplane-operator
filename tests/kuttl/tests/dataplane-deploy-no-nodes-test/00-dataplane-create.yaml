@@ -10,7 +10,7 @@ kind: ConfigMap
 metadata:
   name: ovncontroller-config
 data:
-  ovsdb-config: test-ovn-config
+  ovsdb-config: dGVzdC1vdm4tY29uZmlnCg==
 ---
 apiVersion: v1
 kind: Secret
