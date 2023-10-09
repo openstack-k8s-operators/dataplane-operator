@@ -85,6 +85,7 @@ KubeService represents a Kubernetes Service. It is called like this to avoid the
 | name | Name of the Service will have in kubernetes | string | true |
 | port | Port is the port of the service | int | true |
 | protocol | Protocol is the protocol used to connect to the endpoint | string | false |
+| network | Network is the network that will be used to connect to the endpoint | infranetworkv1.NetNameStr | false |
 
 [Back to Custom Resources](#custom-resources)
 

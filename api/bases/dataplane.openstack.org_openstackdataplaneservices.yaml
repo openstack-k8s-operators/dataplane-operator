@@ -51,6 +51,10 @@ spec:
                   properties:
                     name:
                       type: string
+                    network:
+                      default: CtlPlane
+                      pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
+                      type: string
                     port:
                       type: integer
                     protocol:
