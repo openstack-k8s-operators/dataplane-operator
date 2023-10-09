@@ -120,7 +120,9 @@ func populateInventoryFromIPAM(
 				netCidr, _ := ipnet.Mask.Size()
 				host.Vars[entry+"_cidr"] = netCidr
 			}
-			host.Vars[entry+"_vlan_id"] = res.Vlan
+			if res.Vlan != nil {
+				host.Vars[entry+"_vlan_id"] = res.Vlan
+			}
 			host.Vars[entry+"_mtu"] = res.MTU
 			host.Vars[entry+"_gateway_ip"] = res.Gateway
 			host.Vars[entry+"_host_routes"] = res.Routes
