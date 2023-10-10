@@ -64,7 +64,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 
 		ipSet, ok := allIPSets[nodeName]
 		if ok {
-			populateInventoryFromIPAM(&ipSet, host, dnsAddresses)
+			populateInventoryFromIPAM(&ipSet, host, dnsAddresses, nodeName)
 		}
 
 	}
@@ -96,7 +96,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 // populateInventoryFromIPAM populates inventory from IPAM
 func populateInventoryFromIPAM(
 	ipSet *infranetworkv1.IPSet, host ansible.Host,
-	dnsAddresses []string) {
+	dnsAddresses []string, nodeName string) {
 	var dnsSearchDomains []string
 	for _, res := range ipSet.Status.Reservation {
 		// Build the vars for ips/routes etc
@@ -112,6 +112,7 @@ func populateInventoryFromIPAM(
 			host.Vars["ctlplane_gateway_ip"] = res.Gateway
 			host.Vars["ctlplane_dns_nameservers"] = dnsAddresses
 			host.Vars["ctlplane_host_routes"] = res.Routes
+			host.Vars["canonical_hostname"] = strings.Join([]string{nodeName, res.DNSDomain}, ".")
 		default:
 			entry := toSnakeCase(string(n))
 			host.Vars[entry+"_ip"] = res.Address
