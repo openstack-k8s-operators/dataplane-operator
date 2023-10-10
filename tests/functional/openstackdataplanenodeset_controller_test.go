@@ -380,8 +380,10 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 	When("The nodeTemplate contains a ansibleUser but the individual node does not", func() {
 		BeforeEach(func() {
+			nodeSetSpec := DefaultDataPlaneNodeSetSpec()
+			nodeSetSpec["preProvisioned"] = true
 			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
-			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 			CreateSSHSecret(dataplaneSSHSecretName)
 			SimulateIPSetComplete(dataplaneIPSetName)
 		})
@@ -446,8 +448,10 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 	When("A nodeSet is created with IPAM", func() {
 		BeforeEach(func() {
+			nodeSetSpec := DefaultDataPlaneNodeSetSpec()
+			nodeSetSpec["preProvisioned"] = true
 			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
-			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 			CreateSSHSecret(dataplaneSSHSecretName)
 			SimulateIPSetComplete(dataplaneIPSetName)
 		})

@@ -77,7 +77,8 @@ func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
 	return th.CreateSecret(
 		types.NamespacedName{Namespace: name.Namespace, Name: name.Name},
 		map[string][]byte{
-			"ssh-privatekey": []byte("blah"),
+			"ssh-privatekey":  []byte("blah"),
+			"authorized_keys": []byte("blih"),
 		},
 	)
 }
@@ -88,7 +89,7 @@ func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
 func DefaultDataPlaneNodeSetSpec() map[string]interface{} {
 
 	return map[string]interface{}{
-		"preProvisioned": true,
+		"preProvisioned": false,
 		"nodeTemplate": map[string]interface{}{
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 			"ansible": map[string]interface{}{
@@ -105,6 +106,13 @@ func DefaultDataPlaneNodeSetSpec() map[string]interface{} {
 				},
 				},
 			},
+		},
+		"baremetalSetTemplate": map[string]interface{}{
+			"baremetalHosts": map[string]interface{}{
+				"ctlPlaneIP": map[string]interface{}{},
+			},
+			"deploymentSSHSecret": "dataplane-ansible-ssh-private-key-secret",
+			"ctlplaneInterface":   "172.20.12.1",
 		},
 	}
 }
@@ -143,8 +151,9 @@ func DefaultNetConfigSpec() map[string]interface{} {
 					"start": "172.20.12.0",
 				},
 				},
-				"name": "ctlplane_subnet",
-				"cidr": "172.20.12.0/16",
+				"name":    "ctlplane_subnet",
+				"cidr":    "172.20.12.0/16",
+				"gateway": "172.20.12.1",
 			},
 			},
 		},
@@ -157,6 +166,7 @@ func SimulateIPSetComplete(name types.NamespacedName) {
 	Eventually(func(g Gomega) {
 		IPSet := &infrav1.IPSet{}
 		g.Expect(th.K8sClient.Get(th.Ctx, name, IPSet)).Should(Succeed())
+		gateway := "172.20.12.1"
 		IPSet.Status.Reservation = []infrav1.IPSetReservation{
 			{
 				Address: "172.20.12.76",
@@ -164,6 +174,7 @@ func SimulateIPSetComplete(name types.NamespacedName) {
 				MTU:     1500,
 				Network: "CtlPlane",
 				Subnet:  "subnet1",
+				Gateway: &gateway,
 			},
 		}
 		// This can return conflict so we have the gomega.Eventually block to retry
