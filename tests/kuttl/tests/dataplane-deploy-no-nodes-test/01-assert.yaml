@@ -12,6 +12,7 @@ spec:
   - configure-os
   - run-os
   - ovn
+  - neutron-metadata
   - neutron-sriov
   - neutron-dhcp
   - libvirt
@@ -371,7 +372,58 @@ spec:
         name: ovncontroller-config
       name: ovncontroller-config-0
   - mounts:
-    - mountPath: /var/lib/openstack/configs/ovn/10-neutron-metadata.conf
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-no-nodes
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.ovn
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  generation: 1
+  name: dataplane-deployment-neutron-metadata-edpm-compute-no-nodes
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-no-nodes
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/neutron-metadata/10-neutron-metadata.conf
       name: neutron-ovn-metadata-agent-neutron-config-0
       subPath: 10-neutron-metadata.conf
     volumes:
@@ -382,7 +434,7 @@ spec:
         secretName: neutron-ovn-metadata-agent-neutron-config
       name: neutron-ovn-metadata-agent-neutron-config-0
   - mounts:
-    - mountPath: /var/lib/openstack/configs/ovn/05-nova-metadata.conf
+    - mountPath: /var/lib/openstack/configs/neutron-metadata/05-nova-metadata.conf
       name: nova-metadata-neutron-config-0
       subPath: 05-nova-metadata.conf
     volumes:
@@ -414,7 +466,7 @@ spec:
         secretName: dataplanenodeset-edpm-compute-no-nodes
   name: openstackansibleee
   restartPolicy: Never
-  playbook: osp.edpm.ovn
+  playbook: osp.edpm.neutron_metadata
   uid: 1001
 status:
   JobStatus: Succeeded

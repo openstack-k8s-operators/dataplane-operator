@@ -16,9 +16,6 @@ spec:
     - configure-os
     - run-os
     - ovn
-    - neutron-metadata
-    - libvirt
-    - nova
     - telemetry
   preProvisioned: true
   nodes:
@@ -129,9 +126,7 @@ spec:
          edpm_ovn_controller_agent_image: "{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}"
          edpm_iscsid_image: "{{ registry_url }}/openstack-iscsid:{{ image_tag }}"
          edpm_logrotate_crond_image: "{{ registry_url }}/openstack-cron:{{ image_tag }}"
-         edpm_nova_compute_container_image: "{{ registry_url }}/openstack-nova-compute:{{ image_tag }}"
-         edpm_nova_libvirt_container_image: "{{ registry_url }}/openstack-nova-libvirt:{{ image_tag }}"
-         edpm_neutron_metadata_agent_image: "{{ registry_url }}/openstack-neutron-metadata-agent-ovn:{{ image_tag }}"
+         edpm_enable_chassis_gw: true
          gather_facts: false
          enable_debug: false
          # edpm firewall, change the allowed CIDR if needed

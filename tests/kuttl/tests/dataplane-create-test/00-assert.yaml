@@ -49,7 +49,7 @@ spec:
           image_tag }}'
         edpm_ovn_controller_agent_image: '{{ registry_url }}/openstack-ovn-controller:{{
           image_tag }}'
-        edpm_ovn_metadata_agent_image: '{{ registry_url }}/openstack-neutron-metadata-agent-ovn:{{
+        edpm_neutron_metadata_agent_image: '{{ registry_url }}/openstack-neutron-metadata-agent-ovn:{{
           image_tag }}'
         edpm_selinux_mode: enforcing
         edpm_sshd_allowed_ranges:
@@ -100,6 +100,7 @@ spec:
   - configure-os
   - run-os
   - ovn
+  - neutron-metadata
   - libvirt
   - nova
 status:

@@ -40,7 +40,6 @@ spec:
         - key: inventory
           path: inventory
         secretName: dataplanenodeset-edpm-compute-no-nodes
-  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner@sha256:64eaa1d99e0103cb4536fa9f396d41c467168cab3fe3821f8135e9a9638d7295
   name: openstackansibleee
   play: |
     - hosts: localhost

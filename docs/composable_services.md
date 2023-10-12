@@ -38,6 +38,7 @@ The default list of services as they will appear on the `services` field on an
       - libvirt
       - nova
       - ovn
+      - neutron-metadata
 
 If the `services` field is omitted from the `OpenStackDataPlaneNodeSet` spec,
 then the above list will be used.
@@ -71,6 +72,13 @@ configuration. For more information see the
 
     services:
       - ceph-hci-pre
+
+### neutron-metadata
+
+Include this service to run Neutron OVN Metadata agent on the EDPM nodes. This agent is needed to provide metadata services to the compute nodes.
+
+    services:
+      - neutron-metadata
 
 ### neutron-dhcp
 
@@ -118,6 +126,7 @@ returned.
     libvirt             8d
     nova                8d
     ovn                 8d
+    neutron-metadata    8d
 
 A service can be examined in more detail by looking at the YAML representation
 of the resource.
@@ -287,6 +296,7 @@ service to execute for the `edpm-compute` `NodeSet`.
         - configure-os
         - run-os
         - ovn
+        - neutron-metadata
         - libvirt
         - nova
       nodes:

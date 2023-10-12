@@ -1868,6 +1868,7 @@ spec:
                 - configure-os
                 - run-os
                 - ovn
+                - neutron-metadata
                 - libvirt
                 - nova
                 - telemetry
