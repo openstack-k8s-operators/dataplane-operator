@@ -185,17 +185,7 @@ spec:
       - name: Tenant
         subnetName: subnet1
   preProvisioned: true
-  # Uncomment the services below after Ceph is deployed and
-  # create a nova-custom-ceph service which uses a ConfigMap
-  # containing libvirt overrides for Ceph RBD.
-  services:
-    - configure-network
-    - validate-network
-    - install-os
-    - ceph-hci-pre
-    - configure-os
-    - run-os
-    # - ceph-client
-    # - ovn
-    # - libvirt
-    # - nova-custom-ceph
+  # Each OpenStackDataPlaneDeployment deployment-pre-ceph and
+  # deployment-post-ceph will override the services list so
+  # it is empty in this example.
+  services: []
