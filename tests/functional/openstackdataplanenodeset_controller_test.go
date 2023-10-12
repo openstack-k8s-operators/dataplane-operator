@@ -98,7 +98,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	When("A Dataplane resorce is created with PreProvisioned nodes, no deployment", func() {
+	When("A Dataplane resource is created with PreProvisioned nodes, no deployment", func() {
 		BeforeEach(func() {
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec()))
 		})
@@ -149,27 +149,11 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 						AnsiblePort: 0,
 						AnsibleVars: nil,
 					},
-					ExtraMounts: nil,
 					UserData:    nil,
 					NetworkData: nil,
 				},
-				Env:                nil,
-				PreProvisioned:     true,
-				NetworkAttachments: nil,
-				Nodes:              map[string]dataplanev1.NodeSection{},
-				Services: []string{
-					"download-cache",
-					"configure-network",
-					"validate-network",
-					"install-os",
-					"configure-os",
-					"run-os",
-					"ovn",
-					"neutron-metadata",
-					"libvirt",
-					"nova",
-					"telemetry"},
-			}
+				PreProvisioned: true,
+				Nodes:          map[string]dataplanev1.NodeSection{}}
 			Expect(dataplaneNodeSetInstance.Spec).Should(Equal(emptyNodeSpec))
 		})
 

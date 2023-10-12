@@ -51,16 +51,9 @@ metadata:
   name: edpm-compute-no-nodes
 spec:
   preProvisioned: true
-  env:
-    - name: ANSIBLE_FORCE_COLOR
-      value: "True"
-    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-      value: "True"
   nodes: {}
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-  services:
-    - kuttl-service
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
@@ -69,3 +62,10 @@ metadata:
 spec:
   nodeSets:
     - edpm-compute-no-nodes
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+      value: "True"
+  services:
+    - kuttl-service

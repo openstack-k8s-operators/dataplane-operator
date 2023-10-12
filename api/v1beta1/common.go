@@ -100,10 +100,6 @@ type NodeTemplate struct {
 	// +kubebuilder:validation:Optional
 	Ansible AnsibleOpts `json:"ansible,omitempty"`
 
-	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
-	// +kubebuilder:validation:Optional
-	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
-
 	// UserData  node specific user-data
 	// +kubebuilder:validation:Optional
 	UserData *corev1.SecretReference `json:"userData,omitempty"`

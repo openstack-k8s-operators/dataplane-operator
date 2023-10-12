@@ -4,15 +4,6 @@ metadata:
   name: openstack-edpm-hci
   namespace: openstack
 spec:
-  env:
-  - name: ANSIBLE_CALLBACKS_ENABLED
-    value: profile_tasks
-  - name: ANSIBLE_FORCE_COLOR
-    value: "True"
-  - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-    value: "True"
-  networkAttachments:
-  - ctlplane
   nodeTemplate:
     ansible:
       ansiblePort: 22
@@ -120,17 +111,6 @@ spec:
         tenant_mtu: 1500
         tenant_vlan_id: 22
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-    # Add an `extraVolType: Ceph` with to mount the ceph-conf-files
-    # secret, after Ceph is deployed.
-    extraMounts:
-    - extraVolType: Logs
-      mounts:
-      - mountPath: /runner/artifacts
-        name: ansible-logs
-      volumes:
-      - name: ansible-logs
-        persistentVolumeClaim:
-          claimName: ansible-ee-logs
     managementNetwork: ctlplane
   nodes:
     edpm-compute-0:
@@ -185,17 +165,3 @@ spec:
       - name: Tenant
         subnetName: subnet1
   preProvisioned: true
-  # Uncomment the services below after Ceph is deployed and
-  # create a nova-custom-ceph service which uses a ConfigMap
-  # containing libvirt overrides for Ceph RBD.
-  services:
-    - configure-network
-    - validate-network
-    - install-os
-    - ceph-hci-pre
-    - configure-os
-    - run-os
-    # - ceph-client
-    # - ovn
-    # - libvirt
-    # - nova-custom-ceph

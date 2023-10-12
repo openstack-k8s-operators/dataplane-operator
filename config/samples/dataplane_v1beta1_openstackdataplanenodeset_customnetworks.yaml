@@ -4,27 +4,6 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: openstack-edpm-custom-network
 spec:
-  env:
-    - name: ANSIBLE_FORCE_COLOR
-      value: "True"
-    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-      value: "True"
-    - name: ANSIBLE_VERBOSITY
-      value: 4
-    - name: ANSIBLE_HOST_KEY_CHECKING
-      value: false
-  services:
-    - download-cache
-    - configure-network
-    - validate-network
-    - install-os
-    - configure-os
-    - run-os
-    - ovn
-    - neutron-metadata
-    - libvirt
-    - nova
-    - telemetry
   nodes:
     edpm-compute-0:
       hostName: edpm-compute-0
@@ -38,8 +17,6 @@ spec:
           external_ip: 172.20.12.76
           fqdn_internal_api: edpm-compute-1.example.com
           ansible_ssh_transfer_method: scp
-  networkAttachments:
-    - ctlplane
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     managementNetwork: ctlplane

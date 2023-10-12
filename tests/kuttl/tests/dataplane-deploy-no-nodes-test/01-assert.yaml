@@ -4,24 +4,6 @@ metadata:
   name: edpm-compute-no-nodes
   namespace: openstack
 spec:
-  services:
-  - download-cache
-  - configure-network
-  - validate-network
-  - install-os
-  - configure-os
-  - run-os
-  - ovn
-  - neutron-metadata
-  - neutron-sriov
-  - neutron-dhcp
-  - libvirt
-  - nova
-  env:
-  - name: ANSIBLE_FORCE_COLOR
-    value: "True"
-  - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-    value: "True"
   nodes: {}
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret

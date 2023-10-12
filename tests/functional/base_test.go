@@ -133,8 +133,15 @@ func DefaultDataPlaneNoNodeSetSpec() map[string]interface{} {
 func DefaultDataPlaneDeploymentSpec() map[string]interface{} {
 
 	return map[string]interface{}{
-		"nodeSets": []string{
-			"edpm-compute-nodeset",
+		"nodeSets":           []string{"edpm-compute-nodeset"},
+		"env":                nil,
+		"networkAttachments": nil,
+		"extraMounts":        nil,
+		"ansibleTags":        "",
+		"ansibleLimit":       "",
+		"ansibleSkipTags":    "",
+		"services": []string{
+			"dummy-service",
 		},
 	}
 }
@@ -237,7 +244,11 @@ func DefaultDataplaneService(name types.NamespacedName) map[string]interface{} {
 		"metadata": map[string]interface{}{
 			"name":      name.Name,
 			"namespace": name.Namespace,
-		}}
+		},
+		"spec": map[string]interface{}{
+			"label": name.Name,
+		},
+	}
 }
 
 // Get resources

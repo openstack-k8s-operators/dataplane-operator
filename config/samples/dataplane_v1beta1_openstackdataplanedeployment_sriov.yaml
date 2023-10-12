@@ -5,3 +5,20 @@ metadata:
 spec:
   nodeSets:
     - openstack-edpm-sriov
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+      value: "True"
+  services:
+    - download-cache
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - run-os
+    - neutron-sriov
+    - libvirt
+    - nova
+  networkAttachments:
+    - ctlplane

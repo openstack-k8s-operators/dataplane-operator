@@ -5,3 +5,20 @@ metadata:
 spec:
   nodeSets:
     - edpm-compute-no-nodes
+  services:
+  - download-cache
+  - configure-network
+  - validate-network
+  - install-os
+  - configure-os
+  - run-os
+  - ovn
+  - neutron-sriov
+  - neutron-dhcp
+  - libvirt
+  - nova
+  env:
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+    value: "True"

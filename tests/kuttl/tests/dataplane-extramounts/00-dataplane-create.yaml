@@ -17,16 +17,6 @@ spec:
   nodes: {}
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-    extraMounts:
-      - extraVolType: edpm-ansible
-        mounts:
-        - mountPath: /usr/share/ansible/collections/ansible_collections/osp/edpm
-          name: edpm-ansible
-        volumes:
-        - name: edpm-ansible
-          persistentVolumeClaim:
-            claimName: edpm-ansible
-            readOnly: true
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
@@ -35,3 +25,13 @@ metadata:
 spec:
   nodeSets:
     - edpm-extramounts
+  extraMsunts:
+    - extraVolType: edpm-ansible
+      mounts:
+      - mountPath: /usr/share/ansible/collections/ansible_collections/osp/edpm
+        name: edpm-ansible
+      volumes:
+      - name: edpm-ansible
+        persistentVolumeClaim:
+          claimName: edpm-ansible
+          readOnly: true

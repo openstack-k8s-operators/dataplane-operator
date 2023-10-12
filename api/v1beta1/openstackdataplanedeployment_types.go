@@ -20,6 +20,8 @@ import (
 	"fmt"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/storage"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -29,6 +31,23 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// +kubebuilder:validation:Required
 	// NodeSets is the list of NodeSets deployed
 	NodeSets []string `json:"nodeSets"`
+
+	// +kubebuilder:default={download-cache,configure-network,validate-network,install-os,configure-os,run-os,ovn,libvirt,nova,telemetry}
+	// Services list
+	Services []string `json:"services"`
+
+	// +kubebuilder:validation:Optional
+	// Env is a list containing the environment variables to pass to the pod
+	Env []corev1.EnvVar `json:"env,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
+	// which allows to connect the ansibleee runner to the given network
+	NetworkAttachments []string `json:"networkAttachments,omitempty"`
+
+	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
+	// +kubebuilder:validation:Optional
+	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 
 	// AnsibleTags for ansible execution
 	// +kubebuilder:validation:Optional
@@ -41,10 +60,6 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// AnsibleSkipTags for ansible execution
 	// +kubebuilder:validation:Optional
 	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// ServicesOverride list
-	ServicesOverride []string `json:"servicesOverride"`
 }
 
 // OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPlaneDeployment
@@ -111,4 +126,16 @@ func (instance *OpenStackDataPlaneDeployment) InitConditions() {
 
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.Deployed = false
+}
+
+// GetAnsibleEESpec - get the fields that will be passed to AEE
+func (instance OpenStackDataPlaneDeployment) GetAnsibleEESpec() AnsibleEESpec {
+	return AnsibleEESpec{
+		NetworkAttachments: instance.Spec.NetworkAttachments,
+		ExtraMounts:        instance.Spec.ExtraMounts,
+		Env:                instance.Spec.Env,
+		AnsibleTags:        instance.Spec.AnsibleTags,
+		AnsibleLimit:       instance.Spec.AnsibleLimit,
+		AnsibleSkipTags:    instance.Spec.AnsibleSkipTags,
+	}
 }

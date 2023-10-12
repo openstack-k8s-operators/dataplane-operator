@@ -3,23 +3,6 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: openstack-edpm-ipam
 spec:
-  env:
-    - name: ANSIBLE_FORCE_COLOR
-      value: "True"
-    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-      value: "True"
-  services:
-    - download-cache
-    - configure-network
-    - validate-network
-    - install-os
-    - configure-os
-    - run-os
-    - ovn
-    - neutron-metadata
-    - libvirt
-    - nova
-    - telemetry
   baremetalSetTemplate:
     bmhLabelSelector:
       app: openstack
@@ -28,8 +11,6 @@ spec:
   nodes:
     edpm-compute-0:
       hostName: edpm-compute-0
-  networkAttachments:
-    - ctlplane
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     networks:

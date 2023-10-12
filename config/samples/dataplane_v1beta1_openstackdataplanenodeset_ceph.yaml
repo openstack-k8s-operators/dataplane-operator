@@ -4,15 +4,6 @@ metadata:
   name: openstack-edpm-ceph
   namespace: openstack
 spec:
-  env:
-  - name: ANSIBLE_CALLBACKS_ENABLED
-    value: profile_tasks
-  - name: ANSIBLE_FORCE_COLOR
-    value: "True"
-  - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-    value: "True"
-  networkAttachments:
-  - ctlplane
   nodeTemplate:
     ansible:
       ansiblePort: 22
@@ -114,29 +105,6 @@ spec:
         tenant_mtu: 1500
         tenant_vlan_id: 22
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-    # Create a secret called ceph-conf-files with the cephx key and
-    # ceph.conf file and mount it so the ceph-client service can copy
-    # those files to the EDPM nodes.
-    extraMounts:
-    - extraVolType: Logs
-      mounts:
-      - mountPath: /runner/artifacts
-        name: ansible-logs
-      volumes:
-      - name: ansible-logs
-        persistentVolumeClaim:
-          claimName: ansible-ee-logs
-    - extraVolType: Ceph
-      mounts:
-      - mountPath: /etc/ceph
-        name: ceph
-        readOnly: true
-      volumes:
-      - name: ceph
-        projected:
-          sources:
-          - secret:
-              name: ceph-conf-files
     managementNetwork: ctlplane
   nodes:
     edpm-compute-0:
@@ -185,16 +153,3 @@ spec:
       - name: Tenant
         subnetName: subnet1
   preProvisioned: true
-  # Create a nova-custom-ceph service which uses a ConfigMap
-  # containing libvirt overrides for Ceph RBD.
-  services:
-    - configure-network
-    - validate-network
-    - install-os
-    - configure-os
-    - run-os
-    - ceph-client
-    - ovn
-    - neutron-metadata
-    - libvirt
-    - nova-custom-ceph

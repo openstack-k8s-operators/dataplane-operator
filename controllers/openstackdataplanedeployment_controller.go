@@ -53,26 +53,11 @@ type OpenStackDataPlaneDeploymentReconciler struct {
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets/finalizers,verbs=update
-//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplaneservices/finalizers,verbs=update
 //+kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=baremetal.openstack.org,resources=openstackbaremetalsets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete;
 //+kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete;
 //+kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
 //+kubebuilder:rbac:groups=k8s.cni.cncf.io,resources=network-attachment-definitions,verbs=get;list;watch
-//+kubebuilder:rbac:groups=network.openstack.org,resources=ipsets,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=network.openstack.org,resources=ipsets/status,verbs=get
-//+kubebuilder:rbac:groups=network.openstack.org,resources=ipsets/finalizers,verbs=update
-//+kubebuilder:rbac:groups=network.openstack.org,resources=netconfigs,verbs=get;list;watch
-//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsmasqs,verbs=get;list;watch
-//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsmasqs/status,verbs=get
-//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/status,verbs=get
-//+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/finalizers,verbs=update
-//+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete;
-//+kubebuilder:rbac:groups=discovery.k8s.io,resources=endpointslices,verbs=get;list;watch;create;update;patch;delete;
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -187,54 +172,41 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	// for the first started NodeSet to finish before starting the next.
 	shouldRequeue := false
 	haveError := false
+	ansibleEESpec := instance.GetAnsibleEESpec()
+
+	logger.Info("Deploying NodeSets")
+	logger.Info("Set Status.Deployed to false", "instance", instance)
+	instance.Status.Deployed = false
+	logger.Info("Set DeploymentReadyCondition false", "instance", instance)
+	instance.Status.Conditions.MarkFalse(
+		condition.DeploymentReadyCondition, condition.RequestedReason,
+		condition.SeverityInfo, condition.DeploymentReadyRunningMessage)
 	for _, nodeSet := range nodeSets.Items {
-
-		logger.Info(fmt.Sprintf("Deploying NodeSet: %s", nodeSet.Name))
-		logger.Info("Set Status.Deployed to false", "instance", instance)
-		instance.Status.Deployed = false
-		logger.Info("Set DeploymentReadyCondition false", "instance", instance)
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			condition.DeploymentReadyCondition, condition.RequestedReason,
-			condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
-		ansibleEESpec := nodeSet.GetAnsibleEESpec()
-		ansibleEESpec.AnsibleTags = instance.Spec.AnsibleTags
-		ansibleEESpec.AnsibleSkipTags = instance.Spec.AnsibleSkipTags
-		ansibleEESpec.AnsibleLimit = instance.Spec.AnsibleLimit
-
 		nodeSetSecretInv := fmt.Sprintf("dataplanenodeset-%s", nodeSet.Name)
 
+		// Move this later
 		if nodeSet.Status.DNSClusterAddresses != nil && nodeSet.Status.CtlplaneSearchDomain != "" {
 			ansibleEESpec.DNSConfig = &corev1.PodDNSConfig{
 				Nameservers: nodeSet.Status.DNSClusterAddresses,
 				Searches:    []string{nodeSet.Status.CtlplaneSearchDomain},
 			}
 		}
-
-		// When ServicesOverride is set on the OpenStackDataPlaneDeployment,
-		// deploy those services for each OpenStackDataPlaneNodeSet. Otherwise,
-		// deploy with the OpenStackDataPlaneNodeSet's Services.
 		var deployResult *ctrl.Result
-		if len(instance.Spec.ServicesOverride) != 0 {
-			deployResult, err = deployment.Deploy(
-				ctx, helper, &nodeSet, instance,
-				nodeSetSecretInv, &instance.Status, ansibleEESpec,
-				instance.Spec.ServicesOverride)
-		} else {
-			deployResult, err = deployment.Deploy(
-				ctx, helper, &nodeSet, instance,
-				nodeSetSecretInv, &instance.Status, ansibleEESpec,
-				nodeSet.Spec.Services)
-		}
+		deployResult, err = deployment.Deploy(
+			ctx, helper, &nodeSet, instance,
+			nodeSetSecretInv, &instance.Status, ansibleEESpec,
+			instance.Spec.Services)
 
 		if err != nil {
-			util.LogErrorForObject(helper, err, fmt.Sprintf("OpenStackDeployment error for NodeSet %s", nodeSet.Name), instance)
+			util.LogErrorForObject(helper, err, fmt.Sprintf(
+				"OpenStackDeployment error for NodeSet %s", nodeSet.Name), instance)
 			haveError = true
-			instance.Status.Conditions.Set(condition.FalseCondition(
+			instance.Status.Conditions.MarkFalse(
 				condition.ReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityWarning,
 				dataplanev1.DataPlaneNodeSetErrorMessage,
-				err.Error()))
+				err.Error())
 		}
 
 		if deployResult != nil {
@@ -242,10 +214,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		} else {
 			logger.Info("OpenStackDeployment succeeded for NodeSet", "NodeSet", nodeSet.Name)
 			logger.Info("Set NodeSetDeploymentReadyCondition true", "nodeSet", nodeSet.Name)
-			instance.Status.Conditions.Set(
-				condition.TrueCondition(
-					condition.Type(fmt.Sprintf(dataplanev1.NodeSetDeploymentReadyCondition, nodeSet.Name)),
-					condition.DeploymentReadyMessage))
+			instance.Status.Conditions.MarkTrue(
+				condition.Type(fmt.Sprintf(dataplanev1.NodeSetDeploymentReadyCondition, nodeSet.Name)),
+				condition.DeploymentReadyMessage)
 		}
 	}
 
@@ -259,7 +230,8 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	}
 
 	logger.Info("Set DeploymentReadyCondition true", "instance", instance)
-	instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
+	instance.Status.Conditions.MarkTrue(
+		condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
 	instance.Status.Deployed = true
 	logger.Info("Set status deploy true", "instance", instance)
 	return ctrl.Result{}, nil

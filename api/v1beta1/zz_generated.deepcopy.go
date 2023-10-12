@@ -180,13 +180,6 @@ func (in *NodeTemplate) DeepCopyInto(out *NodeTemplate) {
 		}
 	}
 	in.Ansible.DeepCopyInto(&out.Ansible)
-	if in.ExtraMounts != nil {
-		in, out := &in.ExtraMounts, &out.ExtraMounts
-		*out = make([]storage.VolMounts, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
-		}
-	}
 	if in.UserData != nil {
 		in, out := &in.UserData, &out.UserData
 		*out = new(v1.SecretReference)
@@ -276,10 +269,29 @@ func (in *OpenStackDataPlaneDeploymentSpec) DeepCopyInto(out *OpenStackDataPlane
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
-	if in.ServicesOverride != nil {
-		in, out := &in.ServicesOverride, &out.ServicesOverride
+	if in.Services != nil {
+		in, out := &in.Services, &out.Services
 		*out = make([]string, len(*in))
 		copy(*out, *in)
+	}
+	if in.Env != nil {
+		in, out := &in.Env, &out.Env
+		*out = make([]v1.EnvVar, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
+	if in.NetworkAttachments != nil {
+		in, out := &in.NetworkAttachments, &out.NetworkAttachments
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
+	if in.ExtraMounts != nil {
+		in, out := &in.ExtraMounts, &out.ExtraMounts
+		*out = make([]storage.VolMounts, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 }
 
@@ -385,23 +397,6 @@ func (in *OpenStackDataPlaneNodeSetSpec) DeepCopyInto(out *OpenStackDataPlaneNod
 		for key, val := range *in {
 			(*out)[key] = *val.DeepCopy()
 		}
-	}
-	if in.Env != nil {
-		in, out := &in.Env, &out.Env
-		*out = make([]v1.EnvVar, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
-		}
-	}
-	if in.NetworkAttachments != nil {
-		in, out := &in.NetworkAttachments, &out.NetworkAttachments
-		*out = make([]string, len(*in))
-		copy(*out, *in)
-	}
-	if in.Services != nil {
-		in, out := &in.Services, &out.Services
-		*out = make([]string, len(*in))
-		copy(*out, *in)
 	}
 }
 

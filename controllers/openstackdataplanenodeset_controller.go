@@ -192,12 +192,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 	}
 
-	// Ensure Services
-	err = deployment.EnsureServices(ctx, helper, instance)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
 	// Ensure IPSets Required for Nodes
 	allIPSets, isReady, err := deployment.EnsureIPSets(ctx, helper, instance)
 	if err != nil || !isReady {

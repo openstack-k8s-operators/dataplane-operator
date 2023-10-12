@@ -2,7 +2,6 @@ package functional
 
 import (
 	"fmt"
-	"os"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -26,6 +25,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	var novaCellComputeConfigSecretName types.NamespacedName
 	var ceilometerConfigSecretName types.NamespacedName
 	var dataplaneNetConfigName types.NamespacedName
+	var dataplaneServiceName types.NamespacedName
 
 	BeforeEach(func() {
 		dataplaneDeploymentName = types.NamespacedName{
@@ -60,13 +60,16 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			Namespace: namespace,
 			Name:      "dataplane-netconfig",
 		}
-		err := os.Setenv("OPERATOR_SERVICES", "../../config/services")
-		Expect(err).NotTo(HaveOccurred())
+		dataplaneServiceName = types.NamespacedName{
+			Namespace: namespace,
+			Name:      "dummy-service",
+		}
 	})
 
 	When("A dataplaneDeployment is created with matching NodeSet", func() {
 		BeforeEach(func() {
 			CreateSSHSecret(dataplaneSSHSecretName)
+			CreateDataplaneService(dataplaneServiceName)
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
 			}))
@@ -87,10 +90,16 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		It("Should have Spec fields initialized", func() {
 			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
 			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
-				NodeSets:        []string{"edpm-compute-nodeset"},
-				AnsibleTags:     "",
-				AnsibleLimit:    "",
-				AnsibleSkipTags: "",
+				NodeSets:           []string{"edpm-compute-nodeset"},
+				Env:                nil,
+				NetworkAttachments: nil,
+				ExtraMounts:        nil,
+				AnsibleTags:        "",
+				AnsibleLimit:       "",
+				AnsibleSkipTags:    "",
+				Services: []string{
+					"dummy-service",
+				},
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -126,9 +135,9 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, &baremetal)).To(Succeed())
 
 			}, th.Timeout, th.Interval).Should(Succeed())
-
+			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
 			// Create all services necessary for deployment
-			for _, serviceName := range nodeSet.Spec.Services {
+			for _, serviceName := range dataplaneDeploymentInstance.Spec.Services {
 				dataplaneServiceName := types.NamespacedName{
 					Name:      serviceName,
 					Namespace: namespace,

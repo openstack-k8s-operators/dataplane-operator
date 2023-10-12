@@ -19,7 +19,6 @@ package v1beta1
 import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -46,19 +45,6 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	// PreProvisioned - Whether the nodes are actually pre-provisioned (True) or should be
 	// preprovisioned (False)
 	PreProvisioned bool `json:"preProvisioned,omitempty"`
-
-	// Env is a list containing the environment variables to pass to the pod
-	Env []corev1.EnvVar `json:"env,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
-	// which allows to connect the ansibleee runner to the given network
-	NetworkAttachments []string `json:"networkAttachments,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default={download-cache,configure-network,validate-network,install-os,configure-os,run-os,ovn,neutron-metadata,libvirt,nova,telemetry}
-	// Services list
-	Services []string `json:"services"`
 }
 
 //+kubebuilder:object:root=true
@@ -132,15 +118,6 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.Deployed = false
-}
-
-// GetAnsibleEESpec - get the fields that will be passed to AEE
-func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
-	return AnsibleEESpec{
-		NetworkAttachments: instance.Spec.NetworkAttachments,
-		ExtraMounts:        instance.Spec.NodeTemplate.ExtraMounts,
-		Env:                instance.Spec.Env,
-	}
 }
 
 // DataplaneAnsibleImageDefaults default images for dataplane services

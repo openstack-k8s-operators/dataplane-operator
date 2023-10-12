@@ -5,20 +5,7 @@ metadata:
   name: edpm-extramounts
 spec:
   preProvisioned: true
-  services:
-    - test-service
   nodes: {}
-  nodeTemplate:
-    extraMounts:
-    - extraVolType: edpm-ansible
-      mounts:
-      - mountPath: /usr/share/ansible/collections/ansible_collections/osp/edpm
-        name: edpm-ansible
-      volumes:
-      - name: edpm-ansible
-        persistentVolumeClaim:
-          claimName: edpm-ansible
-          readOnly: true
 ---
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE

@@ -69,7 +69,6 @@ NodeTemplate is a specification of the node attributes that override top level a
 | networks | Networks - Instance networks | []infranetworkv1.IPSetNetwork | false |
 | managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
 | ansible | Ansible is the group of Ansible related configuration options. | [AnsibleOpts](#ansibleopts) | false |
-| extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | false |
 | userData | UserData  node specific user-data | *corev1.SecretReference | false |
 | networkData | NetworkData  node specific network-data | *corev1.SecretReference | false |
 
@@ -105,10 +104,13 @@ OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlane
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | nodeSets | NodeSets is the list of NodeSets deployed | []string | true |
+| services | Services list | []string | true |
+| env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
+| networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | false |
+| extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | false |
 | ansibleTags | AnsibleTags for ansible execution | string | false |
 | ansibleLimit | AnsibleLimit for ansible execution | string | false |
 | ansibleSkipTags | AnsibleSkipTags for ansible execution | string | false |
-| servicesOverride | ServicesOverride list | []string | true |
 
 [Back to Custom Resources](#custom-resources)
 

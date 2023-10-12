@@ -5,8 +5,6 @@ metadata:
   name: edpm-no-nodes-custom-service
 spec:
   preProvisioned: true
-  services:
-    - custom-image-service
   nodes: {}
   nodeTemplate:
     ansible:

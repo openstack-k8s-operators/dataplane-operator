@@ -3,11 +3,6 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: openstack-edpm
 spec:
-  env:
-  - name: ANSIBLE_FORCE_COLOR
-    value: "True"
-  - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-    value: "True"
   nodes:
     edpm-compute-0:
       ansible:
@@ -92,17 +87,6 @@ spec:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     managementNetwork: ctlplane
   preProvisioned: true
-  services:
-  - download-cache
-  - configure-network
-  - validate-network
-  - install-os
-  - configure-os
-  - run-os
-  - ovn
-  - neutron-metadata
-  - libvirt
-  - nova
 status:
   conditions:
   - message: Deployment not started
