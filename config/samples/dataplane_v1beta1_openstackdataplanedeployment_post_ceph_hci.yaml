@@ -1,0 +1,16 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: deployment-post-ceph
+spec:
+  nodeSets:
+    - openstack-edpm-hci
+  # Create this deployment after Ceph is deployed
+  # on EDPM nodes in an HCI scenario. Create a
+  # nova-custom-ceph service which uses a ConfigMap
+  # containing libvirt overrides for Ceph RBD.
+  servicesOverride:
+    - ceph-client
+    - ovn
+    - libvirt
+    - nova-custom-ceph

@@ -1,0 +1,16 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: deployment-pre-ceph
+spec:
+  nodeSets:
+    - openstack-edpm-hci
+  # Create this deployment before Ceph is deployed
+  # on EDPM nodes in an HCI scenario.
+  servicesOverride:
+    - configure-network
+    - validate-network
+    - install-os
+    - ceph-hci-pre
+    - configure-os
+    - run-os
