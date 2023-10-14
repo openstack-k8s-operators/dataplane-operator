@@ -11,11 +11,11 @@ require (
 	github.com/onsi/ginkgo/v2 v2.13.0
 	github.com/onsi/gomega v1.28.0
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230724101130-2d6fe1f4706b
-	github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20231001103054-f74a88ed4971
-	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20231006072650-7fe7fe16bcd1
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231012092711-5f52f15720bf
+	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20231011150636-e8a0540a3c32
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231011150636-e8a0540a3c32
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231006072650-7fe7fe16bcd1
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231006072650-7fe7fe16bcd1
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231011150636-e8a0540a3c32
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231011150636-e8a0540a3c32
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.0
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231006102835-f8abc75be69c
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
