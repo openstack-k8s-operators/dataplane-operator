@@ -278,7 +278,7 @@ The output should be similar to:
 
 Each service uses the
 [`playbook`](https://openstack-k8s-operators.github.io/openstack-ansibleee-operator/openstack_ansibleee/#playbook)
-or 
+or
 [`play`](https://openstack-k8s-operators.github.io/openstack-ansibleee-operator/openstack_ansibleee/#play)
 field from the `OpenStackAnsibleEE` CRD provided
 by
@@ -364,6 +364,25 @@ following command:
 ```console
 oc rsh nova-cell0-conductor-0 nova-manage cell_v2 discover_hosts --verbose
 ```
+
+#### Service specific configurations
+
+Some of the predefined OpenStackDataPlaneService CRs requires manual
+configuration before the deployment can be started.
+
+* `OpenStackDataPlaneService/nova`
+  * The service needs an SSH key-pair provided. Generate an ssh key-pair and store it in a Secret named `nova-migration-ssh-key`.
+    ```console
+    $ cd "$(mktemp -d)"
+    $ ssh-keygen -f ./id -t ed25519 -N ''
+    $ oc create secret generic nova-migration-ssh-key \
+    -n openstack \
+    --from-file=ssh-privatekey=id \
+    --from-file=ssh-publickey=id.pub \
+    --type kubernetes.io/ssh-auth
+    $ rm id*
+    $ cd -
+    ```
 
 #### Overriding services for the deployment
 

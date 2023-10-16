@@ -6,4 +6,8 @@ spec:
   label: dataplane-deployment-nova
   secrets:
     - nova-cell1-compute-config
+    # NOTE: this Secret needs to be created before deploying the data plane.
+    # It should contain an ssh key-pair in the secret fields: ssh-privatekey
+    # and ssh-publickey
+    - nova-migration-ssh-key
   playbook: osp.edpm.nova

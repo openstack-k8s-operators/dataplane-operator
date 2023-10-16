@@ -3,7 +3,8 @@ kind: Secret
 metadata:
   name: nova-cell1-compute-config
 data:
-  00-ansibleVars: Zm9vCg==
+  nova-blank.conf: Zm9vCg==
+  01-nova.conf: Zm9vCg==
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -39,6 +40,14 @@ metadata:
   name: neutron-dhcp-agent-neutron-config
 data:
   10-neutron-dhcp.conf: dGVzdC1uZXV0cm9uLWRoY3AtYWdlbnQtc2VjcmV0LWNvbmZpZwo=
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nova-migration-ssh-key
+data:
+  ssh-privatekey: ZmFrZQo=
+  ssh-publickey: ZmFrZQo=
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet

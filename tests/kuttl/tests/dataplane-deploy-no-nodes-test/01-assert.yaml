@@ -668,16 +668,45 @@ spec:
   envConfigMapName: openstack-aee-default-env
   extraMounts:
   - mounts:
-    - mountPath: /var/lib/openstack/configs/nova/00-ansibleVars
+    - mountPath: /var/lib/openstack/configs/nova/01-nova.conf
       name: nova-cell1-compute-config-0
-      subPath: 00-ansibleVars
+      subPath: 01-nova.conf
+    - mountPath: /var/lib/openstack/configs/nova/nova-blank.conf
+      name: nova-cell1-compute-config-1
+      subPath: nova-blank.conf
     volumes:
     - name: nova-cell1-compute-config-0
       secret:
         items:
-        - key: 00-ansibleVars
-          path: 00-ansibleVars
+        - key: 01-nova.conf
+          path: 01-nova.conf
         secretName: nova-cell1-compute-config
+    - name: nova-cell1-compute-config-1
+      secret:
+        items:
+        - key: nova-blank.conf
+          path: nova-blank.conf
+        secretName: nova-cell1-compute-config
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/nova/ssh-privatekey
+      name: nova-migration-ssh-key-0
+      subPath: ssh-privatekey
+    - mountPath: /var/lib/openstack/configs/nova/ssh-publickey
+      name: nova-migration-ssh-key-1
+      subPath: ssh-publickey
+    volumes:
+    - name: nova-migration-ssh-key-0
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh-privatekey
+        secretName: nova-migration-ssh-key
+    - name: nova-migration-ssh-key-1
+      secret:
+        items:
+        - key: ssh-publickey
+          path: ssh-publickey
+        secretName: nova-migration-ssh-key
   - mounts:
     - mountPath: /runner/env/ssh_key
       name: ssh-key
