@@ -186,6 +186,18 @@ spec:
         subnetName: subnet1
   preProvisioned: true
   # Each OpenStackDataPlaneDeployment deployment-pre-ceph and
-  # deployment-post-ceph will override the services list so
-  # it is empty in this example.
-  services: []
+  # deployment-post-ceph will override the services list. The
+  # full service list is defined here only so the non-custom
+  # services will be defined by the operator.
+  services:
+    - configure-network
+    - validate-network
+    - install-os
+    - ceph-hci-pre
+    - configure-os
+    - run-os
+    - ceph-client
+    - ovn
+    - neutron-metadata
+    - libvirt
+    - nova-custom-ceph
