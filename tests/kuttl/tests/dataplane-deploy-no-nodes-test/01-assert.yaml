@@ -498,6 +498,12 @@ spec:
     - mountPath: /var/lib/openstack/configs/neutron-metadata/05-nova-metadata.conf
       name: nova-metadata-neutron-config-0
       subPath: 05-nova-metadata.conf
+    - mountPath: /var/lib/openstack/configs/neutron-metadata/httpd.conf
+      name: nova-metadata-neutron-config-1
+      subPath: httpd.conf
+    - mountPath: /var/lib/openstack/configs/neutron-metadata/nova-metadata-config.json
+      name: nova-metadata-neutron-config-2
+      subPath: nova-metadata-config.json
     volumes:
     - secret:
         items:
@@ -505,6 +511,18 @@ spec:
           path: 05-nova-metadata.conf
         secretName: nova-metadata-neutron-config
       name: nova-metadata-neutron-config-0
+    - name: nova-metadata-neutron-config-1
+      secret:
+        items:
+        - key: httpd.conf
+          path: httpd.conf
+        secretName: nova-metadata-neutron-config
+    - name: nova-metadata-neutron-config-2
+      secret:
+        items:
+        - key: nova-metadata-config.json
+          path: nova-metadata-config.json
+        secretName: nova-metadata-neutron-config
   - mounts:
     - mountPath: /runner/env/ssh_key
       name: ssh-key
