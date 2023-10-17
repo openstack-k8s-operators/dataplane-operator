@@ -146,5 +146,7 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | CtlplaneSearchDomain | CtlplaneSearchDomain | string | false |
 | AllHostnames | AllHostnames | map[string]map[infranetworkv1.NetNameStr]string | false |
 | AllIPs | AllIPs | map[string]map[infranetworkv1.NetNameStr]string | false |
+| configMapHashes | ConfigMapHashes | map[string]string | false |
+| secretHashes | SecretHashes | map[string]string | false |
 
 [Back to Custom Resources](#custom-resources)
