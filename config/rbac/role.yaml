@@ -30,6 +30,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - baremetal.openstack.org
+  resources:
+  - openstackbaremetalsets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - baremetal.openstack.org
+  resources:
+  - openstackbaremetalsets/status
+  verbs:
+  - get
+- apiGroups:
   - batch
   resources:
   - jobs
@@ -135,7 +147,6 @@ rules:
   - openstackdataplaneservices
   verbs:
   - create
-  - delete
   - get
   - list
   - patch
@@ -146,14 +157,6 @@ rules:
   resources:
   - openstackdataplaneservices/finalizers
   verbs:
-  - update
-- apiGroups:
-  - dataplane.openstack.org
-  resources:
-  - openstackdataplaneservices/status
-  verbs:
-  - get
-  - patch
   - update
 - apiGroups:
   - discovery.k8s.io
