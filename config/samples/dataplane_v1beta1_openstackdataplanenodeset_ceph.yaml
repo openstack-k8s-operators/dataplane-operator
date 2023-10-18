@@ -188,6 +188,7 @@ spec:
   # Create a nova-custom-ceph service which uses a ConfigMap
   # containing libvirt overrides for Ceph RBD.
   services:
+    - bootstrap
     - configure-network
     - validate-network
     - install-os

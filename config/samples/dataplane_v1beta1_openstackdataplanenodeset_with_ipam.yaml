@@ -10,6 +10,7 @@ spec:
       value: "True"
   preProvisioned: true
   services:
+    - bootstrap
     - configure-network
     - validate-network
     - install-os

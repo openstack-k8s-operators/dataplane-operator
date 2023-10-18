@@ -190,6 +190,7 @@ spec:
   # full service list is defined here only so the non-custom
   # services will be defined by the operator.
   services:
+    - bootstrap
     - configure-network
     - validate-network
     - install-os
