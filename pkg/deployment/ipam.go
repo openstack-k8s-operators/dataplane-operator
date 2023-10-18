@@ -18,6 +18,7 @@ package deployment
 
 import (
 	"context"
+	"regexp"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -72,7 +73,16 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 	var ctlplaneSearchDomain string
 	// Build DNSData CR
 	for nodeName, node := range instance.Spec.Nodes {
+		var shortName string
 		nets := node.Networks
+		hostName := node.HostName
+
+		if isFQDN(hostName) {
+			shortName = strings.Split(hostName, ".")[0]
+		} else {
+			shortName = hostName
+		}
+
 		if len(nets) == 0 {
 			nets = instance.Spec.NodeTemplate.Networks
 		}
@@ -81,11 +91,16 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 			ipSet, ok := allIPSets[nodeName]
 			if ok {
 				for _, res := range ipSet.Status.Reservation {
+					var fqdnNames []string
 					dnsRecord := infranetworkv1.DNSHost{}
 					dnsRecord.IP = res.Address
-					var fqdnNames []string
-					fqdnName := strings.Join([]string{nodeName, res.DNSDomain}, ".")
-					fqdnNames = append(fqdnNames, fqdnName)
+					fqdnName := strings.Join([]string{shortName, res.DNSDomain}, ".")
+					if fqdnName != hostName {
+						fqdnNames = append(fqdnNames, fqdnName)
+					}
+					if isFQDN(hostName) && res.Network == CtlPlaneNetwork {
+						fqdnNames = append(fqdnNames, hostName)
+					}
 					dnsRecord.Hostnames = fqdnNames
 					allDNSRecords = append(allDNSRecords, dnsRecord)
 					// Adding only ctlplane domain for ansibleee.
@@ -263,4 +278,13 @@ func CheckDNSService(ctx context.Context, helper *helper.Helper,
 	dnsClusterAddresses := dnsmasqList.Items[0].Status.DNSClusterAddresses
 	dnsAddresses := dnsmasqList.Items[0].Status.DNSAddresses
 	return dnsAddresses, dnsClusterAddresses, true, nil
+}
+
+func isFQDN(hostname string) bool {
+	// Regular expression to match a valid FQDN
+	// This regex assumes that the hostname and domain name segments only contain letters, digits, hyphens, and periods.
+	regex := `^([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$`
+
+	match, _ := regexp.MatchString(regex, hostname)
+	return match
 }
