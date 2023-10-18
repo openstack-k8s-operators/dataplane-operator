@@ -30,6 +30,14 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
+  name: neutron-ovn-agent-neutron-config
+data:
+  10-neutron-ovn.conf: dGVzdC1uZXV0cm9uLW92bi1hZ2VudC1jb25maWc=
+---
+---
+apiVersion: v1
+kind: Secret
+metadata:
   name: neutron-sriov-agent-neutron-config
 data:
   10-neutron-sriov.conf: dGVzdC1uZXV0cm9uLXNyaW92LWFnZW50LXNlY3JldC1jb25maWcK
@@ -65,6 +73,7 @@ spec:
   - run-os
   - ovn
   - neutron-metadata
+  - neutron-ovn
   - neutron-sriov
   - neutron-dhcp
   - libvirt

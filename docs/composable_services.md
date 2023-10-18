@@ -81,6 +81,13 @@ Include this service to run Neutron OVN Metadata agent on the EDPM nodes. This a
     services:
       - neutron-metadata
 
+### neutron-ovn
+
+Include this service to run Neutron OVN agent on the EDPM nodes. This agent is needed to provide QoS to hardware offloaded ports on the compute nodes.
+
+    services:
+      - neutron-ovn
+
 ### neutron-dhcp
 
 Include this service to run Neutron DHCP agent on the EDPM nodes. This agent is needed in some cases not supported by the native OVN DHCP implementation.
