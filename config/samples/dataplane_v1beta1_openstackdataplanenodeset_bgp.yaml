@@ -12,17 +12,13 @@ spec:
     - download-cache
     - configure-network
     - validate-network
-    - install-frr
-    - configure-frr
-    - run-frr
+    - frr
     - install-os
     - configure-os
     - run-os
     - ovn
     - neutron-metadata
-    - install-ovn-bgp-agent
-    - configure-ovn-bgp-agent
-    - run-ovn-bgp-agent
+    - ovn-bgp-agent
     - libvirt
     - nova
     - telemetry

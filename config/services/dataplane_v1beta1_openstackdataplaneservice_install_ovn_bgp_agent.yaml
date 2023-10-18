@@ -1,7 +1,0 @@
-apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlaneService
-metadata:
-  name: install-ovn-bgp-agent
-spec:
-  label: dataplane-deployment-install-ovn-bgp-agent
-  playbook: osp.edpm.install_ovn_bgp_agent

@@ -1,7 +1,0 @@
-apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlaneService
-metadata:
-  name: install-frr
-spec:
-  label: dataplane-deployment-install-frr
-  playbook: osp.edpm.install_frr
