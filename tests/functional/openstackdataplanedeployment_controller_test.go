@@ -24,6 +24,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	var neutronOvnMetadataSecretName types.NamespacedName
 	var novaNeutronMetadataSecretName types.NamespacedName
 	var novaCellComputeConfigSecretName types.NamespacedName
+	var novaMigrationSSHKey types.NamespacedName
 	var ceilometerConfigSecretName types.NamespacedName
 	var dataplaneNetConfigName types.NamespacedName
 
@@ -52,6 +53,10 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			Namespace: namespace,
 			Name:      "nova-cell1-compute-config",
 		}
+		novaMigrationSSHKey = types.NamespacedName{
+			Namespace: namespace,
+			Name:      "nova-migration-ssh-key",
+		}
 		ceilometerConfigSecretName = types.NamespacedName{
 			Namespace: namespace,
 			Name:      "ceilometer-compute-config-data",
@@ -75,6 +80,10 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			}))
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaCellComputeConfigSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaMigrationSSHKey, map[string][]byte{
+				"ssh-privatekey": []byte("fake-ssh-private-key"),
+				"ssh-publickey":  []byte("fake-ssh-public-key"),
 			}))
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(ceilometerConfigSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
