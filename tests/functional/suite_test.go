@@ -41,7 +41,7 @@ import (
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/controllers"
 	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
-	aee "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	aeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
@@ -116,7 +116,7 @@ var _ = BeforeSuite(func() {
 	// in the test env.
 	err = dataplanev1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
-	err = aee.AddToScheme(scheme.Scheme)
+	err = aeev1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = batchv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())

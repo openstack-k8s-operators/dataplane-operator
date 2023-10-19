@@ -1,5 +1,4 @@
----
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: dataplane-deployment-kuttl-service-edpm-compute-no-nodes
@@ -13,10 +12,10 @@ metadata:
 spec:
   debug: false
   env:
-    - name: ANSIBLE_FORCE_COLOR
-      value: "True"
-    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-      value: "True"
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+    value: "True"
   backoffLimit: 6
   envConfigMapName: openstack-aee-default-env
   extraMounts:

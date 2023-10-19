@@ -1,4 +1,3 @@
----
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
@@ -6,7 +5,7 @@ metadata:
 spec:
   preProvisioned: true
   services:
-    - test-service
+  - test-service
   nodes: {}
   nodeTemplate:
     extraMounts:
@@ -20,7 +19,7 @@ spec:
           claimName: edpm-ansible
           readOnly: true
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: test-service-edpm-extramounts

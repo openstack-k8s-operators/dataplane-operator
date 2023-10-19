@@ -45,7 +45,7 @@ status:
     status: "True"
     type: SetupReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: dataplane-deployment-download-cache-edpm-compute-no-nodes
@@ -95,7 +95,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: dataplane-deployment-bootstrap-edpm-compute-no-nodes
@@ -196,7 +196,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: dataplane-deployment-validate-network-edpm-compute-no-nodes
@@ -246,7 +246,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: dataplane-deployment-install-os-edpm-compute-no-nodes
@@ -296,7 +296,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
@@ -347,7 +347,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: dataplane-deployment-run-os-edpm-compute-no-nodes
@@ -397,7 +397,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
@@ -459,7 +459,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
@@ -532,7 +532,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
@@ -594,7 +594,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
@@ -656,7 +656,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: dataplane-deployment-libvirt-edpm-compute-no-nodes
@@ -709,7 +709,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: dataplane-deployment-nova-edpm-compute-no-nodes

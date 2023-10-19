@@ -1,4 +1,3 @@
----
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
@@ -6,7 +5,7 @@ metadata:
 spec:
   preProvisioned: true
   services:
-    - custom-image-service
+  - custom-image-service
   nodes: {}
   nodeTemplate:
     ansible:
@@ -34,7 +33,7 @@ status:
     status: "True"
     type: SetupReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: dp-custom-image-service-edpm-compute-no-nodes
