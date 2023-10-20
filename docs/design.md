@@ -17,14 +17,15 @@ services as CRD's:
 * [OpenStackDataPlaneService](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplaneservices.yaml)
 
 Each `NodeSet` in a dataplane is represented by a corresponding
-OpenStackDataPlaneNodeSet resource.  The OpenStackDataPlaneNodeSet CRD provides for a
-logical grouping of nodes of a similar type. This is analogous to the concept of "roles"
-in TripleO. Similarities within a `NodeSet` are defined by the user, and could be of a
+OpenStackDataPlaneNodeSet resource.  The OpenStackDataPlaneNodeSet CRD provides
+for a logical grouping of nodes of a similar type. A node can only be defined
+in one NodeSet. This is analogous to the concept of "roles" in TripleO.
+Similarities within a `NodeSet` are defined by the user, and could be of a
 small scope (ansible port), or a large scope (same network config, nova config,
-provisioning config, etc). The properties that all nodes in a `NodeSet` share is set
-in the NodeTemplate field of the `NodeSet`'s Spec. Node specific parameters are then
-defined under the `spec.nodeTemplate.nodes` section specific to that node. This is
-described in more detail below.
+provisioning config, etc). The properties that all nodes in a `NodeSet` share
+is set in the NodeTemplate field of the `NodeSet`'s Spec. Node specific
+parameters are then defined under the `spec.nodeTemplate.nodes` section
+specific to that node. This is described in more detail below.
 
 OpenStackDataPlaneNodeSet implements a baremetal provisioning interface to
 provision the nodes in the role. This interface can be used to provision the
