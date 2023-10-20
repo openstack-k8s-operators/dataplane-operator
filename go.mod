@@ -11,13 +11,13 @@ require (
 	github.com/onsi/ginkgo/v2 v2.13.0
 	github.com/onsi/gomega v1.28.0
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230724101130-2d6fe1f4706b
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231012092711-5f52f15720bf
-	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20231011150636-e8a0540a3c32
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231011150636-e8a0540a3c32
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231011150636-e8a0540a3c32
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231011150636-e8a0540a3c32
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231020142809-b6b6796c004f
+	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20231019091705-f3aa3d057b0f
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231019091705-f3aa3d057b0f
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231019091705-f3aa3d057b0f
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231019091705-f3aa3d057b0f
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.0
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231006102835-f8abc75be69c
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231016050254-4aeb8947cdca
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.9
