@@ -30,6 +30,7 @@ The default list of services as they will appear on the `services` field on an
 
     services:
       - download-cache
+      - bootstrap
       - configure-network
       - validate-network
       - install-os
@@ -290,6 +291,7 @@ service to execute for the `edpm-compute` `NodeSet`.
       services:
         - hello-world
         - download-cache
+        - bootstrap
         - configure-network
         - validate-network
         - install-os

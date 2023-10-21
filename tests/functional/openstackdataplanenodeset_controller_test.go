@@ -159,6 +159,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				Nodes:              map[string]dataplanev1.NodeSection{},
 				Services: []string{
 					"download-cache",
+					"bootstrap",
 					"configure-network",
 					"validate-network",
 					"install-os",

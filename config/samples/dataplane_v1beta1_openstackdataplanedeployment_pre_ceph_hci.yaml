@@ -8,6 +8,7 @@ spec:
   # Create this deployment before Ceph is deployed
   # on EDPM nodes in an HCI scenario.
   servicesOverride:
+    - bootstrap
     - configure-network
     - validate-network
     - install-os
