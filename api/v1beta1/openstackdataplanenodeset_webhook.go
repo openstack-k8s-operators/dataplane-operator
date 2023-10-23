@@ -17,8 +17,15 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+	"reflect"
+
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -87,8 +94,54 @@ func (r *OpenStackDataPlaneNodeSet) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(old runtime.Object) error {
 	openstackdataplanenodesetlog.Info("validate update", "name", r.Name)
+	oldNodeSet, ok := old.(*OpenStackDataPlaneNodeSet)
+	if !ok {
+		return apierrors.NewInternalError(
+			fmt.Errorf("Expected a OpenStackDataPlaneNodeSet object, but got %T", oldNodeSet))
+	}
 
-	// TODO(user): fill in your validation logic upon object update.
+	var errors field.ErrorList
+	// Some changes to the baremetalSetTemplate after the initial deployment would necessitate
+	// a redeploy of the node. Thus we should block these changes and require the user to
+	// delete and redeploy should they wish to make such changes after the initial deploy.
+	// If the BaremetalSetTemplate is changed, we will offload the parsing of these details
+	// to the openstack-baremetal-operator webhook to avoid duplicating logic.
+	if !reflect.DeepEqual(r.Spec.BaremetalSetTemplate, oldNodeSet.Spec.BaremetalSetTemplate) {
+		// Initialize OpenStackBaremetalSet with old spec details
+		oldBaremetalSetObject := &baremetalv1.OpenStackBaremetalSet{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      r.Name,
+				Namespace: r.Namespace,
+			},
+		}
+		oldNodeSet.Spec.BaremetalSetTemplate.DeepCopyInto(&oldBaremetalSetObject.Spec)
+
+		// Initialize OpenStackBaremetalSet with new spec details
+		baremetalSetObject := &baremetalv1.OpenStackBaremetalSet{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      r.Name,
+				Namespace: r.Namespace,
+			},
+		}
+		r.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSetObject.Spec)
+
+		// Call openstack-baremetal-operator ValidateUpdate() webhook to parse changes
+		err := baremetalSetObject.ValidateUpdate(oldBaremetalSetObject)
+		if err != nil {
+			errors = append(errors, field.Forbidden(
+				field.NewPath("spec.baremetalSetTemplate"),
+				fmt.Sprintf("%s", err)))
+		}
+	}
+
+	if errors != nil {
+		return apierrors.NewInvalid(
+			schema.GroupKind{Group: "dataplane.openstack.org", Kind: "OpenStackDataPlaneNodeSet"},
+			r.Name,
+			errors,
+		)
+	}
+
 	return nil
 }
 

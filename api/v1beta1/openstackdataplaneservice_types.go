@@ -19,8 +19,8 @@ package v1beta1
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 )
 
 // KubeService represents a Kubernetes Service. It is called like this to avoid the extreme overloading of the
