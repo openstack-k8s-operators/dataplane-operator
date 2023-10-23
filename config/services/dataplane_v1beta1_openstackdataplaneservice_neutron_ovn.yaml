@@ -1,0 +1,9 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: neutron-ovn
+spec:
+  label: dataplane-deployment-neutron-ovn
+  playbook: osp.edpm.neutron_ovn
+  secrets:
+  - neutron-ovn-agent-neutron-config
