@@ -15,6 +15,7 @@ spec:
   - run-os
   - ovn
   - neutron-metadata
+  - neutron-ovn
   - neutron-sriov
   - neutron-dhcp
   - libvirt

@@ -14,6 +14,7 @@ spec:
   - run-os
   - ovn
   - neutron-metadata
+  - neutron-ovn
   - neutron-sriov
   - neutron-dhcp
   - libvirt
@@ -519,6 +520,68 @@ spec:
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.neutron_metadata
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  generation: 1
+  name: dataplane-deployment-neutron-ovn-edpm-compute-no-nodes
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-no-nodes
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/neutron-ovn/10-neutron-ovn.conf
+      name: neutron-ovn-agent-neutron-config-0
+      subPath: 10-neutron-ovn.conf
+    volumes:
+    - secret:
+        items:
+        - key: 10-neutron-ovn.conf
+          path: 10-neutron-ovn.conf
+        secretName: neutron-ovn-agent-neutron-config
+      name: neutron-ovn-agent-neutron-config-0
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-no-nodes
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.neutron_ovn
   uid: 1001
 status:
   JobStatus: Succeeded
