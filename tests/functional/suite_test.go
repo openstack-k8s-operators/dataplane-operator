@@ -102,6 +102,13 @@ var _ = BeforeSuite(func() {
 			baremetalCRDs,
 			infraCRDs,
 		},
+		WebhookInstallOptions: envtest.WebhookInstallOptions{
+			Paths: []string{filepath.Join("..", "..", "config", "webhook")},
+			// NOTE(gibi): if localhost is resolved to ::1 (ipv6) then starting
+			// the webhook fails as it try to parse the address as ipv4 and
+			// failing on the colons in ::1
+			LocalServingHost: "127.0.0.1",
+		},
 		ErrorIfCRDPathMissing: true,
 	}
 
@@ -139,14 +146,22 @@ var _ = BeforeSuite(func() {
 	Expect(th).NotTo(BeNil())
 
 	// Start the controller-manager if goroutine
+	webhookInstallOptions := &testEnv.WebhookInstallOptions
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme: scheme.Scheme,
 		// NOTE(gibi): disable metrics reporting in test to allow
 		// parallel test execution. Otherwise each instance would like to
 		// bind to the same port
 		MetricsBindAddress: "0",
+		Host:               webhookInstallOptions.LocalServingHost,
+		Port:               webhookInstallOptions.LocalServingPort,
+		CertDir:            webhookInstallOptions.LocalServingCertDir,
+		LeaderElection:     false,
 	})
 	Expect(err).ToNot(HaveOccurred())
+
+	err = (&dataplanev1.OpenStackDataPlaneNodeSet{}).SetupWebhookWithManager(k8sManager)
+	Expect(err).NotTo(HaveOccurred())
 
 	kclient, err := kubernetes.NewForConfig(cfg)
 	Expect(err).ToNot(HaveOccurred(), "failed to create kclient")
