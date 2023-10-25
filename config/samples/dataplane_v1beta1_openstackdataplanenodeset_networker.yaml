@@ -124,9 +124,10 @@ spec:
          dns_search_domains: []
          registry_url: quay.io/podified-antelope-centos9
          image_tag: current-podified
-         edpm_ovn_controller_agent_image: "{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}"
-         edpm_iscsid_image: "{{ registry_url }}/openstack-iscsid:{{ image_tag }}"
-         edpm_logrotate_crond_image: "{{ registry_url }}/openstack-cron:{{ image_tag }}"
+         image_prefix: openstack
+         edpm_ovn_controller_agent_image: "{{ registry_url }}/{{ image_prefix }}-ovn-controller:{{ image_tag }}"
+         edpm_iscsid_image: "{{ registry_url }}/{{ image_prefix }}-iscsid:{{ image_tag }}"
+         edpm_logrotate_crond_image: "{{ registry_url }}/{{ image_prefix }}-cron:{{ image_tag }}"
          edpm_enable_chassis_gw: true
          gather_facts: false
          enable_debug: false
