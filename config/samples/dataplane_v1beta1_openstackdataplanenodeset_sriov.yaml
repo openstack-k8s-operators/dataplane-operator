@@ -125,11 +125,12 @@ spec:
          dns_search_domains: []
          registry_url: quay.io/podified-antelope-centos9
          image_tag: current-podified
-         edpm_iscsid_image: "{{ registry_url }}/openstack-iscsid:{{ image_tag }}"
-         edpm_logrotate_crond_image: "{{ registry_url }}/openstack-cron:{{ image_tag }}"
-         edpm_nova_compute_container_image: "{{ registry_url }}/openstack-nova-compute:{{ image_tag }}"
-         edpm_nova_libvirt_container_image: "{{ registry_url }}/openstack-nova-libvirt:{{ image_tag }}"
-         edpm_neutron_sriov_image: "{{ registry_url }}/openstack-neutron-sriov-agent:{{ image_tag }}"
+         image_prefix: openstack
+         edpm_iscsid_image: "{{ registry_url }}/{{ image_prefix }}-iscsid:{{ image_tag }}"
+         edpm_logrotate_crond_image: "{{ registry_url }}/{{ image_prefix }}-cron:{{ image_tag }}"
+         edpm_nova_compute_container_image: "{{ registry_url }}/{{ image_prefix }}-nova-compute:{{ image_tag }}"
+         edpm_nova_libvirt_container_image: "{{ registry_url }}/{{ image_prefix }}-nova-libvirt:{{ image_tag }}"
+         edpm_neutron_sriov_image: "{{ registry_url }}/{{ image_prefix }}-neutron-sriov-agent:{{ image_tag }}"
          gather_facts: false
          enable_debug: false
          # edpm firewall, change the allowed CIDR if needed
