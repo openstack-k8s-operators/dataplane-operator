@@ -18,6 +18,9 @@ package controllers
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -66,6 +69,12 @@ const (
 	// OvnBgpAgentDefaultImage -
 	OvnBgpAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
 )
+
+// NodeConfigElements is a struct containing just the elements used for Ansible executions
+type NodeConfigElements struct {
+	NodeTemplate dataplanev1.NodeTemplate
+	Nodes        map[string]dataplanev1.NodeSection
+}
 
 // SetupAnsibleImageDefaults -
 func SetupAnsibleImageDefaults() {
@@ -192,6 +201,18 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 	}
 
+	// Detect config changes and set Status ConfigHash
+	configHash, err := r.GetSpecConfigHash(instance)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if configHash != instance.Status.ConfigHash {
+		instance.Status.ConfigChanged = true
+	} else {
+		instance.Status.ConfigChanged = false
+	}
+
 	// Ensure Services
 	err = deployment.EnsureServices(ctx, helper, instance)
 	if err != nil {
@@ -307,6 +328,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		logger.Info("Set NodeSet DeploymentReadyCondition true")
 		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
 			condition.DeploymentReadyMessage)
+		instance.Status.ConfigHash = configHash
 	} else if deploymentExists {
 		logger.Info("Set NodeSet DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
@@ -395,4 +417,25 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		Watches(&source.Kind{Type: &dataplanev1.OpenStackDataPlaneDeployment{}},
 			deploymentWatcher).
 		Complete(r)
+}
+
+// GetSpecConfigHash initialises a new struct with only the field we want to check for variances in.
+// We then hash the contents of the new struct using md5 and return the hashed string.
+func (r *OpenStackDataPlaneNodeSetReconciler) GetSpecConfigHash(instance *dataplanev1.OpenStackDataPlaneNodeSet) (string, error) {
+
+	nodeConfig := &NodeConfigElements{
+		NodeTemplate: instance.Spec.NodeTemplate,
+		Nodes:        instance.Spec.Nodes,
+	}
+	jsonBytes, err := json.Marshal(&nodeConfig)
+	if err != nil {
+		return "", err
+	}
+
+	// Hash the values and convert to a slice of bytes required by hex.EncodeToString()
+	var hashSlice []byte
+	hash := md5.Sum(jsonBytes)
+	hashSlice = hash[:]
+
+	return hex.EncodeToString(hashSlice), nil
 }

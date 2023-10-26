@@ -142,5 +142,7 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | deployed | Deployed | bool | false |
 | DNSClusterAddresses | DNSClusterAddresses | []string | false |
 | CtlplaneSearchDomain | CtlplaneSearchDomain | string | false |
+| configChanged | ConfigChanged - Informs us if there are any differences between the deployed spec vs what the most recent version is. We can use this to inform our decisions about when to re-execute Ansible tasks. | bool | false |
+| configHash | ConfigHash - holds the hash of the NodeTemplate and Node sections of the struct. This hash is used to determine when new Ansible executions are required to roll out config changes. | string | false |
 
 [Back to Custom Resources](#custom-resources)

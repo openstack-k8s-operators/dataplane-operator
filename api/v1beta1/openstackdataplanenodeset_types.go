@@ -92,6 +92,16 @@ type OpenStackDataPlaneNodeSetStatus struct {
 
 	// CtlplaneSearchDomain
 	CtlplaneSearchDomain string `json:"CtlplaneSearchDomain,omitempty" optional:"true"`
+
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+ 	// ConfigChanged - Informs us if there are any differences between the deployed spec vs what the most recent version is.
+ 	// We can use this to inform our decisions about when to re-execute Ansible tasks.
+ 	ConfigChanged bool `json:"configChanged,omitempty" optional:"true"`
+
+	// ConfigHash - holds the hash of the NodeTemplate and Node sections of the struct.
+	// This hash is used to determine when new Ansible executions are required to roll
+	// out config changes.
+	ConfigHash string `json:"configHash,omitempty"`
 }
 
 //+kubebuilder:object:root=true
