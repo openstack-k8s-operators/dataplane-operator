@@ -92,6 +92,11 @@ type OpenStackDataPlaneNodeSetStatus struct {
 
 	// CtlplaneSearchDomain
 	CtlplaneSearchDomain string `json:"CtlplaneSearchDomain,omitempty" optional:"true"`
+
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// ConfigChanged - Informs us if there are any differences between the deployed spec vs what the most recent version is.
+	// We can use this to inform our decisions about when to re-execute Ansible tasks.
+	ConfigChanged bool `json:"configChanged,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true

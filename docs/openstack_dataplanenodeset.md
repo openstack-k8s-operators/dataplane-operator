@@ -142,5 +142,6 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | deployed | Deployed | bool | false |
 | DNSClusterAddresses | DNSClusterAddresses | []string | false |
 | CtlplaneSearchDomain | CtlplaneSearchDomain | string | false |
+| configChanged | ConfigChanged - Informs us if there are any differences between the deployed spec vs what the most recent version is. We can use this to inform our decisions about when to re-execute Ansible tasks. | bool | false |
 
 [Back to Custom Resources](#custom-resources)

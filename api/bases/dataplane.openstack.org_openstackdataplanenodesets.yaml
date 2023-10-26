@@ -1910,6 +1910,8 @@ spec:
                   - type
                   type: object
                 type: array
+              configChanged:
+                type: boolean
               deployed:
                 type: boolean
             type: object

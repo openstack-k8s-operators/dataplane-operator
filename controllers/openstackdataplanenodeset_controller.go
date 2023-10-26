@@ -18,7 +18,9 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"reflect"
 	"time"
 
 	"golang.org/x/exp/slices"
@@ -94,6 +96,12 @@ type OpenStackDataPlaneNodeSetReconciler struct {
 	Kclient kubernetes.Interface
 	Scheme  *runtime.Scheme
 	Log     logr.Logger
+}
+
+// LastAppliedConfiguration holds the Spec section from the last-applied-configuration annotation
+// that is added by kubectl or oc.
+type LastAppliedConfiguration struct {
+	Spec *dataplanev1.OpenStackDataPlaneNodeSetSpec
 }
 
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets,verbs=get;list;watch;create;update;patch;delete
@@ -190,6 +198,21 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	if instance.Status.Conditions.IsUnknown(dataplanev1.SetupReadyCondition) {
 		instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
+	}
+
+	// If we are reconciling an existing resource, compare last-applied-configuration with current spec to
+	// determine if any changes are requied. Set the status accordingly.
+	LastAppliedAnnotation := instance.GetAnnotations()["kubectl.kubernetes.io/last-applied-configuration"]
+	if LastAppliedAnnotation != "" {
+		var lastAppliedConfiguration LastAppliedConfiguration
+		if err := json.Unmarshal([]byte(LastAppliedAnnotation), &lastAppliedConfiguration); err != nil {
+			return ctrl.Result{}, err
+		}
+		if !reflect.DeepEqual(lastAppliedConfiguration.Spec.Nodes, instance.Spec.Nodes) || !reflect.DeepEqual(lastAppliedConfiguration.Spec.NodeTemplate, instance.Spec.NodeTemplate) {
+			instance.Status.ConfigChanged = true
+		} else {
+			instance.Status.ConfigChanged = false
+		}
 	}
 
 	// Ensure Services

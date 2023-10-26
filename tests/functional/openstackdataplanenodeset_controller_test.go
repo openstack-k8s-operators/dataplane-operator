@@ -16,6 +16,7 @@ limitations under the License.
 package functional
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -484,6 +485,49 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					corev1.ConditionTrue,
 				)
 			}
+		})
+	})
+
+	When("No last-applied-configuration annotation exists", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec()))
+		})
+
+		It("Should have configChanged set to false", func() {
+			Expect(GetDataplaneNodeSet(dataplaneNodeSetName).Status.ConfigChanged).Should(BeFalse())
+		})
+	})
+
+	When("A user changes spec field that would require a new Ansible execution", func() {
+		BeforeEach(func() {
+			nodeSetSpec := DefaultDataPlaneNodeSetSpec()
+			nodeSetSpec["nodeTemplate"] = dataplanev1.NodeTemplate{
+				Ansible: dataplanev1.AnsibleOpts{
+					AnsibleVars: map[string]json.RawMessage{
+						"edpm_network_config_hide_sensitive_logs": json.RawMessage([]byte(`"false"`)),
+					},
+				},
+			}
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+		})
+
+		It("Should set the ConfigChanged Status field", func() {
+			testAnnotationData := `{"spec": {"nodeTemplate": {"ansible": {"ansibleVars": {"edpm_network_config_hide_sensitive_logs": "false"}}}}}`
+			Eventually(func(g Gomega) error {
+				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+				LastAppliedConfigurationAnnotation := map[string]string{
+					"kubectl.kubernetes.io/last-applied-configuration": testAnnotationData,
+				}
+				instance.SetAnnotations(LastAppliedConfigurationAnnotation)
+				instance.Spec.NodeTemplate.Ansible.AnsibleVars = map[string]json.RawMessage{
+					"edpm_network_config_hide_sensitive_logs": json.RawMessage([]byte(`"true"`)),
+				}
+				return th.K8sClient.Update(th.Ctx, instance)
+			}).Should(Succeed())
+			Eventually(func(g Gomega) bool {
+				updatedInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
+				return updatedInstance.Status.ConfigChanged
+			}).Should(BeTrue())
 		})
 	})
 })
