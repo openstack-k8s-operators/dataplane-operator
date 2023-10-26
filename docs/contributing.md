@@ -12,21 +12,21 @@ cluster-info` shows).
 
 1. Install Instances of Custom Resources:
 
-```sh
-kubectl apply -f config/samples/
-```
+    ```sh
+    kubectl apply -f config/samples/
+    ```
 
 2. Build and push your image to the location specified by `IMG`:
 
-```sh
-make docker-build docker-push IMG=<some-registry>/dataplane-operator:tag
-```
+    ```sh
+    make docker-build docker-push IMG=<some-registry>/dataplane-operator:tag
+    ```
 
 3. Deploy the controller to the cluster with the image specified by `IMG`:
 
-```sh
-make deploy IMG=<some-registry>/dataplane-operator:tag
-```
+    ```sh
+    make deploy IMG=<some-registry>/dataplane-operator:tag
+    ```
 
 ### Uninstall CRDs
 
@@ -56,15 +56,15 @@ until the desired state is reached on the cluster
 
 1. Install the CRDs into the cluster:
 
-```sh
-make install
-```
+    ```sh
+    make install
+    ```
 
 2. Run your controller (this will run in the foreground, so switch to a new terminal if you want to leave it running):
 
-```sh
-make run
-```
+    ```sh
+    make run
+    ```
 
 **NOTE:** You can also run this in one step by running: `make install run`
 
@@ -99,13 +99,15 @@ directory in dataplane-operator.
 
 ### Running kuttl tests
 
-The kuttl tests require a running cluster with
-[openstack-ansibleee-operator](https://github.com/openstack-k8s-operators/openstack-ansibleee-operator)
-running in the cluster.
-
 kuttl tests are under the
 ['tests/kuttl/tests'](https://github.com/openstack-k8s-operators/dataplane-operator/tree/main/tests/kuttl/tests)
 in dataplane-operator.
+
+#### Requirements
+
+The kuttl tests require a running cluster with
+[openstack-ansibleee-operator](https://github.com/openstack-k8s-operators/openstack-ansibleee-operator), [openstack-baremetal-operator](https://github.com/openstack-k8s-operators/openstack-baremetal-operator) and [infra-operator](https://github.com/openstack-k8s-operators/infra-operator)
+running in the cluster.
 
 #### From install_yamls
 
@@ -125,7 +127,8 @@ make dataplane_kuttl
 
 #### From dataplane-operator
 
-The kuttl tests can also be run directly from the dataplane-operator checkout.
+The kuttl tests can also be run directly from the dataplane-operator checkout but
+you need the operators listed under [Requirements](#requirements)
 When running from a dataplane-operator checkout, `kubectl-kuttl` must be
 installed. The `kubectl-kuttl` command can be installed from
 [kuttl releases](https://github.com/kudobuilder/kuttl/releases), or using the
@@ -166,7 +169,7 @@ make kuttl-test KUTTL_ARGS="--test dataplane-deploy-no-nodes --skip-delete"
 
 Install docs build requirements into virtualenv:
 
-```
+```sh
 python3 -m venv local/docs-venv
 source local/docs-venv/bin/activate
 pip install -r docs/doc_requirements.txt
@@ -174,7 +177,7 @@ pip install -r docs/doc_requirements.txt
 
 Serve docs site on localhost:
 
-```
+```sh
 mkdocs serve
 ```
 
@@ -185,7 +188,7 @@ the browser will automatically show the new content.
 
 Create a `puml` file inside `docs/diagrams/src`
 
-```
+```sh
 touch docs/diagrams/src/demo.puml
 ```
 
@@ -193,12 +196,12 @@ Check the PlantUML syntax here: <https://plantuml.com/deployment-diagram>
 
 Serve docs site on localhost:
 
-```
+```sh
 mkdocs serve
 ```
 
 Add the yielded `svg` into the desired `.md` file
 
-```
-![Diagram demo](diagrams/out/demo.svg "Diagram demo")
+```markdown
+![Diagram demo](diagrams/out/edpm.svg "Diagram EDPM")
 ```
