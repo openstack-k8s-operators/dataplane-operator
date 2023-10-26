@@ -68,6 +68,13 @@ const (
 	OvnBgpAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
 )
 
+// NodeConfigElements is a struct containing just the elements used for Ansible executions
+type NodeConfigElements struct {
+	BaremetalSetTempalte baremetalv1.OpenStackBaremetalSetSpec
+	NodeTemplate         dataplanev1.NodeTemplate
+	Nodes                map[string]dataplanev1.NodeSection
+}
+
 // SetupAnsibleImageDefaults -
 func SetupAnsibleImageDefaults() {
 	dataplaneAnsibleImageDefaults = dataplanev1.DataplaneAnsibleImageDefaults{
@@ -193,6 +200,16 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 
+	// Detect config changes and set Status ConfigHash
+	configHash, err := r.GetSpecConfigHash(instance)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if configHash != instance.Status.DeployedConfigHash {
+		instance.Status.ConfigHash = configHash
+	}
+
 	// Ensure Services
 	err = deployment.EnsureServices(ctx, helper, instance)
 	if err != nil {
@@ -304,6 +321,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		logger.Info("Set NodeSet DeploymentReadyCondition true")
 		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
 			condition.DeploymentReadyMessage)
+		instance.Status.DeployedConfigHash = configHash
 	} else if deploymentExists {
 		logger.Info("Set NodeSet DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
@@ -321,7 +339,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 func checkDeployment(helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 ) (bool, bool, error) {
-
 	// Get all completed deployments
 	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
 	opts := []client.ListOption{
@@ -450,4 +467,20 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		Watches(&source.Kind{Type: &dataplanev1.OpenStackDataPlaneDeployment{}},
 			deploymentWatcher).
 		Complete(r)
+}
+
+// GetSpecConfigHash initialises a new struct with only the field we want to check for variances in.
+// We then hash the contents of the new struct using md5 and return the hashed string.
+func (r *OpenStackDataPlaneNodeSetReconciler) GetSpecConfigHash(instance *dataplanev1.OpenStackDataPlaneNodeSet) (string, error) {
+	nodeConfig := &NodeConfigElements{
+		BaremetalSetTempalte: instance.Spec.BaremetalSetTemplate,
+		NodeTemplate:         instance.Spec.NodeTemplate,
+		Nodes:                instance.Spec.Nodes,
+	}
+	configHash, err := util.ObjectHash(&nodeConfig)
+	if err != nil {
+		return "", err
+	}
+
+	return configHash, nil
 }

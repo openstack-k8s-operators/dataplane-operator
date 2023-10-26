@@ -16,6 +16,7 @@ limitations under the License.
 package functional
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -57,6 +58,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 	var dataplaneNetConfigName types.NamespacedName
 	var dataplaneIPSetName types.NamespacedName
 	var dataplaneDeploymentName types.NamespacedName
+	var dataplaneConfigHash string
 
 	defaultEdpmServiceList := []string{
 		"edpm_frr_image",
@@ -486,6 +488,35 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					corev1.ConditionTrue,
 				)
 			}
+		})
+	})
+
+	When("A user changes spec field that would require a new Ansible execution", func() {
+		BeforeEach(func() {
+			nodeSetSpec := DefaultDataPlaneNodeSetSpec()
+			nodeSetSpec["nodeTemplate"] = dataplanev1.NodeTemplate{
+				Ansible: dataplanev1.AnsibleOpts{
+					AnsibleVars: map[string]json.RawMessage{
+						"edpm_network_config_hide_sensitive_logs": json.RawMessage([]byte(`"false"`)),
+					},
+				},
+			}
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+		})
+
+		It("Should change the ConfigHash", func() {
+			Eventually(func(g Gomega) error {
+				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+				dataplaneConfigHash = instance.Status.ConfigHash
+				instance.Spec.NodeTemplate.Ansible.AnsibleVars = map[string]json.RawMessage{
+					"edpm_network_config_hide_sensitive_logs": json.RawMessage([]byte(`"true"`)),
+				}
+				return th.K8sClient.Update(th.Ctx, instance)
+			}).Should(Succeed())
+			Eventually(func(g Gomega) bool {
+				updatedInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
+				return dataplaneConfigHash != updatedInstance.Status.ConfigHash
+			}).Should(BeTrue())
 		})
 	})
 })

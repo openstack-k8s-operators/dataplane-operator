@@ -115,6 +115,17 @@ type OpenStackDataPlaneNodeSetStatus struct {
 
 	// SecretHashes
 	SecretHashes map[string]string `json:"secretHashes,omitempty" optional:"true"`
+
+	// ConfigHash - holds the curret hash of the NodeTemplate and Node sections of the struct.
+	// This hash is used to determine when new Ansible executions are required to roll
+	// out config changes.
+	ConfigHash string `json:"configHash,omitempty"`
+
+	// DeployedConfigHash - holds the hash of the NodeTemplate and Node sections of the struct
+	// that was last deployed.
+	// This hash is used to determine when new Ansible executions are required to roll
+	// out config changes.
+	DeployedConfigHash string `json:"deployedConfigHash,omitempty"`
 }
 
 //+kubebuilder:object:root=true
