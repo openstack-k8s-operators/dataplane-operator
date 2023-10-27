@@ -56,7 +56,12 @@ func AnsibleExecution(
 		return err
 	}
 	if ansibleEE == nil {
-		executionName := fmt.Sprintf("%s-%s", label, obj.GetName())
+		var executionName string
+		if len(label) > 0 {
+			executionName = fmt.Sprintf("%s-%s", label, obj.GetName())
+		} else {
+			executionName = obj.GetName()
+		}
 		ansibleEE = &ansibleeev1.OpenStackAnsibleEE{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      executionName,
