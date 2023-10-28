@@ -5,25 +5,25 @@ go 1.19
 replace github.com/openstack-k8s-operators/dataplane-operator/api => ./api
 
 require (
-	github.com/go-logr/logr v1.2.4
-	github.com/google/uuid v1.3.1
+	github.com/go-logr/logr v1.3.0
+	github.com/google/uuid v1.4.0
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
 	github.com/onsi/ginkgo/v2 v2.13.0
-	github.com/onsi/gomega v1.28.1
+	github.com/onsi/gomega v1.29.0
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230724101130-2d6fe1f4706b
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231020142809-b6b6796c004f
-	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20231019091705-f3aa3d057b0f
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231019091705-f3aa3d057b0f
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231019091705-f3aa3d057b0f
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231019091705-f3aa3d057b0f
+	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20231027113646-46f2fdbf77f1
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231027113646-46f2fdbf77f1
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231027113646-46f2fdbf77f1
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231027113646-46f2fdbf77f1
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.0
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231016050254-4aeb8947cdca
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231026104821-01bd4fad7f1e
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.10
 	k8s.io/apimachinery v0.26.10
 	k8s.io/client-go v0.26.10
-	sigs.k8s.io/controller-runtime v0.14.6
+	sigs.k8s.io/controller-runtime v0.14.7
 )
 
 require (
