@@ -146,10 +146,20 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 
 // GetAnsibleEESpec - get the fields that will be passed to AEE
 func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
+	// Build env to include DEPLOY_CONFIG_HASH at the front of the slice
+	var aeeEnv []corev1.EnvVar
+	aeeEnv = append(aeeEnv, corev1.EnvVar{
+		Name: "DEPLOY_CONFIG_HASH",
+		Value: instance.Status.ConfigHash,
+	})
+	for _, envItem := range instance.Spec.Env {
+		aeeEnv = append(aeeEnv, envItem)
+	}
+
 	return AnsibleEESpec{
 		NetworkAttachments: instance.Spec.NetworkAttachments,
 		ExtraMounts:        instance.Spec.NodeTemplate.ExtraMounts,
-		Env:                instance.Spec.Env,
+		Env:                aeeEnv,
 	}
 }
 

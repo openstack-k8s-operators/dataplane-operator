@@ -55,6 +55,21 @@ func AnsibleExecution(
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
 	}
+
+	// If the AnsibleEE already exists and the config has changed, then we will delete
+	// the existing AnsibleEE and re-create it below to roll out the new config.
+	if ansibleEE != nil && ansibleEE.Spec.Env[0].Value != aeeSpec.Env[0].Value {
+		helper.GetLogger().Info("Redeploying OpenStackAnsibleEE: %s", ansibleEE.Name)
+		err := helper.GetClient().Delete(ctx, ansibleEE)
+		if err != nil {
+			return err
+		}
+		ansibleEE, err = GetAnsibleExecution(ctx, helper, obj, label)
+		if err != nil && !k8serrors.IsNotFound(err) {
+			return err
+		}
+	}
+
 	if ansibleEE == nil {
 		executionName := fmt.Sprintf("%s-%s", label, obj.GetName())
 		ansibleEE = &ansibleeev1.OpenStackAnsibleEE{

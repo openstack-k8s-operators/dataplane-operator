@@ -209,8 +209,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	if configHash != instance.Status.ConfigHash {
 		instance.Status.ConfigChanged = true
-	} else {
-		instance.Status.ConfigChanged = false
+		instance.Status.ConfigHash = configHash
 	}
 
 	// Ensure Services
@@ -284,15 +283,11 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		}
 	}
 
-	// TODO: if the input hash changes or the nodes in the role is updated we should
-	// detect that and redeploy the role that may also require deleting/recreating
-	// the dataplane service AEE CRs based on the updated input/inventory.
-	// for now we just check if the role is already deployed and not being deleted
-	// and leave the triggering to a human to initiate.
-	// This can be done by deleting the dataplane service AEE CRs and then
-	// patching the role to set  dataplane service condition ready to "Unknown"
-	// then patching the Deployed flag to false.
-	if instance.Status.Deployed && instance.DeletionTimestamp.IsZero() {
+	// If the ConfigChanged status field is true, we want to re-generate the Ansible inventory to pick
+	// up the changed variables. Alternatively, if the ConfigChanged is false, the status is deployed
+	// and it hasn't been deleted. Then we want to end our reconcile here since no further actions are
+	// required.
+	if !instance.Status.ConfigChanged && instance.Status.Deployed && instance.DeletionTimestamp.IsZero() {
 		// The role is already deployed and not being deleted, so reconciliation
 		// is already complete.
 		logger.Info("NodeSet already deployed", "instance", instance)
@@ -309,6 +304,15 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	// all setup tasks complete, mark SetupReadyCondition True
 	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
+
+	// If the instance.Status.ConfigChanged field is true, the we can mark the deployment condition
+	// false. This will signal that we need to re-execute the deployment tasks.
+	if instance.Status.ConfigChanged {
+		logger.Info("Config has been updated. Setting DeploymentReadyCondition false")
+		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
+			condition.NotRequestedReason, condition.SeverityInfo,
+			condition.DeploymentReadyInitMessage)
+	}
 
 	// Set DeploymentReadyCondition to False if it was unknown.
 	// Handles the case where the NodeSet is created, but not yet deployed.
@@ -328,7 +332,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		logger.Info("Set NodeSet DeploymentReadyCondition true")
 		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
 			condition.DeploymentReadyMessage)
-		instance.Status.ConfigHash = configHash
+		instance.Status.ConfigChanged = false
 	} else if deploymentExists {
 		logger.Info("Set NodeSet DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,

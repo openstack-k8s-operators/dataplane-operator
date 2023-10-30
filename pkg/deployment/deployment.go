@@ -141,9 +141,27 @@ func ConditionalDeploy(
 ) error {
 
 	var err error
+	var deployedConfigHash string
 	log := helper.GetLogger()
 
-	if status.Conditions.IsUnknown(readyCondition) {
+	// If the nodeSet configHash has changed, we need to keep track of which services
+	// we have re-executed and which ones still need executing. We handle this by
+	// comparing the configHash from the nodeSet, with the DEPLOY_CONFIG_HASH recorded
+	// in the AnsibleEE Env slice.
+	if nodeSet.Status.ConfigChanged {
+		deployedAee, err := dataplaneutil.GetAnsibleExecution(ctx, helper, deployment, deployLabel)
+		if err != nil && !k8s_errors.IsNotFound(err) {
+			return err
+		}
+		if !k8s_errors.IsNotFound(err) {
+			deployedConfigHash = deployedAee.Spec.Env[0].Value
+		}
+	}
+
+	// If the readyCondition is unknown, or the deployed AnsibleEE DEPLOY_CONFIG_HASH differs from the
+	// latest nodeSet configHash, then we need to re-execute the Ansible tasks to bring the dataplane
+	// into a consistent state with the latest user provided data.
+	if status.Conditions.IsUnknown(readyCondition) || deployedConfigHash != nodeSet.Status.ConfigHash {
 		log.Info(fmt.Sprintf("%s Unknown, starting %s", readyCondition, deployName))
 		err = DeployService(
 			ctx,
