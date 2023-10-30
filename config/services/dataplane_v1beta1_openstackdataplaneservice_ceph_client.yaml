@@ -3,5 +3,5 @@ kind: OpenStackDataPlaneService
 metadata:
   name: ceph-client
 spec:
-  label: dataplane-deployment-ceph-client
+  label: ceph-client
   playbook: osp.edpm.ceph_client

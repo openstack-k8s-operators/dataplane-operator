@@ -3,5 +3,5 @@ kind: OpenStackDataPlaneService
 metadata:
   name: ovn-bgp-agent
 spec:
-  label: dataplane-deployment-ovn-bgp-agent
+  label: ovn-bgp-agent
   playbook: osp.edpm.ovn_bgp_agent

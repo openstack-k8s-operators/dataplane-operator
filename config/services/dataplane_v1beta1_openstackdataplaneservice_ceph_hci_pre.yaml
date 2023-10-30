@@ -3,5 +3,5 @@ kind: OpenStackDataPlaneService
 metadata:
   name: ceph-hci-pre
 spec:
-  label: dataplane-deployment-ceph-hci-pre
+  label: ceph-hci-pre
   playbook: osp.edpm.ceph_hci_pre

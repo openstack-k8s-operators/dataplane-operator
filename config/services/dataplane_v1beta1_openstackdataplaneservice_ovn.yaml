@@ -3,7 +3,7 @@ kind: OpenStackDataPlaneService
 metadata:
   name: ovn
 spec:
-  label: dataplane-deployment-ovn
+  label: ovn
   playbook: osp.edpm.ovn
   configMaps:
   - ovncontroller-config

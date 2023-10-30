@@ -3,5 +3,5 @@ kind: OpenStackDataPlaneService
 metadata:
   name: frr
 spec:
-  label: dataplane-deployment-frr
+  label: frr
   playbook: osp.edpm.frr

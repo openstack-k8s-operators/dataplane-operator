@@ -3,5 +3,5 @@ kind: OpenStackDataPlaneService
 metadata:
   name: libvirt
 spec:
-  label: dataplane-deployment-libvirt
+  label: libvirt
   playbook: osp.edpm.libvirt

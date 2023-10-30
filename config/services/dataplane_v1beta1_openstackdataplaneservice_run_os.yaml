@@ -3,5 +3,5 @@ kind: OpenStackDataPlaneService
 metadata:
   name: run-os
 spec:
-  label: dataplane-deployment-run-os
+  label: run-os
   playbook: osp.edpm.run_os

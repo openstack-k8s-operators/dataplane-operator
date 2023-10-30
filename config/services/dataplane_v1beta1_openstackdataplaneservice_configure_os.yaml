@@ -3,5 +3,5 @@ kind: OpenStackDataPlaneService
 metadata:
   name: configure-os
 spec:
-  label: dataplane-deployment-configure-os
+  label: configure-os
   playbook: osp.edpm.configure_os
