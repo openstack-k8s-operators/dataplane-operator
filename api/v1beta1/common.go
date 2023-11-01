@@ -28,7 +28,8 @@ import (
 type AnsibleOpts struct {
 	// AnsibleUser SSH user for Ansible connection
 	// +kubebuilder:validation:Optional
-	AnsibleUser string `json:"ansibleUser,omitempty"`
+	// +kubebuilder:default="cloud-admin"
+	AnsibleUser string `json:"ansibleUser"`
 
 	// AnsibleHost SSH host for Ansible connection
 	// +kubebuilder:validation:Optional
@@ -47,7 +48,6 @@ type AnsibleOpts struct {
 
 // NodeSection defines the top level attributes inherited by nodes in the CR.
 type NodeSection struct {
-
 	// HostName - node name
 	// +kubebuilder:validation:Optional
 	HostName string `json:"hostName,omitempty"`
@@ -94,7 +94,8 @@ type NodeTemplate struct {
 
 	// ManagementNetwork - Name of network to use for management (SSH/Ansible)
 	// +kubebuilder:validation:Optional
-	ManagementNetwork string `json:"managementNetwork,omitempty"`
+	// +kubebuilder:default=ctlplane
+	ManagementNetwork string `json:"managementNetwork"`
 
 	// Ansible is the group of Ansible related configuration options.
 	// +kubebuilder:validation:Optional
@@ -116,9 +117,10 @@ type NodeTemplate struct {
 // AnsibleEESpec is a specification of the ansible EE attributes
 type AnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={ctlplane}
 	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
 	// which allows to connect the ansibleee runner to the given network
-	NetworkAttachments []string `json:"networkAttachments,omitempty"`
+	NetworkAttachments []string `json:"networkAttachments"`
 	// +kubebuilder:validation:Optional
 	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
 	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty"`
