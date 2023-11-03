@@ -68,18 +68,22 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allIPSets map[string]infranetworkv1.IPSet) (
-	string, map[string][]string, map[string][]string, error) {
+	string, map[string]map[infranetworkv1.NetNameStr]string,
+	map[string]map[infranetworkv1.NetNameStr]string, error) {
 
 	var allDNSRecords []infranetworkv1.DNSHost
 	var ctlplaneSearchDomain string
-	allHostnames := map[string][]string{}
-	allIPs := map[string][]string{}
+	allHostnames := map[string]map[infranetworkv1.NetNameStr]string{}
+	allIPs := map[string]map[infranetworkv1.NetNameStr]string{}
 
 	// Build DNSData CR
 	for nodeName, node := range instance.Spec.Nodes {
 		var shortName string
 		nets := node.Networks
 		hostName := node.HostName
+
+		allHostnames[nodeName] = map[infranetworkv1.NetNameStr]string{}
+		allIPs[nodeName] = map[infranetworkv1.NetNameStr]string{}
 
 		if isFQDN(hostName) {
 			shortName = strings.Split(hostName, ".")[0]
@@ -101,12 +105,13 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 					fqdnName := strings.Join([]string{shortName, res.DNSDomain}, ".")
 					if fqdnName != hostName {
 						fqdnNames = append(fqdnNames, fqdnName)
+						allHostnames[nodeName][res.Network] = fqdnName
 					}
 					if isFQDN(hostName) && res.Network == CtlPlaneNetwork {
 						fqdnNames = append(fqdnNames, hostName)
+						allHostnames[nodeName][res.Network] = hostName
 					}
-					allHostnames[nodeName] = append(allHostnames[nodeName], fqdnNames...)
-					allIPs[nodeName] = append(allIPs[nodeName], res.Address)
+					allIPs[nodeName][res.Network] = res.Address
 					dnsRecord.Hostnames = fqdnNames
 					allDNSRecords = append(allDNSRecords, dnsRecord)
 					// Adding only ctlplane domain for ansibleee.
@@ -146,7 +151,8 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allIPSets map[string]infranetworkv1.IPSet) (
-	[]string, []string, string, bool, map[string][]string, map[string][]string, error) {
+	[]string, []string, string, bool, map[string]map[infranetworkv1.NetNameStr]string,
+	map[string]map[infranetworkv1.NetNameStr]string, error) {
 
 	// Verify dnsmasq CR exists
 	dnsAddresses, dnsClusterAddresses, isReady, err := CheckDNSService(

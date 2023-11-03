@@ -31,6 +31,7 @@ import (
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
@@ -82,10 +83,10 @@ func Deploy(
 		aeeSpec.ExtraMounts = make([]storage.VolMounts, len(aeeSpecMounts))
 		copy(aeeSpec.ExtraMounts, aeeSpecMounts)
 		aeeSpec, err = addServiceExtraMounts(ctx, helper, aeeSpec, foundService, nodeSet)
-
 		if err != nil {
 			return &ctrl.Result{}, err
 		}
+
 		err = ConditionalDeploy(
 			ctx,
 			helper,
@@ -324,33 +325,63 @@ func addServiceExtraMounts(
 		aeeSpec.ExtraMounts = append(aeeSpec.ExtraMounts, volMounts)
 	}
 
-	// Add mount for TLS certs
-	if service.Spec.HasTLSCerts != nil && *service.Spec.HasTLSCerts {
-		volMounts := storage.VolMounts{}
-		secretName := GetServiceCertsSecretName(nodeSet, service.Name)
-		sec := &corev1.Secret{}
-		err := client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, sec)
-		if err != nil {
-			return aeeSpec, err
-		}
-		volume := corev1.Volume{
-			Name: secretName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: secretName,
+	// Add mounts for TLS certs
+	if nodeSet.Spec.TLSEnabled != nil && *nodeSet.Spec.TLSEnabled {
+		if service.Spec.HasTLSCerts != nil && *service.Spec.HasTLSCerts {
+			volMounts := storage.VolMounts{}
+			secretName := GetServiceCertsSecretName(nodeSet, service.Name)
+			sec := &corev1.Secret{}
+			err := client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, sec)
+			if err != nil {
+				return aeeSpec, err
+			}
+			volume := corev1.Volume{
+				Name: secretName,
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: secretName,
+					},
 				},
-			},
+			}
+
+			volumeMount := corev1.VolumeMount{
+				Name:      secretName,
+				MountPath: CertPaths,
+			}
+
+			volMounts.Volumes = append(volMounts.Volumes, volume)
+			volMounts.Mounts = append(volMounts.Mounts, volumeMount)
+
+			// add mount for cacerts
+			var caCertSecretName string
+			if len(service.Spec.CACerts) > 0 {
+				caCertSecretName = service.Spec.CACerts
+			} else {
+				caCertSecretName = tls.CABundleLabel
+			}
+
+			err = client.Get(ctx, types.NamespacedName{Name: caCertSecretName, Namespace: service.Namespace}, sec)
+			if err != nil {
+				return aeeSpec, err
+			}
+			volume = corev1.Volume{
+				Name: caCertSecretName,
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: caCertSecretName,
+					},
+				},
+			}
+
+			volumeMount = corev1.VolumeMount{
+				Name:      caCertSecretName,
+				MountPath: CACertPaths,
+			}
+
+			volMounts.Volumes = append(volMounts.Volumes, volume)
+			volMounts.Mounts = append(volMounts.Mounts, volumeMount)
+			aeeSpec.ExtraMounts = append(aeeSpec.ExtraMounts, volMounts)
 		}
-
-		volumeMount := corev1.VolumeMount{
-			Name:      secretName,
-			MountPath: path.Join(CertPaths, service.Name),
-		}
-
-		volMounts.Volumes = append(volMounts.Volumes, volume)
-		volMounts.Mounts = append(volMounts.Mounts, volumeMount)
-		aeeSpec.ExtraMounts = append(aeeSpec.ExtraMounts, volMounts)
-
 	}
 	return aeeSpec, nil
 }

@@ -210,17 +210,19 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	instance.Status.CtlplaneSearchDomain = ctlplaneSearchDomain
 
 	// Issue certs for TLS for services that need them
-	for _, serviceName := range instance.Spec.Services {
-		service, err := deployment.GetService(ctx, helper, serviceName)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-		if service.Spec.HasTLSCerts != nil && *service.Spec.HasTLSCerts {
-			result, err = deployment.EnsureTLSCerts(ctx, helper, instance, allHostnames, allIPs, serviceName)
+	if instance.Spec.TLSEnabled != nil && *instance.Spec.TLSEnabled {
+		for _, serviceName := range instance.Spec.Services {
+			service, err := deployment.GetService(ctx, helper, serviceName)
 			if err != nil {
 				return ctrl.Result{}, err
-			} else if (result != ctrl.Result{}) {
-				return result, nil
+			}
+			if service.Spec.HasTLSCerts != nil && *service.Spec.HasTLSCerts {
+				result, err = deployment.EnsureTLSCerts(ctx, helper, instance, allHostnames, allIPs, service)
+				if err != nil {
+					return ctrl.Result{}, err
+				} else if (result != ctrl.Result{}) {
+					return result, nil
+				}
 			}
 		}
 	}

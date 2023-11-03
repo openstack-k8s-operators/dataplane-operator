@@ -1876,6 +1876,8 @@ spec:
                 items:
                   type: string
                 type: array
+              tlsEnabled:
+                type: boolean
             required:
             - nodeTemplate
             - nodes

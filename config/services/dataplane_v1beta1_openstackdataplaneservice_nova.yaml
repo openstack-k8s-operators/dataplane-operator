@@ -12,3 +12,5 @@ spec:
     - nova-migration-ssh-key
   playbook: osp.edpm.nova
   hasTLSCerts: True
+  issuers:
+    default: osp-rootca-issuer-internal

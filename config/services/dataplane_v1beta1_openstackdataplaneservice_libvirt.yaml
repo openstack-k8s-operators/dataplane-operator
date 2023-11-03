@@ -6,3 +6,5 @@ spec:
   label: libvirt
   playbook: osp.edpm.libvirt
   hasTLSCerts: True
+  issuers:
+    default: osp-rootca-issuer-internal

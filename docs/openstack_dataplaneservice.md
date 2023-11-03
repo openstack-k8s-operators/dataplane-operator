@@ -126,6 +126,8 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | secrets | Secrets list of Secret names to mount as ExtraMounts for the OpenStackAnsibleEE | []string | false |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | false |
 | hasTLSCerts | HasTLSCerts - Whether the nodes have TLS certs | *bool | false |
+| issuers | Issuers - Issuers to issue TLS Certificates | map[string]string | false |
+| caCerts | CACerts - Secret containing the CA certificate chain | string | false |
 
 [Back to Custom Resources](#custom-resources)
 

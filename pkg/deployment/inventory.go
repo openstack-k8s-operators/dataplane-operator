@@ -46,6 +46,12 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		utils.LogErrorForObject(helper, err, "Could not resolve ansible group vars", instance)
 		return "", err
 	}
+
+	// add TLS ansible variable
+	if instance.Spec.TLSEnabled != nil && *instance.Spec.TLSEnabled {
+		nodeSetGroup.Vars["tls_certs_enabled"] = "true"
+	}
+
 	for nodeName, node := range instance.Spec.Nodes {
 		host := nodeSetGroup.AddHost(nodeName)
 		// Use ansible_host if provided else use hostname. Fall back to
