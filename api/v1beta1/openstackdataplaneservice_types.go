@@ -19,8 +19,8 @@ package v1beta1
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 )
 
 // KubeService represents a Kubernetes Service. It is called like this to avoid the extreme overloading of the
@@ -45,8 +45,13 @@ type KubeService struct {
 
 // OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService
 type OpenStackDataPlaneServiceSpec struct {
-	// Label to use for service
+	// Label to use for service.
+	// Must follow DNS952 subdomain conventions.
+	// Since we are using it to generate the pod name,
+	// we need to keep it short.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z]([-a-z0-9]*[a-z0-9])"
+	// +kubebuilder:validation:MaxLength=53
 	Label string `json:"label,omitempty"`
 
 	// Services to create to expose possible external services in computes
