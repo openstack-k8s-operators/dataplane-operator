@@ -92,6 +92,16 @@ type OpenStackDataPlaneNodeSetStatus struct {
 
 	// CtlplaneSearchDomain
 	CtlplaneSearchDomain string `json:"CtlplaneSearchDomain,omitempty" optional:"true"`
+
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+ 	// ConfigChanged - Informs us if there are any differences between the deployed spec vs what the most recent version is.
+ 	// We can use this to inform our decisions about when to re-execute Ansible tasks.
+ 	ConfigChanged bool `json:"configChanged,omitempty" optional:"true"`
+
+	// ConfigHash - holds the hash of the NodeTemplate and Node sections of the struct.
+	// This hash is used to determine when new Ansible executions are required to roll
+	// out config changes.
+	ConfigHash string `json:"configHash,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -136,10 +146,20 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 
 // GetAnsibleEESpec - get the fields that will be passed to AEE
 func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
+	// Build env to include DEPLOY_CONFIG_HASH at the front of the slice
+	var aeeEnv []corev1.EnvVar
+	aeeEnv = append(aeeEnv, corev1.EnvVar{
+		Name: "DEPLOY_CONFIG_HASH",
+		Value: instance.Status.ConfigHash,
+	})
+	for _, envItem := range instance.Spec.Env {
+		aeeEnv = append(aeeEnv, envItem)
+	}
+
 	return AnsibleEESpec{
 		NetworkAttachments: instance.Spec.NetworkAttachments,
 		ExtraMounts:        instance.Spec.NodeTemplate.ExtraMounts,
-		Env:                instance.Spec.Env,
+		Env:                aeeEnv,
 	}
 }
 
