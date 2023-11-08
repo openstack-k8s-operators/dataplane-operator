@@ -154,6 +154,13 @@ spec:
         edpm_nova_compute_container_image: "{{ registry_url }}/{{ image_prefix }}-nova-compute:{{ image_tag }}"
         edpm_nova_libvirt_container_image: "{{ registry_url }}/{{ image_prefix }}-nova-libvirt:{{ image_tag }}"
         edpm_neutron_metadata_agent_image: "{{ registry_url }}/{{ image_prefix }}-neutron-metadata-agent-ovn:{{ image_tag }}"
+        edpm_neutron_ovn_agent_image: "{{ registry_url }}/{{ image_prefix }}-neutron-ovn-agent:{{ image_tag }}"
+        edpm_ovn_bgp_agent_image: "{{ registry_url }}/{{ image_prefix }}-ovn-bgp-agent:{{ image_tag }}"
+        edpm_neutron_dhcp_image: "{{ registry_url }}/{{ image_prefix }}-neutron-dhcp-agent:{{ image_tag }}"
+        edpm_neutron_sriov_image: "{{ registry_url }}/{{ image_prefix }}-neutron-sriov-agent:{{ image_tag }}"
+        edpm_frr_image: "{{ registry_url }}/{{ image_prefix }}-frr:{{ image_tag }}"
+        edpm_multipathd_image: "{{ registry_url }}/{{ image_prefix }}-multipathd:{{ image_tag }}"
+
         gather_facts: false
         enable_debug: false
         # edpm firewall, change the allowed CIDR if needed

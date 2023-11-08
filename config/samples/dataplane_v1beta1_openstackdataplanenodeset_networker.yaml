@@ -128,6 +128,13 @@ spec:
          edpm_ovn_controller_agent_image: "{{ registry_url }}/{{ image_prefix }}-ovn-controller:{{ image_tag }}"
          edpm_iscsid_image: "{{ registry_url }}/{{ image_prefix }}-iscsid:{{ image_tag }}"
          edpm_logrotate_crond_image: "{{ registry_url }}/{{ image_prefix }}-cron:{{ image_tag }}"
+         edpm_neutron_ovn_agent_image: "{{ registry_url }}/{{ image_prefix }}-neutron-ovn-agent:{{ image_tag }}"
+         edpm_ovn_bgp_agent_image: "{{ registry_url }}/{{ image_prefix }}-ovn-bgp-agent:{{ image_tag }}"
+         edpm_neutron_dhcp_image: "{{ registry_url }}/{{ image_prefix }}-neutron-dhcp-agent:{{ image_tag }}"
+         edpm_neutron_sriov_image: "{{ registry_url }}/{{ image_prefix }}-neutron-sriov-agent:{{ image_tag }}"
+         edpm_frr_image: "{{ registry_url }}/{{ image_prefix }}-frr:{{ image_tag }}"
+         edpm_multipathd_image: "{{ registry_url }}/{{ image_prefix }}-multipathd:{{ image_tag }}"
+
          edpm_enable_chassis_gw: true
          gather_facts: false
          enable_debug: false

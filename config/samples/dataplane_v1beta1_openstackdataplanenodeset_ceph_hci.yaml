@@ -32,6 +32,12 @@ spec:
         edpm_iscsid_image: '{{ registry_url }}/{{ image_prefix }}-iscsid:{{ image_tag }}'
         edpm_logrotate_crond_image: '{{ registry_url }}/{{ image_prefix }}-cron:{{ image_tag
           }}'
+        edpm_neutron_ovn_agent_image: "{{ registry_url }}/{{ image_prefix }}-neutron-ovn-agent:{{ image_tag }}"
+        edpm_ovn_bgp_agent_image: "{{ registry_url }}/{{ image_prefix }}-ovn-bgp-agent:{{ image_tag }}"
+        edpm_neutron_dhcp_image: "{{ registry_url }}/{{ image_prefix }}-neutron-dhcp-agent:{{ image_tag }}"
+        edpm_neutron_sriov_image: "{{ registry_url }}/{{ image_prefix }}-neutron-sriov-agent:{{ image_tag }}"
+        edpm_frr_image: "{{ registry_url }}/{{ image_prefix }}-frr:{{ image_tag }}"
+        edpm_multipathd_image: "{{ registry_url }}/{{ image_prefix }}-multipathd:{{ image_tag }}"
         edpm_network_config_hide_sensitive_logs: false
         edpm_network_config_template: |
           ---
