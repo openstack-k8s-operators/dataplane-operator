@@ -27,6 +27,7 @@ import (
 
 	yaml "gopkg.in/yaml.v3"
 
+	validator "github.com/go-playground/validator/v10"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/ansible"
@@ -39,9 +40,15 @@ import (
 func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allIPSets map[string]infranetworkv1.IPSet, dnsAddresses []string, defaultImages dataplanev1.DataplaneAnsibleImageDefaults) (string, error) {
+	// Inventory input validation
+	validate := validator.New()
+	if err := validate.RegisterValidation("isansible", isAnsibleVar); err != nil {
+		utils.LogErrorForObject(helper, err, "Could not register input validation", instance)
+		return "", err
+	}
 	inventory := ansible.MakeInventory()
 	nodeSetGroup := inventory.AddGroup(instance.Name)
-	err := resolveGroupAnsibleVars(&instance.Spec.NodeTemplate, &nodeSetGroup, defaultImages)
+	err := resolveGroupAnsibleVars(&instance.Spec.NodeTemplate, &nodeSetGroup, defaultImages, validate)
 	if err != nil {
 		utils.LogErrorForObject(helper, err, "Could not resolve ansible group vars", instance)
 		return "", err
@@ -56,7 +63,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 			host.Vars["ansible_host"] = node.HostName
 		}
 
-		err = resolveHostAnsibleVars(&node, &host)
+		err = resolveHostAnsibleVars(&node, &host, validate)
 		if err != nil {
 			utils.LogErrorForObject(helper, err, "Could not resolve ansible host vars", instance)
 			return "", err
@@ -135,7 +142,7 @@ func populateInventoryFromIPAM(
 
 // set group ansible vars from NodeTemplate
 func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.Group,
-	defaultImages dataplanev1.DataplaneAnsibleImageDefaults) error {
+	defaultImages dataplanev1.DataplaneAnsibleImageDefaults, validate *validator.Validate) error {
 
 	if template.Ansible.AnsibleUser != "" {
 		group.Vars["ansible_user"] = template.Ansible.AnsibleUser
@@ -178,6 +185,13 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	if err != nil {
 		return err
 	}
+
+	// check that all group var names are valid in ansible
+	for variable := range group.Vars {
+		if err = validate.Var(variable, "isansible"); err != nil {
+			return fmt.Errorf("error validating ansible variable name: %s", variable)
+		}
+	}
 	if len(template.Networks) != 0 {
 		nets, netsLower := buildNetworkVars(template.Networks)
 		group.Vars["role_networks"] = nets
@@ -188,7 +202,7 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 }
 
 // set host ansible vars from NodeSection
-func resolveHostAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host) error {
+func resolveHostAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host, validate *validator.Validate) error {
 
 	if node.Ansible.AnsibleUser != "" {
 		host.Vars["ansible_user"] = node.Ansible.AnsibleUser
@@ -203,6 +217,13 @@ func resolveHostAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host) e
 	err := unmarshalAnsibleVars(node.Ansible.AnsibleVars, host.Vars)
 	if err != nil {
 		return err
+	}
+
+	// check that all group var names are valid in ansible
+	for variable := range host.Vars {
+		if err = validate.Var(variable, "isansible"); err != nil {
+			return fmt.Errorf("error validating ansible variable name: %s", variable)
+		}
 	}
 	if len(node.Networks) != 0 {
 		nets, netsLower := buildNetworkVars(node.Networks)
@@ -249,4 +270,56 @@ func buildNetworkVars(networks []infranetworkv1.IPSetNetwork) ([]string, map[str
 		netsLower[netName] = toSnakeCase(netName)
 	}
 	return nets, netsLower
+}
+
+// check if string is a valid ansible variable name
+func isAnsibleVar(varname validator.FieldLevel) bool {
+	// Python keywords can not be used as variable names
+	// in future this list may be subject to ammendement, pruning, or other change
+	switch varname.Field().String() {
+	case
+		"False",
+		"await",
+		"else",
+		"import",
+		"pass",
+		"None",
+		"break",
+		"except",
+		"in",
+		"raise",
+		"True",
+		"class",
+		"finally",
+		"is",
+		"return",
+		"and",
+		"continue",
+		"for",
+		"lambda",
+		"try",
+		"as",
+		"def",
+		"from",
+		"nonlocal",
+		"while",
+		"assert",
+		"del",
+		"global",
+		"not",
+		"with",
+		"async",
+		"elif",
+		"if",
+		"or",
+		"yield":
+		return false
+	}
+
+	// all variables must start with a letter or underscore
+	// further chars can be alphanumeric, or underscore
+	// dashes and special characters are not allowed
+	pattern := regexp.MustCompile("^[a-zA-Z_][a-zA-Z0-9_]*$")
+
+	return pattern.Match([]byte(varname.Field().String()))
 }
