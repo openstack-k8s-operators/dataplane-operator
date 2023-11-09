@@ -263,14 +263,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		}
 	}
 
-	// TODO: if the input hash changes or the nodes in the role is updated we should
-	// detect that and redeploy the role that may also require deleting/recreating
-	// the dataplane service AEE CRs based on the updated input/inventory.
-	// for now we just check if the role is already deployed and not being deleted
-	// and leave the triggering to a human to initiate.
-	// This can be done by deleting the dataplane service AEE CRs and then
-	// patching the role to set  dataplane service condition ready to "Unknown"
-	// then patching the Deployed flag to false.
 	if instance.Status.Deployed && instance.DeletionTimestamp.IsZero() {
 		// The role is already deployed and not being deleted, so reconciliation
 		// is already complete.
