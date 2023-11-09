@@ -29,9 +29,6 @@ spec:
         dns_search_domains: []
         timesync_ntp_servers:
         - hostname: pool.ntp.org
-        edpm_iscsid_image: '{{ registry_url }}/{{ image_prefix }}-iscsid:{{ image_tag }}'
-        edpm_logrotate_crond_image: '{{ registry_url }}/{{ image_prefix }}-cron:{{ image_tag
-          }}'
         edpm_network_config_hide_sensitive_logs: false
         edpm_network_config_template: |
           ---
@@ -67,14 +64,6 @@ spec:
           {% endfor %}
         edpm_nodes_validation_validate_controllers_icmp: false
         edpm_nodes_validation_validate_gateway_icmp: false
-        edpm_nova_compute_container_image: '{{ registry_url }}/{{ image_prefix }}-nova-compute:{{
-          image_tag }}'
-        edpm_nova_libvirt_container_image: '{{ registry_url }}/{{ image_prefix }}-nova-libvirt:{{
-          image_tag }}'
-        edpm_ovn_controller_agent_image: '{{ registry_url }}/{{ image_prefix }}-ovn-controller:{{
-          image_tag }}'
-        edpm_ovn_metadata_agent_image: '{{ registry_url }}/{{ image_prefix }}-neutron-metadata-agent-ovn:{{
-          image_tag }}'
         edpm_selinux_mode: enforcing
         edpm_sshd_allowed_ranges:
         - 192.168.122.0/24
@@ -85,8 +74,6 @@ spec:
         external_mtu: 1500
         external_vlan_id: 44
         gather_facts: false
-        image_tag: current-podified
-        image_prefix: openstack
         internal_api_cidr: "24"
         internal_api_host_routes: []
         internal_api_mtu: 1500
@@ -99,7 +86,6 @@ spec:
           Tenant: tenant
         neutron_physical_bridge_name: br-ex
         neutron_public_interface_name: eth0
-        registry_url: quay.io/podified-antelope-centos9
         role_networks:
         - InternalApi
         - Storage
