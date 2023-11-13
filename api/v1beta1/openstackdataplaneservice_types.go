@@ -45,8 +45,13 @@ type KubeService struct {
 
 // OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService
 type OpenStackDataPlaneServiceSpec struct {
-	// Label to use for service
+	// Label to use for service.
+	// Must follow DNS952 subdomain conventions.
+	// Since we are using it to generate the pod name,
+	// we need to keep it short.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern="[a-z]([-a-z0-9]*[a-z0-9])"
+	// +kubebuilder:validation:MaxLength=53
 	Label string `json:"label,omitempty"`
 
 	// Services to create to expose possible external services in computes

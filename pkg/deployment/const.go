@@ -22,25 +22,25 @@ const (
 	CtlPlaneNetwork = "CtlPlane"
 
 	// ValidateNetworkLabel for ValidateNetwork OpenStackAnsibleEE
-	ValidateNetworkLabel = "dataplane-deployment-validate-network"
+	ValidateNetworkLabel = "validate-network"
 
 	// InstallOSLabel for InstallOS OpenStackAnsibleEE
-	InstallOSLabel = "dataplane-deployment-install-os"
+	InstallOSLabel = "install-os"
 
 	// ConfigureOSLabel for ConfigureOS OpenStackAnsibleEE
-	ConfigureOSLabel = "dataplane-deployment-configure-os"
+	ConfigureOSLabel = "configure-os"
 
 	// RunOSLabel for RunOS OpenStackAnsibleEE
-	RunOSLabel = "dataplane-deployment-run-os"
+	RunOSLabel = "run-os"
 
 	// InstallOpenStackLabel for InstallOpenStack OpenStackAnsibleEE
-	InstallOpenStackLabel = "dataplane-deployment-install-openstack"
+	InstallOpenStackLabel = "install-openstack"
 
 	// ConfigureOpenStackLabel for ConfigureOpenStack OpenStackAnsibleEE
-	ConfigureOpenStackLabel = "dataplane-deployment-configure-openstack"
+	ConfigureOpenStackLabel = "configure-openstack"
 
 	// RunOpenStackLabel for RunOpenStack OpenStackAnsibleEE
-	RunOpenStackLabel = "dataplane-deployment-run-openstack"
+	RunOpenStackLabel = "run-openstack"
 
 	// NicConfigTemplateFile is the custom nic config file we use when user provided network config templates are provided.
 	NicConfigTemplateFile = "/runner/network/nic-config-template"

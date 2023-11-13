@@ -174,7 +174,7 @@ with the following contents:
     metadata:
       name: hello-world
     spec:
-      label: dataplane-deployment-hello-world
+      label: hello-world
       openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
       play: |
         hosts: all
@@ -270,7 +270,7 @@ In the `OpenStackDataPlaneService` YAML, specify the custom image for the
     metadata:
       name: hello-world
     spec:
-      label: dataplane-deployment-hello-world
+      label: hello-world
       openStackAnsibleEERunnerImage: quay.io/example_user/my_custom_role:latest
       ...
 

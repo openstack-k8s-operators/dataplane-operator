@@ -9,5 +9,5 @@ metadata:
     app.kubernetes.io/created-by: dataplane-operator
   name: validate-network
 spec:
-  label: dataplane-deployment-validate-network
+  label: validate-network
   playbook: osp.edpm.validate_network

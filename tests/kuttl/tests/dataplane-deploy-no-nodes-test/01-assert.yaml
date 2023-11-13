@@ -49,7 +49,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
-  name: dataplane-deployment-download-cache-edpm-compute-no-nodes
+  name: download-cache-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -99,7 +99,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
-  name: dataplane-deployment-bootstrap-edpm-compute-no-nodes
+  name: bootstrap-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -150,7 +150,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
-  name: dataplane-deployment-configure-network-edpm-compute-no-nodes
+  name: configure-network-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -200,7 +200,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
-  name: dataplane-deployment-validate-network-edpm-compute-no-nodes
+  name: validate-network-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -250,7 +250,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
-  name: dataplane-deployment-install-os-edpm-compute-no-nodes
+  name: install-os-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -301,7 +301,7 @@ apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: dataplane-deployment-configure-os-edpm-compute-no-nodes
+  name: configure-os-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -351,7 +351,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
-  name: dataplane-deployment-run-os-edpm-compute-no-nodes
+  name: run-os-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -402,7 +402,7 @@ apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: dataplane-deployment-ovn-edpm-compute-no-nodes
+  name: ovn-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -464,7 +464,7 @@ apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: dataplane-deployment-neutron-metadata-edpm-compute-no-nodes
+  name: neutron-metadata-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -537,7 +537,7 @@ apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: dataplane-deployment-neutron-ovn-edpm-compute-no-nodes
+  name: neutron-ovn-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -599,7 +599,7 @@ apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: dataplane-deployment-neutron-sriov-edpm-compute-no-nodes
+  name: neutron-sriov-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -661,7 +661,7 @@ apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: dataplane-deployment-neutron-dhcp-edpm-compute-no-nodes
+  name: neutron-dhcp-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -722,7 +722,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
-  name: dataplane-deployment-libvirt-edpm-compute-no-nodes
+  name: libvirt-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -775,7 +775,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
-  name: dataplane-deployment-nova-edpm-compute-no-nodes
+  name: nova-edpm-compute-no-nodes
   namespace: openstack
 spec:
   backoffLimit: 6

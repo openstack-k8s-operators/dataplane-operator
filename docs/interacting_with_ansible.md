@@ -22,14 +22,14 @@ retrieved from the API.
 Sample output when the default list of services:
 
  NAME                                                  NETWORKATTACHMENTS   STATUS   MESSAGE
- dataplane-deployment-configure-network-edpm-compute                        True     AnsibleExecutionJob complete
- dataplane-deployment-configure-os-edpm-compute                             True     AnsibleExecutionJob complete
- dataplane-deployment-install-os-edpm-compute                               True     AnsibleExecutionJob complete
- dataplane-deployment-libvirt-edpm-compute                                  True     AnsibleExecutionJob complete
- dataplane-deployment-nova-edpm-compute                                     True     AnsibleExecutionJob complete
- dataplane-deployment-run-os-edpm-compute                                   True     AnsibleExecutionJob complete
- dataplane-deployment-telemetry-edpm-compute                                True     AnsibleExecutionJob complete
- dataplane-deployment-validate-network-edpm-compute                         True     AnsibleExecutionJob complete
+ configure-network-edpm-compute                        True     AnsibleExecutionJob complete
+ configure-os-edpm-compute                             True     AnsibleExecutionJob complete
+ install-os-edpm-compute                               True     AnsibleExecutionJob complete
+ libvirt-edpm-compute                                  True     AnsibleExecutionJob complete
+ nova-edpm-compute                                     True     AnsibleExecutionJob complete
+ run-os-edpm-compute                                   True     AnsibleExecutionJob complete
+ telemetry-edpm-compute                                True     AnsibleExecutionJob complete
+ validate-network-edpm-compute                         True     AnsibleExecutionJob complete
 
 Querying for pods with the OpenStackAnsibleEE label
 
@@ -37,10 +37,10 @@ Querying for pods with the OpenStackAnsibleEE label
 
 Sample output:
 
- dataplane-deployment-configure-network-edpm-compute-j6r4l   0/1     Completed           0          3m36s
- dataplane-deployment-validate-network-edpm-compute-6g7n9    0/1     Pending             0          0s
- dataplane-deployment-validate-network-edpm-compute-6g7n9    0/1     ContainerCreating   0          11s
- dataplane-deployment-validate-network-edpm-compute-6g7n9    1/1     Running             0          13s
+ configure-network-edpm-compute-j6r4l   0/1     Completed           0          3m36s
+ validate-network-edpm-compute-6g7n9    0/1     Pending             0          0s
+ validate-network-edpm-compute-6g7n9    0/1     ContainerCreating   0          11s
+ validate-network-edpm-compute-6g7n9    1/1     Running             0          13s
 
 Querying for jobs, shows the corresponding job for each OpenStackAnsibleEE resource:
 
@@ -49,26 +49,26 @@ Querying for jobs, shows the corresponding job for each OpenStackAnsibleEE resou
 Sample output:
 
  NAME                                                  COMPLETIONS   DURATION   AGE
- dataplane-deployment-configure-network-edpm-compute   1/1           8s         2m51s
- dataplane-deployment-configure-os-edpm-compute        1/1           8s         2m27s
- dataplane-deployment-install-os-edpm-compute          1/1           8s         2m35s
- dataplane-deployment-libvirt-edpm-compute             1/1           8s         2m35s
- dataplane-deployment-nova-edpm-compute                1/1           8s         2m35s
- dataplane-deployment-run-os-edpm-compute              1/1           8s         2m19s
- dataplane-deployment-telemetry-edpm-compute           1/1           8s         2m35s
- dataplane-deployment-validate-network-edpm-compute    1/1           8s         2m43s
+ configure-network-edpm-compute   1/1           8s         2m51s
+ configure-os-edpm-compute        1/1           8s         2m27s
+ install-os-edpm-compute          1/1           8s         2m35s
+ libvirt-edpm-compute             1/1           8s         2m35s
+ nova-edpm-compute                1/1           8s         2m35s
+ run-os-edpm-compute              1/1           8s         2m19s
+ telemetry-edpm-compute           1/1           8s         2m35s
+ validate-network-edpm-compute    1/1           8s         2m43s
 
 Using the job name, the corresponding pod can be retrieved:
 
- oc get pods | grep dataplane-deployment-configure-network-edpm-compute
+ oc get pods | grep configure-network-edpm-compute
 
 Sample output:
 
- dataplane-deployment-configure-network-edpm-compute-2hshp   0/1     Completed            0                5m45s
+ configure-network-edpm-compute-2hshp   0/1     Completed            0                5m45s
 
 Using the job name, the ansible logs can be retrieved:
 
-    oc logs job.batch/dataplane-deployment-configure-network-edpm-compute
+    oc logs job.batch/configure-network-edpm-compute
 
 ## Controlling the Ansible execution
 

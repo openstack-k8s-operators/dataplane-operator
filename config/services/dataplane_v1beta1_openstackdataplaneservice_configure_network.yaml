@@ -9,5 +9,5 @@ metadata:
     app.kubernetes.io/created-by: dataplane-operator
   name: configure-network
 spec:
-  label: dataplane-deployment-configure-network
+  label: configure-network
   playbook: osp.edpm.configure_network

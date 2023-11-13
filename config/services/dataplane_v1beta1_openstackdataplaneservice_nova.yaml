@@ -3,7 +3,7 @@ kind: OpenStackDataPlaneService
 metadata:
   name: nova
 spec:
-  label: dataplane-deployment-nova
+  label: nova
   secrets:
     - nova-cell1-compute-config
     # NOTE: this Secret needs to be created before deploying the data plane.
