@@ -76,6 +76,15 @@ type OpenStackDataPlaneServiceSpec struct {
 	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
 	// +kubebuilder:validation:Optional
 	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty" yaml:"openStackAnsibleEERunnerImage,omitempty"`
+
+	// AnsibleMaxFailPercentage is used to tune service specific, allowable failure percentages during the Ansible execution
+	// https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_error_handling.html#setting-a-maximum-failure-percentage
+	// +kubebuilder:validation:Optional
+	AnsibleMaxFailPercentage int64 `json:"ansibleMaxFailPercentage,omitempty"`
+
+	// AnyErrorsFatal is used to tune service specific, any_errors_fatal
+	// +kubebuilder:validation:Optional
+	AnyErrorsFatal bool `json:"anyErrorsFatal,omitempty"`
 }
 
 // OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService
