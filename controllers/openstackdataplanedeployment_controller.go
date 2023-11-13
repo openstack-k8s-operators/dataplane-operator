@@ -212,20 +212,24 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			}
 		}
 
+		deployer := deployment.Deployer{
+			Ctx:             ctx,
+			Helper:          helper,
+			NodeSet:         &nodeSet,
+			Deployment:      instance,
+			Status:          &instance.Status,
+			AeeSpec:         &ansibleEESpec,
+			InventorySecret: nodeSetSecretInv,
+		}
+
 		// When ServicesOverride is set on the OpenStackDataPlaneDeployment,
 		// deploy those services for each OpenStackDataPlaneNodeSet. Otherwise,
 		// deploy with the OpenStackDataPlaneNodeSet's Services.
 		var deployResult *ctrl.Result
 		if len(instance.Spec.ServicesOverride) != 0 {
-			deployResult, err = deployment.Deploy(
-				ctx, helper, &nodeSet, instance,
-				nodeSetSecretInv, &instance.Status, ansibleEESpec,
-				instance.Spec.ServicesOverride)
+			deployResult, err = deployer.Deploy(instance.Spec.ServicesOverride)
 		} else {
-			deployResult, err = deployment.Deploy(
-				ctx, helper, &nodeSet, instance,
-				nodeSetSecretInv, &instance.Status, ansibleEESpec,
-				nodeSet.Spec.Services)
+			deployResult, err = deployer.Deploy(nodeSet.Spec.Services)
 		}
 
 		if err != nil {

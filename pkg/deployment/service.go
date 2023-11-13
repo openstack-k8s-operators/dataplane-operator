@@ -26,7 +26,6 @@ import (
 	yaml "gopkg.in/yaml.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
@@ -43,10 +42,10 @@ type ServiceYAML struct {
 }
 
 // DeployService service deployment
-func DeployService(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventorySecret string, aeeSpec dataplanev1.AnsibleEESpec, foundService dataplanev1.OpenStackDataPlaneService) error {
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, &foundService, sshKeySecret, inventorySecret, aeeSpec)
+func (d *Deployer) DeployService(foundService dataplanev1.OpenStackDataPlaneService) error {
+	err := dataplaneutil.AnsibleExecution(d.Ctx, d.Helper, d.Deployment, &foundService, d.NodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret, d.InventorySecret, d.AeeSpec)
 	if err != nil {
-		helper.GetLogger().Error(err, fmt.Sprintf("Unable to execute Ansible for %s", foundService.Name))
+		d.Helper.GetLogger().Error(err, fmt.Sprintf("Unable to execute Ansible for %s", foundService.Name))
 		return err
 	}
 
