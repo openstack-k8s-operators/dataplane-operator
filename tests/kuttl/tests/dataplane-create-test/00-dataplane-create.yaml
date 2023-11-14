@@ -43,8 +43,8 @@ spec:
          service_net_map:
            nova_api_network: internal_api
            nova_libvirt_network: internal_api
-         edpm_chrony_ntp_servers:
-           - clock.redhat.com
+         timesync_ntp_servers:
+           - hostname: clock.redhat.com
          # edpm_network_config
          # Default nic config template for a EDPM compute node
          # These vars are edpm_network_config role vars

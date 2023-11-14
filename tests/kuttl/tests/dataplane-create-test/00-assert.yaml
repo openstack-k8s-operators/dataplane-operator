@@ -34,8 +34,8 @@ spec:
         ctlplane_mtu: 1500
         ctlplane_subnet_cidr: 24
         dns_search_domains: []
-        edpm_chrony_ntp_servers:
-        - clock.redhat.com
+        timesync_ntp_servers:
+        - hostname: clock.redhat.com
         edpm_iscsid_image: '{{ registry_url }}/openstack-iscsid:{{ image_tag }}'
         edpm_logrotate_crond_image: '{{ registry_url }}/openstack-cron:{{ image_tag }}'
         edpm_network_config_hide_sensitive_logs: false

@@ -86,9 +86,9 @@ spec:
   nodeTemplate:
     ansibleVars:
       neutron_public_interface_name: eth0
-      edpm_chrony_ntp_servers:
-        - clock.redhat.com
-        - clock2.redhat.com
+      timesync_ntp_servers:
+        - hostname: clock.redhat.com
+        - hostname: clock2.redhat.com
   ...
 ```
 
@@ -110,13 +110,13 @@ vars:
 ```yaml
       neutron_public_interface_name: eth0
       tenant_ip: 192.168.24.100
-      edpm_chrony_ntp_servers:
-        - clock.redhat.com
-        - clock2.redhat.com
+      timesync_ntp_servers:
+        - hostname: clock.redhat.com
+        - hostname: clock2.redhat.com
 ```
 
 Only top level keys are compared for merging. E.g. if `edpm-compute-0`
-had a `edpm_chrony_ntp_servers` list with `clock3.redhat.com`, then
+had a `timesync_ntp_servers` list with `hostname: clock3.redhat.com`, then
 the resultant inventory for the node would not have three NTP servers;
 it would only have `clock3.redhat.com`. I.e. there is no "deep
 merging".
