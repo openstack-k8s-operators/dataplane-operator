@@ -73,18 +73,27 @@ type OpenStackDataPlaneServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	Secrets []string `json:"secrets,omitempty"`
 
+	// AnsibleExtraVars are error handling variables provided via the --extra-vars interface
+	// +kubebuilder:validation:Optional
+	AnsibleExtraVars AnsibleExtraVars `json:"ansibleExtraVars,omitempty"`
+
 	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
 	// +kubebuilder:validation:Optional
 	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty" yaml:"openStackAnsibleEERunnerImage,omitempty"`
+}
 
+// AnsibleExtraVars are error handling variables provided via the --extra-vars interface
+type AnsibleExtraVars struct {
 	// AnsibleMaxFailPercentage is used to tune service specific, allowable failure percentages during the Ansible execution
 	// https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_error_handling.html#setting-a-maximum-failure-percentage
 	// +kubebuilder:validation:Optional
-	AnsibleMaxFailPercentage int64 `json:"ansibleMaxFailPercentage,omitempty"`
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=100
+	AnsibleMaxFailPercentage int `json:"ansibleMaxFailPercentage,omitempty"`
 
-	// AnyErrorsFatal is used to tune service specific, any_errors_fatal
-	// +kubebuilder:validation:Optional
-	AnyErrorsFatal bool `json:"anyErrorsFatal,omitempty"`
+	// AnsibleAnyErrorsFatal is used to tune service specific, any_errors_fatal
+	// +kubebuilder:default=false
+	AnsibleAnyErrorsFatal *bool `json:"ansibleAnyErrorsFatal,omitempty"`
 }
 
 // OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService

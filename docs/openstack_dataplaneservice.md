@@ -9,6 +9,7 @@
 * [AnsibleOpts](#ansibleopts)
 * [NodeSection](#nodesection)
 * [NodeTemplate](#nodetemplate)
+* [AnsibleExtraVars](#ansibleextravars)
 * [KubeService](#kubeservice)
 * [OpenStackDataPlaneServiceList](#openstackdataplaneservicelist)
 * [OpenStackDataPlaneServiceSpec](#openstackdataplaneservicespec)
@@ -76,6 +77,17 @@ NodeTemplate is a specification of the node attributes that override top level a
 
 [Back to Custom Resources](#custom-resources)
 
+#### AnsibleExtraVars
+
+AnsibleExtraVars are error handling variables provided via the --extra-vars interface
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| ansibleMaxFailPercentage | AnsibleMaxFailPercentage is used to tune service specific, allowable failure percentages during the Ansible execution https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_error_handling.html#setting-a-maximum-failure-percentage | int | false |
+| ansibleAnyErrorsFatal | AnsibleAnyErrorsFatal is used to tune service specific, any_errors_fatal | *bool | false |
+
+[Back to Custom Resources](#custom-resources)
+
 #### KubeService
 
 KubeService represents a Kubernetes Service. It is called like this to avoid the extreme overloading of the Service term in this context
@@ -124,6 +136,7 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | playbook | Playbook is a path to the playbook that ansible will run on this execution | string | false |
 | configMaps | ConfigMaps list of ConfigMap names to mount as ExtraMounts for the OpenStackAnsibleEE | []string | false |
 | secrets | Secrets list of Secret names to mount as ExtraMounts for the OpenStackAnsibleEE | []string | false |
+| ansibleExtraVars | AnsibleExtraVars are error handling variables provided via the --extra-vars interface | [AnsibleExtraVars](#ansibleextravars) | false |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | false |
 
 [Back to Custom Resources](#custom-resources)

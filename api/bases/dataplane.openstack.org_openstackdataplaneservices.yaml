@@ -30,6 +30,16 @@ spec:
             type: object
           spec:
             properties:
+              ansibleExtraVars:
+                properties:
+                  ansibleAnyErrorsFatal:
+                    default: false
+                    type: boolean
+                  ansibleMaxFailPercentage:
+                    maximum: 100
+                    minimum: 1
+                    type: integer
+                type: object
               configMaps:
                 items:
                   type: string
