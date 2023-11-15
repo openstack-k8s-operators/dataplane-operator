@@ -75,7 +75,7 @@ func SetupAnsibleImageDefaults() {
 		Logrotate:            util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG", LogrotateDefaultImage),
 		NeutronMetadataAgent: util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_METADATA_AGENT_DEFAULT_IMG", NeutronMetadataAgentDefaultImage),
 		NovaCompute:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG", NovaComputeDefaultImage),
-		NovaLibvirt:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NOVA_LIBVIRT_DEFAULT_IMG", NovaLibvirtDefaultImage),
+		NovaLibvirt:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LIBVIRT_DEFAULT_IMG", NovaLibvirtDefaultImage),
 		OvnControllerAgent:   util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_CONTROLLER_AGENT_DEFAULT_IMG", OvnControllerAgentDefaultImage),
 		OvnBgpAgent:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE", OvnBgpAgentDefaultImage),
 	}

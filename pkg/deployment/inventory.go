@@ -164,8 +164,8 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	if template.Ansible.AnsibleVars["edpm_nova_compute_image"] == nil {
 		group.Vars["edpm_nova_compute_image"] = defaultImages.NovaCompute
 	}
-	if template.Ansible.AnsibleVars["edpm_nova_libvirt_container_image"] == nil {
-		group.Vars["edpm_nova_libvirt_image"] = defaultImages.NovaLibvirt
+	if template.Ansible.AnsibleVars["edpm_libvirt_image"] == nil {
+		group.Vars["edpm_libvirt_image"] = defaultImages.NovaLibvirt
 	}
 	if template.Ansible.AnsibleVars["edpm_ovn_controller_agent_image"] == nil {
 		group.Vars["edpm_ovn_controller_agent_image"] = defaultImages.OvnControllerAgent
