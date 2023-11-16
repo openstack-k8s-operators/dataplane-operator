@@ -44,7 +44,6 @@ type ServiceYAML struct {
 
 // DeployService service deployment
 func DeployService(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventorySecret string, aeeSpec dataplanev1.AnsibleEESpec, foundService dataplanev1.OpenStackDataPlaneService) error {
-
 	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, foundService.Spec.Label, sshKeySecret, inventorySecret, foundService.Spec.Play, foundService.Spec.Playbook, aeeSpec)
 	if err != nil {
 		helper.GetLogger().Error(err, fmt.Sprintf("Unable to execute Ansible for %s", foundService.Name))
@@ -52,7 +51,6 @@ func DeployService(ctx context.Context, helper *helper.Helper, obj client.Object
 	}
 
 	return nil
-
 }
 
 // GetService return service
@@ -141,7 +139,7 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 			return nil
 		})
 		if err != nil {
-			return fmt.Errorf("Error ensuring service: %w", err)
+			return fmt.Errorf("error ensuring service: %w", err)
 		}
 
 	}
