@@ -28,15 +28,14 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		BeforeEach(func() {
 			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec()
 			nodeSetSpec["preProvisioned"] = false
+			nodeSetSpec["nodes"] = map[string]interface{}{
+				"compute-0": map[string]interface{}{
+					"hostName": "compute-0"},
+			}
 			nodeSetSpec["baremetalSetTemplate"] = baremetalv1.OpenStackBaremetalSetSpec{
 				CloudUserName: "test-user",
 				BmhLabelSelector: map[string]string{
 					"app": "test-openstack",
-				},
-				BaremetalHosts: map[string]baremetalv1.InstanceSpec{
-					"compute-0": {
-						CtlPlaneIP: "192.168.1.12",
-					},
 				},
 			}
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
