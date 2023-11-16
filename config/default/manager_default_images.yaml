@@ -19,7 +19,7 @@ spec:
           value: quay.io/podified-antelope-centos9/openstack-cron:current-podified
         - name: RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG
           value: quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified
-        - name: RELATED_IMAGE_OPENSTACK_EDPM_NOVA_LIBVIRT_DEFAULT_IMG
+        - name: RELATED_IMAGE_OPENSTACK_EDPM_LIBVIRT_DEFAULT_IMG
           value: quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified
         - name: RELATED_IMAGE_OPENSTACK_EDPM_OVN_CONTROLLER_AGENT_DEFAULT_IMG
           value: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified

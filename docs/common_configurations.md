@@ -52,6 +52,27 @@ The registration commands for Red Hat Satellite version 6.13 are documented at
 If not using Satellite version 6.13, then refer to the specific version of the
 documentation for the version of Satellite that is in use.
 
+### Customizing container image locations
+
+The container images used by the various roles from edpm-ansible can pull from
+customized locations. The ansible variables used to set the locations and their
+default values are:
+
+		edpm_iscsid_image: "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
+		edpm_logrotate_crond_image: "quay.io/podified-antelope-centos9/openstack-cron:current-podified"
+		edpm_ovn_controller_agent_image: "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
+		edpm_ovn_metadata_agent_image: "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
+		edpm_frr_image: "quay.io/podified-antelope-centos9/openstack-frr:current-podified"
+		edpm_ovn_bgp_agent_image: "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
+		telemetry_node_exporter_image: quay.io/prometheus/node-exporter:v1.5.0
+		edpm_libvirt_image: "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified"
+		edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
+		edpm_neutron_sriov_image: "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"
+		edpm_multipathd_image: "quay.io/podified-antelope-centos9/openstack-multipathd:current-podified"
+
+Set any of the above ansible variables within the `ansibleVars` sections of
+`OpenStackDataPlaneNodeSet` to customize the container image locations.
+
 ## Network Isolation
 
 Network Isolation refers to the practice of separating network traffic by
