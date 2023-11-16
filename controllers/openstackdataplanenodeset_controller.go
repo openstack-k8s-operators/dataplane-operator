@@ -130,7 +130,6 @@ type OpenStackDataPlaneNodeSetReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
-
 	logger := log.FromContext(ctx)
 	logger.Info("Reconciling NodeSet")
 
@@ -155,9 +154,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		r.Scheme,
 		logger,
 	)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
 
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() { // update the Ready condition based on the sub conditions
@@ -216,15 +212,17 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 
-	var secretKeys = []string{}
+	secretKeys := []string{}
 	secretKeys = append(secretKeys, AnsibleSSHPrivateKey)
 	if !instance.Spec.PreProvisioned {
 		secretKeys = append(secretKeys, AnsibleSSHAuthorizedKeys)
 	}
 	_, result, err = secret.VerifySecret(
 		ctx,
-		types.NamespacedName{Namespace: instance.Namespace,
-			Name: ansibleSSHPrivateKeySecret},
+		types.NamespacedName{
+			Namespace: instance.Namespace,
+			Name:      ansibleSSHPrivateKeySecret,
+		},
 		secretKeys,
 		helper.GetClient(),
 		time.Second*5,
@@ -309,7 +307,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 }
 
 func checkDeployment(helper *helper.Helper,
-	request ctrl.Request) (bool, bool, error) {
+	request ctrl.Request,
+) (bool, bool, error) {
 	// Get all completed deployments
 	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
 	opts := []client.ListOption{
@@ -369,7 +368,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		for _, nodeSet := range deployment.Spec.NodeSets {
 			name := client.ObjectKey{
 				Namespace: namespace,
-				Name:      nodeSet}
+				Name:      nodeSet,
+			}
 			result = append(result, reconcile.Request{NamespacedName: name})
 		}
 		return result

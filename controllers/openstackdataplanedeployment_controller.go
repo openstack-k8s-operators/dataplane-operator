@@ -77,7 +77,6 @@ type OpenStackDataPlaneDeploymentReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
-
 	logger := log.FromContext(ctx)
 	logger.Info("Reconciling Deployment")
 
@@ -102,9 +101,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		r.Scheme,
 		logger,
 	)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
 
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() { // update the Ready condition based on the sub conditions
@@ -155,7 +151,8 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			ctx,
 			types.NamespacedName{
 				Namespace: instance.GetNamespace(),
-				Name:      nodeSet},
+				Name:      nodeSet,
+			},
 			nodeSetInstance)
 		if err != nil {
 			// NodeSet not found, force a requeue
