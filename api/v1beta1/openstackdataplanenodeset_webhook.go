@@ -66,7 +66,7 @@ func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
 		spec.BaremetalSetTemplate.DeploymentSSHSecret = spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 	}
 
-	if !spec.PreProvisioned && spec.BaremetalSetTemplate.BaremetalHosts == nil {
+	if !spec.PreProvisioned {
 		nodeSetHostMap := make(map[string]baremetalv1.InstanceSpec)
 		for _, node := range spec.Nodes {
 			instanceSpec := baremetalv1.InstanceSpec{}
