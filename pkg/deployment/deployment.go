@@ -48,7 +48,6 @@ func Deploy(
 	aeeSpec dataplanev1.AnsibleEESpec,
 	services []string,
 ) (*ctrl.Result, error) {
-
 	log := helper.GetLogger()
 
 	var readyCondition condition.Type
@@ -139,7 +138,6 @@ func ConditionalDeploy(
 	aeeSpec dataplanev1.AnsibleEESpec,
 	foundService dataplanev1.OpenStackDataPlaneService,
 ) error {
-
 	var err error
 	log := helper.GetLogger()
 
@@ -206,7 +204,7 @@ func ConditionalDeploy(
 
 		if ansibleEE.Status.JobStatus == ansibleeev1alpha1.JobStatusFailed {
 			log.Info(fmt.Sprintf("Condition %s error", readyCondition))
-			err = fmt.Errorf("Execution.name %s Execution.namespace %s Execution.status.jobstatus: %s", ansibleEE.Name, ansibleEE.Namespace, ansibleEE.Status.JobStatus)
+			err = fmt.Errorf("execution.name %s Execution.namespace %s Execution.status.jobstatus: %s", ansibleEE.Name, ansibleEE.Namespace, ansibleEE.Status.JobStatus)
 			status.Conditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.ErrorReason,
@@ -219,7 +217,6 @@ func ConditionalDeploy(
 	}
 
 	return err
-
 }
 
 // addServiceExtraMounts adds the service configs as ExtraMounts to aeeSpec
@@ -229,7 +226,6 @@ func addServiceExtraMounts(
 	aeeSpec dataplanev1.AnsibleEESpec,
 	service dataplanev1.OpenStackDataPlaneService,
 ) (dataplanev1.AnsibleEESpec, error) {
-
 	client := helper.GetClient()
 	baseMountPath := path.Join(ConfigPaths, service.Name)
 
@@ -327,5 +323,4 @@ func addServiceExtraMounts(
 		aeeSpec.ExtraMounts = append(aeeSpec.ExtraMounts, volMounts)
 	}
 	return aeeSpec, nil
-
 }
