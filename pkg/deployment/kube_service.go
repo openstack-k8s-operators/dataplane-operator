@@ -56,7 +56,7 @@ func CreateKubeServices(
 				// if we have IPSets, lets go to search for the IPs there
 				addresses[i], addressType = getAddressFromIPSet(&item, namespacedName, &kubeService, helper)
 			} else if len(item.Ansible.AnsibleHost) > 0 {
-				addresses[i], addressType = getAddressFromAnsibleHost(&item, namespacedName, &kubeService, helper)
+				addresses[i], addressType = getAddressFromAnsibleHost(&item)
 			} else {
 				// we were unable to find an IP or HostName for a node, so we do not go further
 				return nil
@@ -132,15 +132,10 @@ func getAddressFromIPSet(item *dataplanev1.NodeSection,
 		}
 	}
 	// if the reservations list is empty, we go find if AnsibleHost exists
-	return getAddressFromAnsibleHost(item, namespacedName, kubeService, helper)
+	return getAddressFromAnsibleHost(item)
 }
 
-func getAddressFromAnsibleHost(
-	item *dataplanev1.NodeSection,
-	namespacedName *types.NamespacedName,
-	kubeService *dataplanev1.KubeService,
-	helper *helper.Helper,
-) (string, discoveryv1.AddressType) {
+func getAddressFromAnsibleHost(item *dataplanev1.NodeSection) (string, discoveryv1.AddressType) {
 	// check if ansiblehost is an IP
 	addr := net.ParseIP(item.Ansible.AnsibleHost)
 	if addr != nil {
@@ -166,7 +161,6 @@ func service(
 	helper *helper.Helper,
 	labels map[string]string,
 ) (*corev1.Service, error) {
-
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      kubeService.Name,
@@ -204,7 +198,6 @@ func endpointSlice(
 	helper *helper.Helper,
 	labels map[string]string,
 ) (*discoveryv1.EndpointSlice, error) {
-
 	if len(addresses) > 100 {
 		err := fmt.Errorf("an EndpointSlice cannot contain more than 100 endpoint addresses")
 		return nil, err
@@ -246,6 +239,6 @@ func endpointSlice(
 
 // isValidDomain returns true if the domain is valid.
 func isValidDomain(domain string) bool {
-	var domainRegexp = regexp.MustCompile(`^(?i)[a-z0-9-]+(\.[a-z0-9-]+)+\.?$`)
+	domainRegexp := regexp.MustCompile(`^(?i)[a-z0-9-]+(\.[a-z0-9-]+)+\.?$`)
 	return domainRegexp.MatchString(domain)
 }
