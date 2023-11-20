@@ -10,7 +10,6 @@ spec:
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
   services:
-    - download-cache
     - configure-network
     - validate-network
     - install-os

@@ -14,7 +14,6 @@ spec:
     - name: ANSIBLE_HOST_KEY_CHECKING
       value: false
   services:
-    - download-cache
     - configure-network
     - validate-network
     - install-os
