@@ -3,11 +3,11 @@ kind: OpenStackDataPlaneService
 metadata:
   labels:
     app.kubernetes.io/name: openstackdataplaneservice
-    app.kubernetes.io/instance: openstackdataplaneservice-configure-ovn-dpdk
+    app.kubernetes.io/instance: openstackdataplaneservice-configure-ovs-dpdk
     app.kubernetes.io/part-of: dataplane-operator
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: dataplane-operator
-  name: configure-ovn-dpdk
+  name: configure-ovs-dpdk
 spec:
-  label: dataplane-deployment-configure-ovn-dpdk
-  playbook: osp.edpm.configure_ovn_dpdk
+  label: configure-ovs-dpdk
+  playbook: osp.edpm.configure_ovs_dpdk
