@@ -15,8 +15,6 @@ spec:
   env:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
-    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-      value: "True"
   backoffLimit: 6
   envConfigMapName: openstack-aee-default-env
   extraMounts:
