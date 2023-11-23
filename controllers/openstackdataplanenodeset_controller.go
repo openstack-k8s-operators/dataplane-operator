@@ -179,7 +179,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	if instance.Status.Conditions == nil {
 		instance.InitConditions()
 		// Register overall status immediately to have an early feedback e.g.
-		// in the cli
+		// in the cli.
 		return ctrl.Result{}, nil
 	}
 
