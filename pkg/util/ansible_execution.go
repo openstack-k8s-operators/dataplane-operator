@@ -40,25 +40,22 @@ func AnsibleExecution(
 	ctx context.Context,
 	helper *helper.Helper,
 	obj client.Object,
-	label string,
+	service *dataplanev1.OpenStackDataPlaneService,
 	sshKeySecret string,
 	inventorySecret string,
-	play string,
-	playbook string,
 	aeeSpec dataplanev1.AnsibleEESpec,
 ) error {
-
 	var err error
 	var cmdLineArguments strings.Builder
 
-	ansibleEE, err := GetAnsibleExecution(ctx, helper, obj, label)
+	ansibleEE, err := GetAnsibleExecution(ctx, helper, obj, service.Spec.Label)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
 	}
 	if ansibleEE == nil {
 		var executionName string
-		if len(label) > 0 {
-			executionName = fmt.Sprintf("%s-%s", label, obj.GetName())
+		if len(service.Spec.Label) > 0 {
+			executionName = fmt.Sprintf("%s-%s", service.Spec.Label, obj.GetName())
 		} else {
 			executionName = obj.GetName()
 		}
@@ -67,7 +64,7 @@ func AnsibleExecution(
 				Name:      executionName,
 				Namespace: obj.GetNamespace(),
 				Labels: map[string]string{
-					label: string(obj.GetUID()),
+					service.Spec.Label: string(obj.GetUID()),
 				},
 			},
 		}
@@ -94,11 +91,11 @@ func AnsibleExecution(
 			ansibleEE.Spec.CmdLine = strings.TrimSpace(cmdLineArguments.String())
 		}
 
-		if len(play) > 0 {
-			ansibleEE.Spec.Play = play
+		if len(service.Spec.Play) > 0 {
+			ansibleEE.Spec.Play = service.Spec.Play
 		}
-		if len(playbook) > 0 {
-			ansibleEE.Spec.Playbook = playbook
+		if len(service.Spec.Playbook) > 0 {
+			ansibleEE.Spec.Playbook = service.Spec.Playbook
 		}
 
 		ansibleEEMounts := storage.VolMounts{}
@@ -156,7 +153,6 @@ func AnsibleExecution(
 		}
 
 		return nil
-
 	})
 
 	if err != nil {
@@ -171,7 +167,6 @@ func AnsibleExecution(
 // label where <label>=<node UID>
 // If none is found, return nil
 func GetAnsibleExecution(ctx context.Context, helper *helper.Helper, obj client.Object, label string) (*ansibleeev1.OpenStackAnsibleEE, error) {
-
 	var err error
 	ansibleEEs := &ansibleeev1.OpenStackAnsibleEEList{}
 
@@ -200,5 +195,4 @@ func GetAnsibleExecution(ctx context.Context, helper *helper.Helper, obj client.
 	}
 
 	return ansibleEE, nil
-
 }

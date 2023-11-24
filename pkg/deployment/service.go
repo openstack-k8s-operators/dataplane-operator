@@ -44,7 +44,7 @@ type ServiceYAML struct {
 
 // DeployService service deployment
 func DeployService(ctx context.Context, helper *helper.Helper, obj client.Object, sshKeySecret string, inventorySecret string, aeeSpec dataplanev1.AnsibleEESpec, foundService dataplanev1.OpenStackDataPlaneService) error {
-	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, foundService.Spec.Label, sshKeySecret, inventorySecret, foundService.Spec.Play, foundService.Spec.Playbook, aeeSpec)
+	err := dataplaneutil.AnsibleExecution(ctx, helper, obj, &foundService, sshKeySecret, inventorySecret, aeeSpec)
 	if err != nil {
 		helper.GetLogger().Error(err, fmt.Sprintf("Unable to execute Ansible for %s", foundService.Name))
 		return err
