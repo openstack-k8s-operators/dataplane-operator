@@ -14,13 +14,13 @@ require (
 	github.com/onsi/ginkgo/v2 v2.13.1
 	github.com/onsi/gomega v1.30.0
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230724101130-2d6fe1f4706b
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231117154810-8bbeeadaa790
-	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20231121101653-551c0acef6ba
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231121101653-551c0acef6ba
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231121101653-551c0acef6ba
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231121101653-551c0acef6ba
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231122104142-3b449040167e
+	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20231122111552-6bd6025ade37
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231122111552-6bd6025ade37
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231122111552-6bd6025ade37
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231122111552-6bd6025ade37
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.0
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231121111233-794666ba843e
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231123111448-29e394985a34
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.11
@@ -84,7 +84,7 @@ require (
 	k8s.io/component-base v0.26.11 // indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230515203736-54b630e78af5 // indirect
-	k8s.io/utils v0.0.0-20230726121419-3b25d923346b // indirect
+	k8s.io/utils v0.0.0-20231121161247-cf03d44ff3cf // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
