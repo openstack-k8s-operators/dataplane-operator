@@ -22,7 +22,6 @@ import (
 
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -97,7 +96,7 @@ func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(old runtime.Object) error {
 	oldNodeSet, ok := old.(*OpenStackDataPlaneNodeSet)
 	if !ok {
 		return apierrors.NewInternalError(
-			fmt.Errorf("Expected a OpenStackDataPlaneNodeSet object, but got %T", oldNodeSet))
+			fmt.Errorf("expected a OpenStackDataPlaneNodeSet object, but got %T", oldNodeSet))
 	}
 
 	var errors field.ErrorList
@@ -107,26 +106,9 @@ func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(old runtime.Object) error {
 	// If the BaremetalSetTemplate is changed, we will offload the parsing of these details
 	// to the openstack-baremetal-operator webhook to avoid duplicating logic.
 	if !reflect.DeepEqual(r.Spec.BaremetalSetTemplate, oldNodeSet.Spec.BaremetalSetTemplate) {
-		// Initialize OpenStackBaremetalSet with old spec details
-		oldBaremetalSetObject := &baremetalv1.OpenStackBaremetalSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      r.Name,
-				Namespace: r.Namespace,
-			},
-		}
-		oldNodeSet.Spec.BaremetalSetTemplate.DeepCopyInto(&oldBaremetalSetObject.Spec)
 
-		// Initialize OpenStackBaremetalSet with new spec details
-		baremetalSetObject := &baremetalv1.OpenStackBaremetalSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      r.Name,
-				Namespace: r.Namespace,
-			},
-		}
-		r.Spec.BaremetalSetTemplate.DeepCopyInto(&baremetalSetObject.Spec)
-
-		// Call openstack-baremetal-operator ValidateUpdate() webhook to parse changes
-		err := baremetalSetObject.ValidateUpdate(oldBaremetalSetObject)
+		// Call openstack-baremetal-operator webhook Validate() to parse changes
+		err := r.Spec.BaremetalSetTemplate.Validate(oldNodeSet.Spec.BaremetalSetTemplate)
 		if err != nil {
 			errors = append(errors, field.Forbidden(
 				field.NewPath("spec.baremetalSetTemplate"),
