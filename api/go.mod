@@ -6,7 +6,7 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231122104142-3b449040167e
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231122111552-6bd6025ade37
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231122111552-6bd6025ade37
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231123111448-29e394985a34
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231127065111-347f7cf3b2f5
 	k8s.io/api v0.26.11
 	k8s.io/apimachinery v0.26.11
 	sigs.k8s.io/controller-runtime v0.14.7
@@ -47,7 +47,7 @@ require (
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.8.2 // indirect
+	github.com/stretchr/testify v1.8.3 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 	golang.org/x/net v0.18.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect

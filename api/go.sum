@@ -231,8 +231,8 @@ github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.2023112211
 github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231122111552-6bd6025ade37/go.mod h1:/6//JWNEY68jOMoaoaSI0koL2jzpEKim3m60+jFCbqY=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231122111552-6bd6025ade37 h1:F/sQ5+TzB1dVf4VyeyLDtcyNQDHnIkqZPK9V+cr/f6s=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231122111552-6bd6025ade37/go.mod h1:PAcGzUsidkqZLBv7aVf7tJsq9pzxGUwFDvA5Zeaq0a4=
-github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231123111448-29e394985a34 h1:7ZSX60sdoF5/CBpQu1PBPfo8RFRuT1lzIpnqrYbjMuo=
-github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231123111448-29e394985a34/go.mod h1:JLCVgdpOAk/zcJPJ+od/d0qOb41vkKsi9kzfjSQ6BAU=
+github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231127065111-347f7cf3b2f5 h1:eZvqDZn1+TnRwrwT0A0rsuFIhPX6iWLCJNtGA2vGcrM=
+github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231127065111-347f7cf3b2f5/go.mod h1:JLCVgdpOAk/zcJPJ+od/d0qOb41vkKsi9kzfjSQ6BAU=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
@@ -286,8 +286,8 @@ github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
-github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ8=
-github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
+github.com/stretchr/testify v1.8.3 h1:RP3t2pwF7cMEbC1dqtB6poj3niw/9gnV4Cjg5oW5gtY=
+github.com/stretchr/testify v1.8.3/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f/go.mod h1:N2zxlSyiKSe5eX1tZViRH5QA0qijqEDrYZiPEAiq3wU=
 github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415/go.mod h1:GwrjFmJcFw6At/Gs6z4yjiIwzuJ1/+UwLxMQDVQXShQ=
 github.com/xeipuuv/gojsonschema v1.2.0/go.mod h1:anYRn/JVcOK2ZgGU+IjEV4nwlhoK5sQluxsYJ78Id3Y=
