@@ -300,6 +300,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	// Handles the case where the NodeSet is created, but not yet deployed.
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
 		logger.Info("Set DeploymentReadyCondition false")
+
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
 			condition.NotRequestedReason, condition.SeverityInfo,
 			condition.DeploymentReadyInitMessage)

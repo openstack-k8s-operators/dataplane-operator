@@ -3,6 +3,11 @@
     name: openstack-k8s-operators/dataplane-operator
     github-check:
       jobs:
-        - dataplane-operator-docs-preview
-    templates:
-      - podified-multinode-edpm-baremetal-pipeline
+        - openstack-k8s-operators-content-provider
+        - crc-podified-edpm-baremetal-1: &content_provider
+            dependencies:
+              - openstack-k8s-operators-content-provider
+        - crc-podified-edpm-baremetal-2: *content_provider
+        - crc-podified-edpm-baremetal-3: *content_provider
+        - crc-podified-edpm-baremetal-4: *content_provider
+        - crc-podified-edpm-baremetal-5: *content_provider
