@@ -374,7 +374,7 @@ configuration before the deployment can be started.
   * The service needs an SSH key-pair provided. Generate an ssh key-pair and store it in a Secret named `nova-migration-ssh-key`.
     ```console
     $ cd "$(mktemp -d)"
-    $ ssh-keygen -f ./id -t ed25519 -N ''
+    $ ssh-keygen -f ./id -t ecdsa-sha2-nistp521 -N ''
     $ oc create secret generic nova-migration-ssh-key \
     -n openstack \
     --from-file=ssh-privatekey=id \
