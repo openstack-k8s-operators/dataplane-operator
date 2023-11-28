@@ -65,6 +65,7 @@ func AnsibleExecution(
 				Namespace: obj.GetNamespace(),
 				Labels: map[string]string{
 					service.Spec.Label: string(obj.GetUID()),
+					"osdpd":            obj.GetName(),
 				},
 			},
 		}
