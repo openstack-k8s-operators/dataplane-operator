@@ -87,7 +87,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	defer func() { // update the Ready condition based on the sub conditions
 		if instance.Status.Conditions.AllSubConditionIsTrue() {
 			instance.Status.Conditions.MarkTrue(
-				condition.ReadyCondition, condition.ReadyMessage)
+				condition.ReadyCondition, condition.DeploymentReadyMessage)
 		} else {
 			// something is not ready so reset the Ready condition
 			instance.Status.Conditions.MarkUnknown(
@@ -157,7 +157,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 
 	// All nodeSets successfully fetched.
 	// Mark InputReadyCondition=True
-	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.ReadyMessage)
+	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.InputReadyMessage)
 
 	// Deploy each nodeSet
 	// The loop starts and checks NodeSet deployments sequentially. However, after they
