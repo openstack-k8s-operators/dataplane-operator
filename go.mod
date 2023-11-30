@@ -15,13 +15,13 @@ require (
 	github.com/onsi/gomega v1.30.0
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230724101130-2d6fe1f4706b
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231122104142-3b449040167e
-	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20231122111552-6bd6025ade37
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231122111552-6bd6025ade37
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231122111552-6bd6025ade37
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231122111552-6bd6025ade37
+	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20231128145648-956f4d361a63
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231128145648-956f4d361a63
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231128145648-956f4d361a63
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231128145648-956f4d361a63
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.0
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231127065111-347f7cf3b2f5
-	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231128100725-67372c98ca78
+	golang.org/x/exp v0.0.0-20231127185646-65229373498e
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.11
 	k8s.io/apimachinery v0.26.11
@@ -68,13 +68,13 @@ require (
 	go.uber.org/multierr v1.10.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.18.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
-	golang.org/x/term v0.14.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/term v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	golang.org/x/tools v0.15.0 // indirect
+	golang.org/x/tools v0.16.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
@@ -84,7 +84,7 @@ require (
 	k8s.io/component-base v0.26.11 // indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230515203736-54b630e78af5 // indirect
-	k8s.io/utils v0.0.0-20231121161247-cf03d44ff3cf // indirect
+	k8s.io/utils v0.0.0-20231127182322-b307cd553661 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
