@@ -55,6 +55,9 @@ spec:
          # Default nic config template for a EDPM compute node
          # These vars are edpm_network_config role vars
          edpm_network_config_hide_sensitive_logs: false
+         ctlplane_dns_nameservers:
+         - 192.168.122.80
+         dns_search_domains: []
          edpm_network_config_template: |
               ---
               {% set mtu_list = [ctlplane_mtu] %}
