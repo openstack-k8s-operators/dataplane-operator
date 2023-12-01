@@ -200,7 +200,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	// Ensure DNSData Required for Nodes
-	dnsAddresses, dnsClusterAddresses, ctlplaneSearchDomain, isReady, err := deployment.EnsureDNSData(
+	dnsAddresses, dnsClusterAddresses, ctlplaneSearchDomain, isReady, allHostnames, allIPs, err := deployment.EnsureDNSData(
 		ctx, helper,
 		instance, allIPSets)
 	if err != nil || !isReady {
@@ -208,6 +208,24 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 	instance.Status.DNSClusterAddresses = dnsClusterAddresses
 	instance.Status.CtlplaneSearchDomain = ctlplaneSearchDomain
+
+	// Issue certs for TLS for services that need them
+	if instance.Spec.TLSEnabled != nil && *instance.Spec.TLSEnabled {
+		for _, serviceName := range instance.Spec.Services {
+			service, err := deployment.GetService(ctx, helper, serviceName)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			if service.Spec.HasTLSCerts != nil && *service.Spec.HasTLSCerts {
+				result, err = deployment.EnsureTLSCerts(ctx, helper, instance, allHostnames, allIPs, service)
+				if err != nil {
+					return ctrl.Result{}, err
+				} else if (result != ctrl.Result{}) {
+					return result, nil
+				}
+			}
+		}
+	}
 
 	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 

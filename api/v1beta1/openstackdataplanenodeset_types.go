@@ -59,6 +59,11 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	// +kubebuilder:default={download-cache,bootstrap,configure-network,validate-network,install-os,configure-os,run-os,ovn,neutron-metadata,libvirt,nova,telemetry}
 	// Services list
 	Services []string `json:"services"`
+
+	// TLSEnabled - Whether the node set has TLS enabled.
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	TLSEnabled *bool `json:"tlsEnabled,omitempty" yaml:"tlsEnabled,omitempty"`
 }
 
 //+kubebuilder:object:root=true

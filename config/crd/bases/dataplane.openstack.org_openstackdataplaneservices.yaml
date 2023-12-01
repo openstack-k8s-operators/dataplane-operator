@@ -30,10 +30,18 @@ spec:
             type: object
           spec:
             properties:
+              caCerts:
+                type: string
               configMaps:
                 items:
                   type: string
                 type: array
+              hasTLSCerts:
+                type: boolean
+              issuers:
+                additionalProperties:
+                  type: string
+                type: object
               label:
                 maxLength: 53
                 pattern: '[a-z]([-a-z0-9]*[a-z0-9])'

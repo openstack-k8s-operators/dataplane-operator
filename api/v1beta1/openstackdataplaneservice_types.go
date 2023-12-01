@@ -76,6 +76,19 @@ type OpenStackDataPlaneServiceSpec struct {
 	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
 	// +kubebuilder:validation:Optional
 	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty" yaml:"openStackAnsibleEERunnerImage,omitempty"`
+
+	// HasTLSCerts - Whether the nodes have TLS certs
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	HasTLSCerts *bool `json:"hasTLSCerts,omitempty" yaml:"hasTLSCerts,omitempty"`
+
+	// Issuers - Issuers to issue TLS Certificates
+	// +kubebuilder:validation:Optional
+	Issuers map[string]string `json:"issuers,omitempty"`
+
+	// CACerts - Secret containing the CA certificate chain
+	// +kubebuilder:validation:Optional
+	CACerts string `json:"caCerts,omitempty" yaml:"caCerts,omitempty"`
 }
 
 // OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService

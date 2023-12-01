@@ -47,4 +47,10 @@ const (
 
 	// ConfigPaths base path for volume mounts in OpenStackAnsibleEE pod
 	ConfigPaths = "/var/lib/openstack/configs"
+
+	// CertPaths base path for cert volume mount in OpenStackAnsibleEE pod
+	CertPaths = "/var/lib/openstack/certs"
+
+	// CACertPaths base path for CA cert volume mount in OpenStackAnsibleEE pod
+	CACertPaths = "/var/lib/openstack/cacerts"
 )

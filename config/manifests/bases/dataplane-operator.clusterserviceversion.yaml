@@ -77,6 +77,12 @@ spec:
       displayName: OpenStack Data Plane Service
       kind: OpenStackDataPlaneService
       name: openstackdataplaneservices.dataplane.openstack.org
+      specDescriptors:
+      - description: HasTLSCerts - Whether the nodes have TLS certs
+        displayName: Has TLSCerts
+        path: hasTLSCerts
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       statusDescriptors:
       - description: Conditions
         displayName: Conditions
