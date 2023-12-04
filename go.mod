@@ -17,11 +17,11 @@ require (
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230724101130-2d6fe1f4706b
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231122104142-3b449040167e
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20231128145648-956f4d361a63
-	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231109064837-a0ac89bc5a39
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20231128145648-956f4d361a63
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231128145648-956f4d361a63
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231128145648-956f4d361a63
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20231128145648-956f4d361a63
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.0
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20231130121358-7c60e9c0a60b
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231128100725-67372c98ca78
 	golang.org/x/exp v0.0.0-20231127185646-65229373498e
 	gopkg.in/yaml.v3 v3.0.1
