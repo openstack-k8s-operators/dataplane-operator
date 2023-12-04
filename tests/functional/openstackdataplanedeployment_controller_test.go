@@ -174,12 +174,6 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				condition.InputReadyCondition,
 				corev1.ConditionTrue,
 			)
-			th.ExpectCondition(
-				dataplaneDeploymentName,
-				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
-				dataplanev1.SetupReadyCondition,
-				corev1.ConditionTrue,
-			)
 		})
 	})
 })

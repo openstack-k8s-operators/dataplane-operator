@@ -47,7 +47,7 @@ type OpenStackDataPlaneDeploymentReconciler struct {
 	Log     logr.Logger
 }
 
-//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanedeployments,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanedeployments,verbs=get;list;watch;create;delete
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanedeployments/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanedeployments/finalizers,verbs=update
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets,verbs=get;list;watch
@@ -118,10 +118,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		return ctrl.Result{}, nil
 	}
 
-	// All setup tasks done
-	// Mark SetupReadyCondition=True
-	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
-
 	// Ensure NodeSets
 	nodeSets := dataplanev1.OpenStackDataPlaneNodeSetList{}
 	for _, nodeSet := range instance.Spec.NodeSets {
@@ -171,9 +167,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		logger.Info("Set Status.Deployed to false", "instance", instance)
 		instance.Status.Deployed = false
 		logger.Info("Set DeploymentReadyCondition false", "instance", instance)
-		instance.Status.Conditions.Set(condition.FalseCondition(
+		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition, condition.RequestedReason,
-			condition.SeverityInfo, condition.DeploymentReadyRunningMessage))
+			condition.SeverityInfo, condition.DeploymentReadyRunningMessage)
 		ansibleEESpec := nodeSet.GetAnsibleEESpec()
 		ansibleEESpec.AnsibleTags = instance.Spec.AnsibleTags
 		ansibleEESpec.AnsibleSkipTags = instance.Spec.AnsibleSkipTags
@@ -207,12 +203,12 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("OpenStackDeployment error for NodeSet %s", nodeSet.Name), instance)
 			haveError = true
-			instance.Status.Conditions.Set(condition.FalseCondition(
+			instance.Status.Conditions.MarkFalse(
 				condition.ReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityWarning,
 				dataplanev1.DataPlaneNodeSetErrorMessage,
-				err.Error()))
+				err.Error())
 		}
 
 		if deployResult != nil {
@@ -220,10 +216,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		} else {
 			logger.Info("OpenStackDeployment succeeded for NodeSet", "NodeSet", nodeSet.Name)
 			logger.Info("Set NodeSetDeploymentReadyCondition true", "nodeSet", nodeSet.Name)
-			instance.Status.Conditions.Set(
-				condition.TrueCondition(
-					condition.Type(fmt.Sprintf(dataplanev1.NodeSetDeploymentReadyCondition, nodeSet.Name)),
-					condition.DeploymentReadyMessage))
+			instance.Status.Conditions.MarkTrue(
+				condition.Type(fmt.Sprintf(dataplanev1.NodeSetDeploymentReadyCondition, nodeSet.Name)),
+				condition.DeploymentReadyMessage)
 		}
 	}
 
@@ -237,7 +232,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	}
 
 	logger.Info("Set DeploymentReadyCondition true", "instance", instance)
-	instance.Status.Conditions.Set(condition.TrueCondition(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage))
+	instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
 	instance.Status.Deployed = true
 	logger.Info("Set status deploy true", "instance", instance)
 	return ctrl.Result{}, nil
