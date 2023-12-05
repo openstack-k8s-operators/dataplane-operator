@@ -77,10 +77,10 @@ type OpenStackDataPlaneServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty" yaml:"openStackAnsibleEERunnerImage,omitempty"`
 
-	// HasTLSCerts - Whether the nodes have TLS certs
+	// TLSCertsEnabled - Whether the nodes have TLS certs
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	HasTLSCerts *bool `json:"hasTLSCerts,omitempty" yaml:"hasTLSCerts,omitempty"`
+	TLSCertsEnabled *bool `json:"tlsCertsEnabled,omitempty" yaml:"tlsCertsEnabled,omitempty"`
 
 	// Issuers - Issuers to issue TLS Certificates
 	// +kubebuilder:validation:Optional

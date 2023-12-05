@@ -327,7 +327,7 @@ func addServiceExtraMounts(
 
 	// Add mounts for TLS certs
 	if nodeSet.Spec.TLSEnabled != nil && *nodeSet.Spec.TLSEnabled {
-		if service.Spec.HasTLSCerts != nil && *service.Spec.HasTLSCerts {
+		if service.Spec.TLSCertsEnabled != nil && *service.Spec.TLSCertsEnabled {
 			volMounts := storage.VolMounts{}
 			secretName := GetServiceCertsSecretName(nodeSet, service.Name)
 			sec := &corev1.Secret{}

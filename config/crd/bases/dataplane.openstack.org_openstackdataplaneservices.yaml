@@ -36,8 +36,6 @@ spec:
                 items:
                   type: string
                 type: array
-              hasTLSCerts:
-                type: boolean
               issuers:
                 additionalProperties:
                   type: string
@@ -75,6 +73,8 @@ spec:
                   - port
                   type: object
                 type: array
+              tlsCertsEnabled:
+                type: boolean
             type: object
           status:
             properties:

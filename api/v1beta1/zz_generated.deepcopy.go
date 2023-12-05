@@ -524,8 +524,8 @@ func (in *OpenStackDataPlaneServiceSpec) DeepCopyInto(out *OpenStackDataPlaneSer
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
-	if in.HasTLSCerts != nil {
-		in, out := &in.HasTLSCerts, &out.HasTLSCerts
+	if in.TLSCertsEnabled != nil {
+		in, out := &in.TLSCertsEnabled, &out.TLSCertsEnabled
 		*out = new(bool)
 		**out = **in
 	}
