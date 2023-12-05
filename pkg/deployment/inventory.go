@@ -49,7 +49,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 
 	// add TLS ansible variable
 	if instance.Spec.TLSEnabled != nil && *instance.Spec.TLSEnabled {
-		nodeSetGroup.Vars["tls_certs_enabled"] = "true"
+		nodeSetGroup.Vars["edpm_tls_certs_enabled"] = "true"
 	}
 
 	for nodeName, node := range instance.Spec.Nodes {
