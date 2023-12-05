@@ -60,6 +60,11 @@ spec:
         path: preProvisioned
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: TLSEnabled - Whether the node set has TLS enabled.
+        displayName: TLSEnabled
+        path: tlsEnabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       statusDescriptors:
       - description: Conditions
         displayName: Conditions
@@ -78,9 +83,9 @@ spec:
       kind: OpenStackDataPlaneService
       name: openstackdataplaneservices.dataplane.openstack.org
       specDescriptors:
-      - description: HasTLSCerts - Whether the nodes have TLS certs
-        displayName: Has TLSCerts
-        path: hasTLSCerts
+      - description: TLSCertsEnabled - Whether the nodes have TLS certs
+        displayName: TLSCerts Enabled
+        path: tlsCertsEnabled
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       statusDescriptors:
