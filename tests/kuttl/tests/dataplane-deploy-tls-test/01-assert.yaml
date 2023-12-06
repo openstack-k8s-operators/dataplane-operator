@@ -1,0 +1,900 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-compute-tls
+  namespace: openstack
+spec:
+  services:
+  - download-cache
+  - bootstrap
+  - configure-network
+  - validate-network
+  - install-os
+  - configure-os
+  - run-os
+  - ovn
+  - neutron-metadata
+  - neutron-ovn
+  - neutron-sriov
+  - neutron-dhcp
+  - libvirt
+  - nova
+status:
+  conditions:
+  - message: NodeSet Ready
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: Deployment completed
+    reason: Ready
+    status: "True"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cert-cert-nova-edpm-compute-0
+  type: kubernetes.io/tls
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack-edpm-tls-nova-certs
+  type: Opaque
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cert-cert-libvirt-edpm-compute-0
+  type: kubernetes.io/tls
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack-edpm-tls-libvirt-certs
+  type: Opaque
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: download-cache-edpm-compute-tls
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.download_cache
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: bootstrap-edpm-compute-tls
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.bootstrap
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: configure-network-edpm-compute-tls
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.configure_network
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: validate-network-edpm-compute-tls
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.validate_network
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: install-os-edpm-compute-tls
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.install_os
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  generation: 1
+  name: configure-os-edpm-compute-tls
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.configure_os
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: run-os-edpm-compute-tls
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.run_os
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  generation: 1
+  name: ovn-edpm-compute-tls
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/ovn/ovsdb-config
+      name: ovncontroller-config-0
+      subPath: ovsdb-config
+    volumes:
+    - configMap:
+        items:
+        - key: ovsdb-config
+          path: ovsdb-config
+        name: ovncontroller-config
+      name: ovncontroller-config-0
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.ovn
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  generation: 1
+  name: neutron-metadata-edpm-compute-tls
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/neutron-metadata/10-neutron-metadata.conf
+      name: neutron-ovn-metadata-agent-neutron-config-0
+      subPath: 10-neutron-metadata.conf
+    volumes:
+    - secret:
+        items:
+        - key: 10-neutron-metadata.conf
+          path: 10-neutron-metadata.conf
+        secretName: neutron-ovn-metadata-agent-neutron-config
+      name: neutron-ovn-metadata-agent-neutron-config-0
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/neutron-metadata/05-nova-metadata.conf
+      name: nova-metadata-neutron-config-0
+      subPath: 05-nova-metadata.conf
+    volumes:
+    - secret:
+        items:
+        - key: 05-nova-metadata.conf
+          path: 05-nova-metadata.conf
+        secretName: nova-metadata-neutron-config
+      name: nova-metadata-neutron-config-0
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.neutron_metadata
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  generation: 1
+  name: neutron-ovn-edpm-compute-tls
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/neutron-ovn/10-neutron-ovn.conf
+      name: neutron-ovn-agent-neutron-config-0
+      subPath: 10-neutron-ovn.conf
+    volumes:
+    - secret:
+        items:
+        - key: 10-neutron-ovn.conf
+          path: 10-neutron-ovn.conf
+        secretName: neutron-ovn-agent-neutron-config
+      name: neutron-ovn-agent-neutron-config-0
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.neutron_ovn
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  generation: 1
+  name: neutron-sriov-edpm-compute-tls
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/neutron-sriov/10-neutron-sriov.conf
+      name: neutron-sriov-agent-neutron-config-0
+      subPath: 10-neutron-sriov.conf
+    volumes:
+    - secret:
+        items:
+        - key: 10-neutron-sriov.conf
+          path: 10-neutron-sriov.conf
+        secretName: neutron-sriov-agent-neutron-config
+      name: neutron-sriov-agent-neutron-config-0
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.neutron_sriov
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  generation: 1
+  name: neutron-dhcp-edpm-compute-tls
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls
+spec:
+  backoffLimit: 6
+  extraMounts:
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/neutron-dhcp/10-neutron-dhcp.conf
+      name: neutron-dhcp-agent-neutron-config-0
+      subPath: 10-neutron-dhcp.conf
+    volumes:
+    - secret:
+        items:
+        - key: 10-neutron-dhcp.conf
+          path: 10-neutron-dhcp.conf
+        secretName: neutron-dhcp-agent-neutron-config
+      name: neutron-dhcp-agent-neutron-config-0
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  name: openstackansibleee
+  restartPolicy: Never
+  playbook: osp.edpm.neutron_dhcp
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: libvirt-edpm-compute-tls
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls
+spec:
+  backoffLimit: 6
+  debug: false
+  envConfigMapName: openstack-aee-default-env
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  - mounts:
+    - mountPath: /var/lib/openstack/certs
+      name: openstack-edpm-tls-libvirt-certs
+    - mountPath: /var/lib/openstack/cacerts
+      name: combined-ca-bundle
+    volumes:
+    - name: openstack-edpm-tls-libvirt-certs
+      secret:
+        secretName: openstack-edpm-tls-libvirt-certs
+    - name: combined-ca-bundle
+      secret:
+        secretName: combined-ca-bundle
+  name: openstackansibleee
+  preserveJobs: true
+  restartPolicy: Never
+  playbook: osp.edpm.libvirt
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: nova-edpm-compute-tls
+  namespace: openstack
+spec:
+  backoffLimit: 6
+  debug: false
+  envConfigMapName: openstack-aee-default-env
+  extraMounts:
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/nova/01-nova.conf
+      name: nova-cell1-compute-config-0
+      subPath: 01-nova.conf
+    - mountPath: /var/lib/openstack/configs/nova/nova-blank.conf
+      name: nova-cell1-compute-config-1
+      subPath: nova-blank.conf
+    volumes:
+    - name: nova-cell1-compute-config-0
+      secret:
+        items:
+        - key: 01-nova.conf
+          path: 01-nova.conf
+        secretName: nova-cell1-compute-config
+    - name: nova-cell1-compute-config-1
+      secret:
+        items:
+        - key: nova-blank.conf
+          path: nova-blank.conf
+        secretName: nova-cell1-compute-config
+  - mounts:
+    - mountPath: /var/lib/openstack/configs/nova/ssh-privatekey
+      name: nova-migration-ssh-key-0
+      subPath: ssh-privatekey
+    - mountPath: /var/lib/openstack/configs/nova/ssh-publickey
+      name: nova-migration-ssh-key-1
+      subPath: ssh-publickey
+    volumes:
+    - name: nova-migration-ssh-key-0
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh-privatekey
+        secretName: nova-migration-ssh-key
+    - name: nova-migration-ssh-key-1
+      secret:
+        items:
+        - key: ssh-publickey
+          path: ssh-publickey
+        secretName: nova-migration-ssh-key
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  - mounts:
+    - mountPath: /var/lib/openstack/certs
+      name: openstack-edpm-tls-nova-certs
+    - mountPath: /var/lib/openstack/cacerts
+      name: combined-ca-bundle
+    volumes:
+    - name: openstack-edpm-tls-nova-certs
+      secret:
+        secretName: openstack-edpm-tls-nova-certs
+    - name: combined-ca-bundle
+      secret:
+        secretName: combined-ca-bundle
+  name: openstackansibleee
+  preserveJobs: true
+  restartPolicy: Never
+  playbook: osp.edpm.nova
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady

@@ -1,0 +1,110 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: openstack-edpm-tls
+spec:
+  env:
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  nodes:
+    edpm-compute-0:
+      ansible:
+        ansibleHost: 192.168.122.100
+        ansibleUser: cloud-admin
+        ansibleVars:
+          ctlplane_ip: 192.168.122.100
+          fqdn_internal_api: edpm-compute-0.example.com
+          internal_api_ip: 172.17.0.100
+          storage_ip: 172.18.0.100
+          tenant_ip: 172.19.0.100
+      hostName: edpm-compute-0
+  nodeTemplate:
+    ansible:
+      ansiblePort: 22
+      ansibleUser: cloud-admin
+      ansibleVars:
+        ctlplane_dns_nameservers:
+        - 192.168.122.1
+        ctlplane_gateway_ip: 192.168.122.1
+        ctlplane_host_routes:
+        - ip_netmask: 0.0.0.0/0
+          next_hop: 192.168.122.1
+        ctlplane_mtu: 1500
+        ctlplane_subnet_cidr: 24
+        dns_search_domains: []
+        timesync_ntp_servers:
+        - hostname: clock.redhat.com
+        edpm_network_config_hide_sensitive_logs: false
+        edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
+        edpm_nodes_validation_validate_controllers_icmp: false
+        edpm_nodes_validation_validate_gateway_icmp: false
+        edpm_selinux_mode: enforcing
+        edpm_sshd_allowed_ranges:
+        - 192.168.122.0/24
+        edpm_sshd_configure_firewall: true
+        enable_debug: false
+        external_cidr: "24"
+        external_host_routes: []
+        external_mtu: 1500
+        external_vlan_id: 44
+        gather_facts: false
+        internal_api_cidr: "24"
+        internal_api_host_routes: []
+        internal_api_mtu: 1500
+        internal_api_vlan_id: 20
+        networks_lower:
+          External: external
+          InternalApi: internal_api
+          Storage: storage
+          Tenant: tenant
+        neutron_physical_bridge_name: br-ex
+        neutron_public_interface_name: eth0
+        role_networks:
+        - InternalApi
+        - Storage
+        - Tenant
+        service_net_map:
+          nova_api_network: internal_api
+          nova_libvirt_network: internal_api
+        storage_cidr: "24"
+        storage_host_routes: []
+        storage_mtu: 1500
+        storage_vlan_id: 21
+        tenant_cidr: "24"
+        tenant_host_routes: []
+        tenant_mtu: 1500
+        tenant_vlan_id: 22
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    managementNetwork: ctlplane
+  preProvisioned: true
+  tlsEnabled: true
+  services:
+  - download-cache
+  - bootstrap
+  - configure-network
+  - validate-network
+  - install-os
+  - configure-os
+  - run-os
+  - ovn
+  - neutron-metadata
+  - libvirt
+  - nova
+status:
+  conditions:
+  - message: Deployment not started
+    reason: NotRequested
+    status: "False"
+    type: Ready
+  - message: Deployment not started
+    reason: NotRequested
+    status: "False"
+    type: DeploymentReady
+  - message: Input data complete
+    reason: Ready
+    status: "True"
+    type: InputReady
+  - message: Setup complete
+    reason: Ready
+    status: "True"
+    type: SetupReady

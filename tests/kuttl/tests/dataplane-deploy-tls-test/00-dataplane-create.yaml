@@ -1,0 +1,8 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands: |
+  oc deploy -f ./deploy/certs-create.yaml
+  CA_CRT=$(oc get secret osp-rootca-secret -o json|jq -r '.data."ca.crt"')
+  oc create secret generic combined-ca-bundle  --from-literal=TLSCABundleFile=$CA_CRT
+  oc deploy -f ./deploy/prep.yaml
+  oc deploy -f ./deploy/nodeset.yaml

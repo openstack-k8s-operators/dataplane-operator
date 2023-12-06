@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cert-cert-default-edpm-compute-0
+  type: kubernetes.io/tls
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack-edpm-tls-custom-service-override-certs
+  type: Opaque
+---
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  generation: 1
+  name: custom-service-override-edpm-compute-tls-services-override
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-tls-services-override
+spec:
+  backoffLimit: 6
+  debug: false
+  env:
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  envConfigMapName: openstack-aee-default-env
+  extraMounts:
+  - mounts:
+    - mountPath: /runner/env/ssh_key
+      name: ssh-key
+      subPath: ssh_key
+    - mountPath: /runner/inventory/hosts
+      name: inventory
+      subPath: inventory
+    volumes:
+    - name: ssh-key
+      secret:
+        items:
+        - key: ssh-privatekey
+          path: ssh_key
+        secretName: dataplane-ansible-ssh-private-key-secret
+    - name: inventory
+      secret:
+        items:
+        - key: inventory
+          path: inventory
+        secretName: dataplanenodeset-edpm-compute-tls
+  - mounts:
+    - mountPath: /var/lib/openstack/certs
+      name: openstack-edpm-tls-custom-service-override-certs
+    - mountPath: /var/lib/openstack/cacerts
+      name: combined-ca-bundle
+    volumes:
+    - name: openstack-edpm-tls-custom-service-override-certs
+      secret:
+        secretName: openstack-edpm-tls-custom-service-override-certs
+    - name: combined-ca-bundle
+      secret:
+        secretName: combined-ca-bundle
+  name: openstackansibleee
+  play: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep 1
+          delegate_to: localhost
+  preserveJobs: true
+  restartPolicy: Never
+  uid: 1001
+status:
+  JobStatus: Succeeded
+  conditions:
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: Ready
+  - message: AnsibleExecutionJob complete
+    reason: Ready
+    status: "True"
+    type: AnsibleExecutionJobReady

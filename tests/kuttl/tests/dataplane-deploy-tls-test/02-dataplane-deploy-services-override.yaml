@@ -1,0 +1,26 @@
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-service-override
+spec:
+  label: custom-service-override
+  tlsCertsEnabled: true
+  play: |
+    - hosts: localhost
+      gather_facts: no
+      name: kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep 1
+          delegate_to: localhost
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-compute-tls-services-override
+spec:
+  nodeSets:
+    - edpm-compute-tls
+  servicesOverride:
+    - custom-service-override
