@@ -151,6 +151,34 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		}
 	}
 
+	// get TLS certs
+	for _, nodeSet := range nodeSets.Items {
+		if nodeSet.Spec.TLSEnabled != nil && *nodeSet.Spec.TLSEnabled {
+			var services []string
+			if len(instance.Spec.ServicesOverride) != 0 {
+				services = instance.Spec.ServicesOverride
+			} else {
+				services = nodeSet.Spec.Services
+			}
+
+			for _, serviceName := range services {
+				service, err := deployment.GetService(ctx, helper, serviceName)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+				if service.Spec.TLSCertsEnabled != nil && *service.Spec.TLSCertsEnabled {
+					result, err := deployment.EnsureTLSCerts(ctx, helper, &nodeSet,
+						nodeSet.Status.AllHostnames, nodeSet.Status.AllIPs, service)
+					if err != nil {
+						return ctrl.Result{}, err
+					} else if (*result != ctrl.Result{}) {
+						return *result, nil // requeue here
+					}
+				}
+			}
+		}
+	}
+
 	// All nodeSets successfully fetched.
 	// Mark InputReadyCondition=True
 	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.ReadyMessage)

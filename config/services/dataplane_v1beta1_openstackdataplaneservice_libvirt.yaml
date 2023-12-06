@@ -5,6 +5,6 @@ metadata:
 spec:
   label: libvirt
   playbook: osp.edpm.libvirt
-  hasTLSCerts: True
+  tlsCertsEnabled: True
   issuers:
     default: osp-rootca-issuer-internal

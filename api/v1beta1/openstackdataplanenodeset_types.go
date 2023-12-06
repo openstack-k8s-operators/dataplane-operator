@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -97,6 +98,12 @@ type OpenStackDataPlaneNodeSetStatus struct {
 
 	// CtlplaneSearchDomain
 	CtlplaneSearchDomain string `json:"CtlplaneSearchDomain,omitempty" optional:"true"`
+
+	// AllHostnames
+	AllHostnames map[string]map[infranetworkv1.NetNameStr]string `json:"AllHostnames,omitempty" optional:"true"`
+
+	// AllIPs
+	AllIPs map[string]map[infranetworkv1.NetNameStr]string `json:"AllIPs,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true

@@ -208,24 +208,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 	instance.Status.DNSClusterAddresses = dnsClusterAddresses
 	instance.Status.CtlplaneSearchDomain = ctlplaneSearchDomain
-
-	// Issue certs for TLS for services that need them
-	if instance.Spec.TLSEnabled != nil && *instance.Spec.TLSEnabled {
-		for _, serviceName := range instance.Spec.Services {
-			service, err := deployment.GetService(ctx, helper, serviceName)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			if service.Spec.TLSCertsEnabled != nil && *service.Spec.TLSCertsEnabled {
-				result, err = deployment.EnsureTLSCerts(ctx, helper, instance, allHostnames, allIPs, service)
-				if err != nil {
-					return ctrl.Result{}, err
-				} else if (result != ctrl.Result{}) {
-					return result, nil
-				}
-			}
-		}
-	}
+	instance.Status.AllHostnames = allHostnames
+	instance.Status.AllIPs = allIPs
 
 	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 
