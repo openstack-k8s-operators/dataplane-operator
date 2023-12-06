@@ -143,5 +143,7 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | deployed | Deployed | bool | false |
 | DNSClusterAddresses | DNSClusterAddresses | []string | false |
 | CtlplaneSearchDomain | CtlplaneSearchDomain | string | false |
+| AllHostnames | AllHostnames | map[string]map[infranetworkv1.NetNameStr]string | false |
+| AllIPs | AllIPs | map[string]map[infranetworkv1.NetNameStr]string | false |
 
 [Back to Custom Resources](#custom-resources)

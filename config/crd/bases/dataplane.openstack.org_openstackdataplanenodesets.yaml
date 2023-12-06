@@ -1884,6 +1884,18 @@ spec:
             type: object
           status:
             properties:
+              AllHostnames:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                type: object
+              AllIPs:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                type: object
               CtlplaneSearchDomain:
                 type: string
               DNSClusterAddresses:

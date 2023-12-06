@@ -42,7 +42,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allHostnames map[string]map[infranetworkv1.NetNameStr]string,
 	allIPs map[string]map[infranetworkv1.NetNameStr]string,
-	service dataplanev1.OpenStackDataPlaneService) (ctrl.Result, error) {
+	service dataplanev1.OpenStackDataPlaneService) (*ctrl.Result, error) {
 
 	certsData := map[string][]byte{}
 
@@ -92,7 +92,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 
 		// handle cert request errors
 		if (err != nil) || (result != ctrl.Result{}) {
-			return result, err
+			return &result, err
 		}
 		// TODO(alee) Add an owner reference to the secret so it can be monitored
 		// We'll do this once stuggi adds a function to do this in libcommon
@@ -113,12 +113,12 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 	_, result, err := secret.CreateOrPatchSecret(ctx, helper, instance, serviceCertsSecret)
 	if err != nil {
 		err = fmt.Errorf("Error creating certs secret for %s - %w", service.Name, err)
-		return ctrl.Result{}, err
+		return &ctrl.Result{}, err
 	} else if result != controllerutil.OperationResultNone {
-		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
+		return &ctrl.Result{RequeueAfter: time.Second * 5}, nil
 	}
 
-	return ctrl.Result{}, nil
+	return &ctrl.Result{}, nil
 }
 
 // GetTLSNodeCert creates or retrieves the cert for a node for a given service
