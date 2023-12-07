@@ -42,8 +42,8 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allHostnames map[string]map[infranetworkv1.NetNameStr]string,
 	allIPs map[string]map[infranetworkv1.NetNameStr]string,
-	service dataplanev1.OpenStackDataPlaneService) (*ctrl.Result, error) {
-
+	service dataplanev1.OpenStackDataPlaneService,
+) (*ctrl.Result, error) {
 	certsData := map[string][]byte{}
 
 	// for each node in the nodeset, issue all the TLS certs needed based on the
@@ -112,7 +112,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 	}
 	_, result, err := secret.CreateOrPatchSecret(ctx, helper, instance, serviceCertsSecret)
 	if err != nil {
-		err = fmt.Errorf("Error creating certs secret for %s - %w", service.Name, err)
+		err = fmt.Errorf("error creating certs secret for %s - %w", service.Name, err)
 		return &ctrl.Result{}, err
 	} else if result != controllerutil.OperationResultNone {
 		return &ctrl.Result{RequeueAfter: time.Second * 5}, nil
@@ -126,12 +126,13 @@ func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	secretName string, issuer string,
 	labels map[string]string, nodeName string,
-	hostnames []string, ips []string, usages []certmgrv1.KeyUsage) (*corev1.Secret, ctrl.Result, error) {
+	hostnames []string, ips []string, usages []certmgrv1.KeyUsage,
+) (*corev1.Secret, ctrl.Result, error) {
 	certSecret, _, err := secret.GetSecret(ctx, helper, secretName, instance.Namespace)
 	var result ctrl.Result
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
-			err = fmt.Errorf("Error retrieving secret %s - %w", secretName, err)
+			err = fmt.Errorf("error retrieving secret %s - %w", secretName, err)
 			return nil, ctrl.Result{}, err
 		}
 
