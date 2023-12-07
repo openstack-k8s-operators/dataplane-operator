@@ -74,7 +74,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 			ctlIPs := []string{ips[CtlPlaneNetwork]}
 			certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, secretName,
 				service.Spec.Issuers["default"], labels,
-				nodeName, hosts, ctlIPs, nil)
+				hosts, ctlIPs, nil)
 		default:
 			// The default case provides a cert with all the dns names for the host.
 			// This will probably be sufficient for most services.  If a service needs
@@ -87,7 +87,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 			secretName = "cert-default-" + nodeName
 			certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, secretName,
 				certmanager.RootCAIssuerInternalLabel, labels,
-				nodeName, hosts, nil, nil)
+				hosts, nil, nil)
 		}
 
 		// handle cert request errors
@@ -125,7 +125,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	secretName string, issuer string,
-	labels map[string]string, nodeName string,
+	labels map[string]string,
 	hostnames []string, ips []string, usages []certmgrv1.KeyUsage,
 ) (*corev1.Secret, ctrl.Result, error) {
 	certSecret, _, err := secret.GetSecret(ctx, helper, secretName, instance.Namespace)
