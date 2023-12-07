@@ -320,16 +320,20 @@ func checkDeployment(helper *helper.Helper,
 		helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneDeployment CRs %v")
 		return false, false, err
 	}
+
+	isDeploymentReady := false
+	deploymentExists := false
 	for _, deployment := range deployments.Items {
 		if slices.Contains(
 			deployment.Spec.NodeSets, request.NamespacedName.Name) {
+			deploymentExists = true
+			isDeploymentReady = false
 			if deployment.Status.Deployed {
-				return true, true, nil
+				isDeploymentReady = true
 			}
-			return true, false, nil
 		}
 	}
-	return false, false, nil
+	return deploymentExists, isDeploymentReady, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
