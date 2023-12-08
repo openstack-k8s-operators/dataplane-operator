@@ -32,7 +32,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/go-logr/logr"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
@@ -334,7 +333,7 @@ func checkDeployment(helper *helper.Helper,
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	reconcileFunction := handler.EnqueueRequestsFromMapFunc(func(o client.Object) []reconcile.Request {
+	reconcileFunction := handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, o client.Object) []reconcile.Request {
 		result := []reconcile.Request{}
 
 		// For each DNSMasq change event get the list of all
@@ -361,7 +360,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		return result
 	})
 
-	deploymentWatcher := handler.EnqueueRequestsFromMapFunc(func(obj client.Object) []reconcile.Request {
+	deploymentWatcher := handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
 		var namespace string = obj.GetNamespace()
 		result := []reconcile.Request{}
 
@@ -383,9 +382,9 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		Owns(&infranetworkv1.IPSet{}).
 		Owns(&infranetworkv1.DNSData{}).
 		Owns(&corev1.Secret{}).
-		Watches(&source.Kind{Type: &infranetworkv1.DNSMasq{}},
+		Watches(&infranetworkv1.DNSMasq{},
 			reconcileFunction).
-		Watches(&source.Kind{Type: &dataplanev1.OpenStackDataPlaneDeployment{}},
+		Watches(&dataplanev1.OpenStackDataPlaneDeployment{},
 			deploymentWatcher).
 		Complete(r)
 }
