@@ -42,7 +42,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 )
 
@@ -382,7 +382,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1.OpenStackDataPlaneNodeSet{}).
-		Owns(&v1alpha1.OpenStackAnsibleEE{}).
+		Owns(&v1beta1.OpenStackAnsibleEE{}).
 		Owns(&baremetalv1.OpenStackBaremetalSet{}).
 		Owns(&infranetworkv1.IPSet{}).
 		Owns(&infranetworkv1.DNSData{}).

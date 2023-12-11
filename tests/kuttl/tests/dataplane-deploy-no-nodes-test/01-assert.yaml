@@ -44,7 +44,7 @@ status:
     status: "True"
     type: SetupReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: download-cache-edpm-compute-no-nodes
@@ -94,7 +94,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: bootstrap-edpm-compute-no-nodes
@@ -145,7 +145,7 @@ status:
     type: AnsibleExecutionJobReady
 
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: configure-network-edpm-compute-no-nodes
@@ -195,7 +195,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: validate-network-edpm-compute-no-nodes
@@ -245,7 +245,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: install-os-edpm-compute-no-nodes
@@ -295,7 +295,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
@@ -346,7 +346,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: run-os-edpm-compute-no-nodes
@@ -396,7 +396,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
@@ -458,7 +458,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
@@ -531,7 +531,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
@@ -593,7 +593,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
@@ -655,7 +655,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
@@ -717,7 +717,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: libvirt-edpm-compute-no-nodes
@@ -770,7 +770,7 @@ status:
     status: "True"
     type: AnsibleExecutionJobReady
 ---
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: nova-edpm-compute-no-nodes
