@@ -53,12 +53,12 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	}
 
 	for nodeName, node := range instance.Spec.Nodes {
-		host := nodeSetGroup.AddHost(nodeName)
+		host := nodeSetGroup.AddHost(strings.Split(node.HostName, ".")[0])
 		// Use ansible_host if provided else use hostname. Fall back to
 		// nodeName if all else fails.
 		if node.Ansible.AnsibleHost != "" {
 			host.Vars["ansible_host"] = node.Ansible.AnsibleHost
-		} else if node.HostName != "" {
+		} else {
 			host.Vars["ansible_host"] = node.HostName
 		}
 
@@ -70,7 +70,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 
 		ipSet, ok := allIPSets[nodeName]
 		if ok {
-			populateInventoryFromIPAM(&ipSet, host, dnsAddresses, nodeName)
+			populateInventoryFromIPAM(&ipSet, host, dnsAddresses, nodeName, node.HostName)
 		}
 
 	}
@@ -102,7 +102,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 // populateInventoryFromIPAM populates inventory from IPAM
 func populateInventoryFromIPAM(
 	ipSet *infranetworkv1.IPSet, host ansible.Host,
-	dnsAddresses []string, nodeName string) {
+	dnsAddresses []string, nodeName string, hostName string) {
 	var dnsSearchDomains []string
 	for _, res := range ipSet.Status.Reservation {
 		// Build the vars for ips/routes etc
@@ -118,7 +118,11 @@ func populateInventoryFromIPAM(
 			host.Vars["ctlplane_gateway_ip"] = res.Gateway
 			host.Vars["ctlplane_dns_nameservers"] = dnsAddresses
 			host.Vars["ctlplane_host_routes"] = res.Routes
-			host.Vars["canonical_hostname"] = strings.Join([]string{nodeName, res.DNSDomain}, ".")
+			if !isFQDN(hostName) {
+				host.Vars["canonical_hostname"] = strings.Join([]string{hostName, res.DNSDomain}, ".")
+			} else {
+				host.Vars["canonical_hostname"] = hostName
+			}
 		default:
 			entry := toSnakeCase(string(n))
 			host.Vars[entry+"_ip"] = res.Address

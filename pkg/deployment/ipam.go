@@ -18,7 +18,6 @@ package deployment
 
 import (
 	"context"
-	"regexp"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -85,12 +84,7 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 		allHostnames[nodeName] = map[infranetworkv1.NetNameStr]string{}
 		allIPs[nodeName] = map[infranetworkv1.NetNameStr]string{}
 
-		if isFQDN(hostName) {
-			shortName = strings.Split(hostName, ".")[0]
-		} else {
-			shortName = hostName
-		}
-
+		shortName = strings.Split(hostName, ".")[0]
 		if len(nets) == 0 {
 			nets = instance.Spec.NodeTemplate.Networks
 		}
@@ -291,13 +285,4 @@ func CheckDNSService(ctx context.Context, helper *helper.Helper,
 	dnsClusterAddresses := dnsmasqList.Items[0].Status.DNSClusterAddresses
 	dnsAddresses := dnsmasqList.Items[0].Status.DNSAddresses
 	return dnsAddresses, dnsClusterAddresses, true, nil
-}
-
-func isFQDN(hostname string) bool {
-	// Regular expression to match a valid FQDN
-	// This regex assumes that the hostname and domain name segments only contain letters, digits, hyphens, and periods.
-	regex := `^([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$`
-
-	match, _ := regexp.MatchString(regex, hostname)
-	return match
 }
