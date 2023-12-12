@@ -24,7 +24,7 @@ import (
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
-	"github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -105,7 +105,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		It("should have the Spec fields initialized", func() {
 			dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
 			emptyNodeSpec := dataplanev1.OpenStackDataPlaneNodeSetSpec{
-				BaremetalSetTemplate: v1beta1.OpenStackBaremetalSetSpec{
+				BaremetalSetTemplate: baremetalv1.OpenStackBaremetalSetSpec{
 					BaremetalHosts:        nil,
 					OSImage:               "",
 					UserData:              nil,
@@ -118,18 +118,18 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					CtlplaneGateway:       "",
 					CtlplaneNetmask:       "255.255.255.0",
 					BmhNamespace:          "openshift-machine-api",
-					HardwareReqs: v1beta1.HardwareReqs{
-						CPUReqs: v1beta1.CPUReqs{
+					HardwareReqs: baremetalv1.HardwareReqs{
+						CPUReqs: baremetalv1.CPUReqs{
 							Arch:     "",
-							CountReq: v1beta1.CPUCountReq{Count: 0, ExactMatch: false},
-							MhzReq:   v1beta1.CPUMhzReq{Mhz: 0, ExactMatch: false},
+							CountReq: baremetalv1.CPUCountReq{Count: 0, ExactMatch: false},
+							MhzReq:   baremetalv1.CPUMhzReq{Mhz: 0, ExactMatch: false},
 						},
-						MemReqs: v1beta1.MemReqs{
-							GbReq: v1beta1.MemGbReq{Gb: 0, ExactMatch: false},
+						MemReqs: baremetalv1.MemReqs{
+							GbReq: baremetalv1.MemGbReq{Gb: 0, ExactMatch: false},
 						},
-						DiskReqs: v1beta1.DiskReqs{
-							GbReq:  v1beta1.DiskGbReq{Gb: 0, ExactMatch: false},
-							SSDReq: v1beta1.DiskSSDReq{SSD: false, ExactMatch: false},
+						DiskReqs: baremetalv1.DiskReqs{
+							GbReq:  baremetalv1.DiskGbReq{Gb: 0, ExactMatch: false},
+							SSDReq: baremetalv1.DiskSSDReq{SSD: false, ExactMatch: false},
 						},
 					},
 					PasswordSecret:   nil,
