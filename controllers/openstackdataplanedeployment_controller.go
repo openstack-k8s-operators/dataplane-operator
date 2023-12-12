@@ -36,7 +36,7 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
-	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 )
 
 // OpenStackDataPlaneDeploymentReconciler reconciles a OpenStackDataPlaneDeployment object
@@ -270,6 +270,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 func (r *OpenStackDataPlaneDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1.OpenStackDataPlaneDeployment{}).
-		Owns(&v1alpha1.OpenStackAnsibleEE{}).
+		Owns(&ansibleeev1.OpenStackAnsibleEE{}).
 		Complete(r)
 }

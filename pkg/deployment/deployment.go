@@ -34,7 +34,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
-	ansibleeev1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -185,7 +185,7 @@ func ConditionalDeploy(
 			return err
 		}
 
-		if ansibleEE.Status.JobStatus == ansibleeev1alpha1.JobStatusSucceeded {
+		if ansibleEE.Status.JobStatus == ansibleeev1.JobStatusSucceeded {
 			log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 			status.Conditions.Set(condition.TrueCondition(
 				readyCondition,
@@ -193,7 +193,7 @@ func ConditionalDeploy(
 			return nil
 		}
 
-		if ansibleEE.Status.JobStatus == ansibleeev1alpha1.JobStatusRunning || ansibleEE.Status.JobStatus == ansibleeev1alpha1.JobStatusPending {
+		if ansibleEE.Status.JobStatus == ansibleeev1.JobStatusRunning || ansibleEE.Status.JobStatus == ansibleeev1.JobStatusPending {
 			log.Info(fmt.Sprintf("AnsibleEE job is not yet completed: Execution: %s, Status: %s", ansibleEE.Name, ansibleEE.Status.JobStatus))
 			status.Conditions.Set(condition.FalseCondition(
 				readyCondition,
@@ -203,7 +203,7 @@ func ConditionalDeploy(
 			return nil
 		}
 
-		if ansibleEE.Status.JobStatus == ansibleeev1alpha1.JobStatusFailed {
+		if ansibleEE.Status.JobStatus == ansibleeev1.JobStatusFailed {
 			log.Info(fmt.Sprintf("Condition %s error", readyCondition))
 			err = fmt.Errorf("execution.name %s Execution.namespace %s Execution.status.jobstatus: %s", ansibleEE.Name, ansibleEE.Namespace, ansibleEE.Status.JobStatus)
 			status.Conditions.Set(condition.FalseCondition(
