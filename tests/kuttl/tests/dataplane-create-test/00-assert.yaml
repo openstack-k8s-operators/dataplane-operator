@@ -92,11 +92,11 @@ spec:
 status:
   conditions:
   - message: Deployment not started
-    reason: NotRequested
+    reason: Requested
     status: "False"
     type: Ready
   - message: Deployment not started
-    reason: NotRequested
+    reason: Requested
     status: "False"
     type: DeploymentReady
   - message: Input data complete

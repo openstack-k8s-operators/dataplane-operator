@@ -301,6 +301,11 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
 			condition.RequestedReason, condition.SeverityInfo,
 			condition.DeploymentReadyRunningMessage)
+	} else {
+		logger.Info("Set NodeSet DeploymentReadyCondition false")
+		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
+			condition.RequestedReason, condition.SeverityInfo,
+			condition.DeploymentReadyInitMessage)
 	}
 	return ctrl.Result{}, nil
 }
@@ -322,6 +327,9 @@ func checkDeployment(helper *helper.Helper,
 	isDeploymentReady := false
 	deploymentExists := false
 	for _, deployment := range deployments.Items {
+		if !deployment.DeletionTimestamp.IsZero() {
+			continue
+		}
 		if slices.Contains(
 			deployment.Spec.NodeSets, request.NamespacedName.Name) {
 			deploymentExists = true
