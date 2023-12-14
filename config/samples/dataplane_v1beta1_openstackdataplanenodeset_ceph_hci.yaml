@@ -123,6 +123,7 @@ spec:
     - configure-os
     - run-os
     - ceph-client
+    - install-certs
     - ovn
     - neutron-metadata
     - libvirt
