@@ -49,6 +49,7 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	PreProvisioned bool `json:"preProvisioned,omitempty"`
 
 	// Env is a list containing the environment variables to pass to the pod
+	// +kubebuilder:validation:Optional
 	Env []corev1.EnvVar `json:"env,omitempty"`
 
 	// +kubebuilder:validation:Optional

@@ -4,11 +4,6 @@ metadata:
   name: openstack-edpm-hci
   namespace: openstack
 spec:
-  env:
-    - name: ANSIBLE_CALLBACKS_ENABLED
-      value: profile_tasks
-    - name: ANSIBLE_FORCE_COLOR
-      value: "True"
   networkAttachments:
   - ctlplane
   nodeTemplate:
