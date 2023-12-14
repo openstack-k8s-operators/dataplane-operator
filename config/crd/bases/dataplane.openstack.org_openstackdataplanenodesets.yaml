@@ -268,6 +268,7 @@ spec:
                       ansiblePort:
                         type: integer
                       ansibleUser:
+                        default: cloud-admin
                         type: string
                       ansibleVars:
                         x-kubernetes-preserve-unknown-fields: true
@@ -1020,6 +1021,7 @@ spec:
                       type: object
                     type: array
                   managementNetwork:
+                    default: ctlplane
                     type: string
                   networkData:
                     properties:
@@ -1068,6 +1070,7 @@ spec:
                         ansiblePort:
                           type: integer
                         ansibleUser:
+                          default: cloud-admin
                           type: string
                         ansibleVars:
                           x-kubernetes-preserve-unknown-fields: true

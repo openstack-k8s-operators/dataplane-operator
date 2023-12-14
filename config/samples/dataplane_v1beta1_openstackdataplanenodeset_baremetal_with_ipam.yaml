@@ -27,6 +27,8 @@ spec:
   nodes:
     edpm-compute-0:
       hostName: edpm-compute-0
+      ansible:
+        ansibleHost: 192.168.122.100
   networkAttachments:
     - ctlplane
   nodeTemplate:
@@ -43,18 +45,7 @@ spec:
         subnetName: subnet1
     managementNetwork: ctlplane
     ansible:
-      ansibleUser: cloud-admin
-      ansiblePort: 22
       ansibleVars:
-         service_net_map:
-           nova_api_network: internal_api
-           nova_libvirt_network: internal_api
-         timesync_ntp_servers:
-           - hostname: pool.ntp.org
-         # edpm_network_config
-         # Default nic config template for a EDPM compute node
-         # These vars are edpm_network_config role vars
-         edpm_network_config_hide_sensitive_logs: false
          edpm_network_config_template: |
               ---
               {% set mtu_list = [ctlplane_mtu] %}
@@ -97,7 +88,4 @@ spec:
          gather_facts: false
          enable_debug: false
          # edpm firewall, change the allowed CIDR if needed
-         edpm_sshd_configure_firewall: true
          edpm_sshd_allowed_ranges: ['192.168.111.0/24']
-         # SELinux module
-         edpm_selinux_mode: enforcing

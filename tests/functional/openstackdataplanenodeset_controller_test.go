@@ -141,7 +141,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				NodeTemplate: dataplanev1.NodeTemplate{
 					AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
 					Networks:                   nil,
-					ManagementNetwork:          "",
+					ManagementNetwork:          "ctlplane",
 					Ansible: dataplanev1.AnsibleOpts{
 						AnsibleUser: "",
 						AnsibleHost: "",

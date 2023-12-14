@@ -20,7 +20,7 @@ AnsibleEESpec is a specification of the ansible EE attributes
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | false |
+| networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | true |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | false |
 | ansibleTags | AnsibleTags for ansible execution | string | false |
 | ansibleLimit | AnsibleLimit for ansible execution | string | false |
@@ -37,7 +37,7 @@ AnsibleOpts defines a logical grouping of Ansible related configuration options.
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| ansibleUser | AnsibleUser SSH user for Ansible connection | string | false |
+| ansibleUser | AnsibleUser SSH user for Ansible connection | string | true |
 | ansibleHost | AnsibleHost SSH host for Ansible connection | string | false |
 | ansiblePort | AnsiblePort SSH port for Ansible connection | int | false |
 | ansibleVars | AnsibleVars for configuring ansible | map[string]json.RawMessage | false |
@@ -68,7 +68,7 @@ NodeTemplate is a specification of the node attributes that override top level a
 | ----- | ----------- | ------ | -------- |
 | ansibleSSHPrivateKeySecret | AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing private SSH key for connecting to node. The named secret must be of the form: Secret.data.ssh-privatekey: <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets> | string | true |
 | networks | Networks - Instance networks | []infranetworkv1.IPSetNetwork | false |
-| managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | false |
+| managementNetwork | ManagementNetwork - Name of network to use for management (SSH/Ansible) | string | true |
 | ansible | Ansible is the group of Ansible related configuration options. | [AnsibleOpts](#ansibleopts) | false |
 | extraMounts | ExtraMounts containing files which can be mounted into an Ansible Execution Pod | []storage.VolMounts | false |
 | userData | UserData  node specific user-data | *corev1.SecretReference | false |
