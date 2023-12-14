@@ -17,8 +17,6 @@ limitations under the License.
 package v1beta1
 
 import (
-	"fmt"
-
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -52,6 +50,9 @@ type OpenStackDataPlaneDeploymentStatus struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
 	// Conditions
 	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
+
+	// NodeSetConditions
+	NodeSetConditions map[string]condition.Conditions `json:"nodeSetConditions,omitempty" optional:"true"`
 
 	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Deployed
@@ -101,14 +102,17 @@ func (instance *OpenStackDataPlaneDeployment) InitConditions() {
 		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(condition.InputReadyCondition, condition.InitReason, condition.InitReason),
 	)
-
+	instance.Status.Conditions.Init(&cl)
+	instance.Status.NodeSetConditions = make(map[string]condition.Conditions)
 	if instance.Spec.NodeSets != nil {
 		for _, nodeSet := range instance.Spec.NodeSets {
-			readyCondition := condition.Type(fmt.Sprintf(NodeSetDeploymentReadyCondition, nodeSet))
-			cl = append(cl, *condition.UnknownCondition(readyCondition, condition.InitReason, condition.InitReason))
+			nsConds := condition.Conditions{}
+			nsConds.Set(condition.UnknownCondition(
+				condition.Type(NodeSetDeploymentReadyCondition), condition.InitReason, condition.InitReason))
+			instance.Status.NodeSetConditions[nodeSet] = nsConds
+
 		}
 	}
 
-	instance.Status.Conditions.Init(&cl)
 	instance.Status.Deployed = false
 }

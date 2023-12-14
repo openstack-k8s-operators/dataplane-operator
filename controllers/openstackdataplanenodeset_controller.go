@@ -287,7 +287,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 			condition.DeploymentReadyInitMessage)
 	}
 
-	deploymentExists, isDeploymentReady, err := checkDeployment(helper, req)
+	deploymentExists, isDeploymentReady, err := checkDeployment(helper, instance)
 	if err != nil {
 		logger.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
 		return ctrl.Result{}, err
@@ -311,12 +311,12 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 }
 
 func checkDeployment(helper *helper.Helper,
-	request ctrl.Request,
+	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 ) (bool, bool, error) {
 	// Get all completed deployments
 	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
 	opts := []client.ListOption{
-		client.InNamespace(request.NamespacedName.Namespace),
+		client.InNamespace(instance.Namespace),
 	}
 	err := helper.GetClient().List(context.Background(), deployments, opts...)
 	if err != nil {
@@ -331,12 +331,17 @@ func checkDeployment(helper *helper.Helper,
 			continue
 		}
 		if slices.Contains(
-			deployment.Spec.NodeSets, request.NamespacedName.Name) {
+			deployment.Spec.NodeSets, instance.Name) {
 			deploymentExists = true
 			isDeploymentReady = false
 			if deployment.Status.Deployed {
 				isDeploymentReady = true
 			}
+			deploymentConditions := deployment.Status.NodeSetConditions[instance.Name]
+			if instance.Status.DeploymentConditions == nil {
+				instance.Status.DeploymentConditions = make(map[string]condition.Conditions)
+			}
+			instance.Status.DeploymentConditions[deployment.Name] = deploymentConditions
 		}
 	}
 	return deploymentExists, isDeploymentReady, nil

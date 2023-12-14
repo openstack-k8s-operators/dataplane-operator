@@ -87,27 +87,27 @@ const (
 
 	// NodeSetDeploymentReadyCondition Status=True condition indicates if the
 	// NodeSet Deployment is finished and successful.
-	NodeSetDeploymentReadyCondition string = "%s Deployment ready"
+	NodeSetDeploymentReadyCondition string = "Deployment ready for NodeSet"
 
 	// NodeSetDeploymentReadyMessage ready
-	NodeSetDeploymentReadyMessage = "%s Deployment ready"
+	NodeSetDeploymentReadyMessage = "Deployment ready for NodeSet"
 
 	// NodeSetDeploymentReadyWaitingMessage not yet ready
-	NodeSetDeploymentReadyWaitingMessage = "%s Deployment not yet ready"
+	NodeSetDeploymentReadyWaitingMessage = "Deployment not yet ready for NodeSet"
 
 	// NodeSetDeploymentErrorMessage error
-	NodeSetDeploymentErrorMessage = "%s Deployment error occurred %s"
+	NodeSetDeploymentErrorMessage = "Deployment error occurred %s for NodeSet"
 
 	// NodeSetServiceDeploymentReadyCondition Status=True condition indicates if the
 	// NodeSet Deployment is finished and successful.
-	NodeSetServiceDeploymentReadyCondition string = "%s %s Deployment ready"
+	NodeSetServiceDeploymentReadyCondition string = "%s Deployment ready"
 
 	// NodeSetServiceDeploymentReadyMessage ready
-	NodeSetServiceDeploymentReadyMessage = "%s %s Deployment ready"
+	NodeSetServiceDeploymentReadyMessage = "%s Deployment ready"
 
 	// NodeSetServiceDeploymentReadyWaitingMessage not yet ready
-	NodeSetServiceDeploymentReadyWaitingMessage = "%s %s Deployment not yet ready"
+	NodeSetServiceDeploymentReadyWaitingMessage = "%s Deployment not yet ready"
 
 	// NodeSetServiceDeploymentErrorMessage error
-	NodeSetServiceDeploymentErrorMessage = "%s %s Deployment error occurred"
+	NodeSetServiceDeploymentErrorMessage = "%s Deployment error occurred"
 )

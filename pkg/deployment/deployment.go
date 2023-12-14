@@ -64,7 +64,6 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 	// service deployment
 	aeeSpecMounts := make([]storage.VolMounts, len(d.AeeSpec.ExtraMounts))
 	copy(aeeSpecMounts, d.AeeSpec.ExtraMounts)
-
 	// Deploy the composable services
 	for _, service := range services {
 		log.Info("Deploying service", "service", service)
@@ -74,10 +73,10 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 		}
 		deployName = foundService.Name
 		deployLabel = foundService.Spec.Label
-		readyCondition = condition.Type(fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyCondition, d.NodeSet.Name, service))
-		readyWaitingMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyWaitingMessage, d.NodeSet.Name, deployName)
-		readyMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyMessage, d.NodeSet.Name, deployName)
-		readyErrorMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentErrorMessage, d.NodeSet.Name, deployName)
+		readyCondition = condition.Type(fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyCondition, service))
+		readyWaitingMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyWaitingMessage, deployName)
+		readyMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyMessage, deployName)
+		readyErrorMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentErrorMessage, deployName)
 		d.AeeSpec.OpenStackAnsibleEERunnerImage = foundService.Spec.OpenStackAnsibleEERunnerImage
 
 		// Reset ExtraMounts to its original value, and then add in service
@@ -106,7 +105,8 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 			}
 		}
 
-		if err != nil || !d.Status.Conditions.IsTrue(readyCondition) {
+		nsConditions := d.Status.NodeSetConditions[d.NodeSet.Name]
+		if err != nil || !nsConditions.IsTrue(readyCondition) {
 			log.Info(fmt.Sprintf("Condition %s not ready", readyCondition))
 			return &ctrl.Result{}, err
 		}
@@ -130,7 +130,8 @@ func (d *Deployer) ConditionalDeploy(
 	var err error
 	log := d.Helper.GetLogger()
 
-	if d.Status.Conditions.IsUnknown(readyCondition) {
+	nsConditions := d.Status.NodeSetConditions[d.NodeSet.Name]
+	if nsConditions.IsUnknown(readyCondition) {
 		log.Info(fmt.Sprintf("%s Unknown, starting %s", readyCondition, deployName))
 		err = d.DeployService(
 			foundService)
@@ -138,18 +139,15 @@ func (d *Deployer) ConditionalDeploy(
 			util.LogErrorForObject(d.Helper, err, fmt.Sprintf("Unable to %s for %s", deployName, d.NodeSet.Name), d.NodeSet)
 			return err
 		}
-
-		d.Status.Conditions.Set(condition.FalseCondition(
+		nsConditions.Set(condition.FalseCondition(
 			readyCondition,
 			condition.RequestedReason,
 			condition.SeverityInfo,
 			readyWaitingMessage))
 
-		return nil
-
 	}
 
-	if d.Status.Conditions.IsFalse(readyCondition) {
+	if nsConditions.IsFalse(readyCondition) {
 		ansibleEE, err := dataplaneutil.GetAnsibleExecution(d.Ctx, d.Helper, d.Deployment, deployLabel)
 		if err != nil {
 			// Return nil if we don't have AnsibleEE available yet
@@ -158,46 +156,42 @@ func (d *Deployer) ConditionalDeploy(
 				return nil
 			}
 			log.Error(err, fmt.Sprintf("Error getting ansibleEE job for %s", deployName))
-			d.Status.Conditions.Set(condition.FalseCondition(
+			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.ErrorReason,
 				condition.SeverityWarning,
 				readyErrorMessage,
 				err.Error()))
-			return err
 		}
 
 		if ansibleEE.Status.JobStatus == ansibleeev1.JobStatusSucceeded {
 			log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
-			d.Status.Conditions.Set(condition.TrueCondition(
+			nsConditions.Set(condition.TrueCondition(
 				readyCondition,
 				readyMessage))
-			return nil
 		}
 
 		if ansibleEE.Status.JobStatus == ansibleeev1.JobStatusRunning || ansibleEE.Status.JobStatus == ansibleeev1.JobStatusPending {
 			log.Info(fmt.Sprintf("AnsibleEE job is not yet completed: Execution: %s, Status: %s", ansibleEE.Name, ansibleEE.Status.JobStatus))
-			d.Status.Conditions.Set(condition.FalseCondition(
+			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.RequestedReason,
 				condition.SeverityInfo,
 				readyWaitingMessage))
-			return nil
 		}
 
 		if ansibleEE.Status.JobStatus == ansibleeev1.JobStatusFailed {
 			log.Info(fmt.Sprintf("Condition %s error", readyCondition))
 			err = fmt.Errorf("execution.name %s Execution.namespace %s Execution.status.jobstatus: %s", ansibleEE.Name, ansibleEE.Namespace, ansibleEE.Status.JobStatus)
-			d.Status.Conditions.Set(condition.FalseCondition(
+			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.ErrorReason,
 				condition.SeverityError,
 				readyErrorMessage,
 				err.Error()))
-			return err
 		}
-
 	}
+	d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
 
 	return err
 }

@@ -119,6 +119,7 @@ OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPl
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | conditions | Conditions | condition.Conditions | false |
+| nodeSetConditions | NodeSetConditions | map[string]condition.Conditions | false |
 | deployed | Deployed | bool | false |
 
 [Back to Custom Resources](#custom-resources)

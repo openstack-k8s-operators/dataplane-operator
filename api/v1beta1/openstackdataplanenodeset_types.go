@@ -93,6 +93,9 @@ type OpenStackDataPlaneNodeSetStatus struct {
 	// Deployed
 	Deployed bool `json:"deployed,omitempty" optional:"true"`
 
+	// DeploymentStatuses
+	DeploymentConditions map[string]condition.Conditions `json:"deploymentStatuses,omitempty" optional:"true"`
+
 	// DNSClusterAddresses
 	DNSClusterAddresses []string `json:"DNSClusterAddresses,omitempty" optional:"true"`
 
@@ -127,6 +130,7 @@ func (instance OpenStackDataPlaneNodeSet) IsReady() bool {
 // InitConditions - Initializes Status Conditons
 func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 	instance.Status.Conditions = condition.Conditions{}
+	instance.Status.DeploymentConditions = make(map[string]condition.Conditions)
 
 	cl := condition.CreateList(
 		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
