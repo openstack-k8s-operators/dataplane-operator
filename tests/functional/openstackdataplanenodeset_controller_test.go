@@ -165,6 +165,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					"configure-os",
 					"run-os",
 					"reboot-os",
+					"install-certs",
 					"ovn",
 					"neutron-metadata",
 					"libvirt",
