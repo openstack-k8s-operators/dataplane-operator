@@ -12,6 +12,7 @@ spec:
   - configure-os
   - run-os
   - reboot-os
+  - install-certs
   - ovn
   - neutron-metadata
   - libvirt

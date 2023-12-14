@@ -1,0 +1,7 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: install-certs
+spec:
+  label: install-certs
+  playbook: osp.edpm.install_certs
