@@ -135,7 +135,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			// NodeSet not found, force a requeue
 			if k8s_errors.IsNotFound(err) {
 				logger.Info("NodeSet not found", "NodeSet", nodeSet)
-				return ctrl.Result{RequeueAfter: time.Second * 15}, nil
+				return ctrl.Result{RequeueAfter: time.Second * time.Duration(instance.Spec.DeploymentRequeueTime)}, nil
 			}
 			// Error reading the object - requeue the request.
 			return ctrl.Result{}, err
@@ -147,7 +147,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	for _, nodeSet := range nodeSets.Items {
 		if !nodeSet.Status.Conditions.IsTrue(dataplanev1.SetupReadyCondition) {
 			logger.Info("NodeSet SetupReadyCondition is not True", "NodeSet", nodeSet.Name)
-			return ctrl.Result{RequeueAfter: time.Second * 15}, nil
+			return ctrl.Result{RequeueAfter: time.Second * time.Duration(instance.Spec.DeploymentRequeueTime)}, nil
 		}
 	}
 

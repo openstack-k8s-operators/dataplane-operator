@@ -109,6 +109,7 @@ OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlane
 | ansibleLimit | AnsibleLimit for ansible execution | string | false |
 | ansibleSkipTags | AnsibleSkipTags for ansible execution | string | false |
 | servicesOverride | ServicesOverride list | []string | true |
+| deploymentRequeueTime | Time before the deployment is requeued in seconds | int | true |
 
 [Back to Custom Resources](#custom-resources)
 

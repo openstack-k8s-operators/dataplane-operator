@@ -45,6 +45,11 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// +kubebuilder:validation:Optional
 	// ServicesOverride list
 	ServicesOverride []string `json:"servicesOverride"`
+
+	// Time before the deployment is requeued in seconds
+	// +kubebuilder:validation:Minimum:=1
+	// +kubebuilder:default:=15
+	DeploymentRequeueTime int `json:"deploymentRequeueTime"`
 }
 
 // OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPlaneDeployment
