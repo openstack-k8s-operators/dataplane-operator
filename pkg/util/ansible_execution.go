@@ -43,7 +43,7 @@ func AnsibleExecution(
 	service *dataplanev1.OpenStackDataPlaneService,
 	sshKeySecret string,
 	inventorySecret string,
-	aeeSpec dataplanev1.AnsibleEESpec,
+	aeeSpec *dataplanev1.AnsibleEESpec,
 ) error {
 	var err error
 	var cmdLineArguments strings.Builder
@@ -192,7 +192,7 @@ func GetAnsibleExecution(ctx context.Context, helper *helper.Helper, obj client.
 	} else if len(ansibleEEs.Items) == 1 {
 		ansibleEE = &ansibleEEs.Items[0]
 	} else {
-		return nil, fmt.Errorf("Multiple OpenStackAnsibleEE's found with label %s=%s", label, obj.GetUID())
+		return nil, fmt.Errorf("multiple OpenStackAnsibleEE's found with label %s=%s", label, obj.GetUID())
 	}
 
 	return ansibleEE, nil
