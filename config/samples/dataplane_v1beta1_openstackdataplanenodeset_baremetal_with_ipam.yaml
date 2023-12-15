@@ -27,8 +27,6 @@ spec:
   nodes:
     edpm-compute-0:
       hostName: edpm-compute-0
-      ansible:
-        ansibleHost: 192.168.122.100
   networkAttachments:
     - ctlplane
   nodeTemplate:
