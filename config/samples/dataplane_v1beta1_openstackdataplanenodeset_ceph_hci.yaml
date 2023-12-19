@@ -5,28 +5,15 @@ metadata:
   namespace: openstack
 spec:
   env:
-  - name: ANSIBLE_CALLBACKS_ENABLED
-    value: profile_tasks
-  - name: ANSIBLE_FORCE_COLOR
-    value: "True"
+    - name: ANSIBLE_CALLBACKS_ENABLED
+      value: profile_tasks
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
   networkAttachments:
   - ctlplane
   nodeTemplate:
     ansible:
-      ansiblePort: 22
-      ansibleUser: cloud-admin
       ansibleVars:
-        ctlplane_dns_nameservers:
-        - 192.168.122.1
-        ctlplane_gateway_ip: 192.168.122.1
-        ctlplane_host_routes:
-        - ip_netmask: 0.0.0.0/0
-          next_hop: 192.168.122.1
-        ctlplane_mtu: 1500
-        ctlplane_subnet_cidr: 24
-        dns_search_domains: []
-        timesync_ntp_servers:
-        - hostname: pool.ntp.org
         edpm_network_config_hide_sensitive_logs: false
         edpm_network_config_template: |
           ---
@@ -62,48 +49,6 @@ spec:
           {% endfor %}
         edpm_nodes_validation_validate_controllers_icmp: false
         edpm_nodes_validation_validate_gateway_icmp: false
-        edpm_selinux_mode: enforcing
-        edpm_sshd_allowed_ranges:
-        - 192.168.122.0/24
-        edpm_sshd_configure_firewall: true
-        enable_debug: false
-        external_cidr: "24"
-        external_host_routes: []
-        external_mtu: 1500
-        external_vlan_id: 44
-        gather_facts: false
-        internal_api_cidr: "24"
-        internal_api_host_routes: []
-        internal_api_mtu: 1500
-        internal_api_vlan_id: 20
-        networks_lower:
-          External: external
-          InternalApi: internal_api
-          Storage: storage
-          StorageMgmt: storage_mgmt
-          Tenant: tenant
-        neutron_physical_bridge_name: br-ex
-        neutron_public_interface_name: eth0
-        role_networks:
-        - InternalApi
-        - Storage
-        - StorageMgmt
-        - Tenant
-        service_net_map:
-          nova_api_network: internal_api
-          nova_libvirt_network: internal_api
-        storage_cidr: "24"
-        storage_host_routes: []
-        storage_mgmt_cidr: "24"
-        storage_mgmt_host_routes: []
-        storage_mgmt_mtu: 9000
-        storage_mgmt_vlan_id: 23
-        storage_mtu: 9000
-        storage_vlan_id: 21
-        tenant_cidr: "24"
-        tenant_host_routes: []
-        tenant_mtu: 1500
-        tenant_vlan_id: 22
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     # Add an `extraVolType: Ceph` with to mount the ceph-conf-files
     # secret, after Ceph is deployed.
