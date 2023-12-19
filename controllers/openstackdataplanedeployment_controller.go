@@ -248,8 +248,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		} else {
 			logger.Info("OpenStackDeployment succeeded for NodeSet", "NodeSet", nodeSet.Name)
 			logger.Info("Set NodeSetDeploymentReadyCondition true", "nodeSet", nodeSet.Name)
-			instance.Status.Conditions.MarkTrue(
-				condition.Type(fmt.Sprintf(dataplanev1.NodeSetDeploymentReadyCondition, nodeSet.Name)),
+			nsConditions := instance.Status.NodeSetConditions[nodeSet.Name]
+			nsConditions.MarkTrue(
+				condition.Type(dataplanev1.NodeSetDeploymentReadyCondition),
 				condition.DeploymentReadyMessage)
 		}
 	}

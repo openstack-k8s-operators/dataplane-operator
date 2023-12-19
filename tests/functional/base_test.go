@@ -90,6 +90,7 @@ func DefaultDataPlaneNodeSetSpec() map[string]interface{} {
 
 	return map[string]interface{}{
 		"preProvisioned": false,
+		"services":       []string{},
 		"nodeTemplate": map[string]interface{}{
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 			"ansible": map[string]interface{}{
