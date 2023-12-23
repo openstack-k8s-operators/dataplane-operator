@@ -3,10 +3,10 @@ module github.com/openstack-k8s-operators/dataplane-operator/api
 go 1.19
 
 require (
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231211112757-94d545047df2
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231215134849-9acca0025036
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231215134849-9acca0025036
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231215154001-0a11db9ece34
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231218083014-f777af139aa2
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231219100655-bf6e709d8019
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231219100655-bf6e709d8019
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231220110546-5403c7611a81
 	k8s.io/api v0.26.11
 	k8s.io/apimachinery v0.26.11
 	sigs.k8s.io/controller-runtime v0.14.7
@@ -47,7 +47,7 @@ require (
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb // indirect
+	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
