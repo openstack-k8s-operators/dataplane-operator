@@ -84,7 +84,6 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 			for _, host := range dnsNames {
 				hosts = append(hosts, host)
 			}
-			secretName = "cert-default-" + nodeName
 			certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, secretName,
 				certmanager.RootCAIssuerInternalLabel, labels,
 				hosts, nil, nil)
