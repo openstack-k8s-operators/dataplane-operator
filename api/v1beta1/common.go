@@ -116,25 +116,18 @@ type NodeTemplate struct {
 
 // AnsibleEESpec is a specification of the ansible EE attributes
 type AnsibleEESpec struct {
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default={ctlplane}
 	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
 	// which allows to connect the ansibleee runner to the given network
 	NetworkAttachments []string `json:"networkAttachments"`
-	// +kubebuilder:validation:Optional
 	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
 	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty"`
-	// +kubebuilder:validation:Optional
 	// AnsibleTags for ansible execution
 	AnsibleTags string `json:"ansibleTags,omitempty"`
-	// +kubebuilder:validation:Optional
 	// AnsibleLimit for ansible execution
 	AnsibleLimit string `json:"ansibleLimit,omitempty"`
-	// +kubebuilder:validation:Optional
 	// AnsibleSkipTags for ansible execution
 	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
 	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
-	// +kubebuilder:validation:Optional
 	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
