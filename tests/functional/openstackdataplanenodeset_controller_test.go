@@ -143,7 +143,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					Networks:                   nil,
 					ManagementNetwork:          "ctlplane",
 					Ansible: dataplanev1.AnsibleOpts{
-						AnsibleUser: "",
+						AnsibleUser: "cloud-admin",
 						AnsibleHost: "",
 						AnsiblePort: 0,
 						AnsibleVars: nil,

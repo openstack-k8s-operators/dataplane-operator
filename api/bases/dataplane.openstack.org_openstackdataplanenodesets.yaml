@@ -268,7 +268,6 @@ spec:
                       ansiblePort:
                         type: integer
                       ansibleUser:
-                        default: cloud-admin
                         type: string
                       ansibleVars:
                         x-kubernetes-preserve-unknown-fields: true
@@ -1070,7 +1069,6 @@ spec:
                         ansiblePort:
                           type: integer
                         ansibleUser:
-                          default: cloud-admin
                           type: string
                         ansibleVars:
                           x-kubernetes-preserve-unknown-fields: true
