@@ -43,7 +43,15 @@ type ServiceYAML struct {
 
 // DeployService service deployment
 func (d *Deployer) DeployService(foundService dataplanev1.OpenStackDataPlaneService) error {
-	err := dataplaneutil.AnsibleExecution(d.Ctx, d.Helper, d.Deployment, &foundService, d.NodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret, d.InventorySecret, d.AeeSpec)
+	err := dataplaneutil.AnsibleExecution(
+		d.Ctx,
+		d.Helper,
+		d.Deployment,
+		&foundService,
+		d.NodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret,
+		d.InventorySecret,
+		d.AeeSpec)
+
 	if err != nil {
 		d.Helper.GetLogger().Error(err, fmt.Sprintf("Unable to execute Ansible for %s", foundService.Name))
 		return err
