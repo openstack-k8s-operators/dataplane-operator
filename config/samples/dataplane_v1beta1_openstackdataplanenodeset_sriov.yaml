@@ -3,9 +3,6 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: openstack-edpm-sriov
 spec:
-  env:
-    - name: ANSIBLE_FORCE_COLOR
-      value: "True"
   services:
     - download-cache
     - bootstrap
