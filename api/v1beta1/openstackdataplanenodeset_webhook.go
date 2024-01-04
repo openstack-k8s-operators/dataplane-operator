@@ -61,6 +61,10 @@ func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
 		spec.Nodes[nodeName] = *node.DeepCopy()
 	}
 
+	if spec.NodeTemplate.Ansible.AnsibleUser == "" {
+		spec.NodeTemplate.Ansible.AnsibleUser = "cloud-admin"
+	}
+
 	if spec.BaremetalSetTemplate.DeploymentSSHSecret == "" {
 		spec.BaremetalSetTemplate.DeploymentSSHSecret = spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 	}

@@ -28,7 +28,6 @@ import (
 type AnsibleOpts struct {
 	// AnsibleUser SSH user for Ansible connection
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default="cloud-admin"
 	AnsibleUser string `json:"ansibleUser"`
 
 	// AnsibleHost SSH host for Ansible connection
