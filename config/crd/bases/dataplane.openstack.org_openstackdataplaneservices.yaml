@@ -55,6 +55,7 @@ spec:
                   type: string
                 type: array
               tlsCertsEnabled:
+                default: false
                 type: boolean
             type: object
           status:

@@ -155,6 +155,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				Env:                nil,
 				PreProvisioned:     true,
 				NetworkAttachments: nil,
+				TLSEnabled:         false,
 				Nodes:              map[string]dataplanev1.NodeSection{},
 				Services: []string{
 					"download-cache",
