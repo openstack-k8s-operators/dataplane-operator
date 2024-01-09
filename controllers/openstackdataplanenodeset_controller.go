@@ -24,6 +24,7 @@ import (
 	"golang.org/x/exp/slices"
 	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
@@ -118,6 +119,7 @@ type OpenStackDataPlaneNodeSetReconciler struct {
 //+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/status,verbs=get
 //+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/finalizers,verbs=update
 //+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete;
+//+kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -387,6 +389,23 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 				Name:      nodeSet,
 			}
 			result = append(result, reconcile.Request{NamespacedName: name})
+		}
+		podsInterface := r.Kclient.CoreV1().Pods(namespace)
+		// List service pods in the given namespace
+		podsList, err := podsInterface.List(context.TODO(), v1.ListOptions{
+			LabelSelector: fmt.Sprintf("osdpd=%s", deployment.Name),
+			FieldSelector: "status.phase=Failed",
+		})
+
+		if err != nil {
+			r.Log.Error(err, "unable to retrieve list of pods for dataplane diagnostic")
+		} else {
+			for _, pod := range podsList.Items {
+				r.Log.Info(
+					fmt.Sprintf(
+						"openstack dataplane pod %s failed due to %s message: %s",
+						pod.Name, pod.Status.Reason, pod.Status.Message))
+			}
 		}
 		return result
 	})
