@@ -89,7 +89,7 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 		}
 
 		// Add certMounts to the install-certs service if TLS enabled
-		if d.NodeSet.Spec.TLSEnabled != nil && *d.NodeSet.Spec.TLSEnabled {
+		if d.NodeSet.Spec.TLSEnabled {
 			if foundService.Name == InstallCertsLabel {
 				d.AeeSpec, err = d.addCertMounts(foundService, services)
 			}
@@ -219,7 +219,7 @@ func (d *Deployer) addCertMounts(
 		if err != nil {
 			return nil, err
 		}
-		if foundService.Spec.TLSCertsEnabled != nil && *foundService.Spec.TLSCertsEnabled {
+		if foundService.Spec.TLSCertsEnabled {
 			log.Info("Mounting certs for service", "service", service)
 			volMounts := storage.VolMounts{}
 

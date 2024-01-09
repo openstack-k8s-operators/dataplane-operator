@@ -129,7 +129,7 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 | env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network | []string | false |
 | services | Services list | []string | true |
-| tlsEnabled | TLSEnabled - Whether the node set has TLS enabled. | *bool | false |
+| tlsEnabled | TLSEnabled - Whether the node set has TLS enabled. | bool | true |
 
 [Back to Custom Resources](#custom-resources)
 

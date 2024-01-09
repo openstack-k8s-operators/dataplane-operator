@@ -1880,6 +1880,7 @@ spec:
                   type: string
                 type: array
               tlsEnabled:
+                default: false
                 type: boolean
             required:
             - nodeTemplate

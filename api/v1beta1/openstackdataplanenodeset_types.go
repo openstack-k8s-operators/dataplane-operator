@@ -64,8 +64,9 @@ type OpenStackDataPlaneNodeSetSpec struct {
 
 	// TLSEnabled - Whether the node set has TLS enabled.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	TLSEnabled *bool `json:"tlsEnabled,omitempty" yaml:"tlsEnabled,omitempty"`
+	TLSEnabled bool `json:"tlsEnabled" yaml:"tlsEnabled"`
 }
 
 //+kubebuilder:object:root=true

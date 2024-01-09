@@ -79,8 +79,9 @@ type OpenStackDataPlaneServiceSpec struct {
 
 	// TLSCertsEnabled - Whether the nodes have TLS certs
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	TLSCertsEnabled *bool `json:"tlsCertsEnabled,omitempty" yaml:"tlsCertsEnabled,omitempty"`
+	TLSCertsEnabled bool `json:"tlsCertsEnabled" yaml:"tlsCertsEnabled"`
 
 	// Issuers - Issuers to issue TLS Certificates
 	// +kubebuilder:validation:Optional
