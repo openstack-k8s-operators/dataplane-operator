@@ -13,12 +13,12 @@ require (
 	github.com/onsi/gomega v1.30.0
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230724101130-2d6fe1f4706b
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240104150635-c4ffc51e0752
-	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240108143014-3f12c3253835
-	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240108143014-3f12c3253835
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240108143014-3f12c3253835
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240108143014-3f12c3253835
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240108143014-3f12c3253835
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240109143946-2d17d444f115
+	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240110131857-e70e1dec4d14
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240110131857-e70e1dec4d14
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240110131857-e70e1dec4d14
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240110131857-e70e1dec4d14
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240110131857-e70e1dec4d14
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240109173417-5e2c7973eb3e
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240108171105-f5670a7e8c64
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
 	gopkg.in/yaml.v3 v3.0.1
