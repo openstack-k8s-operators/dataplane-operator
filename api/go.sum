@@ -227,10 +227,10 @@ github.com/onsi/ginkgo/v2 v2.13.2 h1:Bi2gGVkfn6gQcjNjZJVO8Gf0FHzMPf2phUei9tejVMs
 github.com/onsi/gomega v1.30.0 h1:hvMK7xYz4D3HapigLTeGdId/NcfQx1VHMJc60ew99+8=
 github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240104150635-c4ffc51e0752 h1:RWH5R7RLinnWQOp8MmmlmOy/sIlIsrz5hCRFVO1wZzA=
 github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240104150635-c4ffc51e0752/go.mod h1:y4qeIT1ubUm9SKrvhVTuEYWSm0so38P5Hu3ZpdMJMek=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240108143014-3f12c3253835 h1:+FYUZiEc3ZE2TgpPhhLS8YOcdKBqk7rAi3kXvimhCKQ=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240108143014-3f12c3253835/go.mod h1:ov4lAbniNUsLqZCBp1RTixpqXc8JlzA5B+yTcCkJXQg=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240108143014-3f12c3253835 h1:Rjx7PgplNFLYlkbRNeRNEt599W5kMpoSJ+/YJJywIiQ=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240108143014-3f12c3253835/go.mod h1:MwShIB0G7riRDWXS2JQfcdETm+yutb3qpdnxu/yg+Xk=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240110131857-e70e1dec4d14 h1:8batipIElAHscbsVUJz8w/2NOvu+pRi8ixF1XUP6WiQ=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240110131857-e70e1dec4d14/go.mod h1:ov4lAbniNUsLqZCBp1RTixpqXc8JlzA5B+yTcCkJXQg=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240110131857-e70e1dec4d14 h1:bvIyFuznW7OvTOEzh87nmla2x53RdJgTkO9SawdEVJg=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240110131857-e70e1dec4d14/go.mod h1:MwShIB0G7riRDWXS2JQfcdETm+yutb3qpdnxu/yg+Xk=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240108171105-f5670a7e8c64 h1:ocZFBp89JJf5uKB+uvH+ibpej9zYUFilvt5lQfAkIXc=
 github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240108171105-f5670a7e8c64/go.mod h1:UTK7po+fGYND9AwrTpQvEhWMYXmViwJaaWt0LzhleDE=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
