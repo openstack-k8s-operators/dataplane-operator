@@ -3,10 +3,10 @@ module github.com/openstack-k8s-operators/dataplane-operator/api
 go 1.19
 
 require (
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20231218083014-f777af139aa2
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231230095328-700482794743
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231230095328-700482794743
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231228160305-dc8eec5dcdf9
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240104150635-c4ffc51e0752
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240110131857-e70e1dec4d14
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240110131857-e70e1dec4d14
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240108171105-f5670a7e8c64
 	k8s.io/api v0.26.12
 	k8s.io/apimachinery v0.26.12
 	sigs.k8s.io/controller-runtime v0.14.7
@@ -65,7 +65,7 @@ require (
 	k8s.io/component-base v0.26.12 // indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230515203736-54b630e78af5 // indirect
-	k8s.io/utils v0.0.0-20231127182322-b307cd553661 // indirect
+	k8s.io/utils v0.0.0-20240102154912-e7106e64919e // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect

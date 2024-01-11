@@ -50,6 +50,10 @@ spec:
                 type: string
               ansibleTags:
                 type: string
+              deploymentRequeueTime:
+                default: 15
+                minimum: 1
+                type: integer
               nodeSets:
                 items:
                   type: string
@@ -59,6 +63,7 @@ spec:
                   type: string
                 type: array
             required:
+            - deploymentRequeueTime
             - nodeSets
             type: object
           status:

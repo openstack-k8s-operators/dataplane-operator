@@ -96,10 +96,11 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		It("Should have Spec fields initialized", func() {
 			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneDeploymentName)
 			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
-				NodeSets:        []string{"edpm-compute-nodeset"},
-				AnsibleTags:     "",
-				AnsibleLimit:    "",
-				AnsibleSkipTags: "",
+				NodeSets:              []string{"edpm-compute-nodeset"},
+				AnsibleTags:           "",
+				AnsibleLimit:          "",
+				AnsibleSkipTags:       "",
+				DeploymentRequeueTime: 15,
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})

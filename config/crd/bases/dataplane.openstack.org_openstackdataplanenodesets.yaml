@@ -1869,6 +1869,7 @@ spec:
                 - install-os
                 - configure-os
                 - run-os
+                - reboot-os
                 - ovn
                 - neutron-metadata
                 - libvirt
