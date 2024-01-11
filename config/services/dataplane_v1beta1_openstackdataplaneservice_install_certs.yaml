@@ -11,3 +11,4 @@ metadata:
 spec:
   label: install-certs
   playbook: osp.edpm.install_certs
+  addCertMounts: True

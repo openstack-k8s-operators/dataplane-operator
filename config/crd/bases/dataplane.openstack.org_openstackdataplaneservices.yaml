@@ -30,6 +30,9 @@ spec:
             type: object
           spec:
             properties:
+              addCertMounts:
+                default: false
+                type: boolean
               caCerts:
                 type: string
               configMaps:

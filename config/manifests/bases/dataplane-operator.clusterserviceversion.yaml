@@ -83,6 +83,11 @@ spec:
       kind: OpenStackDataPlaneService
       name: openstackdataplaneservices.dataplane.openstack.org
       specDescriptors:
+      - description: AddCertMounts - Whether to add cert mounts
+        displayName: Add Cert Mounts
+        path: addCertMounts
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       - description: TLSCertsEnabled - Whether the nodes have TLS certs
         displayName: TLSCerts Enabled
         path: tlsCertsEnabled
