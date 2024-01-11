@@ -11,6 +11,7 @@ spec:
     - install-os
     - configure-os
     - run-os
+    - reboot-os
     - neutron-sriov
     - libvirt
     - nova
