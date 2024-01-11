@@ -128,6 +128,7 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | tlsCertsEnabled | TLSCertsEnabled - Whether the nodes have TLS certs | bool | true |
 | issuers | Issuers - Issuers to issue TLS Certificates | map[string]string | false |
 | caCerts | CACerts - Secret containing the CA certificate chain | string | false |
+| addCertMounts | AddCertMounts - Whether to add cert mounts | bool | true |
 
 [Back to Custom Resources](#custom-resources)
 

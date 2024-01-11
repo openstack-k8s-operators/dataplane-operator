@@ -88,9 +88,9 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 			return &ctrl.Result{}, err
 		}
 
-		// Add certMounts to the install-certs service if TLS enabled
+		// Add certMounts if TLS is enabled
 		if d.NodeSet.Spec.TLSEnabled {
-			if foundService.Name == InstallCertsLabel {
+			if foundService.Spec.AddCertMounts {
 				d.AeeSpec, err = d.addCertMounts(foundService, services)
 			}
 			if err != nil {

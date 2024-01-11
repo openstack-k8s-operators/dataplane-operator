@@ -90,6 +90,12 @@ type OpenStackDataPlaneServiceSpec struct {
 	// CACerts - Secret containing the CA certificate chain
 	// +kubebuilder:validation:Optional
 	CACerts string `json:"caCerts,omitempty" yaml:"caCerts,omitempty"`
+
+	// AddCertMounts - Whether to add cert mounts
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	AddCertMounts bool `json:"addCertMounts" yaml:"addCertMounts"`
 }
 
 // OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService

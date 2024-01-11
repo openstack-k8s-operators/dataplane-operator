@@ -42,9 +42,6 @@ const (
 	// RunOpenStackLabel for RunOpenStack OpenStackAnsibleEE
 	RunOpenStackLabel = "run-openstack"
 
-	// InstallCertsLabel for InstallCerts OpenStackAnsibleEE
-	InstallCertsLabel = "install-certs"
-
 	// NicConfigTemplateFile is the custom nic config file we use when user provided network config templates are provided.
 	NicConfigTemplateFile = "/runner/network/nic-config-template"
 
