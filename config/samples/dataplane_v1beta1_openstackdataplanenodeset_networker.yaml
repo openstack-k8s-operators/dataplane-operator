@@ -1,7 +1,7 @@
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: openstack-edpm
+  name: openstack-edpm-networker
 spec:
   services:
     - download-cache
@@ -13,11 +13,10 @@ spec:
     - run-os
     - reboot-os
     - ovn
-    - telemetry
   preProvisioned: true
   nodes:
-      edpm-compute-0:
-        hostName: edpm-compute-0
+      edpm-networker-0:
+        hostName: edpm-networker-0
         ansible:
           ansibleHost: 192.168.122.100
           ansibleVars:
@@ -25,7 +24,7 @@ spec:
             internal_api_ip: 172.17.0.100
             storage_ip: 172.18.0.100
             tenant_ip: 172.19.0.100
-            fqdn_internal_api: edpm-compute-0.example.com
+            fqdn_internal_api: edpm-networker-0.example.com
   networkAttachments:
     - ctlplane
   nodeTemplate:
@@ -41,7 +40,7 @@ spec:
          timesync_ntp_servers:
            - hostname: pool.ntp.org
          # edpm_network_config
-         # Default nic config template for a EDPM compute node
+         # Default nic config template for a EDPM networker node
          # These vars are edpm_network_config role vars
          edpm_network_config_hide_sensitive_logs: false
          edpm_network_config_template: |
