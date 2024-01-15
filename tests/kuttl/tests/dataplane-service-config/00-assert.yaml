@@ -65,6 +65,15 @@ spec:
           path: 20-kuttl-service.conf
         name: kuttl-service-cm-1
   - mounts:
+    - mountPath: /var/lib/openstack/configs/kuttl-service/30-kuttl-service.conf
+      subPath: 30-kuttl-service.conf
+    volumes:
+    - configMap:
+        items:
+        - key: 30-kuttl-service.conf
+          path: 30-kuttl-service.conf
+        name: kuttl-service-cm-2
+  - mounts:
     - mountPath: /runner/env/ssh_key
       name: ssh-key
       subPath: ssh_key
