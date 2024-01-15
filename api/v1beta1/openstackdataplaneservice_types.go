@@ -54,10 +54,6 @@ type OpenStackDataPlaneServiceSpec struct {
 	// +kubebuilder:validation:MaxLength=53
 	Label string `json:"label,omitempty"`
 
-	// Services to create to expose possible external services in computes
-	// +kubebuilder:validation:Optional
-	Services []KubeService `json:"services,omitempty"`
-
 	// Play is an inline playbook contents that ansible will run on execution.
 	// If both Play and Roles are specified, Play takes precedence
 	Play string `json:"play,omitempty"`

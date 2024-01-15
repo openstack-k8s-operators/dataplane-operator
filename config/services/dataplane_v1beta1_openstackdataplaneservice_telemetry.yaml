@@ -7,6 +7,3 @@ spec:
   secrets:
     - ceilometer-compute-config-data
   playbook: osp.edpm.telemetry
-  services:
-    - name: node-exporter
-      port: 9100

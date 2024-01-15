@@ -20,7 +20,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -42,30 +41,9 @@ var _ = Describe("OpenstackDataplaneService Test", func() {
 
 		It("spec fields are set up", func() {
 			service := GetService(dataplaneServiceName)
-			Expect(service.Spec.Services).To(BeEmpty())
 			Expect(service.Spec.Secrets).To(BeEmpty())
 			Expect(service.Spec.Playbook).To(BeEmpty())
 			Expect(service.Spec.ConfigMaps).To(BeEmpty())
-		})
-
-		It("can add and remove a kubernetes service", func() {
-			service := GetService(dataplaneServiceName)
-			Eventually(func(g Gomega) {
-				service.Spec.Services = []dataplanev1.KubeService{
-					{
-						Name: "configure-network",
-						Port: 8080,
-					},
-				}
-				g.Expect(k8sClient.Update(ctx, service)).To(Succeed())
-			}, timeout, interval).Should(Succeed())
-			Expect(GetService(dataplaneServiceName).Spec.Services).NotTo(BeEmpty())
-
-			Eventually(func(g Gomega) {
-				service.Spec.Services = []dataplanev1.KubeService{}
-				g.Expect(k8sClient.Update(ctx, service)).To(Succeed())
-			}, timeout, interval).Should(Succeed())
-			Expect(GetService(dataplaneServiceName).Spec.Services).To(BeEmpty())
 		})
 	})
 })
