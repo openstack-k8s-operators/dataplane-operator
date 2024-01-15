@@ -18,6 +18,8 @@ spec:
     - nova
     - telemetry
   preProvisioned: true
+  networkAttachments:
+  - ctlplane
   nodes:
       edpm-compute-0:
         hostName: edpm-compute-0
