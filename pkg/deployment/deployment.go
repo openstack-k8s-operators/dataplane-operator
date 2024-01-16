@@ -216,6 +216,9 @@ func (d *Deployer) addServiceExtraMounts(
 		for key := range cm.Data {
 			keys = append(keys, key)
 		}
+		for key := range cm.BinaryData {
+			keys = append(keys, key)
+		}
 		sort.Strings(keys)
 
 		for idx, key := range keys {
