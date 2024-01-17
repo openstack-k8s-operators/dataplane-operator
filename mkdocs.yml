@@ -37,6 +37,7 @@ nav:
       - deploying.md
       - composable_services.md
       - common_configurations.md
+      - tls.md
       - interacting_with_ansible.md
   - Contributing: contributing.md
 markdown_extensions:
