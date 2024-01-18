@@ -43,6 +43,23 @@ type KubeService struct {
 	Network infranetworkv1.NetNameStr `json:"network,omitempty"`
 }
 
+// OpenstackDataPlaneServiceCert defines the property of a TLS cert issued for
+// a dataplane service
+type OpenstackDataPlaneServiceCert struct {
+	// Contents of the certificate
+	// This is a list of strings for properties that are needed in the cert
+	// +kubebuilder:validation:Required
+	Contents []string `json:"contents"`
+
+	// Networks to include in SNI for the cert
+	// +kubebuilder:validation:Optional
+	Networks []infranetworkv1.NetNameStr `json:"networks,omitempty"`
+
+	// Issuer to issue the cert
+	// +kubebuilder:validation:Optional
+	Issuer string `json:"issuer,omitempty"`
+}
+
 // OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService
 type OpenStackDataPlaneServiceSpec struct {
 	// Label to use for service.
@@ -72,15 +89,9 @@ type OpenStackDataPlaneServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty" yaml:"openStackAnsibleEERunnerImage,omitempty"`
 
-	// TLSCertsEnabled - Whether the nodes have TLS certs
+	// TLSCert tls certs to be generated
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=false
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	TLSCertsEnabled bool `json:"tlsCertsEnabled" yaml:"tlsCertsEnabled"`
-
-	// Issuers - Issuers to issue TLS Certificates
-	// +kubebuilder:validation:Optional
-	Issuers map[string]string `json:"issuers,omitempty"`
+	TLSCert *OpenstackDataPlaneServiceCert `json:"tlsCert,omitempty" yaml:"tlsCert,omitempty"`
 
 	// CACerts - Secret containing the CA certificate chain
 	// +kubebuilder:validation:Optional

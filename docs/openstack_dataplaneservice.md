@@ -13,6 +13,7 @@
 * [OpenStackDataPlaneServiceList](#openstackdataplaneservicelist)
 * [OpenStackDataPlaneServiceSpec](#openstackdataplaneservicespec)
 * [OpenStackDataPlaneServiceStatus](#openstackdataplaneservicestatus)
+* [OpenstackDataPlaneServiceCert](#openstackdataplaneservicecert)
 
 #### AnsibleEESpec
 
@@ -124,8 +125,7 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | configMaps | ConfigMaps list of ConfigMap names to mount as ExtraMounts for the OpenStackAnsibleEE | []string | false |
 | secrets | Secrets list of Secret names to mount as ExtraMounts for the OpenStackAnsibleEE | []string | false |
 | openStackAnsibleEERunnerImage | OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image | string | false |
-| tlsCertsEnabled | TLSCertsEnabled - Whether the nodes have TLS certs | bool | true |
-| issuers | Issuers - Issuers to issue TLS Certificates | map[string]string | false |
+| tlsCert | TLSCert tls certs to be generated | *[OpenstackDataPlaneServiceCert](#openstackdataplaneservicecert) | false |
 | caCerts | CACerts - Secret containing the CA certificate chain | string | false |
 | addCertMounts | AddCertMounts - Whether to add cert mounts | bool | true |
 
@@ -138,5 +138,17 @@ OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlane
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | conditions | Conditions | condition.Conditions | false |
+
+[Back to Custom Resources](#custom-resources)
+
+#### OpenstackDataPlaneServiceCert
+
+OpenstackDataPlaneServiceCert defines the property of a TLS cert issued for a dataplane service
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| contents | Contents of the certificate This is a list of strings for properties that are needed in the cert | []string | true |
+| networks | Networks to include in SNI for the cert | []infranetworkv1.NetNameStr | false |
+| issuer | Issuer to issue the cert | string | false |
 
 [Back to Custom Resources](#custom-resources)

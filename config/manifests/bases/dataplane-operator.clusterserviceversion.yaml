@@ -88,11 +88,6 @@ spec:
         path: addCertMounts
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: TLSCertsEnabled - Whether the nodes have TLS certs
-        displayName: TLSCerts Enabled
-        path: tlsCertsEnabled
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       statusDescriptors:
       - description: Conditions
         displayName: Conditions

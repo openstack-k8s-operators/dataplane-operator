@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"time"
 
+	"golang.org/x/exp/slices"
+
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,7 +52,10 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 	// ips or DNS Names
 	for nodeName := range instance.Spec.Nodes {
 		var dnsNames map[infranetworkv1.NetNameStr]string
-		var ips map[infranetworkv1.NetNameStr]string
+		var ipsMap map[infranetworkv1.NetNameStr]string
+		var hosts []string
+		var ips []string
+		var issuer string
 		var secretName string
 		var certSecret *corev1.Secret = nil
 		var err error
@@ -65,29 +70,45 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		secretName = "cert-" + service.Name + "-" + nodeName
 
 		dnsNames = allHostnames[nodeName]
-		ips = allIPs[nodeName]
+		ipsMap = allIPs[nodeName]
 
-		switch service.Name {
-		case "nova", "libvirt":
-			// nova and libvirt want a cert with ctlplane ip and dns name
-			hosts := []string{dnsNames[CtlPlaneNetwork]}
-			ctlIPs := []string{ips[CtlPlaneNetwork]}
-			certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, secretName,
-				service.Spec.Issuers["default"], labels,
-				hosts, ctlIPs, nil)
-		default:
-			// The default case provides a cert with all the dns names for the host.
-			// This will probably be sufficient for most services.  If a service needs
-			// a different kind of cert (for example, containing ips, or using a different
-			// issuer)  then add a case for the service in this switch statement
-			hosts := make([]string, 0, len(dnsNames))
+		// Create the hosts and ips lists
+		if service.Spec.TLSCert.Networks == nil {
+			hosts = make([]string, 0, len(dnsNames))
 			for _, host := range dnsNames {
 				hosts = append(hosts, host)
 			}
-			certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, secretName,
-				certmanager.RootCAIssuerInternalLabel, labels,
-				hosts, nil, nil)
+			ips = make([]string, 0, len(ipsMap))
+			for _, ip := range ipsMap {
+				ips = append(ips, ip)
+			}
+		} else {
+			hosts = make([]string, 0, len(service.Spec.TLSCert.Networks))
+			for _, network := range service.Spec.TLSCert.Networks {
+				hosts = append(hosts, dnsNames[network])
+			}
+			ips = make([]string, 0, len(service.Spec.TLSCert.Networks))
+			for _, network := range service.Spec.TLSCert.Networks {
+				ips = append(ips, ipsMap[network])
+			}
 		}
+
+		if !slices.Contains(service.Spec.TLSCert.Contents, DNSNamesStr) {
+			hosts = nil
+		}
+		if !slices.Contains(service.Spec.TLSCert.Contents, IPValuesStr) {
+			ips = nil
+		}
+
+		if service.Spec.TLSCert.Issuer == "" {
+			// by default, use the internal root CA
+			issuer = certmanager.RootCAIssuerInternalLabel
+		} else {
+			issuer = service.Spec.TLSCert.Issuer
+		}
+
+		certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, secretName,
+			issuer, labels, hosts, ips, nil)
 
 		// handle cert request errors
 		if (err != nil) || (result != ctrl.Result{}) {

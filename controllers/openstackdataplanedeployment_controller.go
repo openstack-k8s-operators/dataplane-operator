@@ -172,7 +172,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 				if err != nil {
 					return ctrl.Result{}, err
 				}
-				if service.Spec.TLSCertsEnabled {
+				if service.Spec.TLSCert != nil {
 					result, err := deployment.EnsureTLSCerts(ctx, helper, &nodeSet,
 						nodeSet.Status.AllHostnames, nodeSet.Status.AllIPs, service)
 					if err != nil {
