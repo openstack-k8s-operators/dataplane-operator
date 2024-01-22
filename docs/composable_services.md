@@ -318,8 +318,8 @@ service to execute for the `edpm-compute` `NodeSet`.
               ansible_ssh_transfer_method: scp
               ctlplane_ip: 172.20.12.67
               external_ip: 172.20.12.76
-              fqdn_internal_api: edpm-compute-1.example.com
-              internal_api_ip: 172.17.0.101
+              fqdn_internalapi: edpm-compute-1.example.com
+              internalapi_ip: 172.17.0.101
               storage_ip: 172.18.0.101
               tenant_ip: 172.10.0.101
           hostName: edpm-compute-0

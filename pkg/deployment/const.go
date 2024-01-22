@@ -18,8 +18,8 @@ package deployment
 
 const (
 
-	// CtlPlaneNetwork - default CtlPlane Network Name in NetConfig
-	CtlPlaneNetwork = "CtlPlane"
+	// CtlPlaneNetwork - default ctlplane Network Name in NetConfig
+	CtlPlaneNetwork = "ctlplane"
 
 	// ValidateNetworkLabel for ValidateNetwork OpenStackAnsibleEE
 	ValidateNetworkLabel = "validate-network"

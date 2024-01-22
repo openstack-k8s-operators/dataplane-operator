@@ -26,10 +26,10 @@ spec:
           ansibleHost: 192.168.122.100
           ansibleVars:
             ctlplane_ip: 192.168.122.100
-            internal_api_ip: 172.17.0.100
+            internalapi_ip: 172.17.0.100
             storage_ip: 172.18.0.100
             tenant_ip: 172.19.0.100
-            fqdn_internal_api: edpm-compute-0.example.com
+            fqdn_internalapi: edpm-compute-0.example.com
   networkAttachments:
     - ctlplane
   nodeTemplate:
@@ -60,7 +60,7 @@ spec:
                 domain: {{ dns_search_domains }}
                 use_dhcp: false
                 addresses:
-                - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
+                - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
               {% for network in role_networks %}
               {% if lookup('vars', networks_lower[network] ~ '_vlan_id', default='') %}
               - type: vlan
@@ -111,7 +111,7 @@ spec:
          neutron_physical_bridge_name: br-ex
          neutron_public_interface_name: eth0
          ctlplane_mtu: 1500
-         ctlplane_subnet_cidr: 24
+         ctlplane_cidr: 24
          ctlplane_gateway_ip: 192.168.122.1
          ctlplane_host_routes:
          - ip_netmask: 0.0.0.0/0
@@ -120,10 +120,10 @@ spec:
          external_vlan_id: 44
          external_cidr: '24'
          external_host_routes: []
-         internal_api_mtu: 1500
-         internal_api_vlan_id: 20
-         internal_api_cidr: '24'
-         internal_api_host_routes: []
+         internalapi_mtu: 1500
+         internalapi_vlan_id: 20
+         internalapi_cidr: '24'
+         internalapi_host_routes: []
          storage_mtu: 1500
          storage_vlan_id: 21
          storage_cidr: '24'
@@ -138,7 +138,7 @@ spec:
          - Tenant
          networks_lower:
            External: external
-           InternalApi: internal_api
+           InternalApi: internalapi
            Storage: storage
            Tenant: tenant
          # edpm_nodes_validation
