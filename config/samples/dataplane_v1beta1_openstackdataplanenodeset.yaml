@@ -28,14 +28,14 @@ spec:
           ansibleHost: 192.168.122.100
   nodeTemplate:
     networks:
-      - name: CtlPlane
+      - name: ctlplane
         subnetName: subnet1
         defaultRoute: true
-      - name: InternalApi
+      - name: internalapi
         subnetName: subnet1
-      - name: Storage
+      - name: storage
         subnetName: subnet1
-      - name: Tenant
+      - name: tenant
         subnetName: subnet1
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     ansible:
