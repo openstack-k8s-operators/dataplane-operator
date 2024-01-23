@@ -90,17 +90,16 @@ The
 [edpm_network_config](https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles/edpm_network_config)
 ansible role is responsible for configuring networking on dataplane nodes.
 
-The `edpm_network_config_template` variable specifies the path to an ansible
+The `edpm_network_config_template` variable specifies the contents of a jinja2
 template that describes the networking configuration to be applied. The
 template itself also contains variables that can be used to customize the
 networking configuration for a specific node (IP addresses, interface names,
-routes, etc). Templates provided with the edpm_network_config role are at
-<https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles/edpm_network_config/templates>.
+routes, etc). See template examples provided in the nic-config-samples directory:
+<https://github.com/openstack-k8s-operators/dataplane-operator/config/samples/nic-config-samples>.
 
-Custom templates can also be used, but they must be avaialable to ansible in
-the ansible-runner image used by the `configure-network` service. Use the
-[`ExtraMounts`](../composable_services.md/#using-extramounts) field to mount custom
-content into the ansible-runner image.
+These samples can be used inline within the `OpenStackDataPlaneNodeSet` CR
+under then `ansibleVars` section (see our current sample files for examples
+of the inline implementation).
 
 The following is an example
 [`ansibleVars`](openstack_dataplanenodeset.md/#nodesection)
