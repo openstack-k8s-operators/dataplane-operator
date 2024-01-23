@@ -25,11 +25,11 @@ spec:
         ansibleHost: 192.168.1.5
         ansibleVars:
           ctlplane_ip: 192.168.1.5
-          internal_api_ip: 172.17.0.101
+          internalapi_ip: 172.17.0.101
           storage_ip: 172.18.0.101
           tenant_ip: 172.19.0.101
           external_ip: 172.20.12.76
-          fqdn_internal_api: edpm-compute-1.example.com
+          fqdn_internalapi: edpm-compute-1.example.com
           ansible_ssh_transfer_method: scp
   networkAttachments:
     - ctlplane
@@ -58,7 +58,7 @@ spec:
                dns_servers: {{ ctlplane_dns_nameservers }}
                domain: {{ dns_search_domains }}
                addresses:
-               - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
+               - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
                routes: {{ ctlplane_host_routes }}
                members:
                - type: interface
@@ -83,7 +83,7 @@ spec:
         neutron_physical_bridge_name: br-ex
         neutron_public_interface_name: enp7s0
         ctlplane_mtu: 1500
-        ctlplane_subnet_cidr: 24
+        ctlplane_cidr: 24
         ctlplane_gateway_ip: 192.168.1.254
         ctlplane_host_routes:
         - ip_netmask: 0.0.0.0/0
@@ -92,10 +92,10 @@ spec:
         external_vlan_id: 4
         external_cidr: '24'
         external_host_routes: []
-        internal_api_mtu: 1500
-        internal_api_vlan_id: 20
-        internal_api_cidr: '24'
-        internal_api_host_routes: []
+        internalapi_mtu: 1500
+        internalapi_vlan_id: 20
+        internalapi_cidr: '24'
+        internalapi_host_routes: []
         storage_mtu: 1500
         storage_vlan_id: 21
         storage_cidr: '24'
@@ -111,7 +111,7 @@ spec:
         - External
         networks_lower:
           External: external
-          InternalApi: internal_api
+          InternalApi: internalapi
           Storage: storage
           Tenant: tenant
         # edpm_nodes_validation
@@ -138,7 +138,7 @@ spec:
           mtu: 1500
           addresses:
             - ip_netmask:
-                {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
+                {{ ctlplane_ip }}/{{ ctlplane_cidr }}
         - type: ovs_bridge
           name: {{ neutron_physical_bridge_name }}
           mtu: 1500

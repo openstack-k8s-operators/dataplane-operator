@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -60,7 +61,7 @@ func DeployBaremetalSet(
 				instanceSpec.CtlPlaneIP = node.Ansible.AnsibleHost
 			} else {
 				for _, res := range ipSet.Status.Reservation {
-					if res.Network == CtlPlaneNetwork {
+					if strings.ToLower(string(res.Network)) == CtlPlaneNetwork {
 						instanceSpec.CtlPlaneIP = res.Address
 						baremetalSet.Spec.CtlplaneGateway = *res.Gateway
 						baremetalSet.Spec.BootstrapDNS = dnsAddresses

@@ -39,7 +39,7 @@ type KubeService struct {
 	Protocol string `json:"protocol,omitempty"`
 
 	// Network is the network that will be used to connect to the endpoint
-	// +kubebuilder:default=CtlPlane
+	// +kubebuilder:default=ctlplane
 	Network infranetworkv1.NetNameStr `json:"network,omitempty"`
 }
 

@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -106,37 +105,27 @@ func populateInventoryFromIPAM(
 	var dnsSearchDomains []string
 	for _, res := range ipSet.Status.Reservation {
 		// Build the vars for ips/routes etc
-		switch n := res.Network; n {
-		case CtlPlaneNetwork:
-			host.Vars["ctlplane_ip"] = res.Address
-			_, ipnet, err := net.ParseCIDR(res.Cidr)
-			if err == nil {
-				netCidr, _ := ipnet.Mask.Size()
-				host.Vars["ctlplane_subnet_cidr"] = netCidr
-			}
-			host.Vars["ctlplane_mtu"] = res.MTU
-			host.Vars["ctlplane_gateway_ip"] = res.Gateway
-			host.Vars["ctlplane_dns_nameservers"] = dnsAddresses
-			host.Vars["ctlplane_host_routes"] = res.Routes
+		entry := strings.ToLower(string(res.Network))
+		host.Vars[entry+"_ip"] = res.Address
+		_, ipnet, err := net.ParseCIDR(res.Cidr)
+		if err == nil {
+			netCidr, _ := ipnet.Mask.Size()
+			host.Vars[entry+"_cidr"] = netCidr
+		}
+		if res.Vlan != nil || entry != CtlPlaneNetwork {
+			host.Vars[entry+"_vlan_id"] = res.Vlan
+		}
+		host.Vars[entry+"_mtu"] = res.MTU
+		host.Vars[entry+"_gateway_ip"] = res.Gateway
+		host.Vars[entry+"_host_routes"] = res.Routes
+
+		if entry == CtlPlaneNetwork {
+			host.Vars[entry+"_dns_nameservers"] = dnsAddresses
 			if !isFQDN(hostName) {
 				host.Vars["canonical_hostname"] = strings.Join([]string{hostName, res.DNSDomain}, ".")
 			} else {
 				host.Vars["canonical_hostname"] = hostName
 			}
-		default:
-			entry := toSnakeCase(string(n))
-			host.Vars[entry+"_ip"] = res.Address
-			_, ipnet, err := net.ParseCIDR(res.Cidr)
-			if err == nil {
-				netCidr, _ := ipnet.Mask.Size()
-				host.Vars[entry+"_cidr"] = netCidr
-			}
-			if res.Vlan != nil {
-				host.Vars[entry+"_vlan_id"] = res.Vlan
-			}
-			host.Vars[entry+"_mtu"] = res.MTU
-			host.Vars[entry+"_gateway_ip"] = res.Gateway
-			host.Vars[entry+"_host_routes"] = res.Routes
 		}
 		dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
 	}
@@ -238,25 +227,16 @@ func unmarshalAnsibleVars(ansibleVars map[string]json.RawMessage,
 	return nil
 }
 
-var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
-var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
-
-func toSnakeCase(str string) string {
-	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
-	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
-	return strings.ToLower(snake)
-}
-
 func buildNetworkVars(networks []infranetworkv1.IPSetNetwork) ([]string, map[string]string) {
 	netsLower := make(map[string]string)
 	var nets []string
 	for _, network := range networks {
 		netName := string(network.Name)
-		if netName == CtlPlaneNetwork {
+		if strings.EqualFold(netName, CtlPlaneNetwork) {
 			continue
 		}
 		nets = append(nets, netName)
-		netsLower[netName] = toSnakeCase(netName)
+		netsLower[netName] = strings.ToLower(netName)
 	}
 	return nets, netsLower
 }

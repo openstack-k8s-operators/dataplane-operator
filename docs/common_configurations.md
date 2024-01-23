@@ -110,10 +110,10 @@ field that shows defining the variables that configure the
     ansibleVars:
       edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
       ctlplane_ip: 192.168.122.100
-      internal_api_ip: 172.17.0.100
+      internalapi_ip: 172.17.0.100
       storage_ip: 172.18.0.100
       tenant_ip: 172.19.0.100
-      fqdn_internal_api: edpm-compute-0.example.com
+      fqdn_internalapi: edpm-compute-0.example.com
 
 This configuration would be applied by the
 [`configure-network`](../composable_services.md/#dataplane-operator-provided-services) service when

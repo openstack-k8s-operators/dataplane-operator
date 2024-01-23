@@ -60,7 +60,7 @@ spec:
                     name:
                       type: string
                     network:
-                      default: CtlPlane
+                      default: ctlplane
                       pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
                       type: string
                     port:
