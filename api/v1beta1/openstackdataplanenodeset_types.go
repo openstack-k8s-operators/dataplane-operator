@@ -108,6 +108,12 @@ type OpenStackDataPlaneNodeSetStatus struct {
 
 	// AllIPs
 	AllIPs map[string]map[infranetworkv1.NetNameStr]string `json:"AllIPs,omitempty" optional:"true"`
+
+	// ConfigMapHashes
+	ConfigMapHashes map[string]string `json:"configMapHashes,omitempty" optional:"true"`
+
+	// SecretHashes
+	SecretHashes map[string]string `json:"secretHashes,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true

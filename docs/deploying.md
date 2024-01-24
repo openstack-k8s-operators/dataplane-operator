@@ -512,3 +512,48 @@ OpenStackDataPlaneDeployment has the following status fields:
 | Ready | True when the service has been created and is ready for use |
 
 OpenStackDataPlaneService has no additional Status fields.
+
+Each service specific condition will be set to `True` as that service completes
+successfully. Looking at the service conditions will indicate which services
+have completed their deployment, or in failure cases, which services failed.
+
+### OpenStackDataPlaneNodeSet deployment hashes
+
+Each `OpenStackDataPlaneService` can optionally have an associated list of
+`ConfigMaps` and `Secrets` that are mounted as file data into the
+`OpenStackAnsibleEE` job started to deploy that service. The ansible content
+then is able to consume those files as necessary. See [Configuring a custom
+service](composable_services.md#configuring-a-custom-service) for more details.
+
+When an `OpenStackDataPlaneDeployment` succeeds, the computed hash of each
+`ConfigMap` and `Secret` for each `OpenStackDataPlaneService` that was deployed
+is saved on the status of each `OpenStackDataPlaneNodeSet` referenced by the
+`OpenStackDataPlaneDeployment`.
+
+These hashes can be compared against the current hash of the `ConfigMap` or
+`Secret` to see if there is newer input data that has not been deployed to the
+`OpenStackDataPlaneNodeSet`. For example if the hash of
+`nova-cell1-compute-config` `Secret` in the `OpenStackDataPlaneNodeSet` status
+is different from the hash of `nova-cell1-compute-config` in the
+`novacell/nova-cell1` status, then there is nova-compute control plane configuration
+data the needs to be deployed to the EDPM compute nodes.
+
+For example, the following hashes are saved on the `OpenStackDataPlaneNodeSet`
+status after a typical deployment:
+
+```console
+$ oc get openstackdataplanenodeset openstack-edpm -o yaml
+
+<snip>
+status:
+  conditions:
+	<snip>
+  configMapHashes:
+    ovncontroller-config: n655h5...
+  secretHashes:
+    neutron-dhcp-agent-neutron-config: n9ch5...
+    neutron-ovn-metadata-agent-neutron-config: n588h...
+    neutron-sriov-agent-neutron-config: n648h...
+    nova-cell1-compute-config: n576h...
+    nova-metadata-neutron-config: n56fh...
+```

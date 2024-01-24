@@ -62,6 +62,12 @@ type OpenStackDataPlaneDeploymentStatus struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// Deployed
 	Deployed bool `json:"deployed,omitempty" optional:"true"`
+
+	// ConfigMapHashes
+	ConfigMapHashes map[string]string `json:"configMapHashes,omitempty" optional:"true"`
+
+	// SecretHashes
+	SecretHashes map[string]string `json:"secretHashes,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true

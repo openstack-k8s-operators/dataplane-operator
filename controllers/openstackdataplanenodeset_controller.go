@@ -182,6 +182,12 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		// in the cli
 		return ctrl.Result{}, nil
 	}
+	if instance.Status.ConfigMapHashes == nil {
+		instance.Status.ConfigMapHashes = make(map[string]string)
+	}
+	if instance.Status.SecretHashes == nil {
+		instance.Status.SecretHashes = make(map[string]string)
+	}
 
 	instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 
@@ -313,6 +319,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 func checkDeployment(helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 ) (bool, bool, error) {
+
 	// Get all completed deployments
 	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
 	opts := []client.ListOption{
@@ -326,6 +333,20 @@ func checkDeployment(helper *helper.Helper,
 
 	isDeploymentReady := false
 	deploymentExists := false
+
+	// Sort deployments from oldest to newest by the LastTransitionTime of
+	// their DeploymentReadyCondition
+	slices.SortFunc(deployments.Items, func(a, b dataplanev1.OpenStackDataPlaneDeployment) int {
+		aReady := a.Status.Conditions.Get(condition.DeploymentReadyCondition)
+		bReady := b.Status.Conditions.Get(condition.DeploymentReadyCondition)
+		if aReady != nil && bReady != nil {
+			if aReady.LastTransitionTime.Before(&bReady.LastTransitionTime) {
+				return -1
+			}
+		}
+		return 1
+	})
+
 	for _, deployment := range deployments.Items {
 		if !deployment.DeletionTimestamp.IsZero() {
 			continue
@@ -336,6 +357,12 @@ func checkDeployment(helper *helper.Helper,
 			isDeploymentReady = false
 			if deployment.Status.Deployed {
 				isDeploymentReady = true
+				for k, v := range deployment.Status.ConfigMapHashes {
+					instance.Status.ConfigMapHashes[k] = v
+				}
+				for k, v := range deployment.Status.SecretHashes {
+					instance.Status.SecretHashes[k] = v
+				}
 			}
 			deploymentConditions := deployment.Status.NodeSetConditions[instance.Name]
 			if instance.Status.DeploymentConditions == nil {
@@ -344,6 +371,7 @@ func checkDeployment(helper *helper.Helper,
 			instance.Status.DeploymentConditions[deployment.Name] = deploymentConditions
 		}
 	}
+
 	return deploymentExists, isDeploymentReady, nil
 }
 

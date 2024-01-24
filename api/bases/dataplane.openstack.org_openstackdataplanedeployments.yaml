@@ -90,6 +90,10 @@ spec:
                   - type
                   type: object
                 type: array
+              configMapHashes:
+                additionalProperties:
+                  type: string
+                type: object
               deployed:
                 type: boolean
               nodeSetConditions:
@@ -115,6 +119,10 @@ spec:
                     - type
                     type: object
                   type: array
+                type: object
+              secretHashes:
+                additionalProperties:
+                  type: string
                 type: object
             type: object
         type: object

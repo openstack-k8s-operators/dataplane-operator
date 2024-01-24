@@ -117,6 +117,12 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		// in the cli
 		return ctrl.Result{}, nil
 	}
+	if instance.Status.ConfigMapHashes == nil {
+		instance.Status.ConfigMapHashes = make(map[string]string)
+	}
+	if instance.Status.SecretHashes == nil {
+		instance.Status.SecretHashes = make(map[string]string)
+	}
 
 	// Ensure NodeSets
 	nodeSets := dataplanev1.OpenStackDataPlaneNodeSetList{}
@@ -267,8 +273,54 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	logger.Info("Set DeploymentReadyCondition true", "instance", instance)
 	instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
 	instance.Status.Deployed = true
+	err = r.setHashes(ctx, helper, instance, nodeSets)
+	if err != nil {
+		logger.Error(err, "Error setting service hashes")
+	}
 	logger.Info("Set status deploy true", "instance", instance)
 	return ctrl.Result{}, nil
+}
+
+func (r *OpenStackDataPlaneDeploymentReconciler) setHashes(
+	ctx context.Context,
+	helper *helper.Helper,
+	instance *dataplanev1.OpenStackDataPlaneDeployment,
+	nodeSets dataplanev1.OpenStackDataPlaneNodeSetList,
+) error {
+
+	var err error
+
+	if len(instance.Spec.ServicesOverride) > 0 {
+		for _, serviceName := range instance.Spec.ServicesOverride {
+			err = deployment.GetDeploymentHashesForService(
+				ctx,
+				helper,
+				instance.Namespace,
+				serviceName,
+				instance.Status.ConfigMapHashes,
+				instance.Status.SecretHashes)
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		for _, nodeSet := range nodeSets.Items {
+			for _, serviceName := range nodeSet.Spec.Services {
+				err = deployment.GetDeploymentHashesForService(
+					ctx,
+					helper,
+					instance.Namespace,
+					serviceName,
+					instance.Status.ConfigMapHashes,
+					instance.Status.SecretHashes)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

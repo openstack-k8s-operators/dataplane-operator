@@ -26,6 +26,8 @@ metadata:
   name: nova-metadata-neutron-config
 data:
   05-nova-metadata.conf: dGVzdC1ub3ZhLW1ldGFkYXRhLWNvbXB1dGUtY29uZmln
+  httpd.conf: dGVzdC1ub3ZhLW1ldGFkYXRhLWNvbXB1dGUtY29uZmln
+  nova-metadata-config.json: dGVzdC1ub3ZhLW1ldGFkYXRhLWNvbXB1dGUtY29uZmln
 ---
 apiVersion: v1
 kind: Secret
