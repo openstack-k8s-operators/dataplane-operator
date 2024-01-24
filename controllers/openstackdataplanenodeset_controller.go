@@ -50,21 +50,21 @@ var dataplaneAnsibleImageDefaults dataplanev1.DataplaneAnsibleImageDefaults
 
 const (
 	// FrrDefaultImage -
-	FrrDefaultImage = "quay.io/podified-antelope-centos9/openstack-frr:current-podified"
+	FrrDefaultImage = "quay.io/podified-antelope-centos9/openstack-frr:current-podified-test"
 	// IscsiDDefaultImage -
-	IscsiDDefaultImage = "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
+	IscsiDDefaultImage = "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified-test"
 	// LogrotateDefaultImage -
-	LogrotateDefaultImage = "quay.io/podified-antelope-centos9/openstack-cron:current-podified"
+	LogrotateDefaultImage = "quay.io/podified-antelope-centos9/openstack-cron:current-podified-test"
 	// NeutronMetadataAgentDefaultImage -
-	NeutronMetadataAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
+	NeutronMetadataAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified-test"
 	// NovaComputeDefaultImage -
-	NovaComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
+	NovaComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified-test"
 	// NovaLibvirtDefaultImage -
-	NovaLibvirtDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified"
+	NovaLibvirtDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified-test"
 	// OvnControllerAgentDefaultImage -
-	OvnControllerAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
+	OvnControllerAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified-test"
 	// OvnBgpAgentDefaultImage -
-	OvnBgpAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
+	OvnBgpAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified-test"
 )
 
 // SetupAnsibleImageDefaults -
@@ -319,7 +319,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 func checkDeployment(helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 ) (bool, bool, error) {
-
 	// Get all completed deployments
 	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
 	opts := []client.ListOption{
