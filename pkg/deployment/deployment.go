@@ -97,13 +97,6 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 			deployLabel,
 			foundService,
 		)
-		// Some OpenStackDataPlaneService might need Kubernetes Services to be created
-		if len(foundService.Spec.Services) > 0 {
-			errKube := CreateKubeServices(&foundService, d.NodeSet, d.Helper, make(map[string]string))
-			if errKube != nil {
-				return &ctrl.Result{}, errKube
-			}
-		}
 
 		nsConditions := d.Status.NodeSetConditions[d.NodeSet.Name]
 		if err != nil || !nsConditions.IsTrue(readyCondition) {
