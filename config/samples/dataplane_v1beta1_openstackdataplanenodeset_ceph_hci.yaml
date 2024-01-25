@@ -44,6 +44,7 @@ spec:
           {% endfor %}
         edpm_nodes_validation_validate_controllers_icmp: false
         edpm_nodes_validation_validate_gateway_icmp: false
+        neutron_physical_bridge_name: br-ex
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     # Add an `extraVolType: Ceph` with to mount the ceph-conf-files
     # secret, after Ceph is deployed.

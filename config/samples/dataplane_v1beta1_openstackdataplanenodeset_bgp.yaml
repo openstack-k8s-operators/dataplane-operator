@@ -40,10 +40,7 @@ spec:
       - name: Tenant
         subnetName: subnet1
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-    managementNetwork: ctlplane
     ansible:
-      ansibleUser: cloud-admin
-      ansiblePort: 22
       ansibleVars:
          timesync_ntp_servers:
            - hostname: pool.ntp.org
@@ -102,46 +99,11 @@ spec:
          # considered EDPM network defaults.
          neutron_physical_bridge_name: br-ex
          neutron_public_interface_name: eth0
-<<<<<<< HEAD
-         ctlplane_mtu: 1500
-         ctlplane_cidr: 24
-         ctlplane_gateway_ip: 192.168.122.1
-         ctlplane_host_routes:
-         - ip_netmask: 0.0.0.0/0
-           next_hop: 192.168.122.1
-         external_mtu: 1500
-         external_vlan_id: 44
-         external_cidr: '24'
-         external_host_routes: []
-         internalapi_mtu: 1500
-         internalapi_vlan_id: 20
-         internalapi_cidr: '24'
-         internalapi_host_routes: []
-         storage_mtu: 1500
-         storage_vlan_id: 21
-         storage_cidr: '24'
-         storage_host_routes: []
-         tenant_mtu: 1500
-         tenant_vlan_id: 22
-         tenant_cidr: '24'
-         tenant_host_routes: []
-         role_networks:
-         - internalapi
-         - storage
-         - tenant
-         networks_lower:
-           external: external
-           internalapi: internalapi
-           storage: storage
-           tenant: tenant
-=======
->>>>>>> 472b8e0 (All sample files can use IPAM)
          # edpm_nodes_validation
          edpm_nodes_validation_validate_controllers_icmp: false
          edpm_nodes_validation_validate_gateway_icmp: false
          ctlplane_dns_nameservers:
          - 192.168.122.1
-         dns_search_domains: []
          # edpm firewall, change the allowed CIDR if needed
          edpm_sshd_allowed_ranges: ['192.168.122.0/24']
          edpm_frr_bgp_uplinks: ['nic2', 'nic3']
