@@ -13,12 +13,6 @@ spec:
       ansibleVars:
         ctlplane_dns_nameservers:
         - 192.168.122.1
-        ctlplane_gateway_ip: 192.168.122.1
-        ctlplane_host_routes:
-        - ip_netmask: 0.0.0.0/0
-          next_hop: 192.168.122.1
-        ctlplane_mtu: 1500
-        ctlplane_cidr: 24
         dns_search_domains: []
         timesync_ntp_servers:
         - hostname: pool.ntp.org
@@ -62,34 +56,8 @@ spec:
         - 192.168.122.0/24
         edpm_sshd_configure_firewall: true
         enable_debug: false
-        external_cidr: "24"
-        external_host_routes: []
-        external_mtu: 1500
-        external_vlan_id: 44
-        gather_facts: false
-        internalapi_cidr: "24"
-        internalapi_host_routes: []
-        internalapi_mtu: 1500
-        internalapi_vlan_id: 20
-        networks_lower:
-          external: external
-          internalapi: internalapi
-          storage: storage
-          tenant: tenant
         neutron_physical_bridge_name: br-ex
         neutron_public_interface_name: eth0
-        role_networks:
-        - internalapi
-        - storage
-        - tenant
-        storage_cidr: "24"
-        storage_host_routes: []
-        storage_vlan_id: 21
-        storage_mtu: 9000
-        tenant_cidr: "24"
-        tenant_host_routes: []
-        tenant_mtu: 1500
-        tenant_vlan_id: 22
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     # Create a secret called ceph-conf-files with the cephx key and
     # ceph.conf file and mount it so the ceph-client service can copy
