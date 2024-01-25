@@ -56,7 +56,6 @@ spec:
       - name: ansible-logs
         persistentVolumeClaim:
           claimName: ansible-ee-logs
-    managementNetwork: ctlplane
   nodes:
     edpm-compute-0:
       ansible:
