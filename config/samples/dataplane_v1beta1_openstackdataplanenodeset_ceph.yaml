@@ -82,9 +82,6 @@ spec:
         - InternalApi
         - Storage
         - Tenant
-        service_net_map:
-          nova_api_network: internalapi
-          nova_libvirt_network: internalapi
         storage_cidr: "24"
         storage_host_routes: []
         storage_vlan_id: 21
