@@ -208,7 +208,139 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			th.AssertSecretDoesNotExist(dataplaneSecretName)
 		})
 	})
+	When("A Dataplane resorce is created with PreProvisioned nodes, no deployment and global service", func() {
+		BeforeEach(func() {
+			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec()
+			nodeSetSpec["services"] = []string{
+				"download-cache",
+				"bootstrap",
+				"configure-network",
+				"validate-network",
+				"install-os",
+				"configure-os",
+				"run-os",
+				"reboot-os",
+				"install-certs",
+				"ovn",
+				"neutron-metadata",
+				"libvirt",
+				"nova",
+				"telemetry",
+				"global-service"}
 
+			dataplaneAllNodeSetServiceName := types.NamespacedName{
+				Name:      "global-service",
+				Namespace: namespace,
+			}
+			CreateDataplaneService(dataplaneAllNodeSetServiceName, true)
+			DeferCleanup(th.DeleteService, dataplaneAllNodeSetServiceName)
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+		})
+		It("should have the Spec fields initialized", func() {
+			dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
+			emptyNodeSpec := dataplanev1.OpenStackDataPlaneNodeSetSpec{
+				BaremetalSetTemplate: baremetalv1.OpenStackBaremetalSetSpec{
+					BaremetalHosts:        nil,
+					OSImage:               "",
+					UserData:              nil,
+					NetworkData:           nil,
+					AutomatedCleaningMode: "metadata",
+					ProvisionServerName:   "",
+					ProvisioningInterface: "",
+					DeploymentSSHSecret:   "dataplane-ansible-ssh-private-key-secret",
+					CtlplaneInterface:     "",
+					CtlplaneGateway:       "",
+					CtlplaneNetmask:       "255.255.255.0",
+					BmhNamespace:          "openshift-machine-api",
+					HardwareReqs: baremetalv1.HardwareReqs{
+						CPUReqs: baremetalv1.CPUReqs{
+							Arch:     "",
+							CountReq: baremetalv1.CPUCountReq{Count: 0, ExactMatch: false},
+							MhzReq:   baremetalv1.CPUMhzReq{Mhz: 0, ExactMatch: false},
+						},
+						MemReqs: baremetalv1.MemReqs{
+							GbReq: baremetalv1.MemGbReq{Gb: 0, ExactMatch: false},
+						},
+						DiskReqs: baremetalv1.DiskReqs{
+							GbReq:  baremetalv1.DiskGbReq{Gb: 0, ExactMatch: false},
+							SSDReq: baremetalv1.DiskSSDReq{SSD: false, ExactMatch: false},
+						},
+					},
+					PasswordSecret:   nil,
+					CloudUserName:    "",
+					DomainName:       "",
+					BootstrapDNS:     nil,
+					DNSSearchDomains: nil,
+				},
+				NodeTemplate: dataplanev1.NodeTemplate{
+					AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
+					Networks:                   nil,
+					ManagementNetwork:          "ctlplane",
+					Ansible: dataplanev1.AnsibleOpts{
+						AnsibleUser: "cloud-admin",
+						AnsibleHost: "",
+						AnsiblePort: 0,
+						AnsibleVars: nil,
+					},
+					ExtraMounts: nil,
+					UserData:    nil,
+					NetworkData: nil,
+				},
+				Env:                nil,
+				PreProvisioned:     true,
+				NetworkAttachments: nil,
+				TLSEnabled:         false,
+				Nodes:              map[string]dataplanev1.NodeSection{},
+				Services: []string{
+					"download-cache",
+					"bootstrap",
+					"configure-network",
+					"validate-network",
+					"install-os",
+					"configure-os",
+					"run-os",
+					"reboot-os",
+					"install-certs",
+					"ovn",
+					"neutron-metadata",
+					"libvirt",
+					"nova",
+					"telemetry",
+					"global-service"},
+			}
+			Expect(dataplaneNodeSetInstance.Spec).Should(Equal(emptyNodeSpec))
+		})
+
+		It("should have the Status fields initialized", func() {
+			dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
+			Expect(dataplaneNodeSetInstance.Status.Deployed).Should(BeFalse())
+		})
+
+		It("should have input not ready and unknown Conditions initialized", func() {
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.ReadyCondition,
+				corev1.ConditionFalse,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionFalse,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				dataplanev1.SetupReadyCondition,
+				corev1.ConditionFalse,
+			)
+		})
+
+		It("Should not have created a Secret", func() {
+			th.AssertSecretDoesNotExist(dataplaneSecretName)
+		})
+	})
 	When("A Dataplane resorce is created without PreProvisioned nodes and ordered deployment", func() {
 		BeforeEach(func() {
 			spec := DefaultDataPlaneNoNodeSetSpec()

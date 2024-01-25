@@ -40,6 +40,8 @@ spec:
                 items:
                   type: string
                 type: array
+              deployOnAllNodeSets:
+                type: boolean
               openStackAnsibleEERunnerImage:
                 type: string
               play:

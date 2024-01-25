@@ -18,6 +18,7 @@ package util
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -41,12 +42,21 @@ func AnsibleExecution(
 	helper *helper.Helper,
 	obj client.Object,
 	service *dataplanev1.OpenStackDataPlaneService,
-	sshKeySecret string,
-	inventorySecret string,
+	sshKeySecrets map[string]string,
+	inventorySecrets []string,
 	aeeSpec *dataplanev1.AnsibleEESpec,
+	targetNodeset string,
 ) error {
 	var err error
 	var cmdLineArguments strings.Builder
+	var inventoryVolume corev1.Volume
+	var inventoryName string
+	var inventoryMountPath string
+	var sshKeyName string
+	var sshKeyMountPath string
+	var sshKeyMountSubPath string
+
+	ansibleEEMounts := storage.VolMounts{}
 
 	ansibleEE, err := GetAnsibleExecution(ctx, helper, obj, service.Name)
 	if err != nil && !k8serrors.IsNotFound(err) {
@@ -98,51 +108,87 @@ func AnsibleExecution(
 			ansibleEE.Spec.Playbook = service.Spec.Playbook
 		}
 
-		ansibleEEMounts := storage.VolMounts{}
-		sshKeyVolume := corev1.Volume{
-			Name: "ssh-key",
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: sshKeySecret,
-					Items: []corev1.KeyToPath{
-						{
-							Key:  "ssh-privatekey",
-							Path: "ssh_key",
+		// If we have a service that ought to be deployed everywhere
+		// substitute the existing play target with 'all'
+		// Check if we have ExtraVars before accessing it
+		if ansibleEE.Spec.ExtraVars == nil {
+			ansibleEE.Spec.ExtraVars = make(map[string]json.RawMessage)
+		}
+		if service.Spec.DeployOnAllNodeSets != nil && *service.Spec.DeployOnAllNodeSets {
+			ansibleEE.Spec.ExtraVars["edpm_override_hosts"] = json.RawMessage([]byte("\"all\""))
+			util.LogForObject(helper, fmt.Sprintf("for service %s, substituting existing ansible play host with 'all'.", service.Name), ansibleEE)
+		} else {
+			ansibleEE.Spec.ExtraVars["edpm_override_hosts"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", targetNodeset)))
+			util.LogForObject(helper, fmt.Sprintf("for service %s, substituting existing ansible play host with 'all'.", service.Name), ansibleEE)
+		}
+
+		for sshKeyNodeName, sshKeySecret := range sshKeySecrets {
+			if service.Spec.DeployOnAllNodeSets != nil && *service.Spec.DeployOnAllNodeSets {
+				sshKeyName = fmt.Sprintf("ssh-key-%s", sshKeyNodeName)
+				sshKeyMountSubPath = fmt.Sprintf("ssh_key_%s", targetNodeset)
+				sshKeyMountPath = fmt.Sprintf("/runner/env/ssh_key/%s", sshKeyMountSubPath)
+			} else {
+				sshKeyName = "ssh-key"
+				sshKeyMountSubPath = "ssh_key"
+				sshKeyMountPath = "/runner/env/ssh_key"
+			}
+			sshKeyVolume := corev1.Volume{
+				Name: sshKeyName,
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: sshKeySecret,
+						Items: []corev1.KeyToPath{
+							{
+								Key:  "ssh-privatekey",
+								Path: sshKeyMountSubPath,
+							},
 						},
 					},
 				},
-			},
-		}
-		sshKeyMount := corev1.VolumeMount{
-			Name:      "ssh-key",
-			MountPath: "/runner/env/ssh_key",
-			SubPath:   "ssh_key",
+			}
+			sshKeyMount := corev1.VolumeMount{
+				Name:      sshKeyName,
+				MountPath: sshKeyMountPath,
+				SubPath:   sshKeyMountSubPath,
+			}
+			// Mount ssh secrets
+			ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, sshKeyMount)
+			ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, sshKeyVolume)
 		}
 
-		inventoryVolume := corev1.Volume{
-			Name: "inventory",
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: inventorySecret,
-					Items: []corev1.KeyToPath{
-						{
-							Key:  "inventory",
-							Path: "inventory",
+		// Mounting inventory and secrets
+		for inventoryIndex, inventorySecret := range inventorySecrets {
+			if service.Spec.DeployOnAllNodeSets != nil && *service.Spec.DeployOnAllNodeSets {
+				inventoryName = fmt.Sprintf("inventory-%d", inventoryIndex)
+				inventoryMountPath = fmt.Sprintf("/runner/inventory/%s", inventoryName)
+			} else {
+				inventoryName = "inventory"
+				inventoryMountPath = "/runner/inventory/hosts"
+			}
+
+			inventoryVolume = corev1.Volume{
+				Name: inventoryName,
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: inventorySecret,
+						Items: []corev1.KeyToPath{
+							{
+								Key:  inventoryName,
+								Path: inventoryName,
+							},
 						},
 					},
 				},
-			},
+			}
+			inventoryMount := corev1.VolumeMount{
+				Name:      inventoryName,
+				MountPath: inventoryMountPath,
+				SubPath:   inventoryName,
+			}
+			// Inventory mount
+			ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, inventoryMount)
+			ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, inventoryVolume)
 		}
-		inventoryMount := corev1.VolumeMount{
-			Name:      "inventory",
-			MountPath: "/runner/inventory/hosts",
-			SubPath:   "inventory",
-		}
-
-		ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, sshKeyVolume)
-		ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, inventoryVolume)
-		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, sshKeyMount)
-		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, inventoryMount)
 
 		ansibleEE.Spec.ExtraMounts = append(aeeSpec.ExtraMounts, []storage.VolMounts{ansibleEEMounts}...)
 		ansibleEE.Spec.Env = aeeSpec.Env

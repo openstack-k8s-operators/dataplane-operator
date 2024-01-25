@@ -51,6 +51,8 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		nodeSetGroup.Vars["edpm_tls_certs_enabled"] = "true"
 	}
 
+	nodeSetGroup.Vars["ansible_ssh_private_key_file"] = fmt.Sprintf("/runner/env/ssh_key/ssh_key_%s", instance.Name)
+
 	for _, node := range instance.Spec.Nodes {
 		host := nodeSetGroup.AddHost(strings.Split(node.HostName, ".")[0])
 		// Use ansible_host if provided else use hostname. Fall back to

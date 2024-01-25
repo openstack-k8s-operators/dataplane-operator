@@ -195,13 +195,23 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	// All nodeSets successfully fetched.
 	// Mark InputReadyCondition=True
 	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.ReadyMessage)
+	shouldRequeue := false
+	haveError := false
+
+	globalInventorySecrets := []string{}
+	globalSSHKeySecrets := map[string]string{}
+
+	// Gathering individual inventory and ssh secrets for later use
+	for _, nodeSet := range nodeSets.Items {
+		// Add inventory secret to list of inventories for global services
+		globalInventorySecrets = append(globalInventorySecrets, fmt.Sprintf("dataplanenodeset-%s", nodeSet.Name))
+		globalSSHKeySecrets[nodeSet.Name] = nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
+	}
 
 	// Deploy each nodeSet
 	// The loop starts and checks NodeSet deployments sequentially. However, after they
 	// are started, they are running in parallel, since the loop does not wait
 	// for the first started NodeSet to finish before starting the next.
-	shouldRequeue := false
-	haveError := false
 	for _, nodeSet := range nodeSets.Items {
 
 		Log.Info(fmt.Sprintf("Deploying NodeSet: %s", nodeSet.Name))
@@ -217,8 +227,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		ansibleEESpec.AnsibleLimit = instance.Spec.AnsibleLimit
 		ansibleEESpec.ExtraVars = instance.Spec.AnsibleExtraVars
 
-		nodeSetSecretInv := fmt.Sprintf("dataplanenodeset-%s", nodeSet.Name)
-
 		if nodeSet.Status.DNSClusterAddresses != nil && nodeSet.Status.CtlplaneSearchDomain != "" {
 			ansibleEESpec.DNSConfig = &corev1.PodDNSConfig{
 				Nameservers: nodeSet.Status.DNSClusterAddresses,
@@ -227,13 +235,14 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		}
 
 		deployer := deployment.Deployer{
-			Ctx:             ctx,
-			Helper:          helper,
-			NodeSet:         &nodeSet,
-			Deployment:      instance,
-			Status:          &instance.Status,
-			AeeSpec:         &ansibleEESpec,
-			InventorySecret: nodeSetSecretInv,
+			Ctx:                         ctx,
+			Helper:                      helper,
+			NodeSet:                     &nodeSet,
+			Deployment:                  instance,
+			Status:                      &instance.Status,
+			AeeSpec:                     &ansibleEESpec,
+			InventorySecrets:            globalInventorySecrets,
+			AnsibleSSHPrivateKeySecrets: globalSSHKeySecrets,
 		}
 
 		// When ServicesOverride is set on the OpenStackDataPlaneDeployment,

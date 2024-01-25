@@ -41,8 +41,13 @@ func CreateDataplaneDeployment(name types.NamespacedName, spec map[string]interf
 }
 
 // Create an OpenStackDataPlaneService with a given NamespacedName, assert on success
-func CreateDataplaneService(name types.NamespacedName) *unstructured.Unstructured {
-	raw := DefaultDataplaneService(name)
+func CreateDataplaneService(name types.NamespacedName, globalService bool) *unstructured.Unstructured {
+	var raw map[string]interface{}
+	if globalService {
+		raw = DefaultDataplaneGlobalService(name)
+	} else {
+		raw = DefaultDataplaneService(name)
+	}
 	return th.CreateUnstructured(raw)
 }
 
@@ -239,6 +244,24 @@ func DefaultDataplaneService(name types.NamespacedName) map[string]interface{} {
 			"name":      name.Name,
 			"namespace": name.Namespace,
 		}}
+}
+
+// Create an empty OpenStackDataPlaneService struct
+// containing only given NamespacedName as metadata
+func DefaultDataplaneGlobalService(name types.NamespacedName) map[string]interface{} {
+
+	return map[string]interface{}{
+
+		"apiVersion": "dataplane.openstack.org/v1beta1",
+		"kind":       "OpenStackDataPlaneService",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		},
+		"spec": map[string]interface{}{
+			"deployOnAllNodeSets": true,
+		},
+	}
 }
 
 // Get resources
