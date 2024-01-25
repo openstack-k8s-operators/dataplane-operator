@@ -119,7 +119,7 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | label | Label to use for service. Must follow DNS952 subdomain conventions. Since we are using it to generate the pod name, we need to keep it short. | string | false |
-| play | Play is an inline playbook contents that ansible will run on execution. If both Play and Roles are specified, Play takes precedence | string | false |
+| play | Play is an inline playbook contents that ansible will run on execution. | string | false |
 | playbook | Playbook is a path to the playbook that ansible will run on this execution | string | false |
 | configMaps | ConfigMaps list of ConfigMap names to mount as ExtraMounts for the OpenStackAnsibleEE | []string | false |
 | secrets | Secrets list of Secret names to mount as ExtraMounts for the OpenStackAnsibleEE | []string | false |
