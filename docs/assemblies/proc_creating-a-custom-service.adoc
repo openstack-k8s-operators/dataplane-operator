@@ -86,6 +86,27 @@ spec:
 +
 A mount is created for each `secret` in the `OpenStackAnsibleEE` pod with a filename that matches the `secret` value. The mounts are created under `/var/lib/openstack/configs/<service name>`.
 
+. Optional: It may be necessary to run some services on all nodesets at the same time. These services need to have their `deployOnAllNodeSets` field set to true.
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-global-service
+spec:
+  label: custom-global-service
+  play: |
+    - hosts: localhost
+      gather_facts: no
+      name: global play
+      tasks:
+        - name: Sleep
+          command: sleep 1
+          delegate_to: localhost
+  deployOnAllNodeSets: true
+----
++
+
 . Create the custom service:
 +
 ----
@@ -105,6 +126,7 @@ deployment, add the service name to the `services` field list on the `NodeSet`. 
 the service name in the order that it should be executed relative to the other
 services. This example shows adding the `hello-world` service as the first
 service to execute for the `edpm-compute` `NodeSet`.
+
 
  apiVersion: dataplane.openstack.org/v1beta1
  kind: OpenStackDataPlaneNodeSet
@@ -146,7 +168,14 @@ service to execute for the `edpm-compute` `NodeSet`.
          novaInstance: nova
    nodeTemplate: {}
 
+
 When customizing the services list, the default list of services must be
 reproduced and then customized if the intent is to still deploy those services.
 If just the `hello-world` service was listed in the list, then that is the only
 service that would be deployed.
+
+[NOTE]
+====
+Exercise caution when including a service that is meant to be exectured on every `NodeSet` in the list.
+Some services may behave in unexpected ways when executed multiple times on the same node.
+====

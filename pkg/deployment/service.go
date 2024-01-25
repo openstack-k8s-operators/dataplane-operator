@@ -48,9 +48,10 @@ func (d *Deployer) DeployService(foundService dataplanev1.OpenStackDataPlaneServ
 		d.Helper,
 		d.Deployment,
 		&foundService,
-		d.NodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret,
-		d.InventorySecret,
-		d.AeeSpec)
+		d.AnsibleSSHPrivateKeySecrets,
+		d.InventorySecrets,
+		d.AeeSpec,
+		d.NodeSet.Name)
 
 	if err != nil {
 		d.Helper.GetLogger().Error(err, fmt.Sprintf("Unable to execute Ansible for %s", foundService.Name))
@@ -152,4 +153,40 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 	}
 
 	return nil
+}
+
+// Check that global services are defined only once in all nodesets, report and fail if there are duplicates
+func CheckGlobalServiceExecutionConsistency(ctx context.Context, helper *helper.Helper, nodesets []dataplanev1.OpenStackDataPlaneNodeSet) error {
+	var globalServices []string
+	var allServices []string
+
+	for _, nodeset := range nodesets {
+		allServices = append(allServices, nodeset.Spec.Services...)
+	}
+	for _, svc := range allServices {
+		service, err := GetService(ctx, helper, svc)
+		if err != nil {
+			helper.GetLogger().Error(err, fmt.Sprintf("error getting service %s for consistency check", svc))
+			return err
+		}
+
+		if service.Spec.DeployOnAllNodeSets != nil && *service.Spec.DeployOnAllNodeSets {
+			if serviceInList(service.Name, globalServices) {
+				return fmt.Errorf("global service %s defined multiple times", service.Name)
+			}
+			globalServices = append(globalServices, service.Name)
+		}
+	}
+
+	return nil
+}
+
+// Check if service name is already in a list
+func serviceInList(service string, services []string) bool {
+	for _, svc := range services {
+		if svc == service {
+			return true
+		}
+	}
+	return false
 }
