@@ -55,7 +55,6 @@ type OpenStackDataPlaneServiceSpec struct {
 	Label string `json:"label,omitempty"`
 
 	// Play is an inline playbook contents that ansible will run on execution.
-	// If both Play and Roles are specified, Play takes precedence
 	Play string `json:"play,omitempty"`
 
 	// Playbook is a path to the playbook that ansible will run on this execution
