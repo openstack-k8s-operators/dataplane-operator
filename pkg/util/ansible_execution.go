@@ -18,6 +18,7 @@ package util
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -47,6 +48,7 @@ func AnsibleExecution(
 ) error {
 	var err error
 	var cmdLineArguments strings.Builder
+	log := helper.GetLogger()
 
 	ansibleEE, err := GetAnsibleExecution(ctx, helper, obj, service.Spec.Label)
 	if err != nil && !k8serrors.IsNotFound(err) {
@@ -97,6 +99,15 @@ func AnsibleExecution(
 		}
 		if len(service.Spec.Playbook) > 0 {
 			ansibleEE.Spec.Playbook = service.Spec.Playbook
+		}
+
+		// If we have a service that ought to be deployed everywhere
+		// substitute the existing play target with 'all'
+		if service.Spec.DeployOnAllNodeSets != nil && *service.Spec.DeployOnAllNodeSets {
+			ansibleEE.Spec.ExtraVars = map[string]json.RawMessage{
+				"edpm_override_hosts": json.RawMessage([]byte("\"all\"")),
+			}
+			log.Info(fmt.Sprintf("for service %s, substituting existing ansible play host with 'all'.", service.Name))
 		}
 
 		ansibleEEMounts := storage.VolMounts{}

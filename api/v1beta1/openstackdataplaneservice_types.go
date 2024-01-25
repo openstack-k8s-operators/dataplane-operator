@@ -82,6 +82,11 @@ type OpenStackDataPlaneServiceSpec struct {
 	// +kubebuilder:default=false
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	AddCertMounts bool `json:"addCertMounts" yaml:"addCertMounts"`
+
+	// DeployOnAllNodeSets - should the service be deploy across all nodesets
+	// This will override default target of a service play, setting it to 'all'.
+	// +kubebuilder:validation:Optional
+	DeployOnAllNodeSets *bool `json:"deployOnAllNodeSets,omitempty" yaml:"deployOnAllNodeSets,omitempty"`
 }
 
 // OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService
