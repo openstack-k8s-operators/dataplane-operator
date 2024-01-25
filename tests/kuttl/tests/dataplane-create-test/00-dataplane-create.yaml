@@ -53,7 +53,7 @@ spec:
          neutron_physical_bridge_name: br-ex
          neutron_public_interface_name: eth0
          ctlplane_mtu: 1500
-         ctlplane_cidr: 24
+         ctlplane_subnet_cidr: 24
          ctlplane_gateway_ip: 192.168.122.1
          ctlplane_host_routes:
          - ip_netmask: 0.0.0.0/0

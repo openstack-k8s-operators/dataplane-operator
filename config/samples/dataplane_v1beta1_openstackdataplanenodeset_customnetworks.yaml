@@ -58,7 +58,7 @@ spec:
                dns_servers: {{ ctlplane_dns_nameservers }}
                domain: {{ dns_search_domains }}
                addresses:
-               - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+               - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
                routes: {{ ctlplane_host_routes }}
                members:
                - type: interface
@@ -83,7 +83,7 @@ spec:
         neutron_physical_bridge_name: br-ex
         neutron_public_interface_name: enp7s0
         ctlplane_mtu: 1500
-        ctlplane_cidr: 24
+        ctlplane_subnet_cidr: 24
         ctlplane_gateway_ip: 192.168.1.254
         ctlplane_host_routes:
         - ip_netmask: 0.0.0.0/0
@@ -138,7 +138,7 @@ spec:
           mtu: 1500
           addresses:
             - ip_netmask:
-                {{ ctlplane_ip }}/{{ ctlplane_cidr }}
+                {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
         - type: ovs_bridge
           name: {{ neutron_physical_bridge_name }}
           mtu: 1500

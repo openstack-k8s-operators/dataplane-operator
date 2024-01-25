@@ -30,7 +30,7 @@ spec:
         - ip_netmask: 0.0.0.0/0
           next_hop: 192.168.122.1
         ctlplane_mtu: 1500
-        ctlplane_cidr: 24
+        ctlplane_subnet_cidr: 24
         dns_search_domains: []
         timesync_ntp_servers:
         - hostname: clock.redhat.com
