@@ -123,6 +123,9 @@ PROC_CMD = --procs ${PROCS}
 test: manifests generate fmt vet envtest ginkgo ## Run tests.
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" $(GINKGO) --trace --cover --coverpkg=../../pkg/...,../../controllers,../../api/v1beta1 --coverprofile cover.out --covermode=atomic ${PROC_CMD} $(GINKGO_ARGS) ./tests/...
 
+.PHONY: test-all
+test-all: test golint golangci golangci-lint ## Run all tests.
+
 ##@ Build
 
 .PHONY: build
