@@ -57,7 +57,6 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 	var readyWaitingMessage string
 	var readyErrorMessage string
 	var deployName string
-	var deployLabel string
 
 	// Save a copy of the original ExtraMounts so it can be reset after each
 	// service deployment
@@ -71,7 +70,6 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 			return &ctrl.Result{}, err
 		}
 		deployName = foundService.Name
-		deployLabel = foundService.Spec.Label
 		readyCondition = condition.Type(fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyCondition, service))
 		readyWaitingMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyWaitingMessage, deployName)
 		readyMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyMessage, deployName)
@@ -103,7 +101,6 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 			readyWaitingMessage,
 			readyErrorMessage,
 			deployName,
-			deployLabel,
 			foundService,
 		)
 
@@ -127,7 +124,6 @@ func (d *Deployer) ConditionalDeploy(
 	readyWaitingMessage string,
 	readyErrorMessage string,
 	deployName string,
-	deployLabel string,
 	foundService dataplanev1.OpenStackDataPlaneService,
 ) error {
 	var err error
@@ -151,7 +147,7 @@ func (d *Deployer) ConditionalDeploy(
 	}
 
 	if nsConditions.IsFalse(readyCondition) {
-		ansibleEE, err := dataplaneutil.GetAnsibleExecution(d.Ctx, d.Helper, d.Deployment, deployLabel)
+		ansibleEE, err := dataplaneutil.GetAnsibleExecution(d.Ctx, d.Helper, d.Deployment, foundService.Name)
 		if err != nil {
 			// Return nil if we don't have AnsibleEE available yet
 			if k8s_errors.IsNotFound(err) {

@@ -48,24 +48,20 @@ func AnsibleExecution(
 	var err error
 	var cmdLineArguments strings.Builder
 
-	ansibleEE, err := GetAnsibleExecution(ctx, helper, obj, service.Spec.Label)
+	ansibleEE, err := GetAnsibleExecution(ctx, helper, obj, service.Name)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
 	}
 	if ansibleEE == nil {
-		var executionName string
-		if len(service.Spec.Label) > 0 {
-			executionName = fmt.Sprintf("%s-%s", service.Spec.Label, obj.GetName())
-		} else {
-			executionName = obj.GetName()
-		}
+
+		executionName := fmt.Sprintf("%s-%s", GetAnsibleExecutionNamePrefix(service), obj.GetName())
 		ansibleEE = &ansibleeev1.OpenStackAnsibleEE{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      executionName,
 				Namespace: obj.GetNamespace(),
 				Labels: map[string]string{
-					service.Spec.Label: string(obj.GetUID()),
-					"osdpd":            obj.GetName(),
+					service.Name: string(obj.GetUID()),
+					"osdpd":      obj.GetName(),
 				},
 			},
 		}
@@ -196,4 +192,15 @@ func GetAnsibleExecution(ctx context.Context, helper *helper.Helper, obj client.
 	}
 
 	return ansibleEE, nil
+}
+
+// GetAnsibleExecutionNamePrefix compute the name of the AnsibleEE
+func GetAnsibleExecutionNamePrefix(service *dataplanev1.OpenStackDataPlaneService) string {
+	var executionNamePrefix string
+	if len(service.Name) > AnsibleExecutionServiceNameLen {
+		executionNamePrefix = service.Name[:AnsibleExecutionServiceNameLen]
+	} else {
+		executionNamePrefix = service.Name
+	}
+	return executionNamePrefix
 }
