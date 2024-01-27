@@ -17,8 +17,11 @@ limitations under the License.
 package v1beta1
 
 import (
+	"context"
 	"fmt"
 	"reflect"
+
+	"golang.org/x/exp/slices"
 
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -26,15 +29,24 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
+
+// Client needed for API calls (manager's client, set by first SetupWebhookWithManager() call
+// to any particular webhook)
+var webhookClient client.Client
 
 // log is for logging in this package.
 var openstackdataplanenodesetlog = logf.Log.WithName("openstackdataplanenodeset-resource")
 
 // SetupWebhookWithManager sets up the webhook with the Manager
 func (r *OpenStackDataPlaneNodeSet) SetupWebhookWithManager(mgr ctrl.Manager) error {
+	if webhookClient == nil {
+		webhookClient = mgr.GetClient()
+	}
+
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r).
 		Complete()
@@ -90,8 +102,57 @@ var _ webhook.Validator = &OpenStackDataPlaneNodeSet{}
 func (r *OpenStackDataPlaneNodeSet) ValidateCreate() error {
 	openstackdataplanenodesetlog.Info("validate create", "name", r.Name)
 
-	// TODO(user): fill in your validation logic upon object creation.
+	var errors field.ErrorList
+
+	NodeSetList := &OpenStackDataPlaneNodeSetList{}
+	opts := &client.ListOptions{
+		Namespace: r.ObjectMeta.Namespace,
+	}
+
+	err := webhookClient.List(context.TODO(), NodeSetList, opts)
+	if err != nil {
+		return err
+	}
+
+	// If this is the first NodeSet being created, then there can be no duplicates
+	// we can exit early here.
+	if len(NodeSetList.Items) == 0 {
+		return nil
+	}
+
+	duplicateNodesError := r.duplicateNodeCheck(NodeSetList)
+	errors = append(errors, &duplicateNodesError)
+
+	if errors != nil {
+		return apierrors.NewInvalid(
+			schema.GroupKind{Group: "dataplane.openstack.org", Kind: "OpenStackDataPlaneNodeSet"},
+			r.Name,
+			errors)
+	}
+
 	return nil
+}
+
+// duplicateNodeCheck checks the NodeSetList for pre-existing nodes. If the user is trying to redefine an
+// existing node, we will return an error and block resource creation.
+func (r *OpenStackDataPlaneNodeSet) duplicateNodeCheck(nodeSetList *OpenStackDataPlaneNodeSetList) (errors field.Error) {
+	var existingNodeNames []string = make([]string, 0)
+	for _, existingNode := range nodeSetList.Items {
+		for _, node := range existingNode.Spec.Nodes {
+			existingNodeNames = append(existingNodeNames, node.HostName)
+		}
+	}
+
+	for _, newNodeName := range r.Spec.Nodes {
+		if slices.Contains(existingNodeNames, newNodeName.HostName) {
+			errors = *field.Invalid(
+				field.NewPath("Spec").Child("nodes"),
+				r.Name,
+				fmt.Sprintf("node already exists in the cluster: %s", newNodeName.HostName))
+		}
+	}
+
+	return
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
