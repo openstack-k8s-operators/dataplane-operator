@@ -6,7 +6,10 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
+
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 )
@@ -90,6 +93,63 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 				}
 				return th.K8sClient.Update(th.Ctx, instance)
 			}).Should(Succeed())
+		})
+	})
+
+	When("A user tries to redeclare an existing node in a new NodeSet", func() {
+		BeforeEach(func() {
+			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec()
+			nodeSetSpec["preProvisioned"] = true
+			nodeSetSpec["nodes"] = map[string]interface{}{
+				"compute-0": map[string]interface{}{
+					"hostName": "compute-0"},
+			}
+		DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+		})
+
+		It("Should block duplicate node declaration", func() {
+			Eventually(func(g Gomega) string {
+				newNodeSetSpec := DefaultDataPlaneNoNodeSetSpec()
+				newNodeSetSpec["preProvisioned"] = true
+				newNodeSetSpec["nodes"] = map[string]interface{}{
+					"compute-0": map[string]interface{}{
+						"hostName": "compute-0"},
+				}
+				newInstance := DefaultDataplaneNodeSetTemplate(types.NamespacedName{Name: "test-duplicate-node", Namespace: namespace}, newNodeSetSpec)
+				unstructuredObj := &unstructured.Unstructured{Object: newInstance}
+				_, err := controllerutil.CreateOrPatch(
+					th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+				return fmt.Sprintf("%s", err)
+			}).Should(ContainSubstring("node already exists"))
+		})
+
+		It("Should block NodeSets if they contain a duplicate ansibleHost", func() {
+			Eventually(func(g Gomega) string {
+				newNodeSetSpec := DefaultDataPlaneNoNodeSetSpec()
+				newNodeSetSpec["preProvisioned"] = true
+				newNodeSetSpec["nodes"] = map[string]interface{}{
+					"compute-3": map[string]interface{}{
+						"hostName": "compute-3",
+						"ansible": map[string]interface{}{
+							"ansibleHost": "compute-3",
+						},
+					},
+					"compute-2": map[string]interface{}{
+						"hostName": "compute-2"},
+					"compute-8": map[string]interface{}{
+						"hostName": "compute-8"},
+					"compute-0": map[string]interface{}{
+						"ansible": map[string]interface{}{
+							"ansibleHost": "compute-0",
+						},
+					},
+				}
+				newInstance := DefaultDataplaneNodeSetTemplate(types.NamespacedName{Name: "test-nodeset-with-duplicate-node", Namespace: namespace}, newNodeSetSpec)
+				unstructuredObj := &unstructured.Unstructured{Object: newInstance}
+				_, err := controllerutil.CreateOrPatch(
+					th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
+				return fmt.Sprintf("%s", err)
+			}).Should(ContainSubstring("node already exists"))
 		})
 	})
 })

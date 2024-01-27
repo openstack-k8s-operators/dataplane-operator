@@ -104,24 +104,23 @@ func (r *OpenStackDataPlaneNodeSet) ValidateCreate() error {
 
 	var errors field.ErrorList
 
-	NodeSetList := &OpenStackDataPlaneNodeSetList{}
+	nodeSetList := &OpenStackDataPlaneNodeSetList{}
 	opts := &client.ListOptions{
 		Namespace: r.ObjectMeta.Namespace,
 	}
 
-	err := webhookClient.List(context.TODO(), NodeSetList, opts)
+	err := webhookClient.List(context.TODO(), nodeSetList, opts)
 	if err != nil {
 		return err
 	}
 
 	// If this is the first NodeSet being created, then there can be no duplicates
 	// we can exit early here.
-	if len(NodeSetList.Items) == 0 {
+	if len(nodeSetList.Items) == 0 {
 		return nil
 	}
 
-	duplicateNodesError := r.duplicateNodeCheck(NodeSetList)
-	errors = append(errors, &duplicateNodesError)
+	errors = r.duplicateNodeCheck(nodeSetList)
 
 	if errors != nil {
 		return apierrors.NewInvalid(
@@ -135,20 +134,23 @@ func (r *OpenStackDataPlaneNodeSet) ValidateCreate() error {
 
 // duplicateNodeCheck checks the NodeSetList for pre-existing nodes. If the user is trying to redefine an
 // existing node, we will return an error and block resource creation.
-func (r *OpenStackDataPlaneNodeSet) duplicateNodeCheck(nodeSetList *OpenStackDataPlaneNodeSetList) (errors field.Error) {
-	var existingNodeNames []string = make([]string, 0)
+func (r *OpenStackDataPlaneNodeSet) duplicateNodeCheck(nodeSetList *OpenStackDataPlaneNodeSetList) (errors field.ErrorList) {
+	existingNodeNames := make([]string, 0)
 	for _, existingNode := range nodeSetList.Items {
 		for _, node := range existingNode.Spec.Nodes {
 			existingNodeNames = append(existingNodeNames, node.HostName)
+			if node.Ansible.AnsibleHost != "" {
+				existingNodeNames = append(existingNodeNames, node.Ansible.AnsibleHost)
+			}
 		}
 	}
 
 	for _, newNodeName := range r.Spec.Nodes {
-		if slices.Contains(existingNodeNames, newNodeName.HostName) {
-			errors = *field.Invalid(
+		if slices.Contains(existingNodeNames, newNodeName.HostName) || slices.Contains(existingNodeNames, newNodeName.Ansible.AnsibleHost) {
+			errors = append(errors, field.Invalid(
 				field.NewPath("Spec").Child("nodes"),
 				r.Name,
-				fmt.Sprintf("node already exists in the cluster: %s", newNodeName.HostName))
+				fmt.Sprintf("node already exists in the cluster: %s", newNodeName.HostName)))
 		}
 	}
 
