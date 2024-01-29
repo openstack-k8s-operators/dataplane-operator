@@ -76,13 +76,13 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 	allIPs := map[string]map[infranetworkv1.NetNameStr]string{}
 
 	// Build DNSData CR
-	for nodeName, node := range instance.Spec.Nodes {
+	for _, node := range instance.Spec.Nodes {
 		var shortName string
 		nets := node.Networks
 		hostName := node.HostName
 
-		allHostnames[nodeName] = map[infranetworkv1.NetNameStr]string{}
-		allIPs[nodeName] = map[infranetworkv1.NetNameStr]string{}
+		allHostnames[hostName] = map[infranetworkv1.NetNameStr]string{}
+		allIPs[hostName] = map[infranetworkv1.NetNameStr]string{}
 
 		shortName = strings.Split(hostName, ".")[0]
 		if len(nets) == 0 {
@@ -90,7 +90,7 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 		}
 		if len(nets) > 0 {
 			// Get IPSet
-			ipSet, ok := allIPSets[nodeName]
+			ipSet, ok := allIPSets[hostName]
 			if ok {
 				for _, res := range ipSet.Status.Reservation {
 					var fqdnNames []string
@@ -100,13 +100,13 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 					fqdnName := strings.Join([]string{shortName, res.DNSDomain}, ".")
 					if fqdnName != hostName {
 						fqdnNames = append(fqdnNames, fqdnName)
-						allHostnames[nodeName][res.Network] = fqdnName
+						allHostnames[hostName][res.Network] = fqdnName
 					}
 					if isFQDN(hostName) && netLower == CtlPlaneNetwork {
 						fqdnNames = append(fqdnNames, hostName)
-						allHostnames[nodeName][res.Network] = hostName
+						allHostnames[hostName][res.Network] = hostName
 					}
-					allIPs[nodeName][res.Network] = res.Address
+					allIPs[hostName][res.Network] = res.Address
 					dnsRecord.Hostnames = fqdnNames
 					allDNSRecords = append(allDNSRecords, dnsRecord)
 					// Adding only ctlplane domain for ansibleee.
@@ -233,9 +233,9 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 
 	allIPSets := make(map[string]infranetworkv1.IPSet)
 	// CreateOrPatch IPSets
-	for nodeName, node := range instance.Spec.Nodes {
+	for _, node := range instance.Spec.Nodes {
 		nets := node.Networks
-
+		hostName := node.HostName
 		if len(nets) == 0 {
 			nets = instance.Spec.NodeTemplate.Networks
 		}
@@ -245,7 +245,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 			ipSet := &infranetworkv1.IPSet{
 				ObjectMeta: metav1.ObjectMeta{
 					Namespace: instance.Namespace,
-					Name:      nodeName,
+					Name:      hostName,
 				},
 			}
 			_, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), ipSet, func() error {
@@ -258,7 +258,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 			if err != nil {
 				return nil, err
 			}
-			allIPSets[nodeName] = *ipSet
+			allIPSets[hostName] = *ipSet
 		}
 	}
 

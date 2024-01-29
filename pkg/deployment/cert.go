@@ -50,7 +50,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 
 	// for each node in the nodeset, issue all the TLS certs needed based on the
 	// ips or DNS Names
-	for nodeName := range instance.Spec.Nodes {
+	for _, node := range instance.Spec.Nodes {
 		var dnsNames map[infranetworkv1.NetNameStr]string
 		var ipsMap map[infranetworkv1.NetNameStr]string
 		var hosts []string
@@ -63,14 +63,15 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 
 		// TODO(alee) decide if we want to use other labels
 		// For now we just add the hostname so we can select all the certs on one node
+		hostName := node.HostName
 		labels := map[string]string{
-			"hostname": nodeName,
+			"hostname": hostName,
 			"service":  service.Name,
 		}
-		secretName = "cert-" + service.Name + "-" + nodeName
+		secretName = "cert-" + service.Name + "-" + hostName
 
-		dnsNames = allHostnames[nodeName]
-		ipsMap = allIPs[nodeName]
+		dnsNames = allHostnames[hostName]
+		ipsMap = allIPs[hostName]
 
 		// Create the hosts and ips lists
 		if service.Spec.TLSCert.Networks == nil {
@@ -78,6 +79,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 			for _, host := range dnsNames {
 				hosts = append(hosts, host)
 			}
+
 			ips = make([]string, 0, len(ipsMap))
 			for _, ip := range ipsMap {
 				ips = append(ips, ip)
@@ -118,8 +120,8 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		// We'll do this once stuggi adds a function to do this in libcommon
 
 		// To use this cert, add it to the relevant service data
-		certsData[nodeName+"-tls.key"] = certSecret.Data["tls.key"]
-		certsData[nodeName+"-tls.crt"] = certSecret.Data["tls.crt"]
+		certsData[hostName+"-tls.key"] = certSecret.Data["tls.key"]
+		certsData[hostName+"-tls.crt"] = certSecret.Data["tls.crt"]
 	}
 
 	// create a secret to hold the certs for the service
