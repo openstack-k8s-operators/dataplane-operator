@@ -102,6 +102,12 @@ var _ webhook.Validator = &OpenStackDataPlaneNodeSet{}
 func (r *OpenStackDataPlaneNodeSet) ValidateCreate() error {
 	openstackdataplanenodesetlog.Info("validate create", "name", r.Name)
 
+	// Currently, this check is only valid for PreProvisioned nodes. Since we can't possibly
+	// have duplicates in Baremetal Deployments, we can exit early here for Baremetal NodeSets.
+	if !r.Spec.PreProvisioned {
+		return nil
+	}
+
 	var errors field.ErrorList
 
 	nodeSetList := &OpenStackDataPlaneNodeSetList{}

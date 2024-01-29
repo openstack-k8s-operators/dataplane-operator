@@ -104,7 +104,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 				"compute-0": map[string]interface{}{
 					"hostName": "compute-0"},
 			}
-		DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 		})
 
 		It("Should block duplicate node declaration", func() {
