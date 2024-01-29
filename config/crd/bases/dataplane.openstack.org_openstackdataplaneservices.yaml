@@ -13,6 +13,7 @@ spec:
     listKind: OpenStackDataPlaneServiceList
     plural: openstackdataplaneservices
     shortNames:
+    - osdps
     - osdpservice
     - osdpservices
     singular: openstackdataplaneservice
