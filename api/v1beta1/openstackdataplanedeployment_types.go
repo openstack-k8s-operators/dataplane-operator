@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+    "encoding/json"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -39,6 +40,12 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// AnsibleSkipTags for ansible execution
 	// +kubebuilder:validation:Optional
 	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// AnsibleExtraVars for ansible execution
+	// +kubebuilder:pruning:PreserveUnknownFields
+	// +kubebuilder:validation:Schemaless
+	AnsibleExtraVars map[string]json.RawMessage `json:"ansibleExtraVars,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// ServicesOverride list

@@ -79,6 +79,9 @@ func AnsibleExecution(
 		if len(aeeSpec.OpenStackAnsibleEERunnerImage) > 0 {
 			ansibleEE.Spec.Image = aeeSpec.OpenStackAnsibleEERunnerImage
 		}
+		if len(aeeSpec.ExtraVars) > 0 {
+			ansibleEE.Spec.ExtraVars = aeeSpec.ExtraVars
+		}
 		if len(aeeSpec.AnsibleTags) > 0 {
 			fmt.Fprintf(&cmdLineArguments, "--tags %s ", aeeSpec.AnsibleTags)
 		}
