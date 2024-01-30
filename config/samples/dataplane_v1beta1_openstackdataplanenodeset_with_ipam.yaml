@@ -24,30 +24,30 @@ spec:
         ansible:
           ansibleHost: 192.168.122.100
         networks:
-        - name: CtlPlane
+        - name: ctlplane
           subnetName: subnet1
           defaultRoute: true
           fixedIP: 192.168.122.100
-        - name: InternalApi
+        - name: internalapi
           subnetName: subnet1
-        - name: Storage
+        - name: storage
           subnetName: subnet1
-        - name: Tenant
+        - name: tenant
           subnetName: subnet1
       edpm-compute-1:
         hostName: edpm-compute-1
         ansible:
           ansibleHost: 192.168.122.101
         networks:
-        - name: CtlPlane
+        - name: ctlplane
           subnetName: subnet1
           defaultRoute: true
           fixedIP: 192.168.122.101
-        - name: InternalApi
+        - name: internalapi
           subnetName: subnet1
-        - name: Storage
+        - name: storage
           subnetName: subnet1
-        - name: Tenant
+        - name: tenant
           subnetName: subnet1
   networkAttachments:
     - ctlplane

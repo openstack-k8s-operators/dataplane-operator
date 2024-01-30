@@ -123,13 +123,13 @@ spec:
       networks:
       - defaultRoute: true
         fixedIP: 192.168.122.100
-        name: CtlPlane
+        name: ctlplane
         subnetName: subnet1
-      - name: InternalApi
+      - name: internalapi
         subnetName: subnet1
-      - name: Storage
+      - name: storage
         subnetName: subnet1
-      - name: Tenant
+      - name: tenant
         subnetName: subnet1
     edpm-compute-1:
       ansible:
@@ -138,13 +138,13 @@ spec:
       networks:
       - defaultRoute: true
         fixedIP: 192.168.122.101
-        name: CtlPlane
+        name: ctlplane
         subnetName: subnet1
-      - name: InternalApi
+      - name: internalapi
         subnetName: subnet1
-      - name: Storage
+      - name: storage
         subnetName: subnet1
-      - name: Tenant
+      - name: tenant
         subnetName: subnet1
     edpm-compute-2:
       ansible:
@@ -153,13 +153,13 @@ spec:
       networks:
       - defaultRoute: true
         fixedIP: 192.168.122.102
-        name: CtlPlane
+        name: ctlplane
         subnetName: subnet1
-      - name: InternalApi
+      - name: internalapi
         subnetName: subnet1
-      - name: Storage
+      - name: storage
         subnetName: subnet1
-      - name: Tenant
+      - name: tenant
         subnetName: subnet1
   preProvisioned: true
   # Create a nova-custom-ceph service which uses a ConfigMap
