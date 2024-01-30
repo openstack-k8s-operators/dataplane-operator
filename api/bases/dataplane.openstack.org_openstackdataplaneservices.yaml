@@ -30,16 +30,15 @@ spec:
             type: object
           spec:
             properties:
+              addCertMounts:
+                default: false
+                type: boolean
               caCerts:
                 type: string
               configMaps:
                 items:
                   type: string
                 type: array
-              issuers:
-                additionalProperties:
-                  type: string
-                type: object
               label:
                 maxLength: 53
                 pattern: '[a-z]([-a-z0-9]*[a-z0-9])'
@@ -54,8 +53,22 @@ spec:
                 items:
                   type: string
                 type: array
-              tlsCertsEnabled:
-                type: boolean
+              tlsCert:
+                properties:
+                  contents:
+                    items:
+                      type: string
+                    type: array
+                  issuer:
+                    type: string
+                  networks:
+                    items:
+                      pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$
+                      type: string
+                    type: array
+                required:
+                - contents
+                type: object
             type: object
           status:
             properties:

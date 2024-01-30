@@ -53,4 +53,10 @@ const (
 
 	// CACertPaths base path for CA cert volume mount in OpenStackAnsibleEE pod
 	CACertPaths = "/var/lib/openstack/cacerts"
+
+	// DNSNamesStr value for setting dns values in a cert
+	DNSNamesStr = "dnsnames"
+
+	// IPValuesStr value for setting ip addresses in a cert
+	IPValuesStr = "ips"
 )

@@ -31,7 +31,6 @@ import (
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
@@ -84,10 +83,20 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 		d.AeeSpec.ExtraMounts = make([]storage.VolMounts, len(aeeSpecMounts))
 		copy(d.AeeSpec.ExtraMounts, aeeSpecMounts)
 		d.AeeSpec, err = d.addServiceExtraMounts(foundService)
-
 		if err != nil {
 			return &ctrl.Result{}, err
 		}
+
+		// Add certMounts if TLS is enabled
+		if d.NodeSet.Spec.TLSEnabled {
+			if foundService.Spec.AddCertMounts {
+				d.AeeSpec, err = d.addCertMounts(foundService, services)
+			}
+			if err != nil {
+				return &ctrl.Result{}, err
+			}
+		}
+
 		err = d.ConditionalDeploy(
 			readyCondition,
 			readyMessage,
@@ -103,6 +112,7 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 			log.Info(fmt.Sprintf("Condition %s not ready", readyCondition))
 			return &ctrl.Result{}, err
 		}
+
 		log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
 	}
 
@@ -187,6 +197,77 @@ func (d *Deployer) ConditionalDeploy(
 	d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
 
 	return err
+}
+
+// addCertMounts adds the cert mounts to the aeeSpec for the install-certs service
+func (d *Deployer) addCertMounts(
+	certService dataplanev1.OpenStackDataPlaneService,
+	services []string,
+) (*dataplanev1.AnsibleEESpec, error) {
+	log := d.Helper.GetLogger()
+	client := d.Helper.GetClient()
+	for _, svc := range services {
+		service, err := GetService(d.Ctx, d.Helper, svc)
+		if err != nil {
+			return nil, err
+		}
+		if service.Spec.TLSCert != nil {
+			log.Info("Mounting TLS cert for service", "service", svc)
+			volMounts := storage.VolMounts{}
+
+			// add mount for certs and keys
+			secretName := GetServiceCertsSecretName(d.NodeSet, service.Name)
+			certSecret := &corev1.Secret{}
+			err := client.Get(d.Ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, certSecret)
+			if err != nil {
+				return d.AeeSpec, err
+			}
+			certVolume := corev1.Volume{
+				Name: secretName,
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: secretName,
+					},
+				},
+			}
+			certVolumeMount := corev1.VolumeMount{
+				Name:      secretName,
+				MountPath: path.Join(CertPaths, service.Name),
+			}
+			volMounts.Volumes = append(volMounts.Volumes, certVolume)
+			volMounts.Mounts = append(volMounts.Mounts, certVolumeMount)
+			d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
+		}
+
+		// add mount for cacert bundle
+		if len(service.Spec.CACerts) > 0 {
+			log.Info("Mounting CA cert bundle for service", "service", svc)
+			volMounts := storage.VolMounts{}
+			cacertSecret := &corev1.Secret{}
+			err := client.Get(d.Ctx, types.NamespacedName{Name: service.Spec.CACerts, Namespace: service.Namespace}, cacertSecret)
+			if err != nil {
+				return d.AeeSpec, err
+			}
+			cacertVolume := corev1.Volume{
+				Name: fmt.Sprintf("%s-%s", service.Name, service.Spec.CACerts),
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: service.Spec.CACerts,
+					},
+				},
+			}
+
+			cacertVolumeMount := corev1.VolumeMount{
+				Name:      fmt.Sprintf("%s-%s", service.Name, service.Spec.CACerts),
+				MountPath: path.Join(CACertPaths, service.Name),
+			}
+
+			volMounts.Volumes = append(volMounts.Volumes, cacertVolume)
+			volMounts.Mounts = append(volMounts.Mounts, cacertVolumeMount)
+			d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
+		}
+	}
+	return d.AeeSpec, nil
 }
 
 // addServiceExtraMounts adds the service configs as ExtraMounts to aeeSpec
@@ -291,65 +372,6 @@ func (d *Deployer) addServiceExtraMounts(
 		}
 
 		d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
-	}
-
-	// Add mounts for TLS certs
-	if d.NodeSet.Spec.TLSEnabled != nil && *d.NodeSet.Spec.TLSEnabled {
-		if service.Spec.TLSCertsEnabled != nil && *service.Spec.TLSCertsEnabled {
-			volMounts := storage.VolMounts{}
-			secretName := GetServiceCertsSecretName(d.NodeSet, service.Name)
-			sec := &corev1.Secret{}
-			err := client.Get(d.Ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, sec)
-			if err != nil {
-				return d.AeeSpec, err
-			}
-			volume := corev1.Volume{
-				Name: secretName,
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName: secretName,
-					},
-				},
-			}
-
-			volumeMount := corev1.VolumeMount{
-				Name:      secretName,
-				MountPath: CertPaths,
-			}
-
-			volMounts.Volumes = append(volMounts.Volumes, volume)
-			volMounts.Mounts = append(volMounts.Mounts, volumeMount)
-
-			// add mount for cacerts
-			var caCertSecretName string
-			if len(service.Spec.CACerts) > 0 {
-				caCertSecretName = service.Spec.CACerts
-			} else {
-				caCertSecretName = tls.CABundleLabel
-			}
-
-			err = client.Get(d.Ctx, types.NamespacedName{Name: caCertSecretName, Namespace: service.Namespace}, sec)
-			if err != nil {
-				return d.AeeSpec, err
-			}
-			volume = corev1.Volume{
-				Name: caCertSecretName,
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName: caCertSecretName,
-					},
-				},
-			}
-
-			volumeMount = corev1.VolumeMount{
-				Name:      caCertSecretName,
-				MountPath: CACertPaths,
-			}
-
-			volMounts.Volumes = append(volMounts.Volumes, volume)
-			volMounts.Mounts = append(volMounts.Mounts, volumeMount)
-			d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
-		}
 	}
 	return d.AeeSpec, nil
 }

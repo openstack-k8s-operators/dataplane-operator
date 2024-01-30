@@ -159,7 +159,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 
 	// get TLS certs
 	for _, nodeSet := range nodeSets.Items {
-		if nodeSet.Spec.TLSEnabled != nil && *nodeSet.Spec.TLSEnabled {
+		if nodeSet.Spec.TLSEnabled {
 			var services []string
 			if len(instance.Spec.ServicesOverride) != 0 {
 				services = instance.Spec.ServicesOverride
@@ -172,7 +172,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 				if err != nil {
 					return ctrl.Result{}, err
 				}
-				if service.Spec.TLSCertsEnabled != nil && *service.Spec.TLSCertsEnabled {
+				if service.Spec.TLSCert != nil {
 					result, err := deployment.EnsureTLSCerts(ctx, helper, &nodeSet,
 						nodeSet.Status.AllHostnames, nodeSet.Status.AllIPs, service)
 					if err != nil {

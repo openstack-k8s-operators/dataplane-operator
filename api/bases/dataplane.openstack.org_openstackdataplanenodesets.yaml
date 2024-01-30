@@ -1870,6 +1870,7 @@ spec:
                 - configure-os
                 - run-os
                 - reboot-os
+                - install-certs
                 - ovn
                 - neutron-metadata
                 - libvirt
@@ -1879,6 +1880,7 @@ spec:
                   type: string
                 type: array
               tlsEnabled:
+                default: false
                 type: boolean
             required:
             - nodeTemplate

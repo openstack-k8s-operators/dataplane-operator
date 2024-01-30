@@ -11,6 +11,11 @@ spec:
     # and ssh-publickey
     - nova-migration-ssh-key
   playbook: osp.edpm.nova
-  tlsCertsEnabled: True
-  issuers:
-    default: osp-rootca-issuer-internal
+  tlsCert:
+    contents:
+    - dnsnames
+    - ips
+    networks:
+    - CtlPlane
+    issuer: osp-rootca-issuer-internal
+  caCerts: combined-ca-bundle

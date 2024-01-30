@@ -155,6 +155,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				Env:                nil,
 				PreProvisioned:     true,
 				NetworkAttachments: nil,
+				TLSEnabled:         false,
 				Nodes:              map[string]dataplanev1.NodeSection{},
 				Services: []string{
 					"download-cache",
@@ -165,6 +166,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					"configure-os",
 					"run-os",
 					"reboot-os",
+					"install-certs",
 					"ovn",
 					"neutron-metadata",
 					"libvirt",
