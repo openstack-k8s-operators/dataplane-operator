@@ -31,14 +31,14 @@ spec:
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     networks:
-      - name: CtlPlane
+      - name: ctlplane
         subnetName: subnet1
         defaultRoute: true
-      - name: InternalApi
+      - name: internalapi
         subnetName: subnet1
-      - name: Storage
+      - name: storage
         subnetName: subnet1
-      - name: Tenant
+      - name: tenant
         subnetName: subnet1
     managementNetwork: ctlplane
     ansible:

@@ -134,14 +134,14 @@ spec:
          tenant_cidr: '24'
          tenant_host_routes: []
          role_networks:
-         - InternalApi
-         - Storage
-         - Tenant
+         - internalapi
+         - storage
+         - tenant
          networks_lower:
-           External: external
-           InternalApi: internalapi
-           Storage: storage
-           Tenant: tenant
+           external: external
+           internalapi: internalapi
+           storage: storage
+           tenant: tenant
          # edpm_nodes_validation
          edpm_nodes_validation_validate_controllers_icmp: false
          edpm_nodes_validation_validate_gateway_icmp: false
