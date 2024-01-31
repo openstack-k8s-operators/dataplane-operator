@@ -466,7 +466,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(ctx context.Conte
 			for _, pod := range podsList.Items {
 				Log.Info(
 					fmt.Sprintf(
-						"openstack dataplane pod %s failed due to %s message: %s",
+						"openstackansibleee job %s failed due to %s with message: %s",
 						pod.Name, pod.Status.Reason, pod.Status.Message))
 			}
 		}
