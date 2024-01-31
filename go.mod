@@ -12,7 +12,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.14.0
 	github.com/onsi/gomega v1.30.0
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230724101130-2d6fe1f4706b
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240125112246-15881e3c5305
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240127002736-36bb8f7ab340
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240124141114-55d029e4658b
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240124141114-55d029e4658b
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240124141114-55d029e4658b
