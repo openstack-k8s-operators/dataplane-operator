@@ -41,6 +41,15 @@ var webhookClient client.Client
 // log is for logging in this package.
 var openstackdataplanenodesetlog = logf.Log.WithName("openstackdataplanenodeset-resource")
 
+var dataplaneAnsibleContainerImagesDefaults DataplaneAnsibleContainerImages
+
+// SetupDataplaneAnsibleContainerImagesDefaults saves the defaults for use by
+// the webhook
+func SetupDataplaneAnsibleContainerImagesDefaults(defaults DataplaneAnsibleContainerImages) {
+	dataplaneAnsibleContainerImagesDefaults = defaults
+	openstackdataplanenodesetlog.Info("dataplaneAnsibleContainerImagesDefaults initialized", "dataplaneAnsibleContainerImagesDefaults", dataplaneAnsibleContainerImagesDefaults)
+}
+
 // SetupWebhookWithManager sets up the webhook with the Manager
 func (r *OpenStackDataPlaneNodeSet) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	if webhookClient == nil {
@@ -93,6 +102,32 @@ func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
 		}
 		spec.BaremetalSetTemplate.BaremetalHosts = nodeSetHostMap
 	}
+
+	if spec.ContainerImages.Frr == "" {
+		spec.ContainerImages.Frr = dataplaneAnsibleContainerImagesDefaults.Frr
+	}
+	if spec.ContainerImages.IscsiD == "" {
+		spec.ContainerImages.IscsiD = dataplaneAnsibleContainerImagesDefaults.IscsiD
+	}
+	if spec.ContainerImages.Logrotate == "" {
+		spec.ContainerImages.Logrotate = dataplaneAnsibleContainerImagesDefaults.Logrotate
+	}
+	if spec.ContainerImages.NeutronMetadataAgent == "" {
+		spec.ContainerImages.NeutronMetadataAgent = dataplaneAnsibleContainerImagesDefaults.NeutronMetadataAgent
+	}
+	if spec.ContainerImages.NovaCompute == "" {
+		spec.ContainerImages.NovaCompute = dataplaneAnsibleContainerImagesDefaults.NovaCompute
+	}
+	if spec.ContainerImages.NovaLibvirt == "" {
+		spec.ContainerImages.NovaLibvirt = dataplaneAnsibleContainerImagesDefaults.NovaLibvirt
+	}
+	if spec.ContainerImages.OvnControllerAgent == "" {
+		spec.ContainerImages.OvnControllerAgent = dataplaneAnsibleContainerImagesDefaults.OvnControllerAgent
+	}
+	if spec.ContainerImages.OvnBgpAgent == "" {
+		spec.ContainerImages.OvnBgpAgent = dataplaneAnsibleContainerImagesDefaults.OvnBgpAgent
+	}
+
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

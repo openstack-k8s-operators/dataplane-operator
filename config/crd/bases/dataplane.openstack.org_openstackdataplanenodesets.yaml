@@ -197,6 +197,25 @@ spec:
                 - ctlplaneInterface
                 - deploymentSSHSecret
                 type: object
+              containerImages:
+                properties:
+                  frr:
+                    type: string
+                  iscsiD:
+                    type: string
+                  logrotate:
+                    type: string
+                  neutronMetadataAgent:
+                    type: string
+                  novaCompute:
+                    type: string
+                  novaLibvirt:
+                    type: string
+                  ovnBgpAgent:
+                    type: string
+                  ovnControllerAgent:
+                    type: string
+                type: object
               env:
                 items:
                   properties:
@@ -1933,6 +1952,25 @@ spec:
               configMapHashes:
                 additionalProperties:
                   type: string
+                type: object
+              containerImages:
+                properties:
+                  frr:
+                    type: string
+                  iscsiD:
+                    type: string
+                  logrotate:
+                    type: string
+                  neutronMetadataAgent:
+                    type: string
+                  novaCompute:
+                    type: string
+                  novaLibvirt:
+                    type: string
+                  ovnBgpAgent:
+                    type: string
+                  ovnControllerAgent:
+                    type: string
                 type: object
               ctlplaneSearchDomain:
                 type: string

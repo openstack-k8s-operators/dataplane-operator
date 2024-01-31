@@ -47,46 +47,11 @@ import (
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 )
 
-var dataplaneAnsibleImageDefaults dataplanev1.DataplaneAnsibleImageDefaults
-
-const (
-	// FrrDefaultImage -
-	FrrDefaultImage = "quay.io/podified-antelope-centos9/openstack-frr:current-podified"
-	// IscsiDDefaultImage -
-	IscsiDDefaultImage = "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
-	// LogrotateDefaultImage -
-	LogrotateDefaultImage = "quay.io/podified-antelope-centos9/openstack-cron:current-podified"
-	// NeutronMetadataAgentDefaultImage -
-	NeutronMetadataAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
-	// NovaComputeDefaultImage -
-	NovaComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
-	// NovaLibvirtDefaultImage -
-	NovaLibvirtDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified"
-	// OvnControllerAgentDefaultImage -
-	OvnControllerAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
-	// OvnBgpAgentDefaultImage -
-	OvnBgpAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
-)
-
 // NodeConfigElements is a struct containing just the elements used for Ansible executions
 type NodeConfigElements struct {
 	BaremetalSetTemplate baremetalv1.OpenStackBaremetalSetSpec
 	NodeTemplate         dataplanev1.NodeTemplate
 	Nodes                map[string]dataplanev1.NodeSection
-}
-
-// SetupAnsibleImageDefaults -
-func SetupAnsibleImageDefaults() {
-	dataplaneAnsibleImageDefaults = dataplanev1.DataplaneAnsibleImageDefaults{
-		Frr:                  util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_FRR_DEFAULT_IMG", FrrDefaultImage),
-		IscsiD:               util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_ISCSID_DEFAULT_IMG", IscsiDDefaultImage),
-		Logrotate:            util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG", LogrotateDefaultImage),
-		NeutronMetadataAgent: util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_METADATA_AGENT_DEFAULT_IMG", NeutronMetadataAgentDefaultImage),
-		NovaCompute:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG", NovaComputeDefaultImage),
-		NovaLibvirt:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LIBVIRT_DEFAULT_IMG", NovaLibvirtDefaultImage),
-		OvnControllerAgent:   util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_CONTROLLER_AGENT_DEFAULT_IMG", OvnControllerAgentDefaultImage),
-		OvnBgpAgent:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE", OvnBgpAgentDefaultImage),
-	}
 }
 
 const (
@@ -294,7 +259,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	// Generate NodeSet Inventory
 	_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
-		allIPSets, dnsAddresses, dataplaneAnsibleImageDefaults)
+		allIPSets, dnsAddresses)
 	if err != nil {
 		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
 		return ctrl.Result{}, err
@@ -322,6 +287,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
 			condition.DeploymentReadyMessage)
 		instance.Status.DeployedConfigHash = configHash
+		logger.Info("Set NodeSet Status containerImages")
+		instance.Status.ContainerImages = instance.Spec.ContainerImages
 	} else if deploymentExists {
 		logger.Info("Set NodeSet DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,

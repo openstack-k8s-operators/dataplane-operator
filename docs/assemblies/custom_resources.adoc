@@ -16,7 +16,7 @@
 * <<openstackdataplaneservicespec,OpenStackDataPlaneServiceSpec>>
 * <<openstackdataplaneservicestatus,OpenStackDataPlaneServiceStatus>>
 * <<openstackdataplaneservicecert,OpenstackDataPlaneServiceCert>>
-* <<dataplaneansibleimagedefaults,DataplaneAnsibleImageDefaults>>
+* <<dataplaneansiblecontainerimages,DataplaneAnsibleContainerImages>>
 * <<openstackdataplanenodesetlist,OpenStackDataPlaneNodeSetList>>
 * <<openstackdataplanenodesetspec,OpenStackDataPlaneNodeSetSpec>>
 * <<openstackdataplanenodesetstatus,OpenStackDataPlaneNodeSetStatus>>
@@ -343,50 +343,50 @@ OpenstackDataPlaneServiceCert defines the property of a TLS cert issued for a da
 
 <<custom-resources,Back to Custom Resources>>
 
-[#dataplaneansibleimagedefaults]
-==== DataplaneAnsibleImageDefaults
+[#dataplaneansiblecontainerimages]
+==== DataplaneAnsibleContainerImages
 
-DataplaneAnsibleImageDefaults default images for dataplane services
+DataplaneAnsibleContainerImages default images for dataplane services
 
 |===
 | Field | Description | Scheme | Required
 
-| Frr
+| frr
 |
 | string
 | false
 
-| IscsiD
+| iscsiD
 |
 | string
 | false
 
-| Logrotate
+| logrotate
 |
 | string
 | false
 
-| NeutronMetadataAgent
+| neutronMetadataAgent
 |
 | string
 | false
 
-| NovaCompute
+| novaCompute
 |
 | string
 | false
 
-| NovaLibvirt
+| novaLibvirt
 |
 | string
 | false
 
-| OvnControllerAgent
+| ovnControllerAgent
 |
 | string
 | false
 
-| OvnBgpAgent
+| ovnBgpAgent
 |
 | string
 | false
@@ -488,6 +488,11 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 | TLSEnabled - Whether the node set has TLS enabled.
 | bool
 | true
+
+| containerImages
+| ContainerImages sets values for corresponding ansible variables
+| <<dataplaneansiblecontainerimages,DataplaneAnsibleContainerImages>>
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -553,6 +558,11 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | deployedConfigHash
 | DeployedConfigHash - holds the hash of the NodeTemplate and Node sections of the struct that was last deployed. This hash is used to determine when new Ansible executions are required to roll out config changes.
 | string
+| false
+
+| containerImages
+| ContainerImages
+| <<dataplaneansiblecontainerimages,DataplaneAnsibleContainerImages>>
 | false
 |===
 
