@@ -51,7 +51,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		nodeSetGroup.Vars["edpm_tls_certs_enabled"] = "true"
 	}
 
-	for nodeName, node := range instance.Spec.Nodes {
+	for _, node := range instance.Spec.Nodes {
 		host := nodeSetGroup.AddHost(strings.Split(node.HostName, ".")[0])
 		// Use ansible_host if provided else use hostname. Fall back to
 		// nodeName if all else fails.
@@ -67,9 +67,9 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 			return "", err
 		}
 
-		ipSet, ok := allIPSets[nodeName]
+		ipSet, ok := allIPSets[node.HostName]
 		if ok {
-			populateInventoryFromIPAM(&ipSet, host, dnsAddresses, nodeName, node.HostName)
+			populateInventoryFromIPAM(&ipSet, host, dnsAddresses, node.HostName)
 		}
 
 	}
@@ -101,7 +101,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 // populateInventoryFromIPAM populates inventory from IPAM
 func populateInventoryFromIPAM(
 	ipSet *infranetworkv1.IPSet, host ansible.Host,
-	dnsAddresses []string, nodeName string, hostName string) {
+	dnsAddresses []string, hostName string) {
 	var dnsSearchDomains []string
 	for _, res := range ipSet.Status.Reservation {
 		// Build the vars for ips/routes etc
