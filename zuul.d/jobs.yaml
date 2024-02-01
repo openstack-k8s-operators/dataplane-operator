@@ -3,5 +3,6 @@
     name: dataplane-operator-docs-preview
     parent: cifmw-doc
     vars:
+      asciidoc_available: true
       # This var is specific to ci-framework docs directory using sphinx
       doc_available: false

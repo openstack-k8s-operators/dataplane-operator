@@ -39,6 +39,10 @@ go.work.sum
 
 # docs
 site/
+.bundle/
+docs_build/
+Gemfile.lock
+local/
 
 # kuttl files
 kubeconfig

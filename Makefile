@@ -76,6 +76,31 @@ SHELL = /usr/bin/env bash -o pipefail
 .PHONY: all
 all: build
 
+##@ Docs
+
+.PHONY: docs-dependencies
+docs-dependencies: .bundle
+
+.PHONY: .bundle
+.bundle:
+	if ! type bundle; then \
+		echo "Bundler not found. On Linux run 'sudo dnf install /usr/bin/bundle' to install it."; \
+		exit 1; \
+	fi
+
+	bundle config set --local path 'local/bundle'; bundle install
+
+.PHONY: docs
+docs: manifests docs-dependencies crd-to-markdown ## Build docs
+	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplaneservice_types.go -f api/v1beta1/openstackdataplanenodeset_types.go -f api/v1beta1/openstackdataplanedeployment_types.go -n OpenStackDataPlaneService -n OpenStackDataPlaneNodeSet -n OpenStackDataPlaneDeployment > docs/assemblies/custom_resources.md
+	bundle exec kramdoc --auto-ids docs/assemblies/custom_resources.md && rm docs/assemblies/custom_resources.md
+	sed -i "s/=== Custom/== Custom/g" docs/assemblies/custom_resources.adoc
+	cd docs; $(MAKE) html
+
+.PHONY: docs-clean
+docs-clean:
+	rm -r docs_build
+
 ##@ General
 
 # The help target prints out all targets with their descriptions organized
@@ -96,12 +121,9 @@ help: ## Display this help.
 ##@ Development
 
 .PHONY: manifests
-manifests: gowork controller-gen crd-to-markdown ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+manifests: gowork controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd$(CRDDESC_OVERRIDE) webhook paths="./..." output:crd:artifacts:config=config/crd/bases && \
 	rm -f api/bases/* && cp -a config/crd/bases api/
-	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplanenodeset_types.go -n OpenStackDataPlaneNodeSet > docs/openstack_dataplanenodeset.md
-	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplaneservice_types.go -n OpenStackDataPlaneService > docs/openstack_dataplaneservice.md
-	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplanedeployment_types.go -n OpenStackDataPlaneDeployment > docs/openstack_dataplanedeployment.md
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
@@ -410,11 +432,3 @@ run-with-webhook: manifests generate fmt vet ## Run a controller from your host.
 .PHONY: webhook-cleanup
 webhook-cleanup:
 	/bin/bash hack/clean_local_webhook.sh
-
-.PHONY: docs
-docs: ## Build docs and preview it
-	python -m venv _venv
-	_venv/bin/pip install -r ./docs/doc_requirements.txt
-	mkdir -p ${HOME}/zuul-output/logs/docs # Directory to preview docs on CI log server
-	_venv/bin/mkdocs build -d ${HOME}/zuul-output/logs/docs --clean
-	rm -rf _venv

@@ -1,0 +1,179 @@
+= Contributing
+
+== Getting Started
+
+You'll need a Kubernetes cluster to run against. You can use
+https://sigs.k8s.io/kind[KIND] to get a local cluster for testing, or run
+against a remote cluster.  *Note:* Your controller will automatically use the
+current context in your kubeconfig file (i.e. whatever cluster `kubectl
+cluster-info` shows).
+
+=== Running on the cluster
+
+. Install Instances of Custom Resources:
++
+[,sh]
+----
+ kubectl apply -f config/samples/
+----
+
+. Build and push your image to the location specified by `IMG`:
++
+[,sh]
+----
+ make docker-build docker-push IMG=<some-registry>/dataplane-operator:tag
+----
+
+. Deploy the controller to the cluster with the image specified by `IMG`:
++
+[,sh]
+----
+ make deploy IMG=<some-registry>/dataplane-operator:tag
+----
+
+=== Uninstall CRDs
+
+To delete the CRDs from the cluster:
+
+[,sh]
+----
+make uninstall
+----
+
+=== Undeploy controller
+
+UnDeploy the controller to the cluster:
+
+[,sh]
+----
+make undeploy
+----
+
+=== How it works
+
+This project aims to follow the Kubernetes https://kubernetes.io/docs/concepts/extend-kubernetes/operator/[Operator pattern]
+
+It uses https://kubernetes.io/docs/concepts/architecture/controller/[Controllers]
+which provide a reconcile function responsible for synchronizing resources
+until the desired state is reached on the cluster
+
+=== Test It Out
+
+. Install the CRDs into the cluster:
++
+[,sh]
+----
+ make install
+----
+
+. Run your controller (this will run in the foreground, so switch to a new terminal if you want to leave it running):
++
+[,sh]
+----
+ make run
+----
+
+*NOTE:* You can also run this in one step by running: `make install run`
+
+=== Modifying the API definitions
+
+If you are editing the API definitions, generate the manifests such as CRs or CRDs using:
+
+[,sh]
+----
+make manifests
+----
+
+*NOTE:* Run `make --help` for more information on all potential `make` targets
+
+More information can be found via the https://book.kubebuilder.io/introduction.html[Kubebuilder Documentation]
+
+== Testing
+
+The tests can be run with the following command:
+
+[,bash]
+----
+make test
+----
+
+The `test` target runs the
+https://book.kubebuilder.io/reference/envtest.html[EnvTest] tests with
+https://onsi.github.io/ginkgo/[Ginkgo]. These tools will be installed by the
+`test` if needed.
+
+`EnvTest` tests are under the
+https://github.com/openstack-k8s-operators/dataplane-operator/tree/main/tests/functional[`tests/functional`]
+directory in dataplane-operator.
+
+=== Running kuttl tests
+
+kuttl tests are under the
+https://github.com/openstack-k8s-operators/dataplane-operator/tree/main/tests/kuttl/tests['tests/kuttl/tests']
+in dataplane-operator.
+
+==== Requirements
+
+The kuttl tests require a running cluster with
+https://github.com/openstack-k8s-operators/openstack-ansibleee-operator[openstack-ansibleee-operator], https://github.com/openstack-k8s-operators/openstack-baremetal-operator[openstack-baremetal-operator] and https://github.com/openstack-k8s-operators/infra-operator[infra-operator]
+running in the cluster.
+
+==== From install_yamls
+
+The kuttl tests are run from the
+https://github.com/openstack-k8s-operators/install_yamls[install_yamls]
+repository by the CI jobs.
+
+Running from `install_yamls`:
+
+[,sh]
+----
+cd install_yamls
+# Set environment variables if needed to use a specific repo and branch of dataplane-operator
+export DATAPLANE_REPO=https://github.com/openstack-k8s-operators/dataplane-operator.git
+export DATAPLANE_BRANCH=main
+make dataplane_kuttl
+----
+
+==== From dataplane-operator
+
+The kuttl tests can also be run directly from the dataplane-operator checkout but
+you need the operators listed under <<requirements,Requirements>>
+When running from a dataplane-operator checkout, `kubectl-kuttl` must be
+installed. The `kubectl-kuttl` command can be installed from
+https://github.com/kudobuilder/kuttl/releases[kuttl releases], or using the
+Makefile target `kuttl`:
+
+[,sh]
+----
+make kuttl
+----
+
+Then, run the operator from a checkout:
+
+[,sh]
+----
+make run
+----
+
+Execute the kuttl tests:
+
+[,sh]
+----
+make kuttl-test
+----
+
+Run a single test if desired:
+
+[,sh]
+----
+make kuttl-test KUTTL_ARGS="--test dataplane-deploy-no-nodes"
+----
+
+Skip the test resource delete, which will leave the test resources created in the
+cluster, and can be useful for debugging failed tests:
+
+[,sh]
+----
+make kuttl-test KUTTL_ARGS="--test dataplane-deploy-no-nodes --skip-delete"
+----
