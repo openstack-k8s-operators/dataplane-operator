@@ -39,6 +39,9 @@ nav:
       - common_configurations.md
       - tls.md
       - interacting_with_ansible.md
+      - deploying_baremetal.md
+  - Scaling DataPlane:
+      - scaling.md
   - Contributing: contributing.md
 markdown_extensions:
   - toc:
