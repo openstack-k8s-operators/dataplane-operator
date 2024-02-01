@@ -1,20 +1,20 @@
-# DataPlane Design
+= DataPlane Design
 
 The dataplane-operator prepares nodes with enough operating system and other
 configuration to make them suitable for hosting OpenStack workloads.
 
 It uses the
-[openstack-baremetal-operator](https://github.com/openstack-k8s-operators/openstack-baremetal-operator)
+https://github.com/openstack-k8s-operators/openstack-baremetal-operator[openstack-baremetal-operator]
 to optionally provision baremetal. Ansible is used to deploy and configure
 software on the nodes.
 
-## DataPlane Design and Resources
+== DataPlane Design and Resources
 
 The dataplane-operator exposes the concepts of nodesets and
 services as CRD's:
 
-* [OpenStackDataPlaneNodeSet](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplanenodesets.yaml)
-* [OpenStackDataPlaneService](https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplaneservices.yaml)
+* https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplanenodesets.yaml[OpenStackDataPlaneNodeSet]
+* https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplaneservices.yaml[OpenStackDataPlaneService]
 
 Each `NodeSet` in a dataplane is represented by a corresponding
 OpenStackDataPlaneNodeSet resource.  The OpenStackDataPlaneNodeSet CRD provides
@@ -23,7 +23,7 @@ in one NodeSet. This is analogous to the concept of "roles" in TripleO.
 Similarities within a `NodeSet` are defined by the user, and could be of a
 small scope (ansible port), or a large scope (same network config, nova config,
 provisioning config, etc). The properties that all nodes in a `NodeSet` share
-is set in the NodeTemplate field of the `NodeSet`'s Spec. Node specific
+is set in the NodeTemplate field of the ``NodeSet``'s Spec. Node specific
 parameters are then defined under the `spec.nodeTemplate.nodes` section
 specific to that node. This is described in more detail below.
 
@@ -36,7 +36,7 @@ from the `NodeTemplate` section on the spec will automatically be inherited by t
 nodes defined in the `NodeSet`. Nodes can also set their own properties within their
 own section defined under the `spec.nodeTemplate.nodes` field. Options defined here
 will override the inherited values from the `NodeSet`. See
-[inheritance](inheritance.md) for more in depth details about how inheritance
+xref:inheritance.adoc[inheritance] for more in depth details about how inheritance
 works between `NodeSets` and individual `Nodes`.
 
 The `OpenStackDataPlane` CRD provides a way to group all `NodeSets` together
@@ -47,7 +47,7 @@ orchestrate across the nodes. A composable service interface is provided that
 allows for customizing which services are run on which roles and nodes, and for
 defining custom services.
 
-## Deployment
+== Deployment
 
 The deployment handling in `dataplane-operator` is implemented within the
 deployment package at `pkg/deployment`. A `NodeSet` uses an ansible
