@@ -13,7 +13,7 @@ network_config:
   routes: {{ ctlplane_host_routes }}
   use_dhcp: false
   addresses:
-  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
+  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
 {% for network in role_networks %}
 - type: vlan
   device: nic1
