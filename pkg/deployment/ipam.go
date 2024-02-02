@@ -153,7 +153,7 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	dnsAddresses, dnsClusterAddresses, isReady, err := CheckDNSService(
 		ctx, helper, instance)
 
-	if err != nil || !isReady || dnsAddresses == nil {
+	if err != nil || !isReady || dnsClusterAddresses == nil {
 		if err != nil {
 			instance.Status.Conditions.MarkFalse(
 				dataplanev1.NodeSetDNSDataReadyCondition,
@@ -166,7 +166,7 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 				condition.RequestedReason, condition.SeverityInfo,
 				dataplanev1.NodeSetDNSDataReadyWaitingMessage)
 		}
-		if dnsAddresses == nil {
+		if dnsClusterAddresses == nil {
 			instance.Status.Conditions.Remove(dataplanev1.NodeSetDNSDataReadyCondition)
 		}
 		return nil, nil, "", isReady, nil, nil, err
@@ -231,6 +231,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 		return nil, nil
 	}
 
+	ipamUsed := false
 	allIPSets := make(map[string]infranetworkv1.IPSet)
 	// CreateOrPatch IPSets
 	for _, node := range instance.Spec.Nodes {
@@ -241,6 +242,7 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 		}
 
 		if len(nets) > 0 {
+			ipamUsed = true
 			util.LogForObject(helper, "Reconciling IPSet", instance)
 			ipSet := &infranetworkv1.IPSet{
 				ObjectMeta: metav1.ObjectMeta{
@@ -260,6 +262,10 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 			}
 			allIPSets[hostName] = *ipSet
 		}
+	}
+	if !ipamUsed {
+		util.LogForObject(helper, "No Networks defined for nodes, IPAM won't be used", instance)
+		instance.Status.Conditions.Remove(dataplanev1.NodeSetIPReservationReadyCondition)
 	}
 
 	return allIPSets, nil
