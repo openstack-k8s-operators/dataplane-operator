@@ -8,7 +8,7 @@ network_config:
   routes: {{ ctlplane_host_routes }}
   use_dhcp: false
   addresses:
-  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
+  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
 {% for network in networks_all if network not in networks_skip_config %}
 {% if network not in ["External", "Tenant"] and network in role_networks %}
 - type: interface

@@ -10,7 +10,7 @@ network_config:
   mtu: {{ ctlplane_mtu }}
   use_dhcp: false
   addresses:
-  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
+  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
   routes: {{ ctlplane_host_routes }}
 - type: ovs_bridge
   name: {{ neutron_physical_bridge_name }}
