@@ -809,7 +809,6 @@ metadata:
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
-  debug: false
   envConfigMapName: openstack-aee-default-env
   extraMounts:
   - mounts:
@@ -856,7 +855,6 @@ metadata:
   namespace: openstack
 spec:
   backoffLimit: 6
-  debug: false
   envConfigMapName: openstack-aee-default-env
   extraMounts:
   - mounts:

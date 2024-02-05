@@ -12,7 +12,6 @@ metadata:
     name: edpm-compute-no-nodes-services-override
 spec:
   backoffLimit: 6
-  debug: false
   env:
   - name: ANSIBLE_FORCE_COLOR
     value: "True"
