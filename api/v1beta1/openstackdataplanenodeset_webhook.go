@@ -61,7 +61,9 @@ func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
 		spec.Nodes[nodeName] = *node.DeepCopy()
 	}
 
-	if spec.NodeTemplate.Ansible.AnsibleUser == "" {
+	if !spec.PreProvisioned {
+		spec.NodeTemplate.Ansible.AnsibleUser = spec.BaremetalSetTemplate.CloudUserName
+	} else if spec.NodeTemplate.Ansible.AnsibleUser == "" {
 		spec.NodeTemplate.Ansible.AnsibleUser = "cloud-admin"
 	}
 
