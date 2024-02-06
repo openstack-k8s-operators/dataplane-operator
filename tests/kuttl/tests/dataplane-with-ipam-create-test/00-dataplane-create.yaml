@@ -1,0 +1,71 @@
+apiVersion: network.openstack.org/v1beta1
+kind: DNSMasq
+metadata:
+  name: dnsmasq
+spec:
+  replicas: 1
+  options:
+  - key: server
+    values:
+    - 192.168.122.1
+  debug:
+    service: false
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: openstack-edpm-ipam
+spec:
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+  services:
+    - download-cache
+    - bootstrap
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - run-os
+    - install-certs
+    - ovn
+    - neutron-metadata
+    - libvirt
+    - nova
+  preProvisioned: true
+  nodes:
+    edpm-compute-0:
+      hostName: edpm-compute-0
+      networks:
+      - name: ctlplane
+        subnetName: subnet1
+        defaultRoute: true
+        fixedIP: 192.168.122.100
+      - name: internalapi
+        subnetName: subnet1
+      - name: storage
+        subnetName: subnet1
+      - name: tenant
+        subnetName: subnet1
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+    ansible:
+      ansibleUser: cloud-admin
+      ansiblePort: 22
+      ansibleVars:
+         timesync_ntp_servers:
+           - hostname: clock.redhat.com
+         # edpm_network_config
+         # Default nic config template for a EDPM compute node
+         # These vars are edpm_network_config role vars
+         edpm_network_config_hide_sensitive_logs: false
+         edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
+         edpm_nodes_validation_validate_controllers_icmp: false
+         edpm_nodes_validation_validate_gateway_icmp: false
+         gather_facts: false
+         enable_debug: false
+         # edpm firewall, change the allowed CIDR if needed
+         edpm_sshd_configure_firewall: true
+         edpm_sshd_allowed_ranges: ['192.168.122.0/24']
+         # SELinux module
+         edpm_selinux_mode: enforcing

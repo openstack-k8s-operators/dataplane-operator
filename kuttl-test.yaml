@@ -16,6 +16,8 @@
 
 apiVersion: kuttl.dev/v1beta1
 kind: TestSuite
+commands:
+  - command: oc apply -n openstack -f https://raw.githubusercontent.com/openstack-k8s-operators/infra-operator/main/config/samples/network_v1beta1_netconfig.yaml
 reportFormat: JSON
 reportName: kuttl-test-dataplane
 namespace: openstack
