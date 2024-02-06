@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // Client needed for API calls (manager's client, set by first SetupWebhookWithManager() call
@@ -101,13 +102,13 @@ func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
 var _ webhook.Validator = &OpenStackDataPlaneNodeSet{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *OpenStackDataPlaneNodeSet) ValidateCreate() error {
+func (r *OpenStackDataPlaneNodeSet) ValidateCreate() (admission.Warnings, error) {
 	openstackdataplanenodesetlog.Info("validate create", "name", r.Name)
 
 	// Currently, this check is only valid for PreProvisioned nodes. Since we can't possibly
 	// have duplicates in Baremetal Deployments, we can exit early here for Baremetal NodeSets.
 	if !r.Spec.PreProvisioned {
-		return nil
+		return nil, nil
 	}
 
 	var errors field.ErrorList
@@ -119,25 +120,25 @@ func (r *OpenStackDataPlaneNodeSet) ValidateCreate() error {
 
 	err := webhookClient.List(context.TODO(), nodeSetList, opts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// If this is the first NodeSet being created, then there can be no duplicates
 	// we can exit early here.
 	if len(nodeSetList.Items) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	errors = r.duplicateNodeCheck(nodeSetList)
 
 	if errors != nil {
-		return apierrors.NewInvalid(
+		return nil, apierrors.NewInvalid(
 			schema.GroupKind{Group: "dataplane.openstack.org", Kind: "OpenStackDataPlaneNodeSet"},
 			r.Name,
 			errors)
 	}
 
-	return nil
+	return nil, nil
 }
 
 // duplicateNodeCheck checks the NodeSetList for pre-existing nodes. If the user is trying to redefine an
@@ -166,11 +167,11 @@ func (r *OpenStackDataPlaneNodeSet) duplicateNodeCheck(nodeSetList *OpenStackDat
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(old runtime.Object) error {
+func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	openstackdataplanenodesetlog.Info("validate update", "name", r.Name)
 	oldNodeSet, ok := old.(*OpenStackDataPlaneNodeSet)
 	if !ok {
-		return apierrors.NewInternalError(
+		return nil, apierrors.NewInternalError(
 			fmt.Errorf("expected a OpenStackDataPlaneNodeSet object, but got %T", oldNodeSet))
 	}
 
@@ -192,20 +193,20 @@ func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(old runtime.Object) error {
 	}
 
 	if errors != nil {
-		return apierrors.NewInvalid(
+		return nil, apierrors.NewInvalid(
 			schema.GroupKind{Group: "dataplane.openstack.org", Kind: "OpenStackDataPlaneNodeSet"},
 			r.Name,
 			errors,
 		)
 	}
 
-	return nil
+	return nil, nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *OpenStackDataPlaneNodeSet) ValidateDelete() error {
+func (r *OpenStackDataPlaneNodeSet) ValidateDelete() (admission.Warnings, error) {
 	openstackdataplanenodesetlog.Info("validate delete", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object deletion.
-	return nil
+	return nil, nil
 }
