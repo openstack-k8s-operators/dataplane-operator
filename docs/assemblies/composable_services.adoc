@@ -74,6 +74,13 @@ https://github.com/openstack-k8s-operators/docs/blob/main/hci.md[HCI documenatio
  services:
    - ceph-hci-pre
 
+=== configure-ovs-dpdk
+
+Include this service to configure OvS DPDK configuration on EDPM nodes. This service is needed to enable OvS DPDK on the compute nodes.
+
+ services:
+   - configure-ovs-dpdk
+
 === neutron-metadata
 
 Include this service to run Neutron OVN Metadata agent on the EDPM nodes. This agent is needed to provide metadata services to the compute nodes.
