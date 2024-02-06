@@ -33,7 +33,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/go-logr/logr"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
@@ -142,7 +141,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) GetLogger(ctx context.Context) log
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
-
 	Log := r.GetLogger(ctx)
 	Log.Info("Reconciling NodeSet")
 
@@ -401,7 +399,7 @@ func checkDeployment(helper *helper.Helper,
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
-	dnsMasqWatcher := handler.EnqueueRequestsFromMapFunc(func(obj client.Object) []reconcile.Request {
+	dnsMasqWatcher := handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
 		Log := r.GetLogger(ctx)
 		result := []reconcile.Request{}
 
@@ -429,7 +427,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(ctx context.Conte
 		return result
 	})
 
-	deploymentWatcher := handler.EnqueueRequestsFromMapFunc(func(obj client.Object) []reconcile.Request {
+	deploymentWatcher := handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
 		Log := r.GetLogger(ctx)
 		var namespace string = obj.GetNamespace()
 		result := []reconcile.Request{}
@@ -469,9 +467,9 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(ctx context.Conte
 		Owns(&infranetworkv1.IPSet{}).
 		Owns(&infranetworkv1.DNSData{}).
 		Owns(&corev1.Secret{}).
-		Watches(&source.Kind{Type: &infranetworkv1.DNSMasq{}},
+		Watches(&infranetworkv1.DNSMasq{},
 			dnsMasqWatcher).
-		Watches(&source.Kind{Type: &dataplanev1.OpenStackDataPlaneDeployment{}},
+		Watches(&dataplanev1.OpenStackDataPlaneDeployment{},
 			deploymentWatcher).
 		Complete(r)
 }
