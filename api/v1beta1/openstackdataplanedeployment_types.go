@@ -48,6 +48,10 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// +kubebuilder:validation:Minimum:=1
 	// +kubebuilder:default:=15
 	DeploymentRequeueTime int `json:"deploymentRequeueTime"`
+
+	// Services which should be deployed on all nodesets
+	// +kubebuilder:validation:Optional
+	AllNodeSetsServices []string `json:"allNodeSetsServices"`
 }
 
 // OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPlaneDeployment

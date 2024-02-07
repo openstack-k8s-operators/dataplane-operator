@@ -49,7 +49,7 @@ func (d *Deployer) DeployService(foundService dataplanev1.OpenStackDataPlaneServ
 		d.Deployment,
 		&foundService,
 		d.NodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret,
-		d.InventorySecret,
+		d.InventorySecrets,
 		d.AeeSpec)
 
 	if err != nil {

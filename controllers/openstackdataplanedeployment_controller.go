@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -195,13 +196,22 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	// All nodeSets successfully fetched.
 	// Mark InputReadyCondition=True
 	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.ReadyMessage)
+	shouldRequeue := false
+	haveError := false
+
+	// Declare nodeSet for global services
+	globalNodeset := dataplanev1.OpenStackDataPlaneNodeSet{}
+	globalAnsibleEESpec := globalNodeset.GetAnsibleEESpec()
+	globalAnsibleEESpec.AnsibleTags = instance.Spec.AnsibleTags
+	globalAnsibleEESpec.AnsibleSkipTags = instance.Spec.AnsibleSkipTags
+	globalAnsibleEESpec.AnsibleLimit = instance.Spec.AnsibleLimit
+
+	globalInventorySecrets := []string{}
 
 	// Deploy each nodeSet
 	// The loop starts and checks NodeSet deployments sequentially. However, after they
 	// are started, they are running in parallel, since the loop does not wait
 	// for the first started NodeSet to finish before starting the next.
-	shouldRequeue := false
-	haveError := false
 	for _, nodeSet := range nodeSets.Items {
 
 		Log.Info(fmt.Sprintf("Deploying NodeSet: %s", nodeSet.Name))
@@ -226,14 +236,17 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		}
 
 		deployer := deployment.Deployer{
-			Ctx:             ctx,
-			Helper:          helper,
-			NodeSet:         &nodeSet,
-			Deployment:      instance,
-			Status:          &instance.Status,
-			AeeSpec:         &ansibleEESpec,
-			InventorySecret: nodeSetSecretInv,
+			Ctx:              ctx,
+			Helper:           helper,
+			NodeSet:          &nodeSet,
+			Deployment:       instance,
+			Status:           &instance.Status,
+			AeeSpec:          &ansibleEESpec,
+			InventorySecrets: []string{nodeSetSecretInv},
 		}
+
+		// Add inventory secret to list of inventories for global services
+		globalInventorySecrets = append(globalInventorySecrets, nodeSetSecretInv)
 
 		// When ServicesOverride is set on the OpenStackDataPlaneDeployment,
 		// deploy those services for each OpenStackDataPlaneNodeSet. Otherwise,
@@ -265,6 +278,48 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			nsConditions.MarkTrue(
 				condition.Type(dataplanev1.NodeSetDeploymentReadyCondition),
 				condition.DeploymentReadyMessage)
+		}
+
+		// Gathering mounts that may be inventories
+		for _, mount := range nodeSet.GetAnsibleEESpec().ExtraMounts {
+			for _, mountPoint := range mount.Mounts {
+				if strings.HasPrefix(mountPoint.MountPath, "/runner/inventory/") {
+					globalAnsibleEESpec.ExtraMounts = append(globalAnsibleEESpec.ExtraMounts, mount)
+					break
+				}
+			}
+
+		}
+	}
+
+	// If we have any services we want to deploy everywhere, deploy them now
+	if len(instance.Spec.AllNodeSetsServices) != 0 {
+
+		globalDeployer := deployment.Deployer{
+			Ctx:              ctx,
+			Helper:           helper,
+			NodeSet:          &globalNodeset,
+			Deployment:       instance,
+			Status:           &instance.Status,
+			AeeSpec:          &globalAnsibleEESpec,
+			InventorySecrets: globalInventorySecrets,
+		}
+
+		deployResult, err := globalDeployer.Deploy(instance.Spec.AllNodeSetsServices)
+		if err != nil {
+			util.LogErrorForObject(helper, err, fmt.Sprintf("OpenStackDeployment error for all nodesets due to %s", err), instance)
+			haveError = true
+			instance.Status.Conditions.MarkFalse(
+				condition.ReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				dataplanev1.DataPlaneNodeSetErrorMessage,
+				err.Error())
+		}
+		if deployResult != nil {
+			shouldRequeue = true
+		} else {
+			logger.Info("Global OpenStackDeployment succeeded", "NodeSet")
 		}
 	}
 

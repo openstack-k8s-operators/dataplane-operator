@@ -43,7 +43,7 @@ func AnsibleExecution(
 	obj client.Object,
 	service *dataplanev1.OpenStackDataPlaneService,
 	sshKeySecret string,
-	inventorySecret string,
+	inventorySecrets []string,
 	aeeSpec *dataplanev1.AnsibleEESpec,
 ) error {
 	var err error
@@ -130,31 +130,34 @@ func AnsibleExecution(
 			MountPath: "/runner/env/ssh_key",
 			SubPath:   "ssh_key",
 		}
+		for inventoryIndex, inventorySecret := range inventorySecrets {
+			inventoryName := fmt.Sprintf("inventory-%d", inventoryIndex)
 
-		inventoryVolume := corev1.Volume{
-			Name: "inventory",
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: inventorySecret,
-					Items: []corev1.KeyToPath{
-						{
-							Key:  "inventory",
-							Path: "inventory",
+			inventoryVolume := corev1.Volume{
+				Name: inventoryName,
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: inventorySecret,
+						Items: []corev1.KeyToPath{
+							{
+								Key:  inventoryName,
+								Path: inventoryName,
+							},
 						},
 					},
 				},
-			},
-		}
-		inventoryMount := corev1.VolumeMount{
-			Name:      "inventory",
-			MountPath: "/runner/inventory/hosts",
-			SubPath:   "inventory",
+			}
+			inventoryMount := corev1.VolumeMount{
+				Name:      inventoryName,
+				MountPath: fmt.Sprintf("/runner/inventory/hosts_%d", inventoryIndex),
+				SubPath:   inventoryName,
+			}
+			ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, inventoryVolume)
+			ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, inventoryMount)
 		}
 
 		ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, sshKeyVolume)
-		ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, inventoryVolume)
 		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, sshKeyMount)
-		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, inventoryMount)
 
 		ansibleEE.Spec.ExtraMounts = append(aeeSpec.ExtraMounts, []storage.VolMounts{ansibleEEMounts}...)
 		ansibleEE.Spec.Env = aeeSpec.Env

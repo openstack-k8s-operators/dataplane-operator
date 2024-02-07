@@ -44,6 +44,10 @@ spec:
             type: object
           spec:
             properties:
+              allNodeSetsServices:
+                items:
+                  type: string
+                type: array
               ansibleLimit:
                 type: string
               ansibleSkipTags:

@@ -39,13 +39,13 @@ import (
 
 // Deployer defines a data structure with all of the relevant objects required for a full deployment.
 type Deployer struct {
-	Ctx             context.Context
-	Helper          *helper.Helper
-	NodeSet         *dataplanev1.OpenStackDataPlaneNodeSet
-	Deployment      *dataplanev1.OpenStackDataPlaneDeployment
-	Status          *dataplanev1.OpenStackDataPlaneDeploymentStatus
-	AeeSpec         *dataplanev1.AnsibleEESpec
-	InventorySecret string
+	Ctx              context.Context
+	Helper           *helper.Helper
+	NodeSet          *dataplanev1.OpenStackDataPlaneNodeSet
+	Deployment       *dataplanev1.OpenStackDataPlaneDeployment
+	Status           *dataplanev1.OpenStackDataPlaneDeploymentStatus
+	AeeSpec          *dataplanev1.AnsibleEESpec
+	InventorySecrets []string
 }
 
 // Deploy function encapsulating primary deloyment handling
