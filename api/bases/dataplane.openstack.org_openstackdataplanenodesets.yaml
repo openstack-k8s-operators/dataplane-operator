@@ -1928,12 +1928,16 @@ spec:
                   - type
                   type: object
                 type: array
+              configHash:
+                type: string
               configMapHashes:
                 additionalProperties:
                   type: string
                 type: object
               deployed:
                 type: boolean
+              deployedConfigHash:
+                type: string
               deploymentStatuses:
                 additionalProperties:
                   items:

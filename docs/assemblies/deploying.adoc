@@ -245,7 +245,21 @@ NAME             STATUS   MESSAGE
 openstack-edpm   False    Deployment not started
 ----
 
-=== Understanding OpenStackDataPlaneServices
+=== NodeSet Config Changes
+We create a Hash of the inputs located in the OpenStackDataPlaneNodeSet Spec Nodes and NodeTemplate sections.
+This hash is then stored in the `status.configHash` field. If the current value of the configHash is different
+to the deployedConfigHash, then it is necessary to recreate the `OpenStackDataPlaneDeployment` to roll out
+the new changes:
+
+```
+$ oc get osdpns -o yaml | yq '.items[0].status.configHash'
+"n648hd6h88hc7h86hc7h568h585h79h5"
+
+```
+This field can be used to inform user decisions around when a new deploy is needed to reconclie the changes to the NodeSet.
+
+
+### Understanding OpenStackDataPlaneServices
 
 A dataplane is configured with a set of services that define the Ansible plays
 or playbooks that are executed to complete the deployment. The
