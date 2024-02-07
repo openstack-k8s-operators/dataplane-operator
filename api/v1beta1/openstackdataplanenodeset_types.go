@@ -96,19 +96,19 @@ type OpenStackDataPlaneNodeSetStatus struct {
 	Deployed bool `json:"deployed,omitempty" optional:"true"`
 
 	// DeploymentStatuses
-	DeploymentConditions map[string]condition.Conditions `json:"deploymentStatuses,omitempty" optional:"true"`
+	DeploymentStatuses map[string]condition.Conditions `json:"deploymentStatuses,omitempty" optional:"true"`
 
 	// DNSClusterAddresses
-	DNSClusterAddresses []string `json:"DNSClusterAddresses,omitempty" optional:"true"`
+	DNSClusterAddresses []string `json:"dnsClusterAddresses,omitempty" optional:"true"`
 
 	// CtlplaneSearchDomain
-	CtlplaneSearchDomain string `json:"CtlplaneSearchDomain,omitempty" optional:"true"`
+	CtlplaneSearchDomain string `json:"ctlplaneSearchDomain,omitempty" optional:"true"`
 
 	// AllHostnames
-	AllHostnames map[string]map[infranetworkv1.NetNameStr]string `json:"AllHostnames,omitempty" optional:"true"`
+	AllHostnames map[string]map[infranetworkv1.NetNameStr]string `json:"allHostnames,omitempty" optional:"true"`
 
 	// AllIPs
-	AllIPs map[string]map[infranetworkv1.NetNameStr]string `json:"AllIPs,omitempty" optional:"true"`
+	AllIPs map[string]map[infranetworkv1.NetNameStr]string `json:"allIPs,omitempty" optional:"true"`
 
 	// ConfigMapHashes
 	ConfigMapHashes map[string]string `json:"configMapHashes,omitempty" optional:"true"`
@@ -138,7 +138,7 @@ func (instance OpenStackDataPlaneNodeSet) IsReady() bool {
 // InitConditions - Initializes Status Conditons
 func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 	instance.Status.Conditions = condition.Conditions{}
-	instance.Status.DeploymentConditions = make(map[string]condition.Conditions)
+	instance.Status.DeploymentStatuses = make(map[string]condition.Conditions)
 
 	cl := condition.CreateList(
 		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),

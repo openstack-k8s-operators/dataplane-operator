@@ -367,10 +367,10 @@ func checkDeployment(helper *helper.Helper,
 				}
 			}
 			deploymentConditions := deployment.Status.NodeSetConditions[instance.Name]
-			if instance.Status.DeploymentConditions == nil {
-				instance.Status.DeploymentConditions = make(map[string]condition.Conditions)
+			if instance.Status.DeploymentStatuses == nil {
+				instance.Status.DeploymentStatuses = make(map[string]condition.Conditions)
 			}
-			instance.Status.DeploymentConditions[deployment.Name] = deploymentConditions
+			instance.Status.DeploymentStatuses[deployment.Name] = deploymentConditions
 		}
 	}
 

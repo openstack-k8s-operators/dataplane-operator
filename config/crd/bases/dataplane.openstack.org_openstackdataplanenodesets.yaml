@@ -1888,24 +1888,18 @@ spec:
             type: object
           status:
             properties:
-              AllHostnames:
+              allHostnames:
                 additionalProperties:
                   additionalProperties:
                     type: string
                   type: object
                 type: object
-              AllIPs:
+              allIPs:
                 additionalProperties:
                   additionalProperties:
                     type: string
                   type: object
                 type: object
-              CtlplaneSearchDomain:
-                type: string
-              DNSClusterAddresses:
-                items:
-                  type: string
-                type: array
               conditions:
                 items:
                   properties:
@@ -1932,6 +1926,8 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              ctlplaneSearchDomain:
+                type: string
               deployed:
                 type: boolean
               deploymentStatuses:
@@ -1958,6 +1954,10 @@ spec:
                     type: object
                   type: array
                 type: object
+              dnsClusterAddresses:
+                items:
+                  type: string
+                type: array
               secretHashes:
                 additionalProperties:
                   type: string

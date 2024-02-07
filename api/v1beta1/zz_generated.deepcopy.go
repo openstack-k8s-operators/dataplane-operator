@@ -456,8 +456,8 @@ func (in *OpenStackDataPlaneNodeSetStatus) DeepCopyInto(out *OpenStackDataPlaneN
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
-	if in.DeploymentConditions != nil {
-		in, out := &in.DeploymentConditions, &out.DeploymentConditions
+	if in.DeploymentStatuses != nil {
+		in, out := &in.DeploymentStatuses, &out.DeploymentStatuses
 		*out = make(map[string]condition.Conditions, len(*in))
 		for key, val := range *in {
 			var outVal []condition.Condition
