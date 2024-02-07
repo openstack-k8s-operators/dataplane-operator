@@ -53,6 +53,19 @@ spec:
   - libvirt
   - nova
 status:
+  allHostnames:
+    edpm-compute-0:
+      ctlplane: edpm-compute-0.ctlplane.example.com
+      internalapi: edpm-compute-0.internalapi.example.com
+      storage: edpm-compute-0.storage.example.com
+      tenant: edpm-compute-0.tenant.example.com
+  allIPs:
+    edpm-compute-0:
+      ctlplane: 192.168.122.100
+      internalapi: 172.17.0.100
+      storage: 172.18.0.100
+      tenant: 172.19.0.100
+  ctlplaneSearchDomain: ctlplane.example.com
   conditions:
   - message: Deployment not started
     reason: Requested
