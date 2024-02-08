@@ -48,7 +48,11 @@ func AnsibleExecution(
 ) error {
 	var err error
 	var cmdLineArguments strings.Builder
+	var inventoryVolume corev1.Volume
+	var inventoryName string
+	var inventoryMountPath string
 	log := helper.GetLogger()
+	ansibleEEMounts := storage.VolMounts{}
 
 	ansibleEE, err := GetAnsibleExecution(ctx, helper, obj, service.Spec.Label)
 	if err != nil && !k8serrors.IsNotFound(err) {
@@ -110,7 +114,6 @@ func AnsibleExecution(
 			log.Info(fmt.Sprintf("for service %s, substituting existing ansible play host with 'all'.", service.Name))
 		}
 
-		ansibleEEMounts := storage.VolMounts{}
 		sshKeyVolume := corev1.Volume{
 			Name: "ssh-key",
 			VolumeSource: corev1.VolumeSource{
@@ -130,10 +133,21 @@ func AnsibleExecution(
 			MountPath: "/runner/env/ssh_key",
 			SubPath:   "ssh_key",
 		}
-		for inventoryIndex, inventorySecret := range inventorySecrets {
-			inventoryName := fmt.Sprintf("inventory-%d", inventoryIndex)
+		// Mount ssh secrets
+		ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, sshKeyVolume)
+		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, sshKeyMount)
 
-			inventoryVolume := corev1.Volume{
+		// Mounting inventory secrets
+		for inventoryIndex, inventorySecret := range inventorySecrets {
+			if service.Spec.DeployOnAllNodeSets != nil && *service.Spec.DeployOnAllNodeSets {
+				inventoryName = fmt.Sprintf("inventory-%d", inventoryIndex)
+				inventoryMountPath = fmt.Sprintf("/runner/inventory/%s", inventoryName)
+			} else {
+				inventoryName = "inventory"
+				inventoryMountPath = "/runner/inventory/hosts"
+			}
+
+			inventoryVolume = corev1.Volume{
 				Name: inventoryName,
 				VolumeSource: corev1.VolumeSource{
 					Secret: &corev1.SecretVolumeSource{
@@ -149,15 +163,13 @@ func AnsibleExecution(
 			}
 			inventoryMount := corev1.VolumeMount{
 				Name:      inventoryName,
-				MountPath: fmt.Sprintf("/runner/inventory/hosts_%d", inventoryIndex),
+				MountPath: inventoryMountPath,
 				SubPath:   inventoryName,
 			}
-			ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, inventoryVolume)
+			// Inventory mount
 			ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, inventoryMount)
+			ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, inventoryVolume)
 		}
-
-		ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, sshKeyVolume)
-		ansibleEEMounts.Mounts = append(ansibleEEMounts.Mounts, sshKeyMount)
 
 		ansibleEE.Spec.ExtraMounts = append(aeeSpec.ExtraMounts, []storage.VolMounts{ansibleEEMounts}...)
 		ansibleEE.Spec.Env = aeeSpec.Env

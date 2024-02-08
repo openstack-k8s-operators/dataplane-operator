@@ -46,6 +46,7 @@ type Deployer struct {
 	Status           *dataplanev1.OpenStackDataPlaneDeploymentStatus
 	AeeSpec          *dataplanev1.AnsibleEESpec
 	InventorySecrets []string
+	GlobalDeployment bool
 }
 
 // Deploy function encapsulating primary deloyment handling
@@ -96,6 +97,10 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 				return &ctrl.Result{}, err
 			}
 		}
+
+		// Set DeployOnAllNodesets in service spec to true
+		// this will override ansible play target to all.
+		foundService.Spec.DeployOnAllNodeSets = &d.GlobalDeployment
 
 		err = d.ConditionalDeploy(
 			readyCondition,

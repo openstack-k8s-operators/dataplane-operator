@@ -19,7 +19,6 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -280,16 +279,15 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 				condition.DeploymentReadyMessage)
 		}
 
-		// Gathering mounts that may be inventories
-		for _, mount := range nodeSet.GetAnsibleEESpec().ExtraMounts {
-			for _, mountPoint := range mount.Mounts {
-				if strings.HasPrefix(mountPoint.MountPath, "/runner/inventory/") {
-					globalAnsibleEESpec.ExtraMounts = append(globalAnsibleEESpec.ExtraMounts, mount)
-					break
-				}
-			}
+	}
 
-		}
+	if haveError {
+		return ctrl.Result{}, err
+	}
+
+	if shouldRequeue {
+		logger.Info("Not all NodeSets done for OpenStackDeployment")
+		return ctrl.Result{}, nil
 	}
 
 	// If we have any services we want to deploy everywhere, deploy them now
@@ -307,7 +305,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 
 		deployResult, err := globalDeployer.Deploy(instance.Spec.AllNodeSetsServices)
 		if err != nil {
-			util.LogErrorForObject(helper, err, fmt.Sprintf("OpenStackDeployment error for all nodesets due to %s", err), instance)
+			util.LogErrorForObject(helper, err, "OpenStackDeployment error for all nodesets", instance)
 			haveError = true
 			instance.Status.Conditions.MarkFalse(
 				condition.ReadyCondition,
@@ -319,7 +317,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		if deployResult != nil {
 			shouldRequeue = true
 		} else {
-			logger.Info("Global OpenStackDeployment succeeded", "NodeSet")
+			logger.Info("Global OpenStackDeployment succeeded")
 		}
 	}
 
@@ -379,6 +377,20 @@ func (r *OpenStackDataPlaneDeploymentReconciler) setHashes(
 					return err
 				}
 			}
+		}
+	}
+
+	// Now do the same for global services
+	for _, serviceName := range instance.Spec.AllNodeSetsServices {
+		err = deployment.GetDeploymentHashesForService(
+			ctx,
+			helper,
+			instance.Namespace,
+			serviceName,
+			instance.Status.ConfigMapHashes,
+			instance.Status.SecretHashes)
+		if err != nil {
+			return err
 		}
 	}
 

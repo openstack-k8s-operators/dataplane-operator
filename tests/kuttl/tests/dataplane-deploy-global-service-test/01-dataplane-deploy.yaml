@@ -1,0 +1,25 @@
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-global-service
+spec:
+  label: custom-global-service
+  play: |
+    - hosts: localhost
+      gather_facts: no
+      name: global kuttl play
+      tasks:
+        - name: Sleep
+          command: sleep 1
+          delegate_to: localhost
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-compute-global-service
+spec:
+  nodeSets:
+    - edpm-compute-global-service
+  allNodeSetsServices:
+    - custom-global-service

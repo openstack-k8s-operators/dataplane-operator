@@ -297,6 +297,11 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | AddCertMounts - Whether to add cert mounts
 | bool
 | true
+
+| deployOnAllNodeSets
+| DeployOnAllNodeSets - should the service be deploy across all nodesets This will override default target of a service play, setting it to 'all'.
+| *bool
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -641,6 +646,11 @@ OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlane
 | deploymentRequeueTime
 | Time before the deployment is requeued in seconds
 | int
+| true
+
+| allNodeSetsServices
+| Services which should be deployed on all nodesets
+| []string
 | true
 |===
 
