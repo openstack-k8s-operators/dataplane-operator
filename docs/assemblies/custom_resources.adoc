@@ -547,22 +547,22 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | map[string]condition.Conditions
 | false
 
-| DNSClusterAddresses
+| dnsClusterAddresses
 | DNSClusterAddresses
 | []string
 | false
 
-| CtlplaneSearchDomain
+| ctlplaneSearchDomain
 | CtlplaneSearchDomain
 | string
 | false
 
-| AllHostnames
+| allHostnames
 | AllHostnames
 | map[string]map[infranetworkv1.NetNameStr]string
 | false
 
-| AllIPs
+| allIPs
 | AllIPs
 | map[string]map[infranetworkv1.NetNameStr]string
 | false
