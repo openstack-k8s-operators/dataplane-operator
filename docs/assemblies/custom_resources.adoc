@@ -497,7 +497,7 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 | true
 
 | preProvisioned
-| \n\nPreProvisioned - Whether the nodes are actually pre-provisioned (True) or should be preprovisioned (False)
+| \n\nPreProvisioned - Set to true if the nodes have been Pre Provisioned.
 | bool
 | false
 
