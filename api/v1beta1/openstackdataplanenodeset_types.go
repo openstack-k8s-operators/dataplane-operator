@@ -44,8 +44,7 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	// +kubebuilder:validation:Optional
 	//
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// PreProvisioned - Whether the nodes are actually pre-provisioned (True) or should be
-	// preprovisioned (False)
+	// PreProvisioned - Set to true if the nodes have been Pre Provisioned.
 	PreProvisioned bool `json:"preProvisioned,omitempty"`
 
 	// Env is a list containing the environment variables to pass to the pod
