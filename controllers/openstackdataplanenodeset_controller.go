@@ -70,7 +70,7 @@ const (
 
 // NodeConfigElements is a struct containing just the elements used for Ansible executions
 type NodeConfigElements struct {
-	BaremetalSetTempalte baremetalv1.OpenStackBaremetalSetSpec
+	BaremetalSetTemplate baremetalv1.OpenStackBaremetalSetSpec
 	NodeTemplate         dataplanev1.NodeTemplate
 	Nodes                map[string]dataplanev1.NodeSection
 }
@@ -473,7 +473,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 // We then hash the contents of the new struct using md5 and return the hashed string.
 func (r *OpenStackDataPlaneNodeSetReconciler) GetSpecConfigHash(instance *dataplanev1.OpenStackDataPlaneNodeSet) (string, error) {
 	nodeConfig := &NodeConfigElements{
-		BaremetalSetTempalte: instance.Spec.BaremetalSetTemplate,
+		BaremetalSetTemplate: instance.Spec.BaremetalSetTemplate,
 		NodeTemplate:         instance.Spec.NodeTemplate,
 		Nodes:                instance.Spec.Nodes,
 	}
