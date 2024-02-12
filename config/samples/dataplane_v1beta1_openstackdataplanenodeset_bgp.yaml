@@ -82,17 +82,17 @@ spec:
                 name: nic2
                 use_dhcp: false
                 addresses:
-                - ip_netmask: {{ lookup('vars', 'bgp_net1_ip') }}/30
+                - ip_netmask: {{ lookup('vars', 'bgpnet1_ip') }}/30
               - type: interface
                 name: nic3
                 use_dhcp: false
                 addresses:
-                - ip_netmask: {{ lookup('vars', 'bgp_net2_ip') }}/30
+                - ip_netmask: {{ lookup('vars', 'bgpnet2_ip') }}/30
               - type: interface
                 name: lo
                 addresses:
-                - ip_netmask: {{ lookup('vars', 'bgp_main_net_ip') }}/32
-                - ip_netmask: {{ lookup('vars', 'bgp_main_net6_ip') }}/128
+                - ip_netmask: {{ lookup('vars', 'bgpmainnet_ip') }}/32
+                - ip_netmask: {{ lookup('vars', 'bgpmainnet6_ip') }}/128
 
          # These vars are for the network config templates themselves and are
          # considered EDPM network defaults.
@@ -144,6 +144,6 @@ spec:
          edpm_selinux_mode: enforcing
          edpm_frr_bgp_uplinks: ['nic2', 'nic3']
          edpm_frr_bgp_neighbor_password: f00barZ
-         edpm_frr_bgp_ipv4_src_network: bgp_main_net
-         edpm_frr_bgp_ipv6_src_network: bgp_main_net6
+         edpm_frr_bgp_ipv4_src_network: bgpmainnet
+         edpm_frr_bgp_ipv6_src_network: bgpmainnet6
          edpm_ovn_bgp_agent_expose_tenant_networks: true
