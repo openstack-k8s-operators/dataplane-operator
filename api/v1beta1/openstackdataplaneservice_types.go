@@ -23,26 +23,6 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 )
 
-// KubeService represents a Kubernetes Service. It is called like this to avoid the extreme overloading of the
-// Service term in this context
-type KubeService struct {
-	// Name of the Service will have in kubernetes
-	// +kubebuilder:validation:Required
-	Name string `json:"name"`
-
-	// Port is the port of the service
-	// +kubebuilder:validation:Required
-	Port int `json:"port"`
-
-	// Protocol is the protocol used to connect to the endpoint
-	// +kubebuilder:default=http
-	Protocol string `json:"protocol,omitempty"`
-
-	// Network is the network that will be used to connect to the endpoint
-	// +kubebuilder:default=ctlplane
-	Network infranetworkv1.NetNameStr `json:"network,omitempty"`
-}
-
 // OpenstackDataPlaneServiceCert defines the property of a TLS cert issued for
 // a dataplane service
 type OpenstackDataPlaneServiceCert struct {

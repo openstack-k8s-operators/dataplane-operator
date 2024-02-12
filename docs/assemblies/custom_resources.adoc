@@ -12,7 +12,6 @@
 * <<ansibleopts,AnsibleOpts>>
 * <<nodesection,NodeSection>>
 * <<nodetemplate,NodeTemplate>>
-* <<kubeservice,KubeService>>
 * <<openstackdataplaneservicelist,OpenStackDataPlaneServiceList>>
 * <<openstackdataplaneservicespec,OpenStackDataPlaneServiceSpec>>
 * <<openstackdataplaneservicestatus,OpenStackDataPlaneServiceStatus>>
@@ -194,37 +193,6 @@ NodeTemplate is a specification of the node attributes that override top level a
 | networkData
 | NetworkData  node specific network-data
 | *corev1.SecretReference
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
-[#kubeservice]
-==== KubeService
-
-KubeService represents a Kubernetes Service. It is called like this to avoid the extreme overloading of the Service term in this context
-
-|===
-| Field | Description | Scheme | Required
-
-| name
-| Name of the Service will have in kubernetes
-| string
-| true
-
-| port
-| Port is the port of the service
-| int
-| true
-
-| protocol
-| Protocol is the protocol used to connect to the endpoint
-| string
-| false
-
-| network
-| Network is the network that will be used to connect to the endpoint
-| infranetworkv1.NetNameStr
 | false
 |===
 
