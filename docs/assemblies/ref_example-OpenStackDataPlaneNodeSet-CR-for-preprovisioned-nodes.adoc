@@ -1,0 +1,140 @@
+[id="ref_example-OpenStackDataPlaneNodeSet-CR-for-preprovisioned-nodes_{context}"]
+= Example `OpenStackDataPlaneNodeSet` CR for pre-provisioned nodes
+
+[role="_abstract"]
+The following example `OpenStackDataPlaneNodeSet` CR creates a set of generic Compute nodes with some node-specific configuration.
+
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: openstack-edpm-ipam
+spec:
+  env: <1>
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+  preProvisioned: true <2>
+  services: <3>
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - run-os
+    - ovn
+    - libvirt
+    - nova
+    - telemetry
+  nodes:
+      edpm-compute-0: <4>
+        hostName: edpm-compute-0
+        ansible:
+          ansibleHost: 192.168.122.100
+        networks:
+        - name: CtlPlane
+          subnetName: subnet1
+          defaultRoute: true
+          fixedIP: 192.168.122.100
+        - name: InternalApi
+          subnetName: subnet1
+        - name: Storage
+          subnetName: subnet1
+        - name: Tenant
+          subnetName: subnet1
+      edpm-compute-1:
+        hostName: edpm-compute-1
+        ansible:
+          ansibleHost: 192.168.122.101
+        networks:
+        - name: CtlPlane
+          subnetName: subnet1
+          defaultRoute: true
+          fixedIP: 192.168.122.101
+        - name: InternalApi
+          subnetName: subnet1
+        - name: Storage
+          subnetName: subnet1
+        - name: Tenant
+          subnetName: subnet1
+  networkAttachments: <5>
+    - ctlplane
+  nodeTemplate: <6>
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret <7>
+    managementNetwork: ctlplane
+    ansible:
+      ansibleUser: cloud-admin <8>
+      ansiblePort: 22
+      ansibleVars: <9>
+        service_net_map:
+          nova_api_network: internal_api
+          nova_libvirt_network: internal_api
+        edpm_chrony_ntp_servers:
+          - pool.ntp.org
+        edpm_network_config_template: | <10>
+              ---
+              {% set mtu_list = [ctlplane_mtu] %}
+              {% for network in role_networks %}
+              {{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
+              {%- endfor %}
+              {% set min_viable_mtu = mtu_list | max %}
+              network_config:
+              - type: ovs_bridge
+                name: {{ neutron_physical_bridge_name }}
+                mtu: {{ min_viable_mtu }}
+                use_dhcp: false
+                dns_servers: {{ ctlplane_dns_nameservers }}
+                domain: {{ dns_search_domains }}
+                addresses:
+                - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
+                routes: {{ ctlplane_host_routes }}
+                members:
+                - type: interface
+                  name: nic1
+                  mtu: {{ min_viable_mtu }}
+                  # force the MAC address of the bridge to this interface
+                  primary: true
+              {% for network in role_networks %}
+                - type: vlan
+                  mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
+                  vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
+                  addresses:
+                  - ip_netmask:
+                      {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
+                  routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
+              {% endfor %}
+        edpm_network_config_hide_sensitive_logs: false
+        # These vars are for the network config templates themselves and are
+        # considered EDPM network defaults.
+        neutron_physical_bridge_name: br-ex
+        neutron_public_interface_name: eth0
+        role_networks:
+          - InternalApi
+          - Storage
+          - Tenant
+        networks_lower:
+          External: external
+          InternalApi: internal_api
+          Storage: storage
+          Tenant: tenant
+        # edpm_nodes_validation
+        edpm_nodes_validation_validate_controllers_icmp: false
+        edpm_nodes_validation_validate_gateway_icmp: false
+        gather_facts: false
+        enable_debug: false
+        # edpm firewall, change the allowed CIDR if needed
+        edpm_sshd_configure_firewall: true
+        edpm_sshd_allowed_ranges: ['192.168.122.0/24']
+        # SELinux module
+        edpm_selinux_mode: enforcing
+----
+
+<1> Optional: A list of environment variables to pass to the pod.
+<2> Specify if the nodes in this set are pre-provisioned, or if they must be provisioned when creating the resource.
+//For information on how to configure your `OpenStackDataPlane` CR to provision bare metal nodes, see Provisioning bare metal nodes.
+<3> The services that are deployed on the data plane nodes in this `OpenStackDataPlaneNodeSet` CR.
+<4> The node definition reference, for example, `edpm-compute-0`. Each node in the node set must have a node definition.
+<5> The networks the `ansibleee-runner` connects to, specified as a list of `netattach` resource names.
+<6> The common configuration to apply to all nodes in this set of nodes.
+<7> The name of the secret that you created in xref:proc_creating-the-SSH-key-secrets_{context}[Creating the SSH key secrets].
+<8> The user associated with the secret you created in xref:proc_creating-the-SSH-key-secrets_{context}[Creating the SSH key secrets].
+<9> The Ansible variables that customize the set of nodes. For a complete list of Ansible variables, see https://openstack-k8s-operators.github.io/edpm-ansible/.
+<10> The network configuration template to apply to nodes in the set. For sample templates, see https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles/edpm_network_config/templates.

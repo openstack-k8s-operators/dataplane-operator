@@ -1,8 +1,10 @@
-= Provisioning Baremetal Nodes
+[id="con_provisioning-bare-metal-data-plane-nodes_{context}"]
+= Provisioning bare metal data plane nodes
 
-Provisioning bare-metal nodes for dataplane is supported with the Red Hat OpenShift
+[role="_abstract"]
+Provisioning bare metal nodes on the data plane is supported with the Red Hat OpenShift
 Container Platform (RHOCP) Cluster Baremetal Operator (CBO). The CBO is a RHOCP Operator
-responsible for deploying all the components that are required to provision bare-metal
+responsible for deploying all the components that are required to provision bare metal
 nodes within the RHOCP cluster, including the Bare Metal Operator (BMO) and Ironic
 containers.
 
@@ -25,7 +27,7 @@ You can activate CBO on RHOCP clusters installed with user-provisioned infrastru
 creating a Provisioning CR. You cannot add a provisioning network to a user-provisioned
 cluster.
 
-For user-provisioned insfrastructure a provsioning CR has to be created manually as below:
+For user-provisioned insfrastructure a provisioning CR has to be created manually as below:
 
  apiVersion: metal3.io/v1alpha1
  kind: Provisioning

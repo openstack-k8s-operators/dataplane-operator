@@ -110,7 +110,7 @@ $ oc rsh openstackclient openstack compute service list
 $ oc rsh openstackclient openstack compute service set edpm-compute-2 nova-compute --disable
 ----
 
-=== Stop ovn and nova-compuute containers
+=== Stop ovn and nova-compute containers
 
 ssh to the edpm node to be removed and stop the containers.
 
