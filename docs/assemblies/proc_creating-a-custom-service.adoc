@@ -1,0 +1,99 @@
+[id="proc_creating-a-custom-service_{context}"]
+= Creating a custom service
+
+[role="_abstract"]
+You can use the `OpenStackDataPlaneService` CRD to create custom services to deploy on your data plane nodes.
+
+[NOTE]
+Do not create a custom service with the same name as one of the default services. If a custom service name matches a default service name, the default service values overwrite the custom service values during `OpenStackDataPlaneNodeSet` reconciliation.
+
+You specify the Ansible execution for your service with either an Ansible playbook or by including the free-form play contents directly in the `spec` section of the service.
+
+[NOTE]
+You cannot use both an Ansible playbook and an Ansible play in the same service.
+
+.Procedure
+
+. Create an `OpenStackDataPlaneService` CR and save it to a YAML file on your workstation, for example `custom-service.yaml`:
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-service
+spec:
+  label: dataplane-deployment-custom-service
+----
+
+. Specify the Ansible commands to create the custom service, by referencing an Ansible playbook or by including the Ansible play in the `spec`:
+
+* Specify the Ansible playbook to use:
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-service
+spec:
+  label: dataplane-deployment-custom-service
+  playbook: osp.edpm.configure_os
+----
+
++
+For information about how to create an Ansible playbook, see link:https://docs.ansible.com/ansible-core/devel/getting_started/get_started_playbook.html[Creating a playbook].
+
+* Specify the Ansible play as a string that uses Ansible playbook syntax:
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-service
+spec:
+  label: dataplane-deployment-custom-service
+  play: |
+    hosts: all
+    tasks:
+      - name: Hello World!
+        shell: "echo Hello World!"
+        register: output
+      - name: Show output
+        debug:
+          msg: "{{ output.stdout }}"
+      - name: Hello World role
+        import_role: hello_world
+----
+
+. Optional: To override the default container image used by the `ansible-runner` execution environment with a custom image that uses additional Ansible content for a custom service, build and include a custom `ansible-runner` image. For information, see xref:proc_building-a-custom-ansible-runner-image_{context}[Building a custom `ansible-runner` image].
+
+. Optional: Designate and configure a node set for a Compute feature or workload. For more information, see xref:proc_configuring-a-node-set-for-a-Compute-feature-or-workload_dataplane[Configuring a node set for a Compute feature or workload].
+
+. Optional: Specify the names of `Secret` resources to use to pass secrets into the `OpenStackAnsibleEE` job:
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-service
+spec:
+  ...
+  play: |
+    ...
+  secrets:
+    - hello-world-secret-0
+    - hello-world-secret-1
+----
++
+A mount is created for each `secret` in the `OpenStackAnsibleEE` pod with a filename that matches the `secret` value. The mounts are created under `/var/lib/openstack/configs/<service name>`.
+
+. Create the custom service:
++
+----
+$ oc apply -f custom-service.yaml
+----
+
+. Verify that the custom service is created:
++
+----
+$ oc get openstackdataplaneservice <custom_service_name> -o yaml
+----

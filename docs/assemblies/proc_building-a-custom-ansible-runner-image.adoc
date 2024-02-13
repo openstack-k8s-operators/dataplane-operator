@@ -1,0 +1,36 @@
+[id="proc_building-a-custom-ansible-runner-image_{context}"]
+= Building a custom `ansible-runner` image
+
+[role="_abstract"]
+You can override the default container image used by the `ansible-runner` execution environment with your own custom image when you need additional Ansible content for a custom service.
+
+.Procedure
+
+. Create a `Containerfile` that adds the custom content to the default image:
++
+----
+FROM quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+COPY my_custom_role /usr/share/ansible/roles/my_custom_role
+----
+
+. Build and push the image to a container registry:
++
+----
+$ podman build -t quay.io/example_user/my_custom_image:latest .
+$ podman push quay.io/example_user/my_custom_role:latest
+----
+
+. Specify your new container image as the image that the `ansible-runner` execution environment must use to add the additional Ansible content that your custom service requires, such as Ansible roles or modules:
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: custom-service
+spec:
+  label: dataplane-deployment-custom-service
+  openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest <1>
+  play: |
+----
++
+<1> Your container image that the `ansible-runner` execution environment uses to execute Ansible.

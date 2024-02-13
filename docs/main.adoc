@@ -6,19 +6,9 @@ include::assemblies/index.adoc[leveloffset=+1]
 
 include::assemblies/design.adoc[leveloffset=+1]
 
-include::assemblies/inheritance.adoc[leveloffset=+1]
-
-include::assemblies/deploying.adoc[leveloffset=+1]
-
-include::assemblies/composable_services.adoc[leveloffset=+1]
-
-include::assemblies/common_configurations.adoc[leveloffset=+1]
+include::assemblies/creating-the-data-plane.adoc[leveloffset=+1]
 
 include::assemblies/tls.adoc[leveloffset=+1]
-
-include::assemblies/interacting_with_ansible.adoc[leveloffset=+1]
-
-include::assemblies/deploying_baremetal.adoc[leveloffset=+1]
 
 include::assemblies/scaling.adoc[leveloffset=+1]
 

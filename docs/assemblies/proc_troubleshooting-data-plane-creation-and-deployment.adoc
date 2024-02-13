@@ -1,0 +1,72 @@
+[id="proc_troubleshooting-data-plane-creation-and-deployment_{context}"]
+= Troubleshooting data plane creation and deployment
+
+[role="_abstract"]
+Each data plane deployment in the environment has associated services. Each of these services have a job condition message that matches to the current status of the AnsibleEE job executing for that service. This information can be used to troubleshoot deployments when services are not deploying or operating correctly.
+
+.Procedure
+
+. Determine the name and status of all deployments:
++
+----
+$ oc get openstackdataplanedeployment
+----
++
+The following example output shows two deployments currently in progress:
++
+----
+$ oc get openstackdataplanedeployment             
+
+NAME                   NODESETS             STATUS   MESSAGE
+openstack-edpm-ipam1   ["openstack-edpm"]   False    Deployment in progress
+openstack-edpm-ipam2   ["openstack-edpm"]   False    Deployment in progress
+----
+
+. Determine the name and status of all services and their job condition:
++
+----
+$ oc get openstackansibleee
+----
++
+The following example output shows all services and their job condition for all current deployments:
++
+----
+$ oc get openstackansibleee
+
+NAME                             NETWORKATTACHMENTS   STATUS   MESSAGE
+bootstrap-openstack-edpm         ["ctlplane"]         True     AnsibleExecutionJob complete
+download-cache-openstack-edpm    ["ctlplane"]         False    AnsibleExecutionJob is running
+repo-setup-openstack-edpm        ["ctlplane"]         True     AnsibleExecutionJob complete
+validate-network-another-osdpd   ["ctlplane"]         False    AnsibleExecutionJob is running
+----
+
+. Filter for the name and service for a specific deployment:
++
+----
+$ oc get openstackansibleee -l osdpd=<deployment_name>
+----
++
+* Replace `<deployment_name>` with the name of the deployment to use to filter the services list. 
++
+The following example filters the list to only show services and their job condition for the `openstack-edpm-ipam1` deployment:
++
+----
+$ oc get openstackansibleee -l osdpd=openstack-edpm-ipam1   
+
+NAME                            NETWORKATTACHMENTS   STATUS   MESSAGE
+bootstrap-openstack-edpm        ["ctlplane"]         True     AnsibleExecutionJob complete
+download-cache-openstack-edpm   ["ctlplane"]         False    AnsibleExecutionJob is running
+repo-setup-openstack-edpm       ["ctlplane"]         True     AnsibleExecutionJob complete
+----
+
+.Job Condition Messages
+
+AnsibleEE jobs have an associated condition message that indicates the current state of the service job. This condition message is displayed in the `MESSAGE` field of the `oc get openstackansibleee` command output. Jobs return one of the following conditions when queried:
+
+* `AnsibleExecutionJob not started`: The job has not started.
+* `AnsibleExecutionJob not found`: The job could not be found.
+* `AnsibleExecutionJob is running`: The job is currently running.
+* `AnsibleExecutionJob complete`: The job execution is complete.
+* `AnsibleExecutionJob error occured <error_message>`: The job stopped executed unexpectedly. The `<error_message>` is replaced with a specific error message.
+
+To further investigate a service displaying a particular job condition message, use the command `oc logs job/<service>` to display the logs associated with that service. For example, to display the logs for the `repo-setup-openstack-edpm` service, use the command `oc logs job/repo-setup-openstack-edpm`. 
