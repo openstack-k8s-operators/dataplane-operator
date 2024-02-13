@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"flag"
 	"os"
@@ -79,7 +80,7 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	devMode, err := strconv.ParseBool(os.Getenv("DEV_MODE"))
 	if err != nil {
-		devMode = false
+		devMode = true
 	}
 	opts := zap.Options{
 		Development: devMode,
@@ -136,8 +137,7 @@ func main() {
 		Client:  mgr.GetClient(),
 		Scheme:  mgr.GetScheme(),
 		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackDataPlaneNodeSet"),
-	}).SetupWithManager(mgr); err != nil {
+	}).SetupWithManager(context.Background(), mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneNodeSet")
 		os.Exit(1)
 	}
@@ -160,7 +160,6 @@ func main() {
 		Client:  mgr.GetClient(),
 		Scheme:  mgr.GetScheme(),
 		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackDataPlaneDeployment"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneDeployment")
 		os.Exit(1)

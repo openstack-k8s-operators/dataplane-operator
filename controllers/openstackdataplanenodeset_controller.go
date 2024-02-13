@@ -101,7 +101,11 @@ type OpenStackDataPlaneNodeSetReconciler struct {
 	client.Client
 	Kclient kubernetes.Interface
 	Scheme  *runtime.Scheme
-	Log     logr.Logger
+}
+
+// GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
+func (r *OpenStackDataPlaneNodeSetReconciler) GetLogger(ctx context.Context) logr.Logger {
+	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackDataPlaneNodeSet")
 }
 
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanenodesets,verbs=get;list;watch;create;update;patch;delete
@@ -138,8 +142,9 @@ type OpenStackDataPlaneNodeSetReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
-	logger := log.FromContext(ctx)
-	logger.Info("Reconciling NodeSet")
+
+	Log := r.GetLogger(ctx)
+	Log.Info("Reconciling NodeSet")
 
 	// Fetch the OpenStackDataPlaneNodeSet instance
 	instance := &dataplanev1.OpenStackDataPlaneNodeSet{}
@@ -160,7 +165,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		r.Client,
 		r.Kclient,
 		r.Scheme,
-		logger,
+		Log,
 	)
 
 	// Always patch the instance status when exiting this function so we can persist any changes.
@@ -178,7 +183,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		}
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
-			logger.Error(err, "Error updating instance status conditions")
+			Log.Error(err, "Error updating instance status conditions")
 			_err = err
 			return
 		}
@@ -288,7 +293,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	if instance.Status.Deployed && instance.DeletionTimestamp.IsZero() {
 		// The NodeSet is already deployed and not being deleted, so reconciliation
 		// is already complete.
-		logger.Info("NodeSet already deployed", "instance", instance)
+		Log.Info("NodeSet already deployed", "instance", instance)
 		return ctrl.Result{}, nil
 	}
 
@@ -306,7 +311,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	// Set DeploymentReadyCondition to False if it was unknown.
 	// Handles the case where the NodeSet is created, but not yet deployed.
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
-		logger.Info("Set DeploymentReadyCondition false")
+		Log.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
 			condition.NotRequestedReason, condition.SeverityInfo,
 			condition.DeploymentReadyInitMessage)
@@ -314,21 +319,21 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	deploymentExists, isDeploymentReady, err := checkDeployment(helper, instance)
 	if err != nil {
-		logger.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
+		Log.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
 		return ctrl.Result{}, err
 	}
 	if isDeploymentReady {
-		logger.Info("Set NodeSet DeploymentReadyCondition true")
+		Log.Info("Set NodeSet DeploymentReadyCondition true")
 		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
 			condition.DeploymentReadyMessage)
 		instance.Status.DeployedConfigHash = configHash
 	} else if deploymentExists {
-		logger.Info("Set NodeSet DeploymentReadyCondition false")
+		Log.Info("Set NodeSet DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
 			condition.RequestedReason, condition.SeverityInfo,
 			condition.DeploymentReadyRunningMessage)
 	} else {
-		logger.Info("Set NodeSet DeploymentReadyCondition false")
+		Log.Info("Set NodeSet DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
 			condition.RequestedReason, condition.SeverityInfo,
 			condition.DeploymentReadyInitMessage)
@@ -395,8 +400,9 @@ func checkDeployment(helper *helper.Helper,
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	dnsMasqWatcher := handler.EnqueueRequestsFromMapFunc(func(obj client.Object) []reconcile.Request {
+		Log := r.GetLogger(ctx)
 		result := []reconcile.Request{}
 
 		// For each DNSMasq change event get the list of all
@@ -408,7 +414,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 			client.InNamespace(obj.GetNamespace()),
 		}
 		if err := r.Client.List(context.Background(), nodeSets, listOpts...); err != nil {
-			r.Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSetList %w")
+			Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSetList %w")
 			return nil
 		}
 
@@ -424,6 +430,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 	})
 
 	deploymentWatcher := handler.EnqueueRequestsFromMapFunc(func(obj client.Object) []reconcile.Request {
+		Log := r.GetLogger(ctx)
 		var namespace string = obj.GetNamespace()
 		result := []reconcile.Request{}
 
@@ -443,10 +450,10 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		})
 
 		if err != nil {
-			r.Log.Error(err, "unable to retrieve list of pods for dataplane diagnostic")
+			Log.Error(err, "unable to retrieve list of pods for dataplane diagnostic")
 		} else {
 			for _, pod := range podsList.Items {
-				r.Log.Info(
+				Log.Info(
 					fmt.Sprintf(
 						"openstack dataplane pod %s failed due to %s message: %s",
 						pod.Name, pod.Status.Reason, pod.Status.Message))

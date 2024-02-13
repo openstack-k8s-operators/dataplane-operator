@@ -44,7 +44,11 @@ type OpenStackDataPlaneDeploymentReconciler struct {
 	client.Client
 	Kclient kubernetes.Interface
 	Scheme  *runtime.Scheme
-	Log     logr.Logger
+}
+
+// GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
+func (r *OpenStackDataPlaneDeploymentReconciler) GetLogger(ctx context.Context) logr.Logger {
+	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackDataPlaneDeployment")
 }
 
 //+kubebuilder:rbac:groups=dataplane.openstack.org,resources=openstackdataplanedeployments,verbs=get;list;watch;create;delete
@@ -58,8 +62,9 @@ type OpenStackDataPlaneDeploymentReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
-	logger := log.FromContext(ctx)
-	logger.Info("Reconciling Deployment")
+
+	Log := r.GetLogger(ctx)
+	Log.Info("Reconciling Deployment")
 
 	// Fetch the OpenStackDataPlaneDeployment instance
 	instance := &dataplanev1.OpenStackDataPlaneDeployment{}
@@ -80,7 +85,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		r.Client,
 		r.Kclient,
 		r.Scheme,
-		logger,
+		Log,
 	)
 
 	// Always patch the instance status when exiting this function so we can persist any changes.
@@ -98,7 +103,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		}
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
-			logger.Error(err, "Error updating instance status conditions")
+			Log.Error(err, "Error updating instance status conditions")
 			_err = err
 			return
 		}
@@ -106,7 +111,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 
 	// If the deploy is already done, return immediately.
 	if instance.Status.Deployed {
-		logger.Info("Already deployed", "instance.Status.Deployed", instance.Status.Deployed)
+		Log.Info("Already deployed", "instance.Status.Deployed", instance.Status.Deployed)
 		return ctrl.Result{}, nil
 	}
 
@@ -140,7 +145,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		if err != nil {
 			// NodeSet not found, force a requeue
 			if k8s_errors.IsNotFound(err) {
-				logger.Info("NodeSet not found", "NodeSet", nodeSet)
+				Log.Info("NodeSet not found", "NodeSet", nodeSet)
 				return ctrl.Result{RequeueAfter: time.Second * time.Duration(instance.Spec.DeploymentRequeueTime)}, nil
 			}
 			// Error reading the object - requeue the request.
@@ -152,7 +157,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	// Check that all nodeSets are SetupReady
 	for _, nodeSet := range nodeSets.Items {
 		if !nodeSet.Status.Conditions.IsTrue(dataplanev1.SetupReadyCondition) {
-			logger.Info("NodeSet SetupReadyCondition is not True", "NodeSet", nodeSet.Name)
+			Log.Info("NodeSet SetupReadyCondition is not True", "NodeSet", nodeSet.Name)
 			return ctrl.Result{RequeueAfter: time.Second * time.Duration(instance.Spec.DeploymentRequeueTime)}, nil
 		}
 	}
@@ -197,10 +202,10 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	haveError := false
 	for _, nodeSet := range nodeSets.Items {
 
-		logger.Info(fmt.Sprintf("Deploying NodeSet: %s", nodeSet.Name))
-		logger.Info("Set Status.Deployed to false", "instance", instance)
+		Log.Info(fmt.Sprintf("Deploying NodeSet: %s", nodeSet.Name))
+		Log.Info("Set Status.Deployed to false", "instance", instance)
 		instance.Status.Deployed = false
-		logger.Info("Set DeploymentReadyCondition false", "instance", instance)
+		Log.Info("Set DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition, condition.RequestedReason,
 			condition.SeverityInfo, condition.DeploymentReadyRunningMessage)
@@ -252,8 +257,8 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		if deployResult != nil {
 			shouldRequeue = true
 		} else {
-			logger.Info("OpenStackDeployment succeeded for NodeSet", "NodeSet", nodeSet.Name)
-			logger.Info("Set NodeSetDeploymentReadyCondition true", "nodeSet", nodeSet.Name)
+			Log.Info("OpenStackDeployment succeeded for NodeSet", "NodeSet", nodeSet.Name)
+			Log.Info("Set NodeSetDeploymentReadyCondition true", "nodeSet", nodeSet.Name)
 			nsConditions := instance.Status.NodeSetConditions[nodeSet.Name]
 			nsConditions.MarkTrue(
 				condition.Type(dataplanev1.NodeSetDeploymentReadyCondition),
@@ -266,18 +271,18 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	}
 
 	if shouldRequeue {
-		logger.Info("Not all NodeSets done for OpenStackDeployment")
+		Log.Info("Not all NodeSets done for OpenStackDeployment")
 		return ctrl.Result{}, nil
 	}
 
-	logger.Info("Set DeploymentReadyCondition true", "instance", instance)
+	Log.Info("Set DeploymentReadyCondition true")
 	instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
 	instance.Status.Deployed = true
 	err = r.setHashes(ctx, helper, instance, nodeSets)
 	if err != nil {
-		logger.Error(err, "Error setting service hashes")
+		Log.Error(err, "Error setting service hashes")
 	}
-	logger.Info("Set status deploy true", "instance", instance)
+	Log.Info("Set status deploy true", "instance", instance)
 	return ctrl.Result{}, nil
 }
 
