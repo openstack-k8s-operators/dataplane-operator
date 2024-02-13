@@ -151,6 +151,10 @@ test: manifests generate fmt vet envtest ginkgo ## Run tests.
 .PHONY: test-all
 test-all: test golint golangci golangci-lint ## Run all tests.
 
+.PHONY: cover
+cover: test ## Run tests and display functional test coverage
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go tool cover -html=cover.out
+
 ##@ Build
 
 .PHONY: build
