@@ -4,9 +4,9 @@ go 1.19
 
 require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240205163532-e4efedde5776
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240129151020-c9467a8fbbfc
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240129151020-c9467a8fbbfc
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240207104547-9d2c03ca3a17
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240209144956-bbf3c6e54d4d
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240209144956-bbf3c6e54d4d
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240212043131-c83a04f68c57
 	k8s.io/api v0.26.13
 	k8s.io/apimachinery v0.26.13
 	sigs.k8s.io/controller-runtime v0.14.7

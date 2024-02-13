@@ -42,6 +42,10 @@ spec:
             properties:
               baremetalSetTemplate:
                 properties:
+                  agentImageUrl:
+                    type: string
+                  apacheImageUrl:
+                    type: string
                   automatedCleaningMode:
                     default: metadata
                     enum:
@@ -164,6 +168,8 @@ spec:
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
+                  osContainerImageUrl:
+                    type: string
                   osImage:
                     type: string
                   passwordSecret:
