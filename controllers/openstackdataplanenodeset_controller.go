@@ -286,7 +286,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	if instance.Status.Deployed && instance.DeletionTimestamp.IsZero() {
-		// The role is already deployed and not being deleted, so reconciliation
+		// The NodeSet is already deployed and not being deleted, so reconciliation
 		// is already complete.
 		logger.Info("NodeSet already deployed", "instance", instance)
 		return ctrl.Result{}, nil
@@ -396,7 +396,7 @@ func checkDeployment(helper *helper.Helper,
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	reconcileFunction := handler.EnqueueRequestsFromMapFunc(func(o client.Object) []reconcile.Request {
+	dnsMasqWatcher := handler.EnqueueRequestsFromMapFunc(func(obj client.Object) []reconcile.Request {
 		result := []reconcile.Request{}
 
 		// For each DNSMasq change event get the list of all
@@ -405,17 +405,17 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		nodeSets := &dataplanev1.OpenStackDataPlaneNodeSetList{}
 
 		listOpts := []client.ListOption{
-			client.InNamespace(o.GetNamespace()),
+			client.InNamespace(obj.GetNamespace()),
 		}
 		if err := r.Client.List(context.Background(), nodeSets, listOpts...); err != nil {
 			r.Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSetList %w")
 			return nil
 		}
 
-		// For each role instance create a reconcile request
+		// For each NodeSet instance create a reconcile request
 		for _, i := range nodeSets.Items {
 			name := client.ObjectKey{
-				Namespace: o.GetNamespace(),
+				Namespace: obj.GetNamespace(),
 				Name:      i.Name,
 			}
 			result = append(result, reconcile.Request{NamespacedName: name})
@@ -463,7 +463,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		Owns(&infranetworkv1.DNSData{}).
 		Owns(&corev1.Secret{}).
 		Watches(&source.Kind{Type: &infranetworkv1.DNSMasq{}},
-			reconcileFunction).
+			dnsMasqWatcher).
 		Watches(&source.Kind{Type: &dataplanev1.OpenStackDataPlaneDeployment{}},
 			deploymentWatcher).
 		Complete(r)
