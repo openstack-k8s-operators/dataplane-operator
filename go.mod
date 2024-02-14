@@ -11,19 +11,19 @@ require (
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
 	github.com/onsi/ginkgo/v2 v2.14.0
 	github.com/onsi/gomega v1.30.0
-	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230724101130-2d6fe1f4706b
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240213182616-e338bce8cf98
-	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240209144956-bbf3c6e54d4d
-	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240209144956-bbf3c6e54d4d
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240209144956-bbf3c6e54d4d
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240209144956-bbf3c6e54d4d
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240209144956-bbf3c6e54d4d
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240213143827-8dbf9a79683e
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240212070247-bd48f0bb8ad9
-	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3
+	github.com/openstack-k8s-operators/dataplane-operator/api v0.3.1-0.20240213234314-66f0027c591b
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240214153927-179defb96a33
+	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240214144842-5dcac51e5b36
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240214144842-5dcac51e5b36
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240214144842-5dcac51e5b36
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240214144842-5dcac51e5b36
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240214144842-5dcac51e5b36
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240214153858-9bf047b38c40
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240214153913-80b4f87cfc2b
+	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.28.3
-	k8s.io/apimachinery v0.28.3
+	k8s.io/apimachinery v0.29.0
 	k8s.io/client-go v0.28.3
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e
 	sigs.k8s.io/controller-runtime v0.16.4
@@ -66,14 +66,14 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
-	golang.org/x/mod v0.14.0 // indirect
+	golang.org/x/mod v0.15.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
-	golang.org/x/oauth2 v0.16.0 // indirect
+	golang.org/x/oauth2 v0.17.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/term v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	golang.org/x/tools v0.17.0 // indirect
+	golang.org/x/tools v0.18.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
@@ -82,7 +82,7 @@ require (
 	k8s.io/apiextensions-apiserver v0.28.3 // indirect
 	k8s.io/component-base v0.28.3 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20240126223410-2919ad4fcfec // indirect
+	k8s.io/kube-openapi v0.0.0-20240209001042-7a0d5b415232 // indirect
 	sigs.k8s.io/gateway-api v0.6.0 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
