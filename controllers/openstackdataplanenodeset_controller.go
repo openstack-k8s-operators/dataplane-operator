@@ -218,6 +218,12 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	// Ensure Services
 	err = deployment.EnsureServices(ctx, helper, instance)
 	if err != nil {
+		instance.Status.Conditions.MarkFalse(
+			dataplanev1.SetupReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			dataplanev1.DataPlaneNodeSetErrorMessage,
+			err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -301,7 +307,14 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
 		allIPSets, dnsAddresses, dataplaneAnsibleImageDefaults)
 	if err != nil {
-		util.LogErrorForObject(helper, err, fmt.Sprintf("Unable to generate inventory for %s", instance.Name), instance)
+		errorMsg := fmt.Sprintf("Unable to generate inventory for %s", instance.Name)
+		util.LogErrorForObject(helper, err, errorMsg, instance)
+		instance.Status.Conditions.MarkFalse(
+			dataplanev1.SetupReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			dataplanev1.DataPlaneNodeSetErrorMessage,
+			errorMsg)
 		return ctrl.Result{}, err
 	}
 
