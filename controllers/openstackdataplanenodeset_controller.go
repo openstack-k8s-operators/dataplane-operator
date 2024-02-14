@@ -275,7 +275,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 			instance.Status.Conditions.MarkFalse(
 				condition.InputReadyCondition,
 				condition.RequestedReason,
-				condition.SeverityWarning,
+				condition.SeverityError,
 				err.Error())
 		}
 		return result, err
