@@ -1,0 +1,36 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+  namespace: openstack
+spec:
+  selfSigned: {}
+---
+# RootCA Certificate used to sign certificates
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: osp-rootca
+  namespace: openstack
+spec:
+  isCA: true
+  commonName: osp-rootca
+  secretName: osp-rootca-secret
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer
+    group: cert-manager.io
+---
+# Issuer that uses the generated CA certificate to issue certs
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: osp-rootca-issuer-internal
+  namespace: openstack
+spec:
+  ca:
+    secretName: osp-rootca-secret
+---
