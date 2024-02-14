@@ -29,7 +29,6 @@ spec:
   networkAttachments:
     - ctlplane
   nodeTemplate:
-    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     networks:
       - name: ctlplane
         subnetName: subnet1
@@ -40,6 +39,7 @@ spec:
         subnetName: subnet1
       - name: tenant
         subnetName: subnet1
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     managementNetwork: ctlplane
     ansible:
       ansibleVars:

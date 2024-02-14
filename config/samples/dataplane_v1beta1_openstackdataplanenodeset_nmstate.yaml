@@ -25,12 +25,17 @@ spec:
       hostName: edpm-compute-0
       ansible:
         ansibleHost: 192.168.122.100
-        ansibleVars:
-          ctlplane_ip: 192.168.122.100
-          internalapi_ip: 172.17.0.100
-          storage_ip: 172.18.0.100
-          tenant_ip: 172.19.0.100
-          fqdn_internalapi: edpm-compute-0.example.com
+      networks:
+        - name: ctlplane
+          subnetName: subnet1
+          defaultRoute: true
+          fixedIP: 192.168.122.100
+        - name: internalapi
+          subnetName: subnet1
+        - name: storage
+          subnetName: subnet1
+        - name: tenant
+          subnetName: subnet1
   networkAttachments:
   - ctlplane
   nodeTemplate:
@@ -106,33 +111,6 @@ spec:
         # considered EDPM network defaults.
         neutron_physical_bridge_name: br-ex
         neutron_public_interface_name: eth0
-        ctlplane_mtu: 1500
-        ctlplane_cidr: 24
-        ctlplane_gateway_ip: 192.168.122.1
-        ctlplane_host_routes:
-        - ip_netmask: 0.0.0.0/0
-          next_hop: 192.168.122.1
-        external_mtu: 1500
-        external_vlan_id: 44
-        external_cidr: '24'
-        internalapi_mtu: 1500
-        internalapi_vlan_id: 20
-        internalapi_cidr: '24'
-        storage_mtu: 1500
-        storage_vlan_id: 21
-        storage_cidr: '24'
-        tenant_mtu: 1500
-        tenant_vlan_id: 22
-        tenant_cidr: '24'
-        role_networks:
-        - internalapi
-        - storage
-        - tenant
-        networks_lower:
-          external: external
-          internalapi: internalapi
-          storage: storage
-          tenant: tenant
         # edpm_nodes_validation
         edpm_nodes_validation_validate_controllers_icmp: false
         edpm_nodes_validation_validate_gateway_icmp: false
