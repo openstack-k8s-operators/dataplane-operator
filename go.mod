@@ -12,14 +12,14 @@ require (
 	github.com/onsi/ginkgo/v2 v2.14.0
 	github.com/onsi/gomega v1.30.0
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-20230724101130-2d6fe1f4706b
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240205163532-e4efedde5776
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240213182616-e338bce8cf98
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240209144956-bbf3c6e54d4d
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240209144956-bbf3c6e54d4d
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240209144956-bbf3c6e54d4d
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240209144956-bbf3c6e54d4d
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240209144956-bbf3c6e54d4d
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240207123548-8241bebbec7c
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240212043131-c83a04f68c57
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240213143827-8dbf9a79683e
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240212070247-bd48f0bb8ad9
 	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.13
@@ -68,10 +68,10 @@ require (
 	go.uber.org/multierr v1.10.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
-	golang.org/x/term v0.16.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/term v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.17.0 // indirect
