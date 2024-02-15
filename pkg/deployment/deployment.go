@@ -162,7 +162,7 @@ func (d *Deployer) ConditionalDeploy(
 			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
 				condition.ErrorReason,
-				condition.SeverityWarning,
+				condition.SeverityError,
 				readyErrorMessage,
 				err.Error()))
 		}

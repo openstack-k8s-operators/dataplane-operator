@@ -251,7 +251,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			instance.Status.Conditions.MarkFalse(
 				condition.ReadyCondition,
 				condition.ErrorReason,
-				condition.SeverityWarning,
+				condition.SeverityError,
 				dataplanev1.DataPlaneNodeSetErrorMessage,
 				err.Error())
 		}
