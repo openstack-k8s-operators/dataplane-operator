@@ -7,3 +7,10 @@ spec:
   secrets:
     - ceilometer-compute-config-data
   playbook: osp.edpm.telemetry
+  tlsCert:
+    contents:
+    - ips
+    networks:
+    - CtlPlane
+    issuer: osp-rootca-issuer-internal
+  caCerts: combined-ca-bundle
