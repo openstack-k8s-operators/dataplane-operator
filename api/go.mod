@@ -8,7 +8,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240214144842-5dcac51e5b36
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240214153913-80b4f87cfc2b
 	k8s.io/api v0.28.3
-	k8s.io/apimachinery v0.29.0
+	k8s.io/apimachinery v0.28.3
 	sigs.k8s.io/controller-runtime v0.16.4
 )
 
