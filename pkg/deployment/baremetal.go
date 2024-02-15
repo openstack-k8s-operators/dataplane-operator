@@ -57,19 +57,23 @@ func DeployBaremetalSet(
 			ipSet, ok := ipSets[hostName]
 			instanceSpec := baremetalSet.Spec.BaremetalHosts[hostName]
 			if !ok {
+				// TODO: Change this to raise an error instead.
+				// NOTE(hjensas): Hardcode /24 here, this used to rely on
+				// baremetalSet.Spec.CtlplaneNetmask's default value ("255.255.255.0").
 				utils.LogForObject(helper, "IPAM Not configured for use, skipping", instance)
-				instanceSpec.CtlPlaneIP = node.Ansible.AnsibleHost
+				instanceSpec.CtlPlaneIP = fmt.Sprintf("%s/24", node.Ansible.AnsibleHost)
 			} else {
 				for _, res := range ipSet.Status.Reservation {
 					if strings.ToLower(string(res.Network)) == CtlPlaneNetwork {
-						instanceSpec.CtlPlaneIP = res.Address
+						_, ipNet, err := net.ParseCIDR(res.Cidr)
+						if err != nil {
+							return err
+						}
+						ipPrefix, _ := ipNet.Mask.Size()
+						instanceSpec.CtlPlaneIP = fmt.Sprintf("%s/%d", res.Address, ipPrefix)
 						baremetalSet.Spec.CtlplaneGateway = *res.Gateway
 						baremetalSet.Spec.BootstrapDNS = dnsAddresses
 						baremetalSet.Spec.DNSSearchDomains = []string{res.DNSDomain}
-						_, ipNet, err := net.ParseCIDR(res.Cidr)
-						if err == nil {
-							baremetalSet.Spec.CtlplaneNetmask = net.IP(ipNet.Mask).String()
-						}
 					}
 				}
 			}
