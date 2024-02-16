@@ -57,6 +57,11 @@ AnsibleEESpec is a specification of the ansible EE attributes
 | string
 | false
 
+| extraVars
+| ExtraVars for ansible execution
+| map[string]json.RawMessage
+| false
+
 | extraMounts
 | ExtraMounts containing files which can be mounted into an Ansible Execution Pod
 | []storage.VolMounts
@@ -631,6 +636,11 @@ OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlane
 | ansibleSkipTags
 | AnsibleSkipTags for ansible execution
 | string
+| false
+
+| ansibleExtraVars
+| AnsibleExtraVars for ansible execution
+| map[string]json.RawMessage
 | false
 
 | servicesOverride
