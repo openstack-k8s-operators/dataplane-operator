@@ -42,7 +42,7 @@ spec:
         subnetName: subnet1
     managementNetwork: ctlplane
     ansible:
-      AnsiblePort: 22
+      ansiblePort: 22
       ansibleVars:
          timesync_ntp_servers:
            - hostname: pool.ntp.org
