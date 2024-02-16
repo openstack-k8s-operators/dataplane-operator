@@ -531,6 +531,11 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 | map[string]<<nodesection,NodeSection>>
 | true
 
+| secretMaxSize
+| SecretMaxSize - Maximum size in bytes of a Kubernetes secret. This size is currently situated around 1 MiB (nearly 1 MB).
+| int
+| true
+
 | preProvisioned
 | \n\nPreProvisioned - Set to true if the nodes have been Pre Provisioned.
 | bool

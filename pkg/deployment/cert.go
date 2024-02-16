@@ -20,6 +20,8 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -40,8 +42,44 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 )
 
-// EnsureTLSCerts generates  a secret containing all the certificates for the relevant service
-// This secret will be mounted by the ansibleEE pod as an extra mount when the service is deployed.
+// Helper function to create the data structure that will be used to store the secrets.
+func createSecretsDataStructure(secretMaxSize int,
+	certsData map[string][]byte,
+) []map[string][]byte {
+
+	ci := []map[string][]byte{}
+
+	keys := []string{}
+	for k := range certsData {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	totalSize := secretMaxSize
+	var cur *map[string][]byte
+	// Going 3 by 3 to include CA, crt and key, in the same secret.
+	for k := 0; k < len(keys)-1; k += 3 {
+		szCa := len(certsData[keys[k]]) + len(keys[k])
+		szCrt := len(certsData[keys[k+1]]) + len(keys[k+1])
+		szKey := len(certsData[keys[k+2]]) + len(keys[k+2])
+		sz := szCa + szCrt + szKey
+		if (totalSize + sz) > secretMaxSize {
+			i := len(ci)
+			ci = append(ci, make(map[string][]byte))
+			cur = &ci[i]
+			totalSize = 0
+		}
+		totalSize += sz
+		(*cur)[keys[k]] = certsData[keys[k]]
+		(*cur)[keys[k+1]] = certsData[keys[k+1]]
+		(*cur)[keys[k+2]] = certsData[keys[k+2]]
+	}
+
+	return ci
+}
+
+// EnsureTLSCerts generates secrets containing all the certificates for the relevant service
+// These secrets will be mounted by the ansibleEE pod as an extra mount when the service is deployed.
 func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allHostnames map[string]map[infranetworkv1.NetNameStr]string,
@@ -49,6 +87,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 	service dataplanev1.OpenStackDataPlaneService,
 ) (*ctrl.Result, error) {
 	certsData := map[string][]byte{}
+	secretMaxSize := instance.Spec.SecretMaxSize
 
 	// for each node in the nodeset, issue all the TLS certs needed based on the
 	// ips or DNS Names
@@ -153,20 +192,30 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		certsData[basename+"-ca.crt"] = certSecret.Data["ca.crt"]
 	}
 
-	// create a secret to hold the certs for the service
-	serviceCertsSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      GetServiceCertsSecretName(instance, service.Name),
-			Namespace: instance.Namespace,
-		},
-		Data: certsData,
+	// Calculate number of secrets to create
+	ci := createSecretsDataStructure(secretMaxSize, certsData)
+
+	labels := map[string]string{
+		"numberOfSecrets": strconv.Itoa(len(ci)),
 	}
-	_, result, err := secret.CreateOrPatchSecret(ctx, helper, instance, serviceCertsSecret)
-	if err != nil {
-		err = fmt.Errorf("error creating certs secret for %s - %w", service.Name, err)
-		return &ctrl.Result{}, err
-	} else if result != controllerutil.OperationResultNone {
-		return &ctrl.Result{RequeueAfter: time.Second * 5}, nil
+	// create secrets to hold the certs for the services
+	for i := range ci {
+		labels["secretNumber"] = strconv.Itoa(i)
+		serviceCertsSecret := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      GetServiceCertsSecretName(instance, service.Name, i),
+				Namespace: instance.Namespace,
+				Labels:    labels,
+			},
+			Data: ci[i],
+		}
+		_, result, err := secret.CreateOrPatchSecret(ctx, helper, instance, serviceCertsSecret)
+		if err != nil {
+			err = fmt.Errorf("error creating certs secret for %s - %w", service.Name, err)
+			return &ctrl.Result{}, err
+		} else if result != controllerutil.OperationResultNone {
+			return &ctrl.Result{RequeueAfter: time.Second * 5}, nil
+		}
 	}
 
 	return &ctrl.Result{}, nil
@@ -211,9 +260,10 @@ func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 }
 
 // GetServiceCertsSecretName - return name of secret to be mounted in ansibleEE which contains
-// all the TLS certs for the relevant service
-// The convention we use here is "<nodeset.name>-<service>-certs", so for example,
-// openstack-epdm-nova-certs.
-func GetServiceCertsSecretName(instance *dataplanev1.OpenStackDataPlaneNodeSet, serviceName string) string {
-	return fmt.Sprintf("%s-%s-certs", instance.Name, serviceName)
+// all the TLS certs that fit in a secret for the relevant service. The index variable is used
+// to make the secret name unique.
+// The convention we use here is "<nodeset.name>-<service>-certs-<index>", so for example,
+// openstack-epdm-nova-certs-0.
+func GetServiceCertsSecretName(instance *dataplanev1.OpenStackDataPlaneNodeSet, serviceName string, index int) string {
+	return fmt.Sprintf("%s-%s-certs-%s", instance.Name, serviceName, strconv.Itoa(index))
 }

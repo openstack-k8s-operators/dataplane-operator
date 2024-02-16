@@ -1916,6 +1916,9 @@ spec:
                 type: object
               preProvisioned:
                 type: boolean
+              secretMaxSize:
+                default: 1048576
+                type: integer
               services:
                 default:
                 - download-cache

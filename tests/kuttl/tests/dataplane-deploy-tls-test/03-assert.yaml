@@ -116,7 +116,7 @@ commands:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: openstack-edpm-tls-tls-dns-ips-certs
+  name: openstack-edpm-tls-custom-service-tls-dns-ips-certs-0
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneNodeSet
@@ -126,7 +126,7 @@ type: Opaque
 apiVersion: v1
 kind: Secret
 metadata:
-  name: openstack-edpm-tls-custom-tls-dns-certs
+  name: openstack-edpm-tls-custom-service-tls-dns-certs-0
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneNodeSet
@@ -148,12 +148,14 @@ spec:
   backoffLimit: 6
   extraMounts:
   - mounts:
-    - mountPath: /var/lib/openstack/certs/tls-dns-ips
-      name: openstack-edpm-tls-tls-dns-ips-certs
+    - mountPath: /var/lib/openstack/certs/custom-service-tls-dns-ips
+      name: openstack-edpm-tls-custom-service-tls-dns-ips-certs-0
     volumes:
-    - name: openstack-edpm-tls-tls-dns-ips-certs
-      secret:
-        secretName: openstack-edpm-tls-tls-dns-ips-certs
+    - name: openstack-edpm-tls-custom-service-tls-dns-ips-certs-0
+      projected:
+        sources:
+          - secret:
+              name: openstack-edpm-tls-custom-service-tls-dns-ips-certs-0
   - mounts:
     - mountPath: /var/lib/openstack/cacerts/tls-dns-ips
       name: tls-dns-ips-combined-ca-bundle
@@ -162,12 +164,14 @@ spec:
       secret:
         secretName: combined-ca-bundle
   - mounts:
-    - mountPath: /var/lib/openstack/certs/custom-tls-dns
-      name: openstack-edpm-tls-custom-tls-dns-certs
+    - mountPath: /var/lib/openstack/certs/custom-service-tls-dns
+      name: openstack-edpm-tls-custom-service-tls-dns-certs-0
     volumes:
-    - name: openstack-edpm-tls-custom-tls-dns-certs
-      secret:
-        secretName: openstack-edpm-tls-custom-tls-dns-certs
+    - name: openstack-edpm-tls-custom-service-tls-dns-certs-0
+      projected:
+        sources:
+        - secret:
+            name: openstack-edpm-tls-custom-service-tls-dns-certs-0
   - mounts:
     - mountPath: /var/lib/openstack/cacerts/custom-tls-dns
       name: custom-tls-dns-combined-ca-bundle
