@@ -215,6 +215,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		ansibleEESpec.AnsibleTags = instance.Spec.AnsibleTags
 		ansibleEESpec.AnsibleSkipTags = instance.Spec.AnsibleSkipTags
 		ansibleEESpec.AnsibleLimit = instance.Spec.AnsibleLimit
+		ansibleEESpec.ExtraVars = instance.Spec.AnsibleExtraVars
 
 		nodeSetSecretInv := fmt.Sprintf("dataplanenodeset-%s", nodeSet.Name)
 

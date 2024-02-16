@@ -44,6 +44,8 @@ spec:
             type: object
           spec:
             properties:
+              ansibleExtraVars:
+                x-kubernetes-preserve-unknown-fields: true
               ansibleLimit:
                 type: string
               ansibleSkipTags:

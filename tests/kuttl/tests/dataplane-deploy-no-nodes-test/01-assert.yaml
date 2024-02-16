@@ -118,6 +118,8 @@ metadata:
     name: edpm-compute-no-nodes
 spec:
   backoffLimit: 6
+  extraVars:
+    foo: bar
   extraMounts:
   - mounts:
     - mountPath: /runner/env/ssh_key

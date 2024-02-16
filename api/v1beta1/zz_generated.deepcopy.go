@@ -38,6 +38,21 @@ func (in *AnsibleEESpec) DeepCopyInto(out *AnsibleEESpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.ExtraVars != nil {
+		in, out := &in.ExtraVars, &out.ExtraVars
+		*out = make(map[string]json.RawMessage, len(*in))
+		for key, val := range *in {
+			var outVal []byte
+			if val == nil {
+				(*out)[key] = nil
+			} else {
+				in, out := &val, &outVal
+				*out = make(json.RawMessage, len(*in))
+				copy(*out, *in)
+			}
+			(*out)[key] = outVal
+		}
+	}
 	if in.ExtraMounts != nil {
 		in, out := &in.ExtraMounts, &out.ExtraMounts
 		*out = make([]storage.VolMounts, len(*in))
@@ -260,6 +275,21 @@ func (in *OpenStackDataPlaneDeploymentSpec) DeepCopyInto(out *OpenStackDataPlane
 		in, out := &in.NodeSets, &out.NodeSets
 		*out = make([]string, len(*in))
 		copy(*out, *in)
+	}
+	if in.AnsibleExtraVars != nil {
+		in, out := &in.AnsibleExtraVars, &out.AnsibleExtraVars
+		*out = make(map[string]json.RawMessage, len(*in))
+		for key, val := range *in {
+			var outVal []byte
+			if val == nil {
+				(*out)[key] = nil
+			} else {
+				in, out := &val, &outVal
+				*out = make(json.RawMessage, len(*in))
+				copy(*out, *in)
+			}
+			(*out)[key] = outVal
+		}
 	}
 	if in.ServicesOverride != nil {
 		in, out := &in.ServicesOverride, &out.ServicesOverride

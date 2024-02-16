@@ -5,3 +5,5 @@ metadata:
 spec:
   nodeSets:
     - edpm-compute-no-nodes
+  ansibleExtraVars:
+    foo: bar
