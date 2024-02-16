@@ -26,14 +26,6 @@ spec:
   nodes:
     edpm-compute-0:
       hostName: edpm-compute-0
-      ansible:
-        ansibleHost: 192.168.122.100
-        ansibleVars:
-          ctlplane_ip: 192.168.122.100
-          internal_api_ip: 172.17.0.100
-          storage_ip: 172.18.0.100
-          tenant_ip: 172.19.0.100
-          fqdn_internal_api: edpm-compute-0.example.com
   networkAttachments:
     - ctlplane
   nodeTemplate:
@@ -50,12 +42,8 @@ spec:
         subnetName: subnet1
     managementNetwork: ctlplane
     ansible:
-      ansibleUser: cloud-admin
-      ansiblePort: 22
+      AnsiblePort: 22
       ansibleVars:
-         service_net_map:
-           nova_api_network: internal_api
-           nova_libvirt_network: internal_api
          timesync_ntp_servers:
            - hostname: pool.ntp.org
          # edpm_network_config
