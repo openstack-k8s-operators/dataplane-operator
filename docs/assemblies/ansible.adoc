@@ -1,0 +1,18 @@
+= Ansible variables
+
+The list of ansible variables that can be set under `ansibleVars` is extensive.
+To understand what variables are available for each service, see the
+documentation in the <<create-openstackdataplaneservices,Create
+OpenStackDataPlaneServices>> section.
+
+Common configurations that can be enabled with `ansibleVars` are also
+documented at xref:common_configurations.adoc[Common Configurations].
+
+'''
+
+*NOTE*
+
+In the case of `ansibleVars`, the value is merged with that of the value from
+the nodeTemplate. This makes it so that the entire value of `ansibleVars` from
+the nodeTemplate does not need to be reproduced for each node just to set a few
+node specific values.
