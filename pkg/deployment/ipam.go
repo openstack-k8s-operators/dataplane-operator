@@ -104,9 +104,9 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 					}
 					if isFQDN(hostName) && netLower == CtlPlaneNetwork {
 						fqdnNames = append(fqdnNames, hostName)
-						allHostnames[hostName][res.Network] = hostName
+						allHostnames[hostName][infranetworkv1.NetNameStr(netLower)] = hostName
 					}
-					allIPs[hostName][res.Network] = res.Address
+					allIPs[hostName][infranetworkv1.NetNameStr(netLower)] = res.Address
 					dnsRecord.Hostnames = fqdnNames
 					allDNSRecords = append(allDNSRecords, dnsRecord)
 					// Adding only ctlplane domain for ansibleee.

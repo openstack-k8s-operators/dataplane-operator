@@ -16,6 +16,6 @@ spec:
     - dnsnames
     - ips
     networks:
-    - CtlPlane
+    - ctlplane
     issuer: osp-rootca-issuer-internal
   caCerts: combined-ca-bundle
