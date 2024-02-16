@@ -4,7 +4,6 @@ kind: OpenStackDataPlaneService
 metadata:
   name: custom-service-tls-dns-ips
 spec:
-  label: custom-service-tls-dns-ips
   caCerts: combined-ca-bundle
   tlsCert:
     contents:
@@ -27,7 +26,6 @@ kind: OpenStackDataPlaneService
 metadata:
   name: custom-service-tls-dns
 spec:
-  label: custom-service-tls-dns
   caCerts: combined-ca-bundle
   tlsCert:
     contents:
@@ -46,7 +44,6 @@ kind: OpenStackDataPlaneService
 metadata:
   name: install-certs-override
 spec:
-  label: install-certs-override
   addCertMounts: True
   play: |
     - hosts: localhost

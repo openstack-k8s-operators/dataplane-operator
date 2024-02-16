@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
@@ -144,11 +145,12 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					Namespace: namespace,
 				}
 				service := GetService(dataplaneServiceName)
+				executionName := dataplaneutil.GetAnsibleExecutionNamePrefix(service)
 				//Retrieve service AnsibleEE and set JobStatus to Successful
 				Eventually(func(g Gomega) {
 					// Make an AnsibleEE name for each service
 					ansibleeeName := types.NamespacedName{
-						Name:      fmt.Sprintf("%s-%s", service.Spec.Label, dataplaneDeploymentName.Name),
+						Name:      fmt.Sprintf("%s-%s", executionName, dataplaneDeploymentName.Name),
 						Namespace: dataplaneDeploymentName.Namespace,
 					}
 					ansibleEE := &ansibleeev1.OpenStackAnsibleEE{

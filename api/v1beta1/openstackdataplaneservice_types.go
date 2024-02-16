@@ -42,15 +42,6 @@ type OpenstackDataPlaneServiceCert struct {
 
 // OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService
 type OpenStackDataPlaneServiceSpec struct {
-	// Label to use for service.
-	// Must follow DNS952 subdomain conventions.
-	// Since we are using it to generate the pod name,
-	// we need to keep it short.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Pattern="[a-z]([-a-z0-9]*[a-z0-9])"
-	// +kubebuilder:validation:MaxLength=53
-	Label string `json:"label,omitempty"`
-
 	// Play is an inline playbook contents that ansible will run on execution.
 	Play string `json:"play,omitempty"`
 

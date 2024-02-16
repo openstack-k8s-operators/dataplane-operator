@@ -3,7 +3,6 @@ kind: OpenStackDataPlaneService
 metadata:
   name: custom-image-service
 spec:
-  label: dp-custom-image-service
   openStackAnsibleEERunnerImage: example.com/repo/runner-image:latest
   role:
     name: "test role"
