@@ -19,6 +19,7 @@ package deployment
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"golang.org/x/exp/slices"
@@ -73,33 +74,37 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		dnsNames = allHostnames[hostName]
 		ipsMap = allIPs[hostName]
 
+		dnsNamesInCert := slices.Contains(service.Spec.TLSCert.Contents, DNSNamesStr)
+		ipValuesInCert := slices.Contains(service.Spec.TLSCert.Contents, IPValuesStr)
+
 		// Create the hosts and ips lists
-		if service.Spec.TLSCert.Networks == nil {
-			hosts = make([]string, 0, len(dnsNames))
-			for _, host := range dnsNames {
-				hosts = append(hosts, host)
-			}
-
-			ips = make([]string, 0, len(ipsMap))
-			for _, ip := range ipsMap {
-				ips = append(ips, ip)
-			}
-		} else {
-			hosts = make([]string, 0, len(service.Spec.TLSCert.Networks))
-			for _, network := range service.Spec.TLSCert.Networks {
-				hosts = append(hosts, dnsNames[network])
-			}
-			ips = make([]string, 0, len(service.Spec.TLSCert.Networks))
-			for _, network := range service.Spec.TLSCert.Networks {
-				ips = append(ips, ipsMap[network])
+		if dnsNamesInCert {
+			if len(service.Spec.TLSCert.Networks) == 0 {
+				hosts = make([]string, 0, len(dnsNames))
+				for _, host := range dnsNames {
+					hosts = append(hosts, host)
+				}
+			} else {
+				hosts = make([]string, 0, len(service.Spec.TLSCert.Networks))
+				for _, network := range service.Spec.TLSCert.Networks {
+					certNetwork := strings.ToLower(string(network))
+					hosts = append(hosts, dnsNames[infranetworkv1.NetNameStr(certNetwork)])
+				}
 			}
 		}
-
-		if !slices.Contains(service.Spec.TLSCert.Contents, DNSNamesStr) {
-			hosts = nil
-		}
-		if !slices.Contains(service.Spec.TLSCert.Contents, IPValuesStr) {
-			ips = nil
+		if ipValuesInCert {
+			if len(service.Spec.TLSCert.Networks) == 0 {
+				ips = make([]string, 0, len(ipsMap))
+				for _, ip := range ipsMap {
+					ips = append(ips, ip)
+				}
+			} else {
+				ips = make([]string, 0, len(service.Spec.TLSCert.Networks))
+				for _, network := range service.Spec.TLSCert.Networks {
+					certNetwork := strings.ToLower(string(network))
+					ips = append(ips, ipsMap[infranetworkv1.NetNameStr(certNetwork)])
+				}
+			}
 		}
 
 		if service.Spec.TLSCert.Issuer == "" {
