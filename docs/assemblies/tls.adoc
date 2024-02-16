@@ -3,7 +3,7 @@
 When an OpenStackDataPlaneNodeSet is deployed with TLS Enabled, communications
 between dataplane services and with control plane services can be encrypted using
 TLS connections.
-`
+
 Functionality has been added to the dataplane-operator to generate the needed
 certificates for all compute nodes in the nodeset.  The details on how to enable
 this functionality and how dataplane services (including custom services) can take
@@ -43,6 +43,7 @@ The certficate generation code will be executed only if this attribute is set to
 Certificate generation is controlled by several attributes in the OpenstackDataplaneService
 specification.  An example is provided below.
 
+----
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
@@ -58,9 +59,11 @@ spec:
       - CtlPlane
     issuer: osp-rootca-issuer-internal
   caCerts: combined-ca-bundle
+----
 
 A more minimal configuration is provided below:
 
+----
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
@@ -72,6 +75,7 @@ spec:
     contents:
       - dnsnames
   caCerts: combined-ca-bundle
+----
 
 === caCerts
 
