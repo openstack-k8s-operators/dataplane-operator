@@ -19,6 +19,7 @@ package v1beta1
 import (
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -66,6 +67,10 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	// +kubebuilder:default=false
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	TLSEnabled bool `json:"tlsEnabled" yaml:"tlsEnabled"`
+
+	// ContainerImages sets values for corresponding ansible variables
+	// +kubebuilder:validation:Optional
+	ContainerImages DataplaneAnsibleContainerImages `json:"containerImages,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -125,6 +130,9 @@ type OpenStackDataPlaneNodeSetStatus struct {
 	// This hash is used to determine when new Ansible executions are required to roll
 	// out config changes.
 	DeployedConfigHash string `json:"deployedConfigHash,omitempty"`
+
+	// ContainerImages
+	ContainerImages DataplaneAnsibleContainerImages `json:"containerImages,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true
@@ -177,14 +185,49 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 	}
 }
 
-// DataplaneAnsibleImageDefaults default images for dataplane services
-type DataplaneAnsibleImageDefaults struct {
-	Frr                  string
-	IscsiD               string
-	Logrotate            string
-	NeutronMetadataAgent string
-	NovaCompute          string
-	NovaLibvirt          string
-	OvnControllerAgent   string
-	OvnBgpAgent          string
+// DataplaneAnsibleContainerImages default images for dataplane services
+type DataplaneAnsibleContainerImages struct {
+	Frr                  string `json:"frr,omitempty"`
+	IscsiD               string `json:"iscsiD,omitempty"`
+	Logrotate            string `json:"logrotate,omitempty"`
+	NeutronMetadataAgent string `json:"neutronMetadataAgent,omitempty"`
+	NovaCompute          string `json:"novaCompute,omitempty"`
+	NovaLibvirt          string `json:"novaLibvirt,omitempty"`
+	OvnControllerAgent   string `json:"ovnControllerAgent,omitempty"`
+	OvnBgpAgent          string `json:"ovnBgpAgent,omitempty"`
+}
+
+const (
+	// FrrDefaultImage -
+	FrrDefaultImage = "quay.io/podified-antelope-centos9/openstack-frr:current-podified"
+	// IscsiDDefaultImage -
+	IscsiDDefaultImage = "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
+	// LogrotateDefaultImage -
+	LogrotateDefaultImage = "quay.io/podified-antelope-centos9/openstack-cron:current-podified"
+	// NeutronMetadataAgentDefaultImage -
+	NeutronMetadataAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
+	// NovaComputeDefaultImage -
+	NovaComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
+	// NovaLibvirtDefaultImage -
+	NovaLibvirtDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified"
+	// OvnControllerAgentDefaultImage -
+	OvnControllerAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
+	// OvnBgpAgentDefaultImage -
+	OvnBgpAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
+)
+
+// SetupDefaults - initializes any CRD field defaults based on environment variables (the defaulting mechanism itself is implemented via webhooks)
+func SetupDefaults() {
+	// Acquire environmental defaults and initialize dataplane defaults with them
+	dataplaneAnsibleContainerImagesDefaults = DataplaneAnsibleContainerImages{
+		Frr:                  util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_FRR_DEFAULT_IMG", FrrDefaultImage),
+		IscsiD:               util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_ISCSID_DEFAULT_IMG", IscsiDDefaultImage),
+		Logrotate:            util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG", LogrotateDefaultImage),
+		NeutronMetadataAgent: util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_METADATA_AGENT_DEFAULT_IMG", NeutronMetadataAgentDefaultImage),
+		NovaCompute:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG", NovaComputeDefaultImage),
+		NovaLibvirt:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LIBVIRT_DEFAULT_IMG", NovaLibvirtDefaultImage),
+		OvnControllerAgent:   util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_CONTROLLER_AGENT_DEFAULT_IMG", OvnControllerAgentDefaultImage),
+		OvnBgpAgent:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE", OvnBgpAgentDefaultImage),
+	}
+	SetupDataplaneAnsibleContainerImagesDefaults(dataplaneAnsibleContainerImagesDefaults)
 }
