@@ -6,7 +6,7 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240216172129-990c7cf02b25
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240216173409-86913e6d5885
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240216173409-86913e6d5885
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240216180635-4c333e1fda84
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240217021438-5918cf3aefdf
 	k8s.io/api v0.28.3
 	k8s.io/apimachinery v0.28.3
 	sigs.k8s.io/controller-runtime v0.16.5
