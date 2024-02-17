@@ -70,7 +70,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 				},
 				BaremetalHosts: map[string]baremetalv1.InstanceSpec{
 					"compute-0": {
-						CtlPlaneIP: "192.168.1.12",
+						CtlPlaneIP: "192.168.1.12/24",
 					},
 				},
 			}
@@ -87,7 +87,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 					},
 					BaremetalHosts: map[string]baremetalv1.InstanceSpec{
 						"compute-0": {
-							CtlPlaneIP: "192.168.1.12",
+							CtlPlaneIP: "192.168.1.12/24",
 						},
 					},
 				}
