@@ -3,14 +3,16 @@ module github.com/openstack-k8s-operators/dataplane-operator/api
 go 1.20
 
 require (
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240216172129-990c7cf02b25
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240218132212-ad757a2f5bab
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240216173409-86913e6d5885
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240216173409-86913e6d5885
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240217021438-5918cf3aefdf
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240218185734-5d372a0fd380
 	k8s.io/api v0.28.3
 	k8s.io/apimachinery v0.28.3
 	sigs.k8s.io/controller-runtime v0.16.5
 )
+
+require github.com/go-logr/zapr v1.3.0 // indirect
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

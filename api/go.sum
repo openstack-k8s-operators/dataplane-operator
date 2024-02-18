@@ -15,6 +15,7 @@ github.com/fsnotify/fsnotify v1.7.0/go.mod h1:40Bi/Hjc2AVfZrqy+aj+yEI+/bRxZnMJyT
 github.com/go-logr/logr v1.4.1 h1:pKouT5E8xu9zeFC39JXRDukb6JFQPXM5p5I91188VAQ=
 github.com/go-logr/logr v1.4.1/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-logr/zapr v1.3.0 h1:XGdV8XW8zdwFiwOA2Dryh1gj2KRQyOOoNmBy4EplIcQ=
+github.com/go-logr/zapr v1.3.0/go.mod h1:YKepepNBd1u/oyhd/yQmtjVXmm9uML4IXUgMOwR8/Gg=
 github.com/go-openapi/jsonpointer v0.20.2 h1:mQc3nmndL8ZBzStEo3JYF8wzmeWffDH4VbXz58sAx6Q=
 github.com/go-openapi/jsonpointer v0.20.2/go.mod h1:bHen+N0u1KEO3YlmqOjTT9Adn1RfD91Ar825/PuiRVs=
 github.com/go-openapi/jsonreference v0.20.4 h1:bKlDxQxQJgwpUSgOENiMPzCTBVuc7vTdXSSgNeAhojU=
@@ -68,14 +69,14 @@ github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/onsi/ginkgo/v2 v2.14.0 h1:vSmGj2Z5YPb9JwCWT6z6ihcUvDhuXLc3sJiqd3jMKAY=
 github.com/onsi/gomega v1.30.0 h1:hvMK7xYz4D3HapigLTeGdId/NcfQx1VHMJc60ew99+8=
-github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240216172129-990c7cf02b25 h1:IR91sMpcUgp7iAKGKGvdHIputhYCdTQ4O9HXufxkr80=
-github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240216172129-990c7cf02b25/go.mod h1:oZ8/6cQ6NgMzQ+eU/2bccPHOPKZ6FPWEfrJizyBmTMk=
+github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240218132212-ad757a2f5bab h1:zdI202C0TtXz5UPB+uTdxZtIaFseEDV0HtQ/MmX6hQU=
+github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240218132212-ad757a2f5bab/go.mod h1:FGKwlmAIgTsvvz2+uusWqNYFKHNAm4uzVyKao+emeu0=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240216173409-86913e6d5885 h1:o7KZaxKt8Dr97ZJIBPW0P482gLyFEURKF89fizcJCBQ=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240216173409-86913e6d5885/go.mod h1:bQwzyQtWCR9F0+IvWZ30J9d1lB6tcX3CNJ0Ten1smDw=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240216173409-86913e6d5885 h1:sMO+IYsZ91Nho0FV6y03J0NTGd8+ZWB4KmKJJU94gTU=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240216173409-86913e6d5885/go.mod h1:sK82mkh2UzITsbNa/y6AKTZftHQnsYigqRx+rFbfZM4=
-github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240217021438-5918cf3aefdf h1:GgTfJXkSO4GsT9dl62ldj0D+sS8V27++7VdtPBWWlf4=
-github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240217021438-5918cf3aefdf/go.mod h1:BrNj++cLEqEJIw2p7SGGrFiuNXjiCDo7FKH0oB+qcMA=
+github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240218185734-5d372a0fd380 h1:P6VpvKvGMy++Pwe/+4T0etjINGkMcUClTiReF3Ph9NU=
+github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240218185734-5d372a0fd380/go.mod h1:BrNj++cLEqEJIw2p7SGGrFiuNXjiCDo7FKH0oB+qcMA=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
