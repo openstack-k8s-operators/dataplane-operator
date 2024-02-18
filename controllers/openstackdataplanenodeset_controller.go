@@ -67,13 +67,6 @@ const (
 	OvnBgpAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
 )
 
-// NodeConfigElements is a struct containing just the elements used for Ansible executions
-type NodeConfigElements struct {
-	BaremetalSetTemplate baremetalv1.OpenStackBaremetalSetSpec
-	NodeTemplate         dataplanev1.NodeTemplate
-	Nodes                map[string]dataplanev1.NodeSection
-}
-
 // SetupAnsibleImageDefaults -
 func SetupAnsibleImageDefaults() {
 	dataplaneAnsibleImageDefaults = dataplanev1.DataplaneAnsibleImageDefaults{
@@ -490,12 +483,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(ctx context.Conte
 // GetSpecConfigHash initialises a new struct with only the field we want to check for variances in.
 // We then hash the contents of the new struct using md5 and return the hashed string.
 func (r *OpenStackDataPlaneNodeSetReconciler) GetSpecConfigHash(instance *dataplanev1.OpenStackDataPlaneNodeSet) (string, error) {
-	nodeConfig := &NodeConfigElements{
-		BaremetalSetTemplate: instance.Spec.BaremetalSetTemplate,
-		NodeTemplate:         instance.Spec.NodeTemplate,
-		Nodes:                instance.Spec.Nodes,
-	}
-	configHash, err := util.ObjectHash(&nodeConfig)
+	configHash, err := util.ObjectHash(&instance.Spec)
 	if err != nil {
 		return "", err
 	}
