@@ -12,7 +12,11 @@ require (
 	sigs.k8s.io/controller-runtime v0.16.5
 )
 
-require github.com/go-logr/zapr v1.3.0 // indirect
+require (
+	github.com/go-logr/zapr v1.3.0 // indirect
+	github.com/onsi/ginkgo/v2 v2.15.0 // indirect
+	github.com/onsi/gomega v1.31.1 // indirect
+)
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
