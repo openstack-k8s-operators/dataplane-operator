@@ -17,5 +17,5 @@ spec:
     - ips
     networks:
     - ctlplane
-    issuer: osp-rootca-issuer-internal
+    issuer: rootca-internal
   caCerts: combined-ca-bundle
