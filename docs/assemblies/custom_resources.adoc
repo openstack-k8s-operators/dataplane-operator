@@ -488,6 +488,11 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 | TLSEnabled - Whether the node set has TLS enabled.
 | bool
 | true
+
+| tags
+| Tags - Additional tags for NodeSet
+| []string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>

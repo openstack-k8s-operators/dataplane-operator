@@ -66,6 +66,10 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	// +kubebuilder:default=false
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	TLSEnabled bool `json:"tlsEnabled" yaml:"tlsEnabled"`
+
+	// Tags - Additional tags for NodeSet
+	// +kubebuilder:validation:Optional
+	Tags []string `json:"tags,omitempty"`
 }
 
 //+kubebuilder:object:root=true
