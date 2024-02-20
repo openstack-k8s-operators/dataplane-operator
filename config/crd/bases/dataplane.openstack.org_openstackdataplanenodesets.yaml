@@ -1885,6 +1885,10 @@ spec:
                 items:
                   type: string
                 type: array
+              tags:
+                items:
+                  type: string
+                type: array
               tlsEnabled:
                 default: false
                 type: boolean

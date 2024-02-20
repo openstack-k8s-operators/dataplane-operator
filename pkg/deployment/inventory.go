@@ -47,8 +47,11 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	}
 
 	// add TLS ansible variable
-	if instance.Spec.TLSEnabled {
-		nodeSetGroup.Vars["edpm_tls_certs_enabled"] = "true"
+	nodeSetGroup.Vars["edpm_tls_certs_enabled"] = instance.Spec.TLSEnabled
+	if instance.Spec.Tags != nil {
+		nodeSetGroup.Vars["nodeset_tags"] = instance.Spec.Tags
+		// (TODO) Remove this once all templates are converted
+		nodeSetGroup.Vars["role_tags"] = instance.Spec.Tags
 	}
 
 	for _, node := range instance.Spec.Nodes {
@@ -179,6 +182,8 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	}
 	if len(template.Networks) != 0 {
 		nets, netsLower := buildNetworkVars(template.Networks)
+		group.Vars["nodeset_networks"] = nets
+		// (TODO) Remove this once all templates are converted
 		group.Vars["role_networks"] = nets
 		group.Vars["networks_lower"] = netsLower
 	}
