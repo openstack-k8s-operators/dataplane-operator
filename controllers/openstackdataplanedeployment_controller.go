@@ -150,6 +150,12 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 				Log.Info("NodeSet not found", "NodeSet", nodeSet)
 				return ctrl.Result{RequeueAfter: time.Second * time.Duration(instance.Spec.DeploymentRequeueTime)}, nil
 			}
+			instance.Status.Conditions.MarkFalse(
+				dataplanev1.SetupReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				dataplanev1.DataPlaneNodeSetErrorMessage,
+				err.Error())
 			// Error reading the object - requeue the request.
 			return ctrl.Result{}, err
 		}
@@ -177,12 +183,24 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			for _, serviceName := range services {
 				service, err := deployment.GetService(ctx, helper, serviceName)
 				if err != nil {
+					instance.Status.Conditions.MarkFalse(
+						condition.InputReadyCondition,
+						condition.ErrorReason,
+						condition.SeverityError,
+						dataplanev1.ServiceErrorMessage,
+						err.Error())
 					return ctrl.Result{}, err
 				}
 				if service.Spec.TLSCert != nil {
 					result, err := deployment.EnsureTLSCerts(ctx, helper, &nodeSet,
 						nodeSet.Status.AllHostnames, nodeSet.Status.AllIPs, service)
 					if err != nil {
+						instance.Status.Conditions.MarkFalse(
+							condition.InputReadyCondition,
+							condition.ErrorReason,
+							condition.SeverityError,
+							condition.TLSInputErrorMessage,
+							err.Error())
 						return ctrl.Result{}, err
 					} else if (*result != ctrl.Result{}) {
 						return *result, nil // requeue here
