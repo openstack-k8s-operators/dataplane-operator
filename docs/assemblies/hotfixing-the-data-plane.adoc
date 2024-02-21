@@ -1,0 +1,21 @@
+[id="assembly_hotfixing-the-data-plane"]
+= Hotfixing the data plane
+
+:context: dataplane
+
+[role="_abstract"]
+The OpenStack DataPlane can be updated when hotfix content is available. Hotfix content
+can be delivered as RPM packages or container images. How the software is
+installed on the data plane nodes determines how the hotfix content needs to be
+applied.
+
+include::proc_hotfixing-the-data-plane-rpm-content.adoc[leveloffset=+1]
+
+Container hotfix content needs to be applied to the data plane nodes such that
+any running containers are updated to run from container images where the
+hotfix content has been applied. Container hotfix content could be delivered as
+either RPM's or already updated container images.
+
+include::proc_hotfixing-the-data-plane-container-content-rpms.adoc[leveloffset=+1]
+
+include::proc_hotfixing-the-data-plane-container-content-images.adoc[leveloffset=+1]

@@ -54,3 +54,5 @@ include::interacting_with_ansible.adoc[leveloffset=+1]
 include::hashes.adoc[leveloffset=+1]
 
 include::ipam.adoc[leveloffset=+1]
+
+include::hotfixing-the-data-plane.adoc[leveloffset=+1]
