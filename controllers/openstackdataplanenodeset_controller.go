@@ -323,6 +323,12 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	deploymentExists, isDeploymentReady, err := checkDeployment(helper, instance)
 	if err != nil {
+		instance.Status.Conditions.MarkFalse(
+			condition.DeploymentReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			condition.DeploymentReadyErrorMessage,
+			err.Error())
 		Log.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
 		return ctrl.Result{}, err
 	}
