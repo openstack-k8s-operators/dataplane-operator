@@ -59,4 +59,13 @@ const (
 
 	// IPValuesStr value for setting ip addresses in a cert
 	IPValuesStr = "ips"
+
+	// NodeSetLabel label for marking secrets to be watched for changes
+	NodeSetLabel = "osdpns"
+
+	//ServiceLabel label for marking secrets to be watched for changes
+	ServiceLabel = "osdp-service"
+
+	//HostnameLabel label for marking secrets to be watched for changes
+	HostnameLabel = "hostname"
 )

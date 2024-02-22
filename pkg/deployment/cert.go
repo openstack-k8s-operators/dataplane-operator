@@ -68,8 +68,9 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		// For now we just add the hostname so we can select all the certs on one node
 		hostName := node.HostName
 		labels := map[string]string{
-			"hostname": hostName,
-			"service":  service.Name,
+			HostnameLabel: hostName,
+			ServiceLabel:  service.Name,
+			NodeSetLabel:  instance.Name,
 		}
 		secretName = "cert-" + service.Name + "-" + hostName
 

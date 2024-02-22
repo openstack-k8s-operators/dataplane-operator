@@ -315,34 +315,36 @@ func (r *OpenStackDataPlaneDeploymentReconciler) setHashes(
 ) error {
 
 	var err error
+	services := []string{}
 
 	if len(instance.Spec.ServicesOverride) > 0 {
-		for _, serviceName := range instance.Spec.ServicesOverride {
-			err = deployment.GetDeploymentHashesForService(
-				ctx,
-				helper,
-				instance.Namespace,
-				serviceName,
-				instance.Status.ConfigMapHashes,
-				instance.Status.SecretHashes)
-			if err != nil {
-				return err
-			}
-		}
+		services = instance.Spec.ServicesOverride
 	} else {
+		// get the union of services across nodesets
+		type void struct{}
+		var member void
+		s := make(map[string]void)
 		for _, nodeSet := range nodeSets.Items {
 			for _, serviceName := range nodeSet.Spec.Services {
-				err = deployment.GetDeploymentHashesForService(
-					ctx,
-					helper,
-					instance.Namespace,
-					serviceName,
-					instance.Status.ConfigMapHashes,
-					instance.Status.SecretHashes)
-				if err != nil {
-					return err
-				}
+				s[serviceName] = member
 			}
+		}
+		for service := range s {
+			services = append(services, service)
+		}
+	}
+
+	for _, serviceName := range services {
+		err = deployment.GetDeploymentHashesForService(
+			ctx,
+			helper,
+			instance.Namespace,
+			serviceName,
+			instance.Status.ConfigMapHashes,
+			instance.Status.SecretHashes,
+			nodeSets)
+		if err != nil {
+			return err
 		}
 	}
 

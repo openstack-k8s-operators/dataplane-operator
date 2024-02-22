@@ -9,7 +9,8 @@ metadata:
     cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-0
-    service: default-service-tls-dnsnames
+    osdp-service: default-service-tls-dnsnames
+    osdpns: openstack-edpm-tls
 type: kubernetes.io/tls
 ---
 # validate the alt-names - which is a list with elements that can be in any order
