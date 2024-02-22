@@ -90,7 +90,9 @@ func DefaultDataPlaneNodeSetSpec() map[string]interface{} {
 
 	return map[string]interface{}{
 		"preProvisioned": false,
-		"services":       []string{},
+		"services": []string{
+			"foo-service",
+		},
 		"nodeTemplate": map[string]interface{}{
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 			"ansible": map[string]interface{}{
@@ -115,19 +117,23 @@ func DefaultDataPlaneNodeSetSpec() map[string]interface{} {
 			"deploymentSSHSecret": "dataplane-ansible-ssh-private-key-secret",
 			"ctlplaneInterface":   "172.20.12.1",
 		},
+		"tlsEnabled": true,
 	}
 }
 
 // Build OpenStackDataPlaneNodeSetSpec struct with empty `Nodes` list
-func DefaultDataPlaneNoNodeSetSpec() map[string]interface{} {
-
-	return map[string]interface{}{
+func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]interface{} {
+	spec := map[string]interface{}{
 		"preProvisioned": true,
 		"nodeTemplate": map[string]interface{}{
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 		},
 		"nodes": map[string]interface{}{},
 	}
+	if tlsEnabled {
+		spec["tlsEnabled"] = true
+	}
+	return spec
 }
 
 // Build OpenStackDataPlnaeDeploymentSpec and fill it with preset values

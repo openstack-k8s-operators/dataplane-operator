@@ -89,6 +89,13 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			DeferCleanup(th.DeleteInstance, th.CreateSecret(ceilometerConfigSecretName, map[string][]byte{
 				"fake_keys": []byte("blih"),
 			}))
+			// DefaultDataPlanenodeSetSpec comes with single mock service
+			dataplaneServiceName := types.NamespacedName{
+				Namespace: namespace,
+				Name:      "foo-service",
+			}
+			CreateDataplaneService(dataplaneServiceName)
+			DeferCleanup(th.DeleteService, dataplaneServiceName)
 			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec()))
 			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))

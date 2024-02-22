@@ -29,7 +29,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 
 	When("User tries to change forbidden items in the baremetalSetTemplate", func() {
 		BeforeEach(func() {
-			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec()
+			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 			nodeSetSpec["preProvisioned"] = false
 			nodeSetSpec["nodes"] = map[string]interface{}{
 				"compute-0": map[string]interface{}{
@@ -61,7 +61,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 
 	When("A user changes an allowed field in the baremetalSetTemplate", func() {
 		BeforeEach(func() {
-			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec()
+			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 			nodeSetSpec["preProvisioned"] = false
 			nodeSetSpec["baremetalSetTemplate"] = baremetalv1.OpenStackBaremetalSetSpec{
 				CloudUserName: "test-user",
@@ -98,7 +98,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 
 	When("A user tries to redeclare an existing node in a new NodeSet", func() {
 		BeforeEach(func() {
-			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec()
+			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 			nodeSetSpec["preProvisioned"] = true
 			nodeSetSpec["nodes"] = map[string]interface{}{
 				"compute-0": map[string]interface{}{
@@ -109,7 +109,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 
 		It("Should block duplicate node declaration", func() {
 			Eventually(func(g Gomega) string {
-				newNodeSetSpec := DefaultDataPlaneNoNodeSetSpec()
+				newNodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 				newNodeSetSpec["preProvisioned"] = true
 				newNodeSetSpec["nodes"] = map[string]interface{}{
 					"compute-0": map[string]interface{}{
@@ -125,7 +125,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 
 		It("Should block NodeSets if they contain a duplicate ansibleHost", func() {
 			Eventually(func(g Gomega) string {
-				newNodeSetSpec := DefaultDataPlaneNoNodeSetSpec()
+				newNodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 				newNodeSetSpec["preProvisioned"] = true
 				newNodeSetSpec["nodes"] = map[string]interface{}{
 					"compute-3": map[string]interface{}{
