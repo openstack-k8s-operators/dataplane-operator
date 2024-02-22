@@ -28,7 +28,7 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: osp-rootca-issuer-internal
+  name: rootca-internal
   namespace: openstack
 spec:
   ca:

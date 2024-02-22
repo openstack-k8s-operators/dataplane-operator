@@ -8,7 +8,7 @@ metadata:
     cert-manager.io/ip-sans: 192.168.122.100
     cert-manager.io/issuer-group: cert-manager.io
     cert-manager.io/issuer-kind: Issuer
-    cert-manager.io/issuer-name: osp-rootca-issuer-internal
+    cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-0
     service: custom-service-tls-dns-ips
@@ -22,7 +22,7 @@ metadata:
     cert-manager.io/certificate-name: cert-custom-service-tls-dns-edpm-compute-0
     cert-manager.io/issuer-group: cert-manager.io
     cert-manager.io/issuer-kind: Issuer
-    cert-manager.io/issuer-name: osp-rootca-issuer-internal
+    cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-0
     service: custom-service-tls-dns

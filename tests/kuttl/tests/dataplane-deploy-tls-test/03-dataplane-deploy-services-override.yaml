@@ -9,7 +9,7 @@ spec:
     contents:
     - dnsnames
     - ips
-    issuer: osp-rootca-issuer-internal
+    issuer: rootca-internal
     networks:
     - ctlplane
   play: |

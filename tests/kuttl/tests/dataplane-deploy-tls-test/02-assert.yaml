@@ -6,7 +6,7 @@ metadata:
     cert-manager.io/certificate-name: cert-default-service-tls-dnsnames-edpm-compute-0
     cert-manager.io/issuer-group: cert-manager.io
     cert-manager.io/issuer-kind: Issuer
-    cert-manager.io/issuer-name: osp-rootca-issuer-internal
+    cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-0
     service: default-service-tls-dnsnames

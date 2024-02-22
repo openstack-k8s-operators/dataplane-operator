@@ -35,8 +35,10 @@ import (
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/endpoint"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 )
 
 // EnsureTLSCerts generates  a secret containing all the certificates for the relevant service
@@ -109,7 +111,9 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 
 		if service.Spec.TLSCert.Issuer == "" {
 			// by default, use the internal root CA
-			issuer = certmanager.RootCAIssuerInternalLabel
+			// issuer = certmanager.RootCAIssuerInternalLabel
+			// TODO(alee) Temporarily set this to the issuer name
+			issuer = tls.DefaultCAPrefix + string(endpoint.EndpointInternal)
 		} else {
 			issuer = service.Spec.TLSCert.Issuer
 		}
