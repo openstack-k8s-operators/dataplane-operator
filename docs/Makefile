@@ -4,10 +4,12 @@ ROOTDIR = $(realpath .)
 NAME = dataplane
 DEST_DIR = $(BUILD_DIR)/$(NAME)
 DEST_HTML = $(DEST_DIR)/index-$(BUILD).html
+DEV_HTML = $(DEST_DIR)/dev.html
 DEST_PDF = $(BUILD_DIR)/$(NAME)-$(BUILD).pdf
 IMAGES_DIR = $(DEST_DIR)/images
 IMAGES_TS = $(DEST_DIR)/.timestamp-images
-MAIN_SOURCE = main.adoc
+MAIN_SOURCE = user.adoc
+DEV_SOURCE = dev.adoc
 OTHER_SOURCES = $(shell find ./assemblies -type f)
 IMAGES = $(shell find ./images -type f)
 ALL_SOURCES = $(MAIN_SOURCE) $(OTHER_SOURCES) $(IMAGES)
@@ -25,7 +27,7 @@ all: html
 
 html: html-latest
 
-html-latest: prepare $(IMAGES_TS) $(DEST_HTML)
+html-latest: prepare $(IMAGES_TS) $(DEST_HTML) $(DEV_HTML)
 
 pdf: prepare $(DEST_PDF)
 
@@ -56,6 +58,9 @@ $(IMAGES_TS): $(IMAGES)
 
 $(DEST_HTML): $(ALL_SOURCES)
 	$(BUNDLE_EXEC) asciidoctor -a source-highlighter=highlightjs -a highlightjs-languages="yaml,bash" -a highlightjs-theme="monokai" --failure-level WARN -a build=$(BUILD) -b xhtml5 -d book -o $@ $(MAIN_SOURCE)
+
+$(DEV_HTML): $(ALL_SOURCES)
+	$(BUNDLE_EXEC) asciidoctor -a source-highlighter=highlightjs -a highlightjs-languages="yaml,bash" -a highlightjs-theme="monokai" --failure-level WARN -a build=$(BUILD) -b xhtml5 -d book -o $@ $(DEV_SOURCE)
 
 $(DEST_PDF): $(ALL_SOURCES)
 	$(BUNDLE_EXEC) asciidoctor-pdf -a build=$(BUILD) -d book -o $@ $(MAIN_SOURCE) $(IMAGES)

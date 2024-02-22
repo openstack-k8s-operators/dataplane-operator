@@ -8,7 +8,7 @@ workloads. The dataplane-operator prepares the nodes with enough operating
 system configuration so that they are ready for hosting other required
 OpenStack services and workloads.
 
-See <<_contributing,contributing>> for notes for developers and
+See https://openstack-k8s-operators.github.io/dataplane-operator/dev[contributing] for notes for developers and
 contributors, running the operator, building the documentation, etc.
 
 See <<_dataplane_design,design>> for details about the dataplane design.
@@ -26,5 +26,3 @@ include::assemblies/design.adoc[leveloffset=+1]
 include::assemblies/creating-the-data-plane.adoc[leveloffset=+1]
 
 include::assemblies/custom_resources.adoc[leveloffset=-1]
-
-include::assemblies/contributing.adoc[leveloffset=+1]

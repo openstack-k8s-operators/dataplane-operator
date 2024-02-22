@@ -6,7 +6,7 @@ workloads. The dataplane-operator prepares the nodes with enough operating
 system configuration so that they are ready for hosting other required
 OpenStack services and workloads.
 
-See [contributing](https://openstack-k8s-operators.github.io/dataplane-operator/#_contributing) for notes for developers and
+See [contributing](https://openstack-k8s-operators.github.io/dataplane-operator/dev) for notes for developers and
 contributors, running the operator, building the documentation, etc.
 
 See [design](https://openstack-k8s-operators.github.io/dataplane-operator/#_dataplane_design) for details about the dataplane design.
