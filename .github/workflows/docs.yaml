@@ -31,7 +31,9 @@ jobs:
       - name: Install Asciidoc
         run: make docs-dependencies
       - name: Build docs
-        run: make docs
+        run: |
+          make docs
+          cp docs/index.html index.html
 
       - name: Prepare gh-pages branch
         run: |
@@ -43,8 +45,10 @@ jobs:
 
       - name: Commit asciidoc docs
         run: |
-          mv docs_build/dataplane/index-upstream.html index.html
-          git add index.html
+          mkdir user dev
+          mv docs_build/dataplane/index-upstream.html user/index.html
+          mv docs_build/dataplane/dev.html dev/index.html
+          git add index.html user/index.html dev/index.html
           git commit -m "Rendered docs"
 
       - name: Push rendered docs to gh-pages
