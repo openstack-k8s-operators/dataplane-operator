@@ -35,6 +35,7 @@ func GetDeploymentHashesForService(
 	serviceName string,
 	configMapHashes map[string]string,
 	secretHashes map[string]string,
+	nodeSets dataplanev1.OpenStackDataPlaneNodeSetList,
 ) error {
 
 	namespacedName := types.NamespacedName{
@@ -78,6 +79,31 @@ func GetDeploymentHashesForService(
 		secretHashes[secretName], err = secret.Hash(sec)
 		if err != nil {
 			helper.GetLogger().Error(err, "Unable to hash Secret %v")
+		}
+	}
+
+	if service.Spec.TLSCert != nil {
+		var secrets *corev1.SecretList
+		for _, nodeSet := range nodeSets.Items {
+			labelSelectorMap := map[string]string{
+				NodeSetLabel: nodeSet.Name,
+				ServiceLabel: serviceName,
+			}
+			secrets, err = secret.GetSecrets(ctx, helper, "", labelSelectorMap)
+			if err != nil {
+				helper.GetLogger().Error(err, "Unable to search for cert secrets %v")
+				return err
+			}
+			for _, sec := range secrets.Items {
+				// get secret?  or is it already there
+				secretHashes[sec.Name], err = secret.Hash(&sec)
+				if err != nil {
+					helper.GetLogger().Error(err, "Unable to search for hash cert secrets %v")
+					return err
+				}
+
+			}
+
 		}
 	}
 

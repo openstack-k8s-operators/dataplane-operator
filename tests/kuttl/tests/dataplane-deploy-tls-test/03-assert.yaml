@@ -11,7 +11,8 @@ metadata:
     cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-0
-    service: custom-service-tls-dns-ips
+    osdp-service: custom-service-tls-dns-ips
+    osdpns: openstack-edpm-tls
 type: kubernetes.io/tls
 ---
 apiVersion: v1
@@ -25,7 +26,8 @@ metadata:
     cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-0
-    service: custom-service-tls-dns
+    osdp-service: custom-service-tls-dns
+    osdpns: openstack-edpm-tls
 type: kubernetes.io/tls
 ---
 # validate the alt-names - which is a list with elements that can be in any order
