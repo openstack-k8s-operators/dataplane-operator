@@ -4,8 +4,8 @@ metadata:
   name: openstack-edpm-ovs-dpdk
 spec:
   services:
-    - download-cache
     - bootstrap
+    - download-cache
     - reboot-os
     - configure-ovs-dpdk
     - configure-network
