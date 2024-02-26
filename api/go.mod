@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240221083751-49edc0df8a12
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240220172726-06e269f22402
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240220172726-06e269f22402
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240219091252-0e5017b733d0
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240224182407-3b6c02b195f6
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240224182407-3b6c02b195f6
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240222051903-0f74dcdc7782
 	k8s.io/api v0.28.7
 	k8s.io/apimachinery v0.28.7
 	sigs.k8s.io/controller-runtime v0.16.5
@@ -42,7 +42,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/onsi/ginkgo/v2 v2.15.0 // indirect
 	github.com/onsi/gomega v1.31.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.16.0 // indirect
