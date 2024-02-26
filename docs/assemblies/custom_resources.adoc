@@ -77,6 +77,11 @@ AnsibleEESpec is a specification of the ansible EE attributes
 | DNSConfig for setting dnsservers
 | *corev1.PodDNSConfig
 | false
+
+| ServiceAccountName
+| ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying, it will run with default serviceaccount
+| string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>

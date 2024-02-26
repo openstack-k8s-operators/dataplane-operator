@@ -98,6 +98,9 @@ func AnsibleExecution(
 		if len(aeeSpec.AnsibleSkipTags) > 0 {
 			fmt.Fprintf(&cmdLineArguments, "--skip-tags %s ", aeeSpec.AnsibleSkipTags)
 		}
+		if len(aeeSpec.ServiceAccountName) > 0 {
+			ansibleEE.Spec.ServiceAccountName = aeeSpec.ServiceAccountName
+		}
 		if cmdLineArguments.Len() > 0 {
 			ansibleEE.Spec.CmdLine = strings.TrimSpace(cmdLineArguments.String())
 		}

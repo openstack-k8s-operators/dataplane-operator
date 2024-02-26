@@ -103,7 +103,16 @@ status:
     reason: Ready
     status: "True"
     type: InputReady
+  - message: ServiceAccount created
+    reason: Ready
+    status: "True"
+    type: ServiceAccountReady
   - message: Setup complete
     reason: Ready
     status: "True"
     type: SetupReady
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: openstack-edpm
