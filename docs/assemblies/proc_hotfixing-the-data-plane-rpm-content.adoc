@@ -23,9 +23,9 @@ $ ssh <ssh_user>@<data_plane_node> mkdir -p /tmp/<hotfix_id>/rpms
 $ scp <hotfix_id>/rpms/*.rpm <ssh_user>@<data_plane_node>:/tmp/<hotfix_id>/rpms
 ----
 +
-* Replace `<hotfix_id>` with a hotfix identifier such as a Jira issue, for example `osprh-0000`
 * Replace `<ssh_user>` with the SSH user name.
 * Replace `<data_plane_node>` with the hostname or IP for the data plane node.
+* Replace `<hotfix_id>` with a hotfix identifier such as a Jira issue, for example `osprh-0000`.
 
 +
 Repeat this step for each data plane node that the hotfix must be applied to.
@@ -39,4 +39,4 @@ $ sudo rpm -F /tmp/hotfix-rpms/*.rpm
 +
 * The `-F` (`--freshen`) `rpm` command option updates the RPM content if earlier versions are already installed.
 
-. Perform any additional custom steps that are detailed in the hotfix instructions to complete the application of the RPM hotfix content. 
+. Perform any additional custom steps that are detailed in the hotfix instructions to complete the application of the RPM hotfix content.
