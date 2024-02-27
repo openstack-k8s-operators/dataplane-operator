@@ -3,7 +3,6 @@ kind: OpenStackDataPlaneService
 metadata:
   name: swift
 spec:
-  label: swift
   playbook: osp.edpm.swift
   secrets:
   - swift-conf

@@ -9,6 +9,5 @@ metadata:
     app.kubernetes.io/created-by: dataplane-operator
   name: install-certs
 spec:
-  label: install-certs
   playbook: osp.edpm.install_certs
   addCertMounts: True

@@ -3,7 +3,6 @@ kind: OpenStackDataPlaneService
 metadata:
   name: neutron-metadata
 spec:
-  label: neutron-metadata
   playbook: osp.edpm.neutron_metadata
   secrets:
   - neutron-ovn-metadata-agent-neutron-config
