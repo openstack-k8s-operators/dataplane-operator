@@ -22,6 +22,7 @@ $ cp /path/to/hotfix/*.rpm <hotfix_id>/rpms
 * Replace `<hotfix_id>` with a hotfix identifier such as a Jira issue, for example `osprh-0000`.
 
 . Create a container image tagged with your registry account details and a hotfix identifier:
++
 ----
 $ updated_container="<updated_container_registry>/<updated_container_project>/<container_image>:<hotfix_id>"
 $ container=$(buildah from <container_registry>/<container_project>/<container_image>:<container_tag>)
