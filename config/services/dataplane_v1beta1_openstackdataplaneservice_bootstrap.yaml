@@ -9,5 +9,4 @@ metadata:
     app.kubernetes.io/created-by: dataplane-operator
   name: bootstrap
 spec:
-  label: bootstrap
   playbook: osp.edpm.bootstrap

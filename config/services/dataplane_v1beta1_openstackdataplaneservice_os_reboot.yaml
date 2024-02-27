@@ -3,5 +3,4 @@ kind: OpenStackDataPlaneService
 metadata:
   name: reboot-os
 spec:
-  label: reboot-os
   playbook: osp.edpm.reboot

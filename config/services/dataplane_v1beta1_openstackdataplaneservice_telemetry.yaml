@@ -3,7 +3,6 @@ kind: OpenStackDataPlaneService
 metadata:
   name: telemetry
 spec:
-  label: telemetry
   secrets:
     - ceilometer-compute-config-data
   playbook: osp.edpm.telemetry

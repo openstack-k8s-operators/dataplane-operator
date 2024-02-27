@@ -3,7 +3,6 @@ kind: OpenStackDataPlaneService
 metadata:
   name: libvirt
 spec:
-  label: libvirt
   playbook: osp.edpm.libvirt
   tlsCert:
     contents:
