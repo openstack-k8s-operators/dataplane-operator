@@ -351,6 +351,11 @@ DataplaneAnsibleImageDefaults default images for dataplane services
 |===
 | Field | Description | Scheme | Required
 
+| CeilometerCompute
+|
+| string
+| false
+
 | Frr
 |
 | string
@@ -367,6 +372,11 @@ DataplaneAnsibleImageDefaults default images for dataplane services
 | false
 
 | NeutronMetadataAgent
+|
+| string
+| false
+
+| NodeExporter
 |
 | string
 | false
