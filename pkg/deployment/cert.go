@@ -58,7 +58,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		var ips []string
 		var issuer *certmgrv1.Issuer
 		var issuerLabelSelector map[string]string
-		var secretName string
+		var certName string
 		var certSecret *corev1.Secret = nil
 		var err error
 		var result ctrl.Result
@@ -71,7 +71,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 			ServiceLabel:  service.Name,
 			NodeSetLabel:  instance.Name,
 		}
-		secretName = "cert-" + service.Name + "-" + hostName
+		certName = service.Name + "-" + hostName
 
 		dnsNames = allHostnames[hostName]
 		ipsMap = allIPs[hostName]
@@ -121,7 +121,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 			return &result, err
 		}
 
-		certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, secretName,
+		certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, certName,
 			issuer.Name, labels, hosts, ips, nil)
 
 		// handle cert request errors
@@ -158,10 +158,11 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 // GetTLSNodeCert creates or retrieves the cert for a node for a given service
 func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	secretName string, issuer string,
+	certName string, issuer string,
 	labels map[string]string,
 	hostnames []string, ips []string, usages []certmgrv1.KeyUsage,
 ) (*corev1.Secret, ctrl.Result, error) {
+	secretName := "cert-" + certName
 	certSecret, _, err := secret.GetSecret(ctx, helper, secretName, instance.Namespace)
 	var result ctrl.Result
 	if err != nil {
@@ -173,7 +174,7 @@ func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 		duration := ptr.To(time.Hour * 24 * 365)
 		request := certmanager.CertificateRequest{
 			IssuerName:  issuer,
-			CertName:    secretName,
+			CertName:    certName,
 			Duration:    duration,
 			Hostnames:   hostnames,
 			Ips:         ips,

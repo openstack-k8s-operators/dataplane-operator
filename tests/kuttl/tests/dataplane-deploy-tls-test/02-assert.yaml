@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cert-cert-default-service-tls-dnsnames-edpm-compute-0
+  name: cert-default-service-tls-dnsnames-edpm-compute-0
   annotations:
-    cert-manager.io/certificate-name: cert-default-service-tls-dnsnames-edpm-compute-0
+    cert-manager.io/certificate-name: default-service-tls-dnsnames-edpm-compute-0
     cert-manager.io/issuer-group: cert-manager.io
     cert-manager.io/issuer-kind: Issuer
     cert-manager.io/issuer-name: rootca-internal
@@ -19,7 +19,7 @@ kind: TestAssert
 commands:
   - script: |
       template='{{index .metadata.annotations "cert-manager.io/alt-names" }}'
-      names=$(oc get secret cert-cert-default-service-tls-dnsnames-edpm-compute-0 -n openstack -o go-template="$template")
+      names=$(oc get secret cert-default-service-tls-dnsnames-edpm-compute-0 -n openstack -o go-template="$template")
       echo $names > test123.data
       regex="(?=.*(edpm-compute-0\.internalapi\.example\.com))(?=.*(edpm-compute-0\.storage\.example\.com))(?=.*(edpm-compute-0\.tenant\.example\.com))(?=.*(edpm-compute-0\.ctlplane\.example\.com))"
       matches=$(grep -P "$regex" test123.data)
