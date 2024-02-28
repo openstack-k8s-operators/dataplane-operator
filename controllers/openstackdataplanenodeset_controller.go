@@ -51,6 +51,8 @@ var dataplaneAnsibleImageDefaults dataplanev1.DataplaneAnsibleImageDefaults
 const (
 	// CeilometerComputeDefaultImage
 	CeilometerComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified"
+	// CeilometerIpmiDefaultImage
+	CeilometerIpmiDefaultImage = "quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi:current-podified"
 	// FrrDefaultImage -
 	FrrDefaultImage = "quay.io/podified-antelope-centos9/openstack-frr:current-podified"
 	// IscsiDDefaultImage -
@@ -75,6 +77,7 @@ const (
 func SetupAnsibleImageDefaults() {
 	dataplaneAnsibleImageDefaults = dataplanev1.DataplaneAnsibleImageDefaults{
 		CeilometerCompute:    util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_CEILOMETER_COMPUTE_IMAGE", CeilometerComputeDefaultImage),
+		CeilometerIpmi:       util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_CEILOMETER_IPMI_IMAGE", CeilometerIpmiDefaultImage),
 		Frr:                  util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_FRR_DEFAULT_IMG", FrrDefaultImage),
 		IscsiD:               util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_ISCSID_DEFAULT_IMG", IscsiDDefaultImage),
 		Logrotate:            util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG", LogrotateDefaultImage),
