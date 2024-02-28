@@ -190,7 +190,6 @@ type DataplaneAnsibleImageDefaults struct {
 	NeutronMetadataAgent string
 	NodeExporter         string
 	NovaCompute          string
-	NovaLibvirt          string
 	OvnControllerAgent   string
 	OvnBgpAgent          string
 }

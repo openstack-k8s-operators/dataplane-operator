@@ -386,11 +386,6 @@ DataplaneAnsibleImageDefaults default images for dataplane services
 | string
 | false
 
-| NovaLibvirt
-|
-| string
-| false
-
 | OvnControllerAgent
 |
 | string

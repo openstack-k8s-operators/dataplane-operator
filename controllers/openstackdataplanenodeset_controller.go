@@ -63,8 +63,6 @@ const (
 	NodeExporterDefaultImage = "quay.io/prometheus/node-exporter:v1.5.0"
 	// NovaComputeDefaultImage -
 	NovaComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
-	// NovaLibvirtDefaultImage -
-	NovaLibvirtDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified"
 	// OvnControllerAgentDefaultImage -
 	OvnControllerAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
 	// OvnBgpAgentDefaultImage -
@@ -81,7 +79,6 @@ func SetupAnsibleImageDefaults() {
 		NeutronMetadataAgent: util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_METADATA_AGENT_DEFAULT_IMG", NeutronMetadataAgentDefaultImage),
 		NodeExporter:         util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NODE_EXPORTER_IMAGE", NodeExporterDefaultImage),
 		NovaCompute:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG", NovaComputeDefaultImage),
-		NovaLibvirt:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LIBVIRT_DEFAULT_IMG", NovaLibvirtDefaultImage),
 		OvnControllerAgent:   util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_CONTROLLER_AGENT_DEFAULT_IMG", OvnControllerAgentDefaultImage),
 		OvnBgpAgent:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE", OvnBgpAgentDefaultImage),
 	}
