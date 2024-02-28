@@ -5,7 +5,7 @@ go 1.20
 replace github.com/openstack-k8s-operators/dataplane-operator/api => ./api
 
 require (
-	github.com/cert-manager/cert-manager v1.14.3
+	github.com/cert-manager/cert-manager v1.13.4
 	github.com/go-logr/logr v1.4.1
 	github.com/google/uuid v1.6.0
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
@@ -14,17 +14,17 @@ require (
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240221083751-49edc0df8a12
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240224182407-3b6c02b195f6
-	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240224182407-3b6c02b195f6
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240227142955-7f3f84347d80
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240224182407-3b6c02b195f6
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240224182407-3b6c02b195f6
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240224182407-3b6c02b195f6
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240221124236-7f25323a89e4
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240226163515-d53e4f43e3b0
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240222051903-0f74dcdc7782
 	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.29.0
-	k8s.io/apimachinery v0.29.0
-	k8s.io/client-go v0.29.0
+	k8s.io/api v0.28.7
+	k8s.io/apimachinery v0.28.7
+	k8s.io/client-go v0.28.7
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e
 	sigs.k8s.io/controller-runtime v0.16.5
 )
@@ -80,8 +80,8 @@ require (
 	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apiextensions-apiserver v0.29.0 // indirect
-	k8s.io/component-base v0.29.0 // indirect
+	k8s.io/apiextensions-apiserver v0.28.7 // indirect
+	k8s.io/component-base v0.28.7 // indirect
 	k8s.io/klog/v2 v2.110.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240103051144-eec4567ac022 // indirect
 	sigs.k8s.io/gateway-api v1.0.0 // indirect
