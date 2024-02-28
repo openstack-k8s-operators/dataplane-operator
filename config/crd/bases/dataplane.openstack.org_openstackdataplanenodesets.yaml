@@ -1874,6 +1874,7 @@ spec:
                 - validate-network
                 - install-os
                 - configure-os
+                - ssh-known-hosts
                 - run-os
                 - reboot-os
                 - install-certs
