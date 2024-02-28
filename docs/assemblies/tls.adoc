@@ -107,10 +107,11 @@ to the SAN.
 
 ==== issuer
 
-This attribute corresponds to the certmanager issuer that will be used to issue the certificate.
-If the issuers attribute is not set (as in the configuarion above for service1), certificates
-will be issued using the default root CA for internal TLS as defined in lib-common.
-(currently set to "osp-rootca-issuer-internal").
+This attribute corresponds to the label for the certmanager issuer that is used to issue the certificate.
+The label can be different from the name of the issuer. There can be only one issuer with the specified label.
+If more than one issuer has the label, an error is generated. If the issuers attribute is not set, as in the
+configuration for `service1`, the certificates are issued with the default root CA for internal TLS as defined
+in `lib-common`, which is set to the label "osp-rootca-issuer-internal" for the `rootca-internal` issuer.
 
 === addCertMounts
 

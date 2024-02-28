@@ -35,7 +35,8 @@ type OpenstackDataPlaneServiceCert struct {
 	// +kubebuilder:validation:Optional
 	Networks []infranetworkv1.NetNameStr `json:"networks,omitempty"`
 
-	// Issuer to issue the cert
+	// Issuer is the label for the issuer to issue the cert
+	// Only one issuer should have this label
 	// +kubebuilder:validation:Optional
 	Issuer string `json:"issuer,omitempty"`
 }

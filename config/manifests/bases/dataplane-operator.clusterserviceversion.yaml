@@ -54,8 +54,7 @@ spec:
         path: nodes.ansible.ansiblePort
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:number
-      - description: PreProvisioned - Whether the nodes are actually pre-provisioned
-          (True) or should be preprovisioned (False)
+      - description: PreProvisioned - Set to true if the nodes have been Pre Provisioned.
         displayName: Pre Provisioned
         path: preProvisioned
         x-descriptors:

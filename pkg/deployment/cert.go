@@ -35,10 +35,8 @@ import (
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/endpoint"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 )
 
 // EnsureTLSCerts generates  a secret containing all the certificates for the relevant service
@@ -58,7 +56,8 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		var ipsMap map[infranetworkv1.NetNameStr]string
 		var hosts []string
 		var ips []string
-		var issuer string
+		var issuer *certmgrv1.Issuer
+		var issuerLabelSelector map[string]string
 		var secretName string
 		var certSecret *corev1.Secret = nil
 		var err error
@@ -112,15 +111,18 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 
 		if service.Spec.TLSCert.Issuer == "" {
 			// by default, use the internal root CA
-			// issuer = certmanager.RootCAIssuerInternalLabel
-			// TODO(alee) Temporarily set this to the issuer name
-			issuer = tls.DefaultCAPrefix + string(endpoint.EndpointInternal)
+			issuerLabelSelector = map[string]string{certmanager.RootCAIssuerInternalLabel: ""}
 		} else {
-			issuer = service.Spec.TLSCert.Issuer
+			issuerLabelSelector = map[string]string{service.Spec.TLSCert.Issuer: ""}
+		}
+
+		issuer, err = certmanager.GetIssuerByLabels(ctx, helper, "", issuerLabelSelector)
+		if err != nil {
+			return &result, err
 		}
 
 		certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, secretName,
-			issuer, labels, hosts, ips, nil)
+			issuer.Name, labels, hosts, ips, nil)
 
 		// handle cert request errors
 		if (err != nil) || (result != ctrl.Result{}) {
