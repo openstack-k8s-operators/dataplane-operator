@@ -19,4 +19,4 @@ commands:
       oc apply -f ./certs.yaml
       wait_for 100 oc get secret osp-rootca-secret -n openstack
       CA_CRT=$(oc get secret osp-rootca-secret -n openstack -o json|jq -r '.data."ca.crt"')
-      oc create secret generic combined-ca-bundle  -n openstack --from-literal=TLSCABundleFile=$CA_CRT
+      oc create secret generic combined-ca-bundle  -n openstack --from-literal=tls-ca-bundle.pem=$CA_CRT
