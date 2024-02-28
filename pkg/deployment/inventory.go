@@ -154,6 +154,9 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	if template.Ansible.AnsibleVars["edpm_ceilometer_compute_image"] == nil {
 		group.Vars["edpm_ceilometer_compute_image"] = defaultImages.CeilometerCompute
 	}
+	if template.Ansible.AnsibleVars["edpm_ceilometer_ipmi_image"] == nil {
+		group.Vars["edpm_ceilometer_ipmi_image"] = defaultImages.CeilometerIpmi
+	}
 	if template.Ansible.AnsibleVars["edpm_frr_image"] == nil {
 		group.Vars["edpm_frr_image"] = defaultImages.Frr
 	}

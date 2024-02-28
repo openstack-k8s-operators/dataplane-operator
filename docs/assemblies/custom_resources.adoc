@@ -356,6 +356,11 @@ DataplaneAnsibleImageDefaults default images for dataplane services
 | string
 | false
 
+| CeilometerIpmi
+|
+| string
+| false
+
 | Frr
 |
 | string

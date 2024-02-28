@@ -184,6 +184,7 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 // DataplaneAnsibleImageDefaults default images for dataplane services
 type DataplaneAnsibleImageDefaults struct {
 	CeilometerCompute    string
+	CeilometerIpmi       string
 	Frr                  string
 	IscsiD               string
 	Logrotate            string
