@@ -42,11 +42,10 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 )
 
-// Helper function to create the data structure that will be used to store the secrets.
+// Generates an organized data structure that is leveraged to create the secrets.
 func createSecretsDataStructure(secretMaxSize int,
 	certsData map[string][]byte,
 ) []map[string][]byte {
-
 	ci := []map[string][]byte{}
 
 	keys := []string{}
