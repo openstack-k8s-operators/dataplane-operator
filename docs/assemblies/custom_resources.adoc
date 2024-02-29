@@ -76,6 +76,11 @@ AnsibleEESpec is a specification of the ansible EE attributes
 | DNSConfig for setting dnsservers
 | *corev1.PodDNSConfig
 | false
+
+| subscriptionManagerSecret
+| SubscriptionManagerSecret for ansible execution
+| string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -169,6 +174,11 @@ NodeTemplate is a specification of the node attributes that override top level a
 | AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing private SSH key for connecting to node. The named secret must be of the form: Secret.data.ssh-privatekey: +++<base64 encoded="" private="" key="" contents="">+++<https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>+++</base64>+++
 | string
 | true
+
+| subscriptionManagerSecret
+| SubscriptionManagerSecret Name of a subscription-manager secret containing username and password for registering to node. https://kubernetes.io/docs/concepts/configuration/secret/#basic-authentication-secret
+| string
+| false
 
 | networks
 | Networks - Instance networks

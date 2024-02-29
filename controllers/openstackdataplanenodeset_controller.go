@@ -278,6 +278,37 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		return result, err
 	}
 
+	if len(instance.Spec.NodeTemplate.SubscriptionManagerSecret) > 0 {
+		_, result, err = secret.VerifySecret(
+			ctx,
+			types.NamespacedName{
+				Namespace: instance.Namespace,
+				Name:      instance.Spec.NodeTemplate.SubscriptionManagerSecret,
+			},
+			[]string{"username", "password"},
+			helper.GetClient(),
+			time.Second*5,
+		)
+
+		if err != nil {
+			if (result != ctrl.Result{}) {
+				instance.Status.Conditions.MarkFalse(
+					condition.InputReadyCondition,
+					condition.RequestedReason,
+					condition.SeverityInfo,
+					dataplanev1.InputReadyWaitingMessage,
+					"secret/"+instance.Spec.NodeTemplate.SubscriptionManagerSecret)
+			} else {
+				instance.Status.Conditions.MarkFalse(
+					condition.InputReadyCondition,
+					condition.RequestedReason,
+					condition.SeverityError,
+					err.Error())
+			}
+			return result, err
+		}
+	}
+
 	// all our input checks out so report InputReady
 	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.InputReadyMessage)
 

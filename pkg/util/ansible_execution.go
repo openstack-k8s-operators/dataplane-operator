@@ -147,6 +147,46 @@ func AnsibleExecution(
 		ansibleEE.Spec.ExtraMounts = append(aeeSpec.ExtraMounts, []storage.VolMounts{ansibleEEMounts}...)
 		ansibleEE.Spec.Env = aeeSpec.Env
 
+		if service.Name == "bootstrap" && len(aeeSpec.SubscriptionManagerSecret) > 0 {
+			// Adding an InitContainer to execute `subscription-manager register`
+			// without exposing the password at `edpm_bootstrap_command`
+			ansibleEE.Spec.InitContainers = []corev1.Container{{
+				ImagePullPolicy: "Always",
+				Image:           ansibleEE.Spec.Image,
+				Name:            "subscription",
+				Env: []corev1.EnvVar{{
+					Name: "SECRET_USERNAME",
+					ValueFrom: &corev1.EnvVarSource{
+						SecretKeyRef: &corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: aeeSpec.SubscriptionManagerSecret,
+							},
+							Key: "username",
+						},
+					},
+				},
+					{
+						Name: "SECRET_PASSWORD",
+						ValueFrom: &corev1.EnvVarSource{
+							SecretKeyRef: &corev1.SecretKeySelector{
+								LocalObjectReference: corev1.LocalObjectReference{
+									Name: aeeSpec.SubscriptionManagerSecret,
+								},
+								Key: "password",
+							},
+						},
+					},
+					{
+						Name:  "RUNNER_PLAYBOOK",
+						Value: SubscriptionPlay,
+					},
+				},
+				Args:         []string{"ansible-runner", "run", "/runner", "-p", "playbook.yaml"},
+				VolumeMounts: ansibleEEMounts.Mounts,
+			}}
+
+		}
+
 		err := controllerutil.SetControllerReference(obj, ansibleEE, helper.GetScheme())
 		if err != nil {
 			return err

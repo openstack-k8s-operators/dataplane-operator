@@ -87,6 +87,13 @@ type NodeTemplate struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
 	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret"`
 
+	// SubscriptionManagerSecret Name of a subscription-manager secret containing
+	// username and password for registering to node.
+	// <https://kubernetes.io/docs/concepts/configuration/secret/#basic-authentication-secret>
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
+	SubscriptionManagerSecret string `json:"subscriptionManagerSecret,omitempty"`
+
 	// Networks - Instance networks
 	// +kubebuilder:validation:Optional
 	Networks []infranetworkv1.IPSetNetwork `json:"networks,omitempty"`
@@ -127,11 +134,13 @@ type AnsibleEESpec struct {
 	// AnsibleSkipTags for ansible execution
 	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
 	// ExtraVars for ansible execution
-	ExtraVars map[string]json.RawMessage  `json:"extraVars,omitempty"`
+	ExtraVars map[string]json.RawMessage `json:"extraVars,omitempty"`
 	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
 	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
 	// DNSConfig for setting dnsservers
 	DNSConfig *corev1.PodDNSConfig `json:"dnsConfig,omitempty"`
+	// SubscriptionManagerSecret for ansible execution
+	SubscriptionManagerSecret string `json:"subscriptionManagerSecret,omitempty"`
 }

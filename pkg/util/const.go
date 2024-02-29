@@ -19,4 +19,16 @@ package util
 const (
 	// AnsibleExecutionServiceNameLen max length for the ansibleEE service name prefix
 	AnsibleExecutionServiceNameLen = 53
+	SubscriptionPlay               = `
+- hosts: all
+  strategy: linear
+  tasks:
+    - name: subscription-manager register
+      become: true
+      no_log: true
+      when: ansible_facts.distribution == 'RedHat'
+      ansible.builtin.shell: |
+        set -euxo pipefail
+        subscription-manager register --username {{ lookup('ansible.builtin.env', 'SECRET_USERNAME') }} --password {{ lookup('ansible.builtin.env', 'SECRET_PASSWORD') }}
+`
 )

@@ -1054,6 +1054,8 @@ spec:
                       - subnetName
                       type: object
                     type: array
+                  subscriptionManagerSecret:
+                    type: string
                   userData:
                     properties:
                       name:

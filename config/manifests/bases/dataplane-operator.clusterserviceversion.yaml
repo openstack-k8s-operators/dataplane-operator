@@ -49,13 +49,18 @@ spec:
         path: nodeTemplate.ansibleSSHPrivateKeySecret
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes:Secret
+      - description: SubscriptionManagerSecret Name of a subscription-manager secret
+          containing username and password for registering to node. <https://kubernetes.io/docs/concepts/configuration/secret/#basic-authentication-secret>
+        displayName: Subscription Manager Secret
+        path: nodeTemplate.subscriptionManagerSecret
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes:Secret
       - description: AnsiblePort SSH port for Ansible connection
         displayName: Ansible Port
         path: nodes.ansible.ansiblePort
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:number
-      - description: PreProvisioned - Whether the nodes are actually pre-provisioned
-          (True) or should be preprovisioned (False)
+      - description: PreProvisioned - Set to true if the nodes have been Pre Provisioned.
         displayName: Pre Provisioned
         path: preProvisioned
         x-descriptors:
