@@ -6,3 +6,7 @@ spec:
   secrets:
     - ceilometer-compute-config-data
   playbook: osp.edpm.telemetry
+  tlsCert:
+    contents:
+    - ips
+  caCerts: combined-ca-bundle
