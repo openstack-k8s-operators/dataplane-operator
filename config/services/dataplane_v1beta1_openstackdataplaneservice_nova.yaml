@@ -3,7 +3,6 @@ kind: OpenStackDataPlaneService
 metadata:
   name: nova
 spec:
-  label: nova
   secrets:
     - nova-cell1-compute-config
     # NOTE: this Secret needs to be created before deploying the data plane.
@@ -17,5 +16,5 @@ spec:
     - ips
     networks:
     - ctlplane
-    issuer: rootca-internal
+    issuer: osp-rootca-issuer-internal
   caCerts: combined-ca-bundle

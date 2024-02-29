@@ -1,6 +1,7 @@
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
-  name: ceph-hci-pre
+  name: ssh-known-hosts
 spec:
-  playbook: osp.edpm.ceph_hci_pre
+  playbook: osp.edpm.ssh_known_hosts
+  deployOnAllNodeSets: true

@@ -66,7 +66,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		"edpm_logrotate_crond_image",
 		"edpm_neutron_metadata_agent_image",
 		"edpm_nova_compute_image",
-		"edpm_libvirt_image",
 		"edpm_ovn_controller_agent_image",
 		"edpm_ovn_bgp_agent_image",
 	}
@@ -168,6 +167,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 						"validate-network",
 						"install-os",
 						"configure-os",
+						"ssh-known-hosts",
 						"run-os",
 						"reboot-os",
 						"install-certs",
@@ -561,6 +561,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 						"validate-network",
 						"install-os",
 						"configure-os",
+						"ssh-known-hosts",
 						"run-os",
 						"reboot-os",
 						"install-certs",

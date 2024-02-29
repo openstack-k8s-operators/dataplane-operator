@@ -35,10 +35,8 @@ import (
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/endpoint"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 )
 
 // EnsureTLSCerts generates  a secret containing all the certificates for the relevant service
@@ -58,8 +56,9 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		var ipsMap map[infranetworkv1.NetNameStr]string
 		var hosts []string
 		var ips []string
-		var issuer string
-		var secretName string
+		var issuer *certmgrv1.Issuer
+		var issuerLabelSelector map[string]string
+		var certName string
 		var certSecret *corev1.Secret = nil
 		var err error
 		var result ctrl.Result
@@ -72,7 +71,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 			ServiceLabel:  service.Name,
 			NodeSetLabel:  instance.Name,
 		}
-		secretName = "cert-" + service.Name + "-" + hostName
+		certName = service.Name + "-" + hostName
 
 		dnsNames = allHostnames[hostName]
 		ipsMap = allIPs[hostName]
@@ -112,15 +111,18 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 
 		if service.Spec.TLSCert.Issuer == "" {
 			// by default, use the internal root CA
-			// issuer = certmanager.RootCAIssuerInternalLabel
-			// TODO(alee) Temporarily set this to the issuer name
-			issuer = tls.DefaultCAPrefix + string(endpoint.EndpointInternal)
+			issuerLabelSelector = map[string]string{certmanager.RootCAIssuerInternalLabel: ""}
 		} else {
-			issuer = service.Spec.TLSCert.Issuer
+			issuerLabelSelector = map[string]string{service.Spec.TLSCert.Issuer: ""}
 		}
 
-		certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, secretName,
-			issuer, labels, hosts, ips, nil)
+		issuer, err = certmanager.GetIssuerByLabels(ctx, helper, "", issuerLabelSelector)
+		if err != nil {
+			return &result, err
+		}
+
+		certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, certName,
+			issuer.Name, labels, hosts, ips, nil)
 
 		// handle cert request errors
 		if (err != nil) || (result != ctrl.Result{}) {
@@ -156,10 +158,11 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 // GetTLSNodeCert creates or retrieves the cert for a node for a given service
 func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	secretName string, issuer string,
+	certName string, issuer string,
 	labels map[string]string,
 	hostnames []string, ips []string, usages []certmgrv1.KeyUsage,
 ) (*corev1.Secret, ctrl.Result, error) {
+	secretName := "cert-" + certName
 	certSecret, _, err := secret.GetSecret(ctx, helper, secretName, instance.Namespace)
 	var result ctrl.Result
 	if err != nil {
@@ -171,7 +174,7 @@ func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 		duration := ptr.To(time.Hour * 24 * 365)
 		request := certmanager.CertificateRequest{
 			IssuerName:  issuer,
-			CertName:    secretName,
+			CertName:    certName,
 			Duration:    duration,
 			Hostnames:   hostnames,
 			Ips:         ips,

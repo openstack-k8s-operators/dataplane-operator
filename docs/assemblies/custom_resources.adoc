@@ -336,7 +336,7 @@ OpenstackDataPlaneServiceCert defines the property of a TLS cert issued for a da
 | false
 
 | issuer
-| Issuer to issue the cert
+| Issuer is the label for the issuer to issue the cert Only one issuer should have this label
 | string
 | false
 |===
@@ -372,11 +372,6 @@ DataplaneAnsibleImageDefaults default images for dataplane services
 | false
 
 | NovaCompute
-|
-| string
-| false
-
-| NovaLibvirt
 |
 | string
 | false
