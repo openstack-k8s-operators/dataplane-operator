@@ -12,9 +12,20 @@ spec:
       ansiblePort: 22
       ansibleUser: cloud-admin
       ansibleVars:
+        # Swift disks defined here apply to all nodes. Node-specific disks
+        # might be defined in the nodes: section below
+        #
+        # weight, region and zone are not used in the playbook, but
+        # in swift-operator itself to determine Swift ring values. weight
+        # should be usually set to the GiB of the disk; region and
+        # zone are optional and might be used to enforce distribution of
+        # replicas
         edpm_swift_disks:
           - device: /dev/vdb
             path: /srv/node/vdb
+            weight: 4000
+            region: 0
+            zone: 0
         ctlplane_dns_nameservers:
         - 192.168.122.1
         ctlplane_gateway_ip: 192.168.122.1
@@ -97,10 +108,18 @@ spec:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     managementNetwork: ctlplane
   nodes:
-    edpm-compute-0:
+    edpm-swift-0:
       ansible:
         ansibleHost: 192.168.122.100
-      hostName: edpm-compute-0
+        ansibleVars:
+          # Same options as above for all nodes, this time for an individual
+          # node with an extra disk. With this template, the node will use both
+          # vdb and vdc
+          edpm_swift_disks:
+            - device: /dev/vdc
+              path: /srv/node/vdc
+              weight: 1000
+      hostName: edpm-swift-0
       networks:
       - defaultRoute: true
         fixedIP: 192.168.122.100
