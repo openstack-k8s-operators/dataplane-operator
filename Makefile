@@ -100,6 +100,10 @@ docs: manifests docs-dependencies crd-to-markdown ## Build docs
 	sed -i "s/=== Custom/== Custom/g" docs/assemblies/custom_resources.adoc
 	cd docs; $(MAKE) html
 
+.PHONY: docs-preview
+docs-preview: docs
+	cd docs; $(MAKE) open-html
+
 .PHONY: docs-clean
 docs-clean:
 	rm -r docs_build

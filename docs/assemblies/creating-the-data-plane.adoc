@@ -20,6 +20,7 @@ To create and deploy a data plane, you must perform the following tasks:
 ** CBO is installed and configured for provisioning.
 ** `BareMetalHosts` registered, inspected, and have the label `app:openstack`.
 * You are logged on to a workstation that has access to the RHOCP cluster as a user with `cluster-admin` privileges.
+* https://kustomize.io/[kustomize] version 5.0.1 or higher
 
 include::proc_creating-the-SSH-key-secrets.adoc[leveloffset=+1]
 
