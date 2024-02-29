@@ -183,15 +183,15 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 
 // DataplaneAnsibleImageDefaults default images for dataplane services
 type DataplaneAnsibleImageDefaults struct {
-	CeilometerCompute    string
-	CeilometerIpmi       string
-	Frr                  string
-	IscsiD               string
-	Logrotate            string
-	NeutronMetadataAgent string
-	NodeExporter         string
-	NovaCompute          string
-	NovaLibvirt          string
-	OvnControllerAgent   string
-	OvnBgpAgent          string
+	Frr                  		  string
+	IscsiD               		  string
+	Logrotate            		  string
+	NeutronMetadataAgent 		  string
+	NovaCompute          		  string
+	NovaLibvirt          		  string
+	OvnControllerAgent   		  string
+	OvnBgpAgent                   string
+	TelemetryCeilometerCompute    string
+	TelemetryCeilometerIpmi       string
+	TelemetryNodeExporter         string
 }

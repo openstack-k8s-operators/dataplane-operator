@@ -351,16 +351,6 @@ DataplaneAnsibleImageDefaults default images for dataplane services
 |===
 | Field | Description | Scheme | Required
 
-| CeilometerCompute
-|
-| string
-| false
-
-| CeilometerIpmi
-|
-| string
-| false
-
 | Frr
 |
 | string
@@ -381,11 +371,6 @@ DataplaneAnsibleImageDefaults default images for dataplane services
 | string
 | false
 
-| NodeExporter
-|
-| string
-| false
-
 | NovaCompute
 |
 | string
@@ -402,6 +387,21 @@ DataplaneAnsibleImageDefaults default images for dataplane services
 | false
 
 | OvnBgpAgent
+|
+| string
+| false
+
+| TelemetryCeilometerCompute
+|
+| string
+| false
+
+| TelemetryCeilometerIpmi
+|
+| string
+| false
+
+| TelemetryNodeExporter
 |
 | string
 | false

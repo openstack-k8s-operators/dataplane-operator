@@ -49,10 +49,6 @@ import (
 var dataplaneAnsibleImageDefaults dataplanev1.DataplaneAnsibleImageDefaults
 
 const (
-	// CeilometerComputeDefaultImage
-	CeilometerComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified"
-	// CeilometerIpmiDefaultImage
-	CeilometerIpmiDefaultImage = "quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi:current-podified"
 	// FrrDefaultImage -
 	FrrDefaultImage = "quay.io/podified-antelope-centos9/openstack-frr:current-podified"
 	// IscsiDDefaultImage -
@@ -61,8 +57,6 @@ const (
 	LogrotateDefaultImage = "quay.io/podified-antelope-centos9/openstack-cron:current-podified"
 	// NeutronMetadataAgentDefaultImage -
 	NeutronMetadataAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
-	// NodeExporterDefaultImage -
-	NodeExporterDefaultImage = "quay.io/prometheus/node-exporter:v1.5.0"
 	// NovaComputeDefaultImage -
 	NovaComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
 	// NovaLibvirtDefaultImage -
@@ -71,22 +65,28 @@ const (
 	OvnControllerAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
 	// OvnBgpAgentDefaultImage -
 	OvnBgpAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
+	// TelemetryCeilometerComputeDefaultImage
+	TelemetryCeilometerComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified"
+	// TelemetryCeilometerIpmiDefaultImage
+	TelemetryCeilometerIpmiDefaultImage = "quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi:current-podified"
+	// NodeExporterDefaultImage -
+	TelemetryNodeExporterDefaultImage = "quay.io/prometheus/node-exporter:v1.5.0"
 )
 
 // SetupAnsibleImageDefaults -
 func SetupAnsibleImageDefaults() {
 	dataplaneAnsibleImageDefaults = dataplanev1.DataplaneAnsibleImageDefaults{
-		CeilometerCompute:    util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_CEILOMETER_COMPUTE_IMAGE", CeilometerComputeDefaultImage),
-		CeilometerIpmi:       util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_CEILOMETER_IPMI_IMAGE", CeilometerIpmiDefaultImage),
-		Frr:                  util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_FRR_DEFAULT_IMG", FrrDefaultImage),
-		IscsiD:               util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_ISCSID_DEFAULT_IMG", IscsiDDefaultImage),
-		Logrotate:            util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG", LogrotateDefaultImage),
-		NeutronMetadataAgent: util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_METADATA_AGENT_DEFAULT_IMG", NeutronMetadataAgentDefaultImage),
-		NodeExporter:         util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NODE_EXPORTER_IMAGE", NodeExporterDefaultImage),
-		NovaCompute:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG", NovaComputeDefaultImage),
-		NovaLibvirt:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LIBVIRT_DEFAULT_IMG", NovaLibvirtDefaultImage),
-		OvnControllerAgent:   util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_CONTROLLER_AGENT_DEFAULT_IMG", OvnControllerAgentDefaultImage),
-		OvnBgpAgent:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE", OvnBgpAgentDefaultImage),
+		Frr:                        util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_FRR_DEFAULT_IMG", FrrDefaultImage),
+		IscsiD:                     util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_ISCSID_DEFAULT_IMG", IscsiDDefaultImage),
+		Logrotate:                  util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG", LogrotateDefaultImage),
+		NeutronMetadataAgent:       util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_METADATA_AGENT_DEFAULT_IMG", NeutronMetadataAgentDefaultImage),
+		NovaCompute:                util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG", NovaComputeDefaultImage),
+		NovaLibvirt:                util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LIBVIRT_DEFAULT_IMG", NovaLibvirtDefaultImage),
+		OvnControllerAgent:         util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_CONTROLLER_AGENT_DEFAULT_IMG", OvnControllerAgentDefaultImage),
+		OvnBgpAgent:                util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE", OvnBgpAgentDefaultImage),
+		TelemetryCeilometerCompute: util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_CEILOMETER_COMPUTE_IMAGE", TelemetryCeilometerComputeDefaultImage),
+		TelemetryCeilometerIpmi:    util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_CEILOMETER_IPMI_IMAGE", TelemetryCeilometerIpmiDefaultImage),
+		TelemetryNodeExporter:      util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NODE_EXPORTER_IMAGE", TelemetryNodeExporterDefaultImage),
 	}
 }
 
