@@ -35,7 +35,7 @@ var _ = Describe("OpenstackDataplaneService Test", func() {
 	When("A defined service resource is created", func() {
 		BeforeEach(func() {
 			os.Unsetenv("OPERATOR_SERVICES")
-			CreateDataplaneService(dataplaneServiceName)
+			CreateDataplaneService(dataplaneServiceName, false)
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 		})
 
@@ -44,6 +44,23 @@ var _ = Describe("OpenstackDataplaneService Test", func() {
 			Expect(service.Spec.Secrets).To(BeEmpty())
 			Expect(service.Spec.Playbook).To(BeEmpty())
 			Expect(service.Spec.ConfigMaps).To(BeEmpty())
+			Expect(service.Spec.DeployOnAllNodeSets).To(BeNil())
+		})
+	})
+
+	When("A defined service resource for all nodes is created", func() {
+		BeforeEach(func() {
+			os.Unsetenv("OPERATOR_SERVICES")
+			CreateDataplaneService(dataplaneServiceName, true)
+			DeferCleanup(th.DeleteService, dataplaneServiceName)
+		})
+
+		It("spec fields are set up", func() {
+			service := GetService(dataplaneServiceName)
+			Expect(service.Spec.Secrets).To(BeEmpty())
+			Expect(service.Spec.Playbook).To(BeEmpty())
+			Expect(service.Spec.ConfigMaps).To(BeEmpty())
+			Expect(*service.Spec.DeployOnAllNodeSets).To(BeTrue())
 		})
 	})
 })

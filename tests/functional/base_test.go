@@ -13,6 +13,7 @@ import (
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 )
 
 var DefaultEdpmServiceAnsibleVarList = []string{
@@ -40,8 +41,13 @@ func CreateDataplaneDeployment(name types.NamespacedName, spec map[string]interf
 }
 
 // Create an OpenStackDataPlaneService with a given NamespacedName, assert on success
-func CreateDataplaneService(name types.NamespacedName) *unstructured.Unstructured {
-	raw := DefaultDataplaneService(name)
+func CreateDataplaneService(name types.NamespacedName, globalService bool) *unstructured.Unstructured {
+	var raw map[string]interface{}
+	if globalService {
+		raw = DefaultDataplaneGlobalService(name)
+	} else {
+		raw = DefaultDataplaneService(name)
+	}
 	return th.CreateUnstructured(raw)
 }
 
@@ -85,12 +91,13 @@ func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
 // Struct initialization
 
 // Build OpenStackDataPlaneNodeSetSpec struct and fill it with preset values
-func DefaultDataPlaneNodeSetSpec() map[string]interface{} {
+func DefaultDataPlaneNodeSetSpec(nodeSetName string) map[string]interface{} {
 
 	return map[string]interface{}{
 		"preProvisioned": false,
 		"services": []string{
 			"foo-service",
+			"global-service",
 		},
 		"nodeTemplate": map[string]interface{}{
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
@@ -99,7 +106,7 @@ func DefaultDataPlaneNodeSetSpec() map[string]interface{} {
 			},
 		},
 		"nodes": map[string]interface{}{
-			"edpm-compute-node-1": map[string]interface{}{
+			fmt.Sprintf("%s-node-1", nodeSetName): map[string]interface{}{
 				"hostname": "edpm-bm-compute-1",
 				"networks": []map[string]interface{}{{
 					"name":       "CtlPlane",
@@ -246,6 +253,24 @@ func DefaultDataplaneService(name types.NamespacedName) map[string]interface{} {
 		}}
 }
 
+// Create an empty OpenStackDataPlaneService struct
+// containing only given NamespacedName as metadata
+func DefaultDataplaneGlobalService(name types.NamespacedName) map[string]interface{} {
+
+	return map[string]interface{}{
+
+		"apiVersion": "dataplane.openstack.org/v1beta1",
+		"kind":       "OpenStackDataPlaneService",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		},
+		"spec": map[string]interface{}{
+			"deployOnAllNodeSets": true,
+		},
+	}
+}
+
 // Get resources
 
 // Retrieve OpenStackDataPlaneDeployment and check for errors
@@ -288,6 +313,14 @@ func DataplaneConditionGetter(name types.NamespacedName) condition.Conditions {
 func DataplaneDeploymentConditionGetter(name types.NamespacedName) condition.Conditions {
 	instance := GetDataplaneDeployment(name)
 	return instance.Status.Conditions
+}
+
+func GetAnsibleee(name types.NamespacedName) *v1beta1.OpenStackAnsibleEE {
+	instance := &v1beta1.OpenStackAnsibleEE{}
+	Eventually(func(g Gomega) {
+		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
+	}, timeout, interval).Should(Succeed())
+	return instance
 }
 
 // Delete resources
