@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
+	. "github.com/onsi/gomega"    //revive:disable:dot-imports
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+
+	//revive:disable-next-line:dot-imports
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
@@ -317,7 +319,6 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				Namespace: namespace,
 			}
 
-			nodeSetAlpha := dataplanev1.OpenStackDataPlaneNodeSet{}
 			baremetalAlpha := baremetalv1.OpenStackBaremetalSet{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      alphaNodeSetName.Name,
@@ -325,7 +326,6 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				},
 			}
 
-			nodeSetBeta := dataplanev1.OpenStackDataPlaneNodeSet{}
 			baremetalBeta := baremetalv1.OpenStackBaremetalSet{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      betaNodeSetName.Name,
@@ -343,8 +343,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			}
 			th.CreateConfigMap(ovnConfigMapName, mapData)
 
-			nodeSetAlpha = *GetDataplaneNodeSet(alphaNodeSetName)
-			nodeSetBeta = *GetDataplaneNodeSet(betaNodeSetName)
+			nodeSetAlpha := *GetDataplaneNodeSet(alphaNodeSetName)
+			nodeSetBeta := *GetDataplaneNodeSet(betaNodeSetName)
 
 			// Set baremetal provisioning conditions to True
 			Eventually(func(g Gomega) {

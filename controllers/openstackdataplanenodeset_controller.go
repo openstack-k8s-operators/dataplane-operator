@@ -416,7 +416,7 @@ func checkDeployment(helper *helper.Helper,
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
+func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	dnsMasqWatcher := handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
 		Log := r.GetLogger(ctx)
 		result := []reconcile.Request{}
@@ -429,7 +429,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(ctx context.Conte
 		listOpts := []client.ListOption{
 			client.InNamespace(obj.GetNamespace()),
 		}
-		if err := r.Client.List(context.Background(), nodeSets, listOpts...); err != nil {
+		if err := r.Client.List(ctx, nodeSets, listOpts...); err != nil {
 			Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSetList %w")
 			return nil
 		}

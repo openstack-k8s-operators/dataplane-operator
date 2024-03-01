@@ -89,7 +89,7 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 		// Add certMounts if TLS is enabled
 		if d.NodeSet.Spec.TLSEnabled {
 			if foundService.Spec.AddCertMounts {
-				d.AeeSpec, err = d.addCertMounts(foundService, services)
+				d.AeeSpec, err = d.addCertMounts(services)
 			}
 			if err != nil {
 				return &ctrl.Result{}, err
@@ -198,7 +198,6 @@ func (d *Deployer) ConditionalDeploy(
 
 // addCertMounts adds the cert mounts to the aeeSpec for the install-certs service
 func (d *Deployer) addCertMounts(
-	certService dataplanev1.OpenStackDataPlaneService,
 	services []string,
 ) (*dataplanev1.AnsibleEESpec, error) {
 	log := d.Helper.GetLogger()
