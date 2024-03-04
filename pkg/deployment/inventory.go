@@ -153,12 +153,6 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 
 	// Set default Service Image Variables in they are not provided by the user.
 	// This uses the default values provided by dataplanev1.DataplaneAnsibleImageDefaults
-	if template.Ansible.AnsibleVars["edpm_ceilometer_compute_image"] == nil {
-		group.Vars["edpm_ceilometer_compute_image"] = defaultImages.CeilometerCompute
-	}
-	if template.Ansible.AnsibleVars["edpm_ceilometer_ipmi_image"] == nil {
-		group.Vars["edpm_ceilometer_ipmi_image"] = defaultImages.CeilometerIpmi
-	}
 	if template.Ansible.AnsibleVars["edpm_frr_image"] == nil {
 		group.Vars["edpm_frr_image"] = defaultImages.Frr
 	}
@@ -171,9 +165,6 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	if template.Ansible.AnsibleVars["edpm_neutron_metadata_agent_image"] == nil {
 		group.Vars["edpm_neutron_metadata_agent_image"] = defaultImages.NeutronMetadataAgent
 	}
-	if template.Ansible.AnsibleVars["edpm_node_exporter_image"] == nil {
-		group.Vars["edpm_node_exporter_image"] = defaultImages.NodeExporter
-	}
 	if template.Ansible.AnsibleVars["edpm_nova_compute_image"] == nil {
 		group.Vars["edpm_nova_compute_image"] = defaultImages.NovaCompute
 	}
@@ -182,6 +173,15 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	}
 	if template.Ansible.AnsibleVars["edpm_ovn_bgp_agent_image"] == nil {
 		group.Vars["edpm_ovn_bgp_agent_image"] = defaultImages.OvnBgpAgent
+	}
+	if template.Ansible.AnsibleVars["edpm_telemetry_ceilometer_compute_image"] == nil {
+		group.Vars["edpm_telemetry_ceilometer_compute_image"] = defaultImages.TelemetryCeilometerCompute
+	}
+	if template.Ansible.AnsibleVars["edpm_telemetry_ceilometer_ipmi_image"] == nil {
+		group.Vars["edpm_telemetry_ceilometer_ipmi_image"] = defaultImages.TelemetryCeilometerIpmi
+	}
+	if template.Ansible.AnsibleVars["edpm_telemetry_node_exporter_image"] == nil {
+		group.Vars["edpm_telemetry_node_exporter_image"] = defaultImages.TelemetryNodeExporter
 	}
 
 	err := unmarshalAnsibleVars(template.Ansible.AnsibleVars, group.Vars)
