@@ -3,7 +3,7 @@ package functional
 import (
 	"fmt"
 
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega" //revive:disable:dot-imports
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,7 +26,7 @@ var DefaultEdpmServiceAnsibleVarList = []string{
 	"edpm_ovn_bgp_agent_image",
 }
 
-var CustomEdpmServiceDomainTag string = "test-image:latest"
+var CustomEdpmServiceDomainTag = "test-image:latest"
 
 // Create OpenstackDataPlaneNodeSet in k8s and test that no errors occur
 func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {

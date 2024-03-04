@@ -59,7 +59,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		var issuer *certmgrv1.Issuer
 		var issuerLabelSelector map[string]string
 		var certName string
-		var certSecret *corev1.Secret = nil
+		var certSecret *corev1.Secret
 		var err error
 		var result ctrl.Result
 
