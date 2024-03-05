@@ -4,9 +4,9 @@
 [role="_abstract"]
 You use the `OpenStackDataPlaneDeployment` CRD to configure the services on the data plane nodes and deploy the data plane. Create an `OpenStackDataPlaneDeployment` custom resource (CR) that deploys each of your `OpenStackDataPlaneNodeSet` CRs.
 
-. Procedure
+.Procedure
 
-. Copy the sample `OpenStackDataPlaneDeployment` CR from https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/samples/dataplane_v1beta1_openstackdataplanedeployment_baremetal_with_ipam.yaml and save it to a file named `openstack-edpm-deploy.yaml` on your workstation.
+. Complete the steps from <<proc_creating-a-set-of-data-plane-nodes_dataplane,Creating a DataPlane>> procedure, ensuring that you have a file named `openstack-edpm.yaml` on your workstation.
 
 . Optional: Update `nodeSets` to include all the `OpenStackDataPlaneNodeSet` CRs that you want to deploy:
 +
@@ -25,12 +25,10 @@ spec:
 +
 * Replace `<nodeSet_name>` with the names of the `OpenStackDataPlaneNodeSet` CRs that you want to include in your data plane deployment.
 
-. Save the `openstack-edpm-deploy.yaml` deployment file.
-
 . Deploy the data plane:
 +
 ----
-$ oc create -f openstack-edpm-deploy.yaml
+$ oc create -f openstack-edpm.yaml
 ----
 +
 You can view the Ansible logs while the deployment executes:
