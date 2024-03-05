@@ -10,6 +10,7 @@ spec:
     - validate-network
     - install-os
     - configure-os
+    - ssh-known-hosts
     - run-os
     - reboot-os
     - install-certs
@@ -41,6 +42,10 @@ spec:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     ansible:
       ansibleVars:
+         # CHANGEME -- see https://access.redhat.com/solutions/253273
+         # edpm_bootstrap_command: |
+         #       subscription-manager register --username <subscription_manager_username> --password <subscription_manager_password>
+         #       podman login -u <registry_username> -p <registry_password> registry.redhat.io
          edpm_network_config_template: |
               ---
               {% set mtu_list = [ctlplane_mtu] %}

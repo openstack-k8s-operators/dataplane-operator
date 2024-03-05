@@ -1,8 +1,6 @@
 ## Append samples you want in your CSV to this file as resources ##
 resources:
-  - dataplane_v1beta1_openstackdataplanenodeset_baremetal_with_ipam.yaml
-  - dataplane_v1beta1_openstackdataplanenodeset_ceph.yaml
-  - dataplane_v1beta1_openstackdataplanenodeset_customnetworks.yaml
+  - dataplane_v1beta1_openstackdataplanenodeset.yaml
   - dataplane_v1beta1_openstackdataplaneservice.yaml
   - dataplane_v1beta1_openstackdataplanedeployment.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
