@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240221083751-49edc0df8a12
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240224182407-3b6c02b195f6
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240224182407-3b6c02b195f6
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240222051903-0f74dcdc7782
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240229121803-169ced56d56e
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240229121803-169ced56d56e
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240228041515-b764323ce1de
 	k8s.io/api v0.28.7
 	k8s.io/apimachinery v0.28.7
 	sigs.k8s.io/controller-runtime v0.16.5
@@ -45,7 +45,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/onsi/gomega v1.31.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.18.0 // indirect
@@ -55,7 +54,6 @@ require (
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/goleak v1.3.0 // indirect
-	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/oauth2 v0.15.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
