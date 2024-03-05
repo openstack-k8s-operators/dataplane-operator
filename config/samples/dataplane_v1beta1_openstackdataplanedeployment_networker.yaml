@@ -1,7 +1,0 @@
-apiVersion: dataplane.openstack.org/v1beta1
-kind: OpenStackDataPlaneDeployment
-metadata:
-  name: openstack-edpm-networker
-spec:
-  nodeSets:
-    - openstack-edpm-networker
