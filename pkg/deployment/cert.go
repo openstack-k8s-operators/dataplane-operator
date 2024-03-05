@@ -134,6 +134,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		// To use this cert, add it to the relevant service data
 		certsData[hostName+"-tls.key"] = certSecret.Data["tls.key"]
 		certsData[hostName+"-tls.crt"] = certSecret.Data["tls.crt"]
+		certsData[hostName+"-ca.crt"] = certSecret.Data["ca.crt"]
 	}
 
 	// create a secret to hold the certs for the service
