@@ -1,8 +1,11 @@
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: openstack-edpm-sriov
+  name: openstack-edpm
 spec:
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
   services:
     - bootstrap
     - download-cache
@@ -10,44 +13,42 @@ spec:
     - validate-network
     - install-os
     - configure-os
+    - ssh-known-hosts
     - run-os
     - reboot-os
     - install-certs
-    - neutron-sriov
+    - ovn
+    - neutron-metadata
     - libvirt
     - nova
+    - telemetry
   preProvisioned: true
-  nodes:
-    edpm-compute-0:
-      hostName: edpm-compute-0
-      ansible:
-        ansibleHost: 192.168.122.100
-      networks:
-        - name: ctlplane
-          subnetName: subnet1
-          defaultRoute: true
-          fixedIP: 192.168.122.100
-        - name: internalapi
-          subnetName: subnet1
-        - name: storage
-          subnetName: subnet1
-        - name: tenant
-          subnetName: subnet1
   networkAttachments:
-    - ctlplane
+  - ctlplane
+  nodes:
+      edpm-compute-0:
+        hostName: edpm-compute-0
+        ansible:
+          ansibleHost: 192.168.122.100
+        networks:
+          - name: ctlplane
+            subnetName: subnet1
+            defaultRoute: true
+            fixedIP: 192.168.122.100
+          - name: internalapi
+            subnetName: subnet1
+          - name: storage
+            subnetName: subnet1
+          - name: tenant
+            subnetName: subnet1
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
-    managementNetwork: ctlplane
     ansible:
-      ansibleUser: cloud-admin
-      ansiblePort: 22
       ansibleVars:
-         timesync_ntp_servers:
-           - hostname: pool.ntp.org
-         # edpm_network_config
-         # Default nic config template for a EDPM compute node
-         # These vars are edpm_network_config role vars
-         edpm_network_config_hide_sensitive_logs: false
+         # CHANGEME -- see https://access.redhat.com/solutions/253273
+         # edpm_bootstrap_command: |
+         #       subscription-manager register --username <subscription_manager_username> --password <subscription_manager_password>
+         #       podman login -u <registry_username> -p <registry_password> registry.redhat.io
          edpm_network_config_template: |
               ---
               {% set mtu_list = [ctlplane_mtu] %}
@@ -94,7 +95,4 @@ spec:
          gather_facts: false
          enable_debug: false
          # edpm firewall, change the allowed CIDR if needed
-         edpm_sshd_configure_firewall: true
          edpm_sshd_allowed_ranges: ['192.168.122.0/24']
-         # SELinux module
-         edpm_selinux_mode: enforcing
