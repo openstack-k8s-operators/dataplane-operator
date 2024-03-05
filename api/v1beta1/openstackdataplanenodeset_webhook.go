@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"golang.org/x/exp/slices"
 
@@ -67,24 +68,24 @@ func (r *OpenStackDataPlaneNodeSet) Default() {
 
 // Default - set defaults for this OpenStackDataPlaneNodeSet Spec
 func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
+	domain := spec.BaremetalSetTemplate.DomainName
 	for nodeName, node := range spec.Nodes {
 		if node.HostName == "" {
 			node.HostName = nodeName
+		}
+		if !spec.PreProvisioned {
+			if !NodeHostNameIsFQDN(node.HostName) && domain != "" {
+				node.HostName = strings.Join([]string{nodeName, domain}, ".")
+			}
 		}
 		spec.Nodes[nodeName] = *node.DeepCopy()
 	}
 
 	if !spec.PreProvisioned {
 		spec.NodeTemplate.Ansible.AnsibleUser = spec.BaremetalSetTemplate.CloudUserName
-	} else if spec.NodeTemplate.Ansible.AnsibleUser == "" {
-		spec.NodeTemplate.Ansible.AnsibleUser = "cloud-admin"
-	}
-
-	if spec.BaremetalSetTemplate.DeploymentSSHSecret == "" {
-		spec.BaremetalSetTemplate.DeploymentSSHSecret = spec.NodeTemplate.AnsibleSSHPrivateKeySecret
-	}
-
-	if !spec.PreProvisioned {
+		if spec.BaremetalSetTemplate.DeploymentSSHSecret == "" {
+			spec.BaremetalSetTemplate.DeploymentSSHSecret = spec.NodeTemplate.AnsibleSSHPrivateKeySecret
+		}
 		nodeSetHostMap := make(map[string]baremetalv1.InstanceSpec)
 		for _, node := range spec.Nodes {
 			instanceSpec := baremetalv1.InstanceSpec{}
@@ -93,6 +94,8 @@ func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
 			nodeSetHostMap[node.HostName] = instanceSpec
 		}
 		spec.BaremetalSetTemplate.BaremetalHosts = nodeSetHostMap
+	} else if spec.NodeTemplate.Ansible.AnsibleUser == "" {
+		spec.NodeTemplate.Ansible.AnsibleUser = "cloud-admin"
 	}
 }
 

@@ -76,7 +76,6 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 			}
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 		})
-
 		It("Should allow changes to the CloudUserName", func() {
 			Eventually(func(g Gomega) error {
 				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
@@ -94,6 +93,36 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 				return th.K8sClient.Update(th.Ctx, instance)
 			}).Should(Succeed())
 		})
+	})
+
+	When("domainName in baremetalSetTemplate", func() {
+		BeforeEach(func() {
+			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
+			nodeSetSpec["preProvisioned"] = false
+			nodeSetSpec["nodes"] = map[string]interface{}{
+				"compute-0": map[string]interface{}{
+					"hostName": "compute-0"},
+			}
+			nodeSetSpec["baremetalSetTemplate"] = baremetalv1.OpenStackBaremetalSetSpec{
+				DomainName: "example.com",
+				BmhLabelSelector: map[string]string{
+					"app": "test-openstack",
+				},
+				BaremetalHosts: map[string]baremetalv1.InstanceSpec{
+					"compute-0": {
+						CtlPlaneIP: "192.168.1.12/24",
+					},
+				},
+			}
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+		})
+
+		It("hostName should be fqdn", func() {
+			instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+			Expect(instance.Spec.Nodes["compute-0"].HostName).Should(Equal(
+				"compute-0.example.com"))
+		})
+
 	})
 
 	When("A user tries to redeclare an existing node in a new NodeSet", func() {

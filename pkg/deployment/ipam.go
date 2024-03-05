@@ -102,7 +102,7 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 						fqdnNames = append(fqdnNames, fqdnName)
 						allHostnames[hostName][res.Network] = fqdnName
 					}
-					if isFQDN(hostName) && netLower == CtlPlaneNetwork {
+					if dataplanev1.NodeHostNameIsFQDN(hostName) && netLower == CtlPlaneNetwork {
 						fqdnNames = append(fqdnNames, hostName)
 						allHostnames[hostName][infranetworkv1.NetNameStr(netLower)] = hostName
 					}

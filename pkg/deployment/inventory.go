@@ -126,7 +126,7 @@ func populateInventoryFromIPAM(
 
 		if entry == CtlPlaneNetwork {
 			host.Vars[entry+"_dns_nameservers"] = dnsAddresses
-			if !isFQDN(hostName) {
+			if !dataplanev1.NodeHostNameIsFQDN(hostName) {
 				host.Vars["canonical_hostname"] = strings.Join([]string{hostName, res.DNSDomain}, ".")
 			} else {
 				host.Vars["canonical_hostname"] = hostName

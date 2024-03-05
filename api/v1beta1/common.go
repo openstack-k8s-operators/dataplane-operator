@@ -127,7 +127,7 @@ type AnsibleEESpec struct {
 	// AnsibleSkipTags for ansible execution
 	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
 	// ExtraVars for ansible execution
-	ExtraVars map[string]json.RawMessage  `json:"extraVars,omitempty"`
+	ExtraVars map[string]json.RawMessage `json:"extraVars,omitempty"`
 	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
 	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 	// Env is a list containing the environment variables to pass to the pod
