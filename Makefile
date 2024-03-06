@@ -98,7 +98,8 @@ docs: manifests docs-dependencies crd-to-markdown ## Build docs
 	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplaneservice_types.go -f api/v1beta1/openstackdataplanenodeset_types.go -f api/v1beta1/openstackdataplanedeployment_types.go -n OpenStackDataPlaneService -n OpenStackDataPlaneNodeSet -n OpenStackDataPlaneDeployment > docs/assemblies/custom_resources.md
 	bundle exec kramdoc --auto-ids docs/assemblies/custom_resources.md && rm docs/assemblies/custom_resources.md
 	sed -i "s/=== Custom/== Custom/g" docs/assemblies/custom_resources.adoc
-	cd docs; $(MAKE) html
+	cd docs; $(MAKE) html BUILD=upstream
+	cd docs; $(MAKE) html BUILD=downstream
 
 .PHONY: docs-preview
 docs-preview: docs
