@@ -170,7 +170,7 @@ func CheckGlobalServiceExecutionConsistency(ctx context.Context, helper *helper.
 			return err
 		}
 
-		if service.Spec.DeployOnAllNodeSets != nil && *service.Spec.DeployOnAllNodeSets {
+		if service.Spec.DeployOnAllNodeSets {
 			if serviceInList(service.Name, globalServices) {
 				return fmt.Errorf("global service %s defined multiple times", service.Name)
 			}

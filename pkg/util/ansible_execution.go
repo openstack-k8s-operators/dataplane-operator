@@ -114,7 +114,7 @@ func AnsibleExecution(
 		if ansibleEE.Spec.ExtraVars == nil {
 			ansibleEE.Spec.ExtraVars = make(map[string]json.RawMessage)
 		}
-		if service.Spec.DeployOnAllNodeSets != nil && *service.Spec.DeployOnAllNodeSets {
+		if service.Spec.DeployOnAllNodeSets {
 			ansibleEE.Spec.ExtraVars["edpm_override_hosts"] = json.RawMessage([]byte("\"all\""))
 			util.LogForObject(helper, fmt.Sprintf("for service %s, substituting existing ansible play host with 'all'.", service.Name), ansibleEE)
 		} else {
@@ -123,7 +123,7 @@ func AnsibleExecution(
 		}
 
 		for sshKeyNodeName, sshKeySecret := range sshKeySecrets {
-			if service.Spec.DeployOnAllNodeSets != nil && *service.Spec.DeployOnAllNodeSets {
+			if service.Spec.DeployOnAllNodeSets {
 				sshKeyName = fmt.Sprintf("ssh-key-%s", sshKeyNodeName)
 				sshKeyMountSubPath = fmt.Sprintf("ssh_key_%s", targetNodeset)
 				sshKeyMountPath = fmt.Sprintf("/runner/env/ssh_key/%s", sshKeyMountSubPath)
@@ -158,7 +158,7 @@ func AnsibleExecution(
 
 		// Mounting inventory and secrets
 		for inventoryIndex, inventorySecret := range inventorySecrets {
-			if service.Spec.DeployOnAllNodeSets != nil && *service.Spec.DeployOnAllNodeSets {
+			if service.Spec.DeployOnAllNodeSets {
 				inventoryName = fmt.Sprintf("inventory-%d", inventoryIndex)
 				inventoryMountPath = fmt.Sprintf("/runner/inventory/%s", inventoryName)
 			} else {
