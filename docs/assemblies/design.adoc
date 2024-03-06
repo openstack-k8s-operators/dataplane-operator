@@ -1,55 +1,83 @@
-= DataPlane Design
+= Data Plane Design
 
-The dataplane-operator prepares nodes with enough operating system and other
-configuration to make them suitable for hosting OpenStack workloads.
+The dataplane-operator provisions and configures nodes that make up the
+OpenStack data plane. The data plane consists of nodes that host end-user
+workloads and applications. Depending on the OpenStack deployment, these data
+plane nodes are often compute nodes, but may also be storage nodes, networker
+nodes, or other types of nodes.
 
-It uses the
+The dataplane-operator provides a Kubernetes like abstraction and API for
+deploying the data plane. It uses the
 https://github.com/openstack-k8s-operators/openstack-baremetal-operator[openstack-baremetal-operator]
-to optionally provision baremetal. Ansible is used to deploy and configure
-software on the nodes.
+to optionally provision baremetal. It then uses the
+https://github.com/openstack-k8s-operators/openstack-ansibleee-operator[openstack-ansibleee-operator]
+to execute Ansible to deploy, configure, and orchestrate software on the nodes.
+The software is typically RPM or container based using the `podman` container
+runtime.
 
-== DataPlane Design and Resources
+External Data Plane Management (EDPM) is the concept of using Ansible in this
+manner to configure software on data plane nodes. Ansible is used instead of
+using native Kubernetes Workload API's (Deployment, Job, Pod, etc) and kubelet.
+While the Ansible executions themselves run on the Kubernetes cluster as native
+Kubernetes workloads, they communicate using SSH with data plane nodes and use
+various Ansible modules to deploy software on data plane nodes.
 
-The dataplane-operator exposes the concepts of nodesets and
-services as CRD's:
+== dataplane-operator CRD Design and Resources
 
-* https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplanenodesets.yaml[OpenStackDataPlaneNodeSet]
-* https://github.com/openstack-k8s-operators/dataplane-operator/blob/main/config/crd/bases/dataplane.openstack.org_openstackdataplaneservices.yaml[OpenStackDataPlaneService]
+The dataplane-operator exposes the concepts of `OpenStackDataPlaneNodeSets`,
+`OpenStackDataPlaneServices`, and `OpenStackDataPlaneDeployments` as CRD's:
 
-Each `NodeSet` in a dataplane is represented by a corresponding
-OpenStackDataPlaneNodeSet resource.  The OpenStackDataPlaneNodeSet CRD provides
-for a logical grouping of nodes of a similar type. A node can only be defined
-in one NodeSet. This is analogous to the concept of "roles" in TripleO.
-Similarities within a `NodeSet` are defined by the user, and could be of a
-small scope (ansible port), or a large scope (same network config, nova config,
-provisioning config, etc). The properties that all nodes in a `NodeSet` share
-is set in the NodeTemplate field of the ``NodeSet``'s Spec. Node specific
-parameters are then defined under the `spec.nodeTemplate.nodes` section
-specific to that node. This is described in more detail below.
+* <<openstackdataplanenodeset>>
+* <<openstackdataplaneservice>>
+* <<openstackdataplanedeployment>>
 
-OpenStackDataPlaneNodeSet implements a baremetal provisioning interface to
-provision the nodes in the role. This interface can be used to provision the
-initial OS on a set of nodes.
+The `OpenStackDataPlaneNodeSet` CRD is used to describe a logical grouping of
+nodes of a similar type. A node can only be defined in one NodeSet. This is
+analogous to the concept of "roles" in TripleO. An OpenStack data plane is
+likely to consist of multiple `OpenStackDataPlaneNodeSet` resources to describe
+groups of nodes that are configured differently.
 
-A `NodeSet` also provides for an inheritance model of node attributes. Properties
-from the `NodeTemplate` section on the spec will automatically be inherited by the
-nodes defined in the `NodeSet`. Nodes can also set their own properties within their
-own section defined under the `spec.nodeTemplate.nodes` field. Options defined here
-will override the inherited values from the `NodeSet`. See
-xref:inheritance.adoc[inheritance] for more in depth details about how inheritance
-works between `NodeSets` and individual `Nodes`.
+Similarities within a `OpenStackDataPlaneNodeSet` are defined by the user, and
+could be of a small scope (ansible port), or a large scope (same network
+config, nova config, provisioning config, etc). The properties that all nodes
+in a `OpenStackDataPlaneNodeSet` share are set in the `nodeTemplate` field of
+the `OpenStackDataPlaneNodeSet` spec. Node specific parameters are then defined
+under the `nodeTemplate.nodes` section specific to that node. Options defined
+here will override the inherited values from the `NodeSet`.
 
-The `OpenStackDataPlane` CRD provides a way to group all `NodeSets` together
-into a single resource that represents the entire dataplane.
+Divding and assigning nodes to different `OpenStackDataPlaneNodeSets` is a
+design decision by the user. Nodes that are configured mostly the same, are of
+the same hardware, and serving the same purpose are likely candidates for being
+in the same `OpenStackDataPlaneNodeSet`. While hardware differences or
+differences in purposes (compute vs. netwoker) would lend themselves to nodes
+being in different `OpenStackDataPlaneNodeSets`.
 
-`OpenStackDataPlaneService` is a CRD for representing an Ansible based service to
-orchestrate across the nodes. A composable service interface is provided that
-allows for customizing which services are run on which roles and nodes, and for
-defining custom services.
+`OpenStackDataPlaneNodeSet` implements a baremetal provisioning interface to
+provision the nodes if requested. The `baremetalSetTemplate` field is used to
+describe the baremetal configuration of the nodes and is used to provision the
+initial OS on the set of nodes.
 
-== Deployment
+The `OpenStackDataPlaneService` CRD for is an abstraction which combines
+Ansible content and configuration from Kubernetes ConfigMaps and Secrets. The
+Ansible content is typically a playbook from
+https://github.com/openstack-k8s-operators/edpm-ansible[edpm-ansible], but can
+be any Ansible play content. The ConfigMaps and Secrets are typically generated
+from OpenStack control plane operators, but could be any configuration data
+that needs to be consumed by the Ansible content.
 
-The deployment handling in `dataplane-operator` is implemented within the
-deployment package at `pkg/deployment`. A `NodeSet` uses an ansible
-inventory containing all the nodes defined by that `NodeSet` CR when it triggers
-a deployment.
+An `OpenStackDataPlaneNodeSet` has a list of services that contain the
+`OpenStackDataPlaneService` resources for the nodes in that
+`OpenStackDataPlaneNodeSet`. Using the services list, users can customize the
+software that is deployed on the `OpenStackDataPlaneNodeSet` nodes.
+
+The `OpenStackDataPlaneDeployment` CRD is used to start an Ansible execution
+for the list of `OpenStackDataPlaneNodeSets` on the
+`OpenStackDataPlaneDeployment`. Each `OpenStackDataPlaneDeployment` models a
+single Ansible execution, and once the execution is successful, the
+`OpenStackDataPlaneDeployment` does not automatically execute Ansible again,
+even if the `OpenStackDataPlaneDeployment` or related
+`OpenStackDataPlaneNodeSet` resources are changed. In order to start another
+Ansible execution, another `OpenStackDataPlaneDeployment` resource needs to be
+created. In this manner, the user maintains explicit control over when Ansible
+actually executes through the creation of `OpenStackDataPlaneDeployment`
+resources.
