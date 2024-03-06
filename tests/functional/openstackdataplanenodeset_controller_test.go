@@ -347,7 +347,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 			It("Should have service called 'global-service'", func() {
 				service := GetService(dataplaneGlobalServiceName)
-				Expect(*service.Spec.DeployOnAllNodeSets).Should(BeTrue())
+				Expect(service.Spec.DeployOnAllNodeSets).Should(BeTrue())
 			})
 		})
 

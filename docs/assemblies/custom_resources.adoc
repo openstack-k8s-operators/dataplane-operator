@@ -300,7 +300,7 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 
 | deployOnAllNodeSets
 | DeployOnAllNodeSets - should the service be deploy across all nodesets This will override default target of a service play, setting it to 'all'.
-| *bool
+| bool
 | false
 |===
 
