@@ -43,6 +43,11 @@ type AnsibleOpts struct {
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
 	AnsibleVars map[string]json.RawMessage `json:"ansibleVars,omitempty"`
+
+	// AnsibleVarsFrom is a list of sources to populate ansible variables from.
+	// Values defined by an AnsibleVars with a duplicate key take precedence.
+	// +kubebuilder:validation:Optional
+	AnsibleVarsFrom []corev1.EnvFromSource `json:"ansibleVarsFrom,omitempty"`
 }
 
 // NodeSection defines the top level attributes inherited by nodes in the CR.

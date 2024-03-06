@@ -277,6 +277,29 @@ spec:
                         type: string
                       ansibleVars:
                         x-kubernetes-preserve-unknown-fields: true
+                      ansibleVarsFrom:
+                        items:
+                          properties:
+                            configMapRef:
+                              properties:
+                                name:
+                                  type: string
+                                optional:
+                                  type: boolean
+                              type: object
+                              x-kubernetes-map-type: atomic
+                            prefix:
+                              type: string
+                            secretRef:
+                              properties:
+                                name:
+                                  type: string
+                                optional:
+                                  type: boolean
+                              type: object
+                              x-kubernetes-map-type: atomic
+                          type: object
+                        type: array
                     type: object
                   ansibleSSHPrivateKeySecret:
                     type: string
@@ -1078,6 +1101,29 @@ spec:
                           type: string
                         ansibleVars:
                           x-kubernetes-preserve-unknown-fields: true
+                        ansibleVarsFrom:
+                          items:
+                            properties:
+                              configMapRef:
+                                properties:
+                                  name:
+                                    type: string
+                                  optional:
+                                    type: boolean
+                                type: object
+                                x-kubernetes-map-type: atomic
+                              prefix:
+                                type: string
+                              secretRef:
+                                properties:
+                                  name:
+                                    type: string
+                                  optional:
+                                    type: boolean
+                                type: object
+                                x-kubernetes-map-type: atomic
+                            type: object
+                          type: array
                       type: object
                     extraMounts:
                       items:

@@ -25,6 +25,9 @@ import (
 	"strings"
 
 	yaml "gopkg.in/yaml.v3"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
@@ -34,13 +37,93 @@ import (
 	utils "github.com/openstack-k8s-operators/lib-common/modules/common/util"
 )
 
+// getAnsibleVarsFrom gets ansible vars from ConfigMap/Secret
+func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace string, ansible *dataplanev1.AnsibleOpts) (map[string]string, error) {
+
+	var (
+		configMaps = make(map[string]*v1.ConfigMap)
+		secrets    = make(map[string]*v1.Secret)
+		result     = make(map[string]string)
+	)
+	client := helper.GetClient()
+
+	// AnsibleVars will override AnsibleVarsFrom variables.
+	// Process AnsibleVarsFrom first then allow AnsibleVars to replace existing values.
+	for _, varFrom := range ansible.AnsibleVarsFrom {
+		switch {
+		case varFrom.ConfigMapRef != nil:
+			cm := varFrom.ConfigMapRef
+			name := cm.Name
+			configMap, ok := configMaps[name]
+			if !ok {
+				optional := cm.Optional != nil && *cm.Optional
+				configMap = &v1.ConfigMap{}
+				err := client.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, configMap)
+				if err != nil {
+					if errors.IsNotFound(err) && optional {
+						// ignore error when marked optional
+						utils.LogErrorForObject(helper, err, "could not get ansible vars, the configMap: "+name+"is missing", configMap)
+						continue
+					}
+					return result, err
+				}
+				configMaps[name] = configMap
+			}
+
+			for k, v := range configMap.Data {
+				if len(varFrom.Prefix) > 0 {
+					k = varFrom.Prefix + k
+				}
+
+				result[k] = v
+			}
+
+		case varFrom.SecretRef != nil:
+			s := varFrom.SecretRef
+			name := s.Name
+			secret, ok := secrets[name]
+			if !ok {
+				optional := s.Optional != nil && *s.Optional
+				secret = &v1.Secret{}
+				err := client.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, secret)
+				if err != nil {
+					if errors.IsNotFound(err) && optional {
+						// ignore error when marked optional
+						utils.LogErrorForObject(helper, err, "could not get ansible vars, the secret: "+name+"is missing", secret)
+						continue
+					}
+					return result, err
+				}
+				secrets[name] = secret
+			}
+
+			for k, v := range secret.Data {
+				if len(varFrom.Prefix) > 0 {
+					k = varFrom.Prefix + k
+				}
+				result[k] = string(v)
+			}
+		}
+	}
+
+	return result, nil
+}
+
 // GenerateNodeSetInventory yields a parsed Inventory for role
 func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allIPSets map[string]infranetworkv1.IPSet, dnsAddresses []string, defaultImages dataplanev1.DataplaneAnsibleImageDefaults) (string, error) {
 	inventory := ansible.MakeInventory()
 	nodeSetGroup := inventory.AddGroup(instance.Name)
-	err := resolveGroupAnsibleVars(&instance.Spec.NodeTemplate, &nodeSetGroup, defaultImages)
+	groupVars, err := getAnsibleVarsFrom(ctx, helper, instance.Namespace, &instance.Spec.NodeTemplate.Ansible)
+	if err != nil {
+		utils.LogErrorForObject(helper, err, "could not get ansible group vars from configMap/secret", instance)
+		return "", err
+	}
+	for k, v := range groupVars {
+		nodeSetGroup.Vars[k] = v
+	}
+	err = resolveGroupAnsibleVars(&instance.Spec.NodeTemplate, &nodeSetGroup, defaultImages)
 	if err != nil {
 		utils.LogErrorForObject(helper, err, "Could not resolve ansible group vars", instance)
 		return "", err
@@ -58,6 +141,14 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 
 	for _, node := range instance.Spec.Nodes {
 		host := nodeSetGroup.AddHost(strings.Split(node.HostName, ".")[0])
+		hostVars, err := getAnsibleVarsFrom(ctx, helper, instance.Namespace, &node.Ansible)
+		if err != nil {
+			utils.LogErrorForObject(helper, err, "could not get ansible host vars from configMap/secret", instance)
+			return "", err
+		}
+		for k, v := range hostVars {
+			host.Vars[k] = v
+		}
 		// Use ansible_host if provided else use hostname. Fall back to
 		// nodeName if all else fails.
 		if node.Ansible.AnsibleHost != "" {

@@ -58,11 +58,14 @@ spec:
     ansible:
       ansiblePort: 22
       ansibleUser: cloud-admin
+      ansibleVarsFrom:
+        - prefix: edpm_
+          configMapRef:
+            name: network-config-template
       ansibleVars:
         timesync_ntp_servers:
         - hostname: clock.redhat.com
         edpm_network_config_hide_sensitive_logs: false
-        edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
         edpm_nodes_validation_validate_controllers_icmp: false
         edpm_nodes_validation_validate_gateway_icmp: false
         edpm_selinux_mode: enforcing

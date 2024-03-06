@@ -33,6 +33,10 @@ spec:
     ansible:
       ansibleUser: cloud-admin
       ansiblePort: 22
+      ansibleVarsFrom:
+        - prefix: edpm_
+          configMapRef:
+            name: network-config-template
       ansibleVars:
          service_net_map:
            nova_api_network: internalapi
@@ -43,7 +47,6 @@ spec:
          # Default nic config template for a EDPM compute node
          # These vars are edpm_network_config role vars
          edpm_network_config_hide_sensitive_logs: false
-         edpm_network_config_template: templates/single_nic_vlans/single_nic_vlans.j2
          # These vars are for the network config templates themselves and are
          # considered EDPM network defaults.
          neutron_physical_bridge_name: br-ex
