@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -43,7 +44,7 @@ func AnsibleExecution(
 	obj client.Object,
 	service *dataplanev1.OpenStackDataPlaneService,
 	sshKeySecrets map[string]string,
-	inventorySecrets []string,
+	inventorySecrets map[string]string,
 	aeeSpec *dataplanev1.AnsibleEESpec,
 	targetNodeset string,
 ) error {
@@ -125,9 +126,12 @@ func AnsibleExecution(
 		for sshKeyNodeName, sshKeySecret := range sshKeySecrets {
 			if service.Spec.DeployOnAllNodeSets {
 				sshKeyName = fmt.Sprintf("ssh-key-%s", sshKeyNodeName)
-				sshKeyMountSubPath = fmt.Sprintf("ssh_key_%s", targetNodeset)
+				sshKeyMountSubPath = fmt.Sprintf("ssh_key_%s", sshKeyNodeName)
 				sshKeyMountPath = fmt.Sprintf("/runner/env/ssh_key/%s", sshKeyMountSubPath)
 			} else {
+				if sshKeyNodeName != targetNodeset {
+					continue
+				}
 				sshKeyName = "ssh-key"
 				sshKeyMountSubPath = "ssh_key"
 				sshKeyMountPath = "/runner/env/ssh_key"
@@ -156,12 +160,22 @@ func AnsibleExecution(
 			ansibleEEMounts.Volumes = append(ansibleEEMounts.Volumes, sshKeyVolume)
 		}
 
+		// order the inventory keys otherwise it could lead to changing order and mount order changing
+		invKeys := make([]string, 0)
+		for k := range inventorySecrets {
+			invKeys = append(invKeys, k)
+		}
+		sort.Strings(invKeys)
+
 		// Mounting inventory and secrets
-		for inventoryIndex, inventorySecret := range inventorySecrets {
+		for inventoryIndex, nodeName := range invKeys {
 			if service.Spec.DeployOnAllNodeSets {
 				inventoryName = fmt.Sprintf("inventory-%d", inventoryIndex)
 				inventoryMountPath = fmt.Sprintf("/runner/inventory/%s", inventoryName)
 			} else {
+				if nodeName != targetNodeset {
+					continue
+				}
 				inventoryName = "inventory"
 				inventoryMountPath = "/runner/inventory/hosts"
 			}
@@ -170,7 +184,7 @@ func AnsibleExecution(
 				Name: inventoryName,
 				VolumeSource: corev1.VolumeSource{
 					Secret: &corev1.SecretVolumeSource{
-						SecretName: inventorySecret,
+						SecretName: inventorySecrets[nodeName],
 						Items: []corev1.KeyToPath{
 							{
 								Key:  "inventory",

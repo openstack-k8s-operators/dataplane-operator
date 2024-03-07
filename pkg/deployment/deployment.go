@@ -45,7 +45,7 @@ type Deployer struct {
 	Deployment                  *dataplanev1.OpenStackDataPlaneDeployment
 	Status                      *dataplanev1.OpenStackDataPlaneDeploymentStatus
 	AeeSpec                     *dataplanev1.AnsibleEESpec
-	InventorySecrets            []string
+	InventorySecrets            map[string]string
 	AnsibleSSHPrivateKeySecrets map[string]string
 }
 

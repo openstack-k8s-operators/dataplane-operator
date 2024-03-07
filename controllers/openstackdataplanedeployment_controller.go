@@ -216,13 +216,13 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	shouldRequeue := false
 	haveError := false
 
-	globalInventorySecrets := []string{}
+	globalInventorySecrets := map[string]string{}
 	globalSSHKeySecrets := map[string]string{}
 
 	// Gathering individual inventory and ssh secrets for later use
 	for _, nodeSet := range nodeSets.Items {
 		// Add inventory secret to list of inventories for global services
-		globalInventorySecrets = append(globalInventorySecrets, fmt.Sprintf("dataplanenodeset-%s", nodeSet.Name))
+		globalInventorySecrets[nodeSet.Name] = fmt.Sprintf("dataplanenodeset-%s", nodeSet.Name)
 		globalSSHKeySecrets[nodeSet.Name] = nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 	}
 
