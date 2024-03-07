@@ -60,6 +60,34 @@ spec:
                     type: array
                   issuer:
                     type: string
+                  keyUsages:
+                    items:
+                      enum:
+                      - signing
+                      - digital signature
+                      - content commitment
+                      - key encipherment
+                      - key agreement
+                      - data encipherment
+                      - cert sign
+                      - crl sign
+                      - encipher only
+                      - decipher only
+                      - any
+                      - server auth
+                      - client auth
+                      - code signing
+                      - email protection
+                      - s/mime
+                      - ipsec end system
+                      - ipsec tunnel
+                      - ipsec user
+                      - timestamping
+                      - ocsp signing
+                      - microsoft sgc
+                      - netscape sgc
+                      type: string
+                    type: array
                   networks:
                     items:
                       pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]*[a-zA-Z0-9]$

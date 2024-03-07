@@ -12,7 +12,10 @@ require (
 	sigs.k8s.io/controller-runtime v0.16.5
 )
 
-require golang.org/x/exp v0.0.0-20240213143201-ec583247a57a
+require (
+	github.com/cert-manager/cert-manager v1.13.4
+	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a
+)
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -44,12 +47,10 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.16.0 // indirect
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.10.1 // indirect
-	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/goleak v1.3.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
@@ -70,6 +71,7 @@ require (
 	k8s.io/klog/v2 v2.110.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230905202853-d090da108d2f // indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e // indirect
+	sigs.k8s.io/gateway-api v0.8.0 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect

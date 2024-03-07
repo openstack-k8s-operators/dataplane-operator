@@ -30,6 +30,11 @@ spec:
   tlsCert:
     contents:
     - dnsnames
+    keyUsages:
+    - key encipherment
+    - digital signature
+    - server auth
+    - client auth
   play: |
     - hosts: localhost
       gather_facts: no

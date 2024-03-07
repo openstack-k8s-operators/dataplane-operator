@@ -57,6 +57,11 @@ spec:
       - ips
     networks:
       - CtlPlane
+    keyUsages:
+      - digital signature
+      - key encipherment
+      - server auth
+      - client auth
     issuer: osp-rootca-issuer-internal
   caCerts: combined-ca-bundle
 ----
@@ -112,6 +117,14 @@ The label can be different from the name of the issuer. There can be only one is
 If more than one issuer has the label, an error is generated. If the issuers attribute is not set, as in the
 configuration for `service1`, the certificates are issued with the default root CA for internal TLS as defined
 in `lib-common`, which is set to the label "osp-rootca-issuer-internal" for the `rootca-internal` issuer.
+
+==== keyUsages
+
+This attribute is a list of key uages to be included as key usage extensions in the certificate.  The
+strings that correspond to valid usages are provided by the https://github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1/types.go[certmanage api].
+If this attribute is not provided, the default set of key usages as defined in https://github.com/openstack-k8s-operators/lib-common/blob/main/modules/certmanager/certificate.go[lib-common].
+will be used.  These are "key encipherment", "digital signature" and "server auth".  In the above examples, we
+see that libvirt defines this attribute because the "client auth" key usage is also needed.
 
 === addCertMounts
 
