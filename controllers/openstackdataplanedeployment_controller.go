@@ -226,15 +226,18 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		globalSSHKeySecrets[nodeSet.Name] = nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 	}
 
-	if err := deployment.CheckGlobalServiceExecutionConsistency(ctx, helper, nodeSets.Items); err != nil {
-		util.LogErrorForObject(helper, err, "OpenStackDeployment error for deployment", instance)
-		haveError = true
-		instance.Status.Conditions.MarkFalse(
-			condition.ReadyCondition,
-			condition.ErrorReason,
-			condition.SeverityError,
-			dataplanev1.DataPlaneNodeSetErrorMessage,
-			err.Error())
+	if instance.Spec.ServicesOverride == nil {
+		if err := deployment.CheckGlobalServiceExecutionConsistency(ctx, helper, nodeSets.Items); err != nil {
+			util.LogErrorForObject(helper, err, "OpenStackDeployment error for deployment", instance)
+			instance.Status.Conditions.MarkFalse(
+				condition.ReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				condition.DeploymentReadyErrorMessage,
+				err.Error())
+			return ctrl.Result{}, err
+		}
+
 	}
 
 	// Deploy each nodeSet
