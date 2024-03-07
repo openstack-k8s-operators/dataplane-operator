@@ -58,6 +58,7 @@ The container images used by the various roles from edpm-ansible can pull from
 customized locations. The ansible variables used to set the locations and their
 default values are:
 
+ifeval::["{build}" != "downstream"]
  	edpm_iscsid_image: "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
  	edpm_logrotate_crond_image: "quay.io/podified-antelope-centos9/openstack-cron:current-podified"
  	edpm_ovn_controller_agent_image: "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
@@ -69,6 +70,20 @@ default values are:
  	edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
  	edpm_neutron_sriov_image: "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"
  	edpm_multipathd_image: "quay.io/podified-antelope-centos9/openstack-multipathd:current-podified"
+endif::[]
+ifeval::["{build}" == "downstream"]
+ 	edpm_iscsid_image: "registry.redhat.io/rhosp-dev-preview/openstack-iscsid:18.0"
+ 	edpm_logrotate_crond_image: "registry.redhat.io/rhosp-dev-preview/openstack-cron:18.0"
+ 	edpm_ovn_controller_agent_image: "registry.redhat.io/rhosp-dev-preview/openstack-ovn-controller:18.0"
+ 	edpm_ovn_metadata_agent_image: "registry.redhat.io/rhosp-dev-preview/openstack-neutron-metadata-agent-ovn:18.0"
+ 	edpm_frr_image: "registry.redhat.io/rhosp-dev-preview/openstack-frr:18.0"
+ 	edpm_ovn_bgp_agent_image: "registry.redhat.io/rhosp-dev-preview/openstack-ovn-bgp-agent:18.0"
+ 	telemetry_node_exporter_image: quay.io/prometheus/node-exporter:v1.5.0
+ 	edpm_libvirt_image: "registry.redhat.io/rhosp-dev-preview/openstack-nova-libvirt:18.0"
+ 	edpm_nova_compute_image: "registry.redhat.io/rhosp-dev-preview/openstack-nova-compute:18.0"
+ 	edpm_neutron_sriov_image: "registry.redhat.io/rhosp-dev-preview/openstack-neutron-sriov-agent:18.0"
+ 	edpm_multipathd_image: "registry.redhat.io/rhosp-dev-preview/openstack-multipathd:18.0"
+endif::[]
 
 Set any of the above ansible variables within the `ansibleVars` sections of
 `OpenStackDataPlaneNodeSet` to customize the container image locations.

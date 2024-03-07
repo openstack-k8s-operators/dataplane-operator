@@ -9,7 +9,12 @@ You can override the default container image used by the `ansible-runner` execut
 . Create a `Containerfile` that adds the custom content to the default image:
 +
 ----
+ifeval::["{build}" != "downstream"]
 FROM quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+endif::[]
+ifeval::["{build}" == "downstream"]
+FROM registry.redhat.io/rhosp-dev-preview/ee-openstack-ansible-ee-rhel9:0.1.3-5
+endif::[]
 COPY my_custom_role /usr/share/ansible/roles/my_custom_role
 ----
 
@@ -29,7 +34,12 @@ metadata:
   name: custom-service
 spec:
   label: dataplane-deployment-custom-service
+ifeval::["{build}" != "downstream"]
   openStackAnsibleEERunnerImage: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest <1>
+endif::[]
+ifeval::["{build}" == "downstream"]
+  openStackAnsibleEERunnerImage: registry.redhat.io/rhosp-dev-preview/ee-openstack-ansible-ee-rhel9:0.1.3-5 <1>
+endif::[]
   play: |
 ----
 +
