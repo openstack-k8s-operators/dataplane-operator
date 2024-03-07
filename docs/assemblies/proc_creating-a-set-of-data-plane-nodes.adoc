@@ -162,7 +162,67 @@ spec:
 ----
 +
 You can copy a sample template from https://github.com/openstack-k8s-operators/dataplane-operator/tree/main/config/samples/nic-config-samples. For information about customizing the template, see link:https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/17.1/html/installing_and_managing_red_hat_openstack_platform_with_director/assembly_configuring-overcloud-networking_installing-director-on-the-undercloud#ref_network-interface-configuration-options_custom-network-interface-templates[Network interface configuration options].
+ifeval::["{build}" == "downstream"]
+. Register the operating system of the nodes that are not registered to the Red Hat Customer Portal, and enable repositories for your nodes:
++
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: subscription-manager
+data:
+  username: <subscription_manager_username>
+  password: <subscription_manager_password>
+----
++
+* Replace `<subscription_manager_username>` with the applicable user name.
+* Replace `<subscription_manager_password>` with the applicable password.
 
++
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redhat-registry
+data:
+  username: <registry_username>
+  password: <registry_password>
+----
++
+* Replace `<registry_username>` with the applicable user name.
+* Replace `<registry_password>` with the applicable password.
+
++
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: openstack-edpm-ipam
+spec:
+  preProvisioned: True
+  ...
+  nodeTemplate:
+    ansible:
+      ...
+      ansibleVars:
+        edpm_bootstrap_command: |
+          subscription-manager register --username {{ subscription_manager_username }} --password {{ subscription_manager_password }}
+          subscription-manager release --set=9.2
+          subscription-manager repos --disable=*
+          subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms --enable=rhel-9-for-x86_64-appstream-eus-rpms --enable=rhel-9-for-x86_64-highavailability-eus-rpms --enable=openstack-17.1-for-rhel-9-x86_64-rpms --enable=fast-datapath-for-rhel-9-x86_64-rpms --enable=openstack-dev-preview-for-rhel-9-x86_64-rpms
+          podman login -u {{ registry_username }} -p {{ registry_password }} registry.redhat.io
+      ansibleVarsFrom:
+      - prefix: subscription_manager_
+        secretRef:
+          name: subscription-manager
+      - prefix: registry_
+        secretRef:
+          name: redhat-registry
+----
+
++
+For a complete list of the Red Hat Customer Portal registration commands, see https://access.redhat.com/solutions/253273. For information about how to log into `registry.redhat.io`, see https://access.redhat.com/RegistryAuthentication#creating-registry-service-accounts-6.
+endif::[]
 . If your nodes are bare metal, you must configure the bare metal template, see xref:con_provisioning-bare-metal-data-plane-nodes_{context}[Provisioning bare metal data plane nodes].
 
 . Optional: The sample `OpenStackDataPlaneNodeSet` CR you copied includes default node configurations under the `nodes` section. You can add additional nodes, and edit the configured values as required. For example, to add node-specific Ansible variables that customize the node, add the following configuration to your `openstack-edpm.yaml` file:

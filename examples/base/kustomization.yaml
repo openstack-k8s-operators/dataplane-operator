@@ -4,8 +4,11 @@ kind: Component
 resources:
 - crs/openstackdataplanenodeset.yaml
 - crs/openstackdataplanedeployment.yaml
+- vars/nic-config.yaml
+- vars/neutron.yaml
 
 namespace: openstack
 
 configurations:
 - config/nodesetname.yaml
+- config/varsfromname.yaml

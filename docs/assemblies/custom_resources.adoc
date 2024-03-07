@@ -107,6 +107,11 @@ AnsibleOpts defines a logical grouping of Ansible related configuration options.
 | AnsibleVars for configuring ansible
 | map[string]json.RawMessage
 | false
+
+| ansibleVarsFrom
+| AnsibleVarsFrom is a list of sources to populate ansible variables from. Values defined by an AnsibleVars with a duplicate key take precedence.
+| []corev1.EnvFromSource
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
