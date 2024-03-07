@@ -137,8 +137,8 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   labels:
-    osdpd: openstack-edpm-tls-services-override
-  name: install-certs-override-openstack-edpm-tls-services-override
+    openstackdataplanedeployment: openstack-edpm-tls-services-override
+  generateName: install-certs-override-openstack-edpm-tls-services-override-openstack-edpm-tls-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -216,8 +216,8 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   labels:
-    osdpd: openstack-edpm-tls-services-override
-  name: custom-service-tls-dns-ips-openstack-edpm-tls-services-override
+    openstackdataplanedeployment: openstack-edpm-tls-services-override
+  generateName: custom-service-tls-dns-ips-openstack-edpm-tls-services-override-openstack-edpm-tls-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -265,8 +265,8 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   labels:
-    osdpd: openstack-edpm-tls-services-override
-  name: custom-service-tls-dns-openstack-edpm-tls-services-override
+    openstackdataplanedeployment: openstack-edpm-tls-services-override
+  generateName: custom-service-tls-dns-openstack-edpm-tls-services-override-openstack-edpm-tls-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1

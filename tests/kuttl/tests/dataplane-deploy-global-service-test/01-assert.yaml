@@ -50,7 +50,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: custom-global-service-edpm-compute-global-service
+  generateName: custom-global-service-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -114,7 +114,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: download-cache-edpm-compute-global-service
+  generateName: download-cache-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -164,7 +164,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: bootstrap-edpm-compute-global-service
+  generateName: bootstrap-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -215,7 +215,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: configure-network-edpm-compute-global-service
+  generateName: configure-network-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -265,7 +265,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: validate-network-edpm-compute-global-service
+  generateName: validate-network-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -315,7 +315,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: install-os-edpm-compute-global-service
+  generateName: install-os-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -366,7 +366,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: configure-os-edpm-compute-global-service
+  generateName: configure-os-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -416,7 +416,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: run-os-edpm-compute-global-service
+  generateName: run-os-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -466,7 +466,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: install-certs-edpm-compute-global-service
+  generateName: install-certs-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -517,7 +517,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: ovn-edpm-compute-global-service
+  generateName: ovn-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -579,7 +579,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-metadata-edpm-compute-global-service
+  generateName: neutron-metadata-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -670,7 +670,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-ovn-edpm-compute-global-service
+  generateName: neutron-ovn-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -732,7 +732,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-sriov-edpm-compute-global-service
+  generateName: neutron-sriov-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -794,7 +794,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-dhcp-edpm-compute-global-service
+  generateName: neutron-dhcp-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -855,7 +855,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: libvirt-edpm-compute-global-service
+  generateName: libvirt-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -907,8 +907,14 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: nova-edpm-compute-global-service
+  generateName: nova-edpm-deploy-global-service-edpm-compute-global-service-
   namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: OpenStackDataPlaneDeployment
+    name: edpm-compute-global-service
 spec:
   backoffLimit: 6
   envConfigMapName: openstack-aee-default-env

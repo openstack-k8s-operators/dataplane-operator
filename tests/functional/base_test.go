@@ -4,16 +4,16 @@ import (
 	"fmt"
 
 	. "github.com/onsi/gomega" //revive:disable:dot-imports
+	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
-
-	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
-	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
-	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
-	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var DefaultEdpmServiceAnsibleVarList = []string{
@@ -315,11 +315,40 @@ func DataplaneDeploymentConditionGetter(name types.NamespacedName) condition.Con
 	return instance.Status.Conditions
 }
 
+// Get OpenStackAnsibleEE resource by name
 func GetAnsibleee(name types.NamespacedName) *v1beta1.OpenStackAnsibleEE {
 	instance := &v1beta1.OpenStackAnsibleEE{}
 	Eventually(func(g Gomega) {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 	}, timeout, interval).Should(Succeed())
+	return instance
+}
+
+// Get OpenStackAnsibleEE resource by label
+func GetAnsibleeeByLabel(targetNodeSet string, deploymentName types.NamespacedName, service string) *v1beta1.OpenStackAnsibleEE {
+	ansibleEEs := &v1beta1.OpenStackAnsibleEEList{}
+	instance := &v1beta1.OpenStackAnsibleEE{}
+	Eventually(func(g Gomega) {
+		deployment := GetDataplaneDeployment(deploymentName)
+		listOpts := []client.ListOption{
+			client.InNamespace(deployment.GetNamespace()),
+		}
+		labelSelector := map[string]string{
+			"openstackdataplaneservice":    service,
+			"openstackdataplanedeployment": deployment.Name,
+			"openstackdataplanenodeset":    targetNodeSet,
+		}
+		labels := client.MatchingLabels(labelSelector)
+		listOpts = append(listOpts, labels)
+		g.Expect(k8sClient.List(ctx, ansibleEEs, listOpts...)).Should(Succeed())
+
+		g.Expect(ansibleEEs.Items).To(HaveLen(1))
+		if len(ansibleEEs.Items) == 1 {
+			*instance = ansibleEEs.Items[0]
+		}
+
+	}, timeout, interval).Should(Succeed())
+
 	return instance
 }
 

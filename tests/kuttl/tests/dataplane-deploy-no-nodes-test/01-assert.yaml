@@ -58,7 +58,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: download-cache-edpm-compute-no-nodes
+  generateName: download-cache-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -108,7 +108,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: bootstrap-edpm-compute-no-nodes
+  generateName: bootstrap-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -161,7 +161,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: configure-network-edpm-compute-no-nodes
+  generateName: configure-network-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -211,7 +211,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: validate-network-edpm-compute-no-nodes
+  generateName: validate-network-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -261,7 +261,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: install-os-edpm-compute-no-nodes
+  generateName: install-os-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -312,7 +312,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: configure-os-edpm-compute-no-nodes
+  generateName: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -362,7 +362,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: run-os-edpm-compute-no-nodes
+  generateName: run-os-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -412,7 +412,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: install-certs-edpm-compute-no-nodes
+  generateName: install-certs-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -463,7 +463,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: ovn-edpm-compute-no-nodes
+  generateName: ovn-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -525,7 +525,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-metadata-edpm-compute-no-nodes
+  generateName: neutron-metadata-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -616,7 +616,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-ovn-edpm-compute-no-nodes
+  generateName: neutron-ovn-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -678,7 +678,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-sriov-edpm-compute-no-nodes
+  generateName: neutron-sriov-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -740,7 +740,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-dhcp-edpm-compute-no-nodes
+  generateName: neutron-dhcp-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -801,7 +801,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: libvirt-edpm-compute-no-nodes
+  generateName: libvirt-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -853,7 +853,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: nova-edpm-compute-no-nodes
+  generateName: nova-edpm-compute-no-nodes-edpm-compute-no-nodes-
   namespace: openstack
 spec:
   backoffLimit: 6

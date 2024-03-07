@@ -83,8 +83,10 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   labels:
-    osdpd: openstack-edpm-tls-deployment
-  name: default-install-certs-override-openstack-edpm-tls-deployment
+    openstackdataplanedeployment: openstack-edpm-tls-deployment
+    openstackdataplanenodeset: openstack-edpm-tls
+    openstackdataplaneservice: default-service-tls-dnsnames
+  generateName: default-service-tls-dnsnames-openstack-edpm-tls-deployment-openstack-edpm-tls-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -148,8 +150,10 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   labels:
-    osdpd: openstack-edpm-tls-deployment
-  name: default-service-tls-dnsnames-openstack-edpm-tls-deployment
+    openstackdataplanedeployment: openstack-edpm-tls-deployment
+    openstackdataplanenodeset: openstack-edpm-tls
+    openstackdataplaneservice: default-install-certs-override
+  generateName: default-install-certs-override-openstack-edpm-tls-deployment-openstack-edpm-tls-
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
