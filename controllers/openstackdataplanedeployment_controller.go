@@ -230,10 +230,10 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		if err := deployment.CheckGlobalServiceExecutionConsistency(ctx, helper, nodeSets.Items); err != nil {
 			util.LogErrorForObject(helper, err, "OpenStackDeployment error for deployment", instance)
 			instance.Status.Conditions.MarkFalse(
-				condition.ReadyCondition,
+				condition.DeploymentReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityError,
-				condition.DeploymentReadyErrorMessage,
+				dataplanev1.ServiceErrorMessage,
 				err.Error())
 			return ctrl.Result{}, err
 		}
@@ -291,10 +291,10 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			util.LogErrorForObject(helper, err, fmt.Sprintf("OpenStackDeployment error for NodeSet %s", nodeSet.Name), instance)
 			haveError = true
 			instance.Status.Conditions.MarkFalse(
-				condition.ReadyCondition,
+				condition.DeploymentReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityError,
-				dataplanev1.DataPlaneNodeSetErrorMessage,
+				condition.DeploymentReadyErrorMessage,
 				err.Error())
 		}
 
