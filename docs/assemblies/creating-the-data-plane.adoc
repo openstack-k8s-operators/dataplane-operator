@@ -4,7 +4,12 @@
 :context: dataplane
 
 [role="_abstract"]
+ifeval::["{build}" != "downstream"]
 The OpenStack DataPlane consists of CentOS nodes. Use the `OpenStackDataPlaneNodeSet` custom resource definition (CRD) to create the custom resources (CRs) that define the nodes and the layout of the data plane. You can use pre-provisioned nodes, or provision bare metal nodes as part of the data plane creation and deployment process.
+endif::[]
+ifeval::["{build}" == "downstream"]
+The OpenStack DataPlane consists of RHEL nodes. Use the `OpenStackDataPlaneNodeSet` custom resource definition (CRD) to create the custom resources (CRs) that define the nodes and the layout of the data plane. You can use pre-provisioned nodes, or provision bare metal nodes as part of the data plane creation and deployment process.
+endif::[]
 
 To create and deploy a data plane, you must perform the following tasks:
 
