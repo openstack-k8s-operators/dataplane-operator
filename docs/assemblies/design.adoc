@@ -45,7 +45,7 @@ the `OpenStackDataPlaneNodeSet` spec. Node specific parameters are then defined
 under the `nodeTemplate.nodes` section specific to that node. Options defined
 here will override the inherited values from the `NodeSet`.
 
-Divding and assigning nodes to different `OpenStackDataPlaneNodeSets` is a
+Dividing and assigning nodes to different `OpenStackDataPlaneNodeSets` is a
 design decision by the user. Nodes that are configured mostly the same, are of
 the same hardware, and serving the same purpose are likely candidates for being
 in the same `OpenStackDataPlaneNodeSet`. While hardware differences or
