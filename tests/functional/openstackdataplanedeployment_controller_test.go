@@ -371,7 +371,6 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				}
 				service := GetService(dataplaneServiceName)
 				executionName := dataplaneutil.GetAnsibleExecutionNamePrefix(service)
-
 				//Retrieve service AnsibleEE and set JobStatus to Successful
 				Eventually(func(g Gomega) {
 					// Make an AnsibleEE name for each service
@@ -379,12 +378,12 @@ var _ = Describe("Dataplane Deployment Test", func() {
 						Name:      fmt.Sprintf("%s-%s", executionName, dataplaneMultiNodesetDeploymentName.Name),
 						Namespace: dataplaneMultiNodesetDeploymentName.Namespace,
 					}
-					ansibleEE := &ansibleeev1.OpenStackAnsibleEE{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      ansibleeeName.Name,
-							Namespace: ansibleeeName.Namespace,
-						}}
-					g.Expect(th.K8sClient.Get(th.Ctx, ansibleeeName, ansibleEE)).To(Succeed())
+					ansibleEE := GetAnsibleee(ansibleeeName)
+					if service.Spec.DeployOnAllNodeSets {
+						g.Expect(ansibleEE.Spec.ExtraMounts[0].Volumes).Should(HaveLen(4))
+					} else {
+						g.Expect(ansibleEE.Spec.ExtraMounts[0].Volumes).Should(HaveLen(2))
+					}
 					ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 					if service.Spec.DeployOnAllNodeSets {
@@ -408,12 +407,12 @@ var _ = Describe("Dataplane Deployment Test", func() {
 						Name:      fmt.Sprintf("%s-%s", executionName, dataplaneMultiNodesetDeploymentName.Name),
 						Namespace: dataplaneMultiNodesetDeploymentName.Namespace,
 					}
-					ansibleEE := &ansibleeev1.OpenStackAnsibleEE{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      ansibleeeName.Name,
-							Namespace: ansibleeeName.Namespace,
-						}}
-					g.Expect(th.K8sClient.Get(th.Ctx, ansibleeeName, ansibleEE)).To(Succeed())
+					ansibleEE := GetAnsibleee(ansibleeeName)
+					if service.Spec.DeployOnAllNodeSets {
+						g.Expect(ansibleEE.Spec.ExtraMounts[0].Volumes).Should(HaveLen(4))
+					} else {
+						g.Expect(ansibleEE.Spec.ExtraMounts[0].Volumes).Should(HaveLen(2))
+					}
 					ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 				}, th.Timeout, th.Interval).Should(Succeed())
