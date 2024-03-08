@@ -215,6 +215,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.ReadyMessage)
 	shouldRequeue := false
 	haveError := false
+	deploymentErrMsg := ""
 
 	globalInventorySecrets := map[string]string{}
 	globalSSHKeySecrets := map[string]string{}
@@ -287,11 +288,26 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			deployResult, err = deployer.Deploy(nodeSet.Spec.Services)
 		}
 
+		nsConditions := instance.Status.NodeSetConditions[nodeSet.Name]
+
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("OpenStackDeployment error for NodeSet %s", nodeSet.Name), instance)
+			Log.Info("Set NodeSetDeploymentReadyCondition false", "nodeSet", nodeSet.Name)
 			haveError = true
+			errMsg := fmt.Sprintf("nodeSet: %s error: %s", nodeSet.Name, err.Error())
+			if len(deploymentErrMsg) == 0 {
+				deploymentErrMsg = errMsg
+			} else {
+				deploymentErrMsg = fmt.Sprintf("%s & %s", deploymentErrMsg, errMsg)
+			}
 			instance.Status.Conditions.MarkFalse(
-				condition.DeploymentReadyCondition,
+				dataplanev1.NodeSetDeploymentReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				dataplanev1.DataPlaneNodeSetErrorMessage,
+				errMsg)
+			nsConditions.MarkFalse(
+				dataplanev1.NodeSetDeploymentReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityError,
 				condition.DeploymentReadyErrorMessage,
@@ -303,15 +319,20 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		} else {
 			Log.Info("OpenStackDeployment succeeded for NodeSet", "NodeSet", nodeSet.Name)
 			Log.Info("Set NodeSetDeploymentReadyCondition true", "nodeSet", nodeSet.Name)
-			nsConditions := instance.Status.NodeSetConditions[nodeSet.Name]
 			nsConditions.MarkTrue(
-				condition.Type(dataplanev1.NodeSetDeploymentReadyCondition),
+				dataplanev1.NodeSetDeploymentReadyCondition,
 				condition.DeploymentReadyMessage)
 		}
 	}
 
 	if haveError {
-		return ctrl.Result{}, err
+		instance.Status.Conditions.MarkFalse(
+			condition.DeploymentReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			condition.DeploymentReadyErrorMessage,
+			deploymentErrMsg)
+		return ctrl.Result{}, fmt.Errorf(deploymentErrMsg)
 	}
 
 	if shouldRequeue {

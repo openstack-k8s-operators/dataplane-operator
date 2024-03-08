@@ -17,7 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
-    "encoding/json"
+	"encoding/json"
+
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -126,7 +127,7 @@ func (instance *OpenStackDataPlaneDeployment) InitConditions() {
 		for _, nodeSet := range instance.Spec.NodeSets {
 			nsConds := condition.Conditions{}
 			nsConds.Set(condition.UnknownCondition(
-				condition.Type(NodeSetDeploymentReadyCondition), condition.InitReason, condition.InitReason))
+				NodeSetDeploymentReadyCondition, condition.InitReason, condition.InitReason))
 			instance.Status.NodeSetConditions[nodeSet] = nsConds
 
 		}
