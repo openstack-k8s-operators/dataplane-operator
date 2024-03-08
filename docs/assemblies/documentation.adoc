@@ -1,0 +1,40 @@
+= Contributing to documentation
+
+== Rendering documentation locally
+
+Install docs build requirements:
+
+[,bash]
+----
+make docs-dependencies
+----
+
+To render the user-facing documentation site locally:
+
+[,bash]
+----
+make docs
+----
+
+The built HTML files are in `docs_build/dataplane` directory.
+
+
+There are some additional make targets for convenience. The following
+targets, in addition to rendering the docs, will also open the
+resulting HTML in your browser so that you don't have to look for it:
+
+[,bash]
+----
+make docs-preview
+----
+
+The following targets set up an inotify watch on the documentation
+sources, and when it detects modification, the HTML is re-rendered.
+This is so that you can use "edit source - save source - refresh
+browser page" loop when working on the docs, without having to run
+`make docs-*` repeatedly.
+
+[,bash]
+----
+make docs-watch
+----
