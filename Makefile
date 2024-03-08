@@ -105,6 +105,10 @@ docs: manifests docs-dependencies crd-to-markdown ## Build docs
 docs-preview: docs
 	cd docs; $(MAKE) open-html
 
+.PHONY: docs-watch
+docs-watch: docs-preview
+	cd docs; $(MAKE) watch-html
+
 .PHONY: docs-clean
 docs-clean:
 	rm -r docs_build

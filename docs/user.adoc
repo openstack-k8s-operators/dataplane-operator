@@ -11,7 +11,7 @@ OpenStack services and workloads.
 See https://openstack-k8s-operators.github.io/dataplane-operator/dev[contributing] for notes for developers and
 contributors, running the operator, building the documentation, etc.
 
-See <<_dataplane_design,design>> for details about the dataplane design.
+See <<_data_plane_design,design>> for details about the dataplane design.
 
 <<assembly_creating-the-data-plane,Creating a DataPlane>> documents how to create a dataplane.
 
