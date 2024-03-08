@@ -10,5 +10,10 @@ spec:
       - ips
     networks:
       - ctlplane
+    keyUsages:
+      - digital signature
+      - key encipherment
+      - server auth
+      - client auth
     issuer: osp-rootca-issuer-internal
   caCerts: combined-ca-bundle

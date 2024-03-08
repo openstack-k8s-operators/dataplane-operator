@@ -19,6 +19,7 @@ package v1beta1
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 )
@@ -39,6 +40,10 @@ type OpenstackDataPlaneServiceCert struct {
 	// Only one issuer should have this label
 	// +kubebuilder:validation:Optional
 	Issuer string `json:"issuer,omitempty"`
+
+	// KeyUsages to be added to the issued cert
+	// +kubebuilder:validation:Optional
+	KeyUsages []certmgrv1.KeyUsage `json:"keyUsages,omitempty" yaml:"keyUsages,omitempty"`
 }
 
 // OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService

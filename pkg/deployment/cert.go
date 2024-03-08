@@ -123,12 +123,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 
 		// TODO: paramaterize usage
 		certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, certName,
-			issuer.Name, labels, hosts, ips, []certmgrv1.KeyUsage{
-				certmgrv1.UsageDigitalSignature,
-				certmgrv1.UsageKeyEncipherment,
-				certmgrv1.UsageServerAuth,
-				certmgrv1.UsageClientAuth,
-			})
+			issuer.Name, labels, hosts, ips, service.Spec.TLSCert.KeyUsages)
 
 		// handle cert request errors
 		if (err != nil) || (result != ctrl.Result{}) {

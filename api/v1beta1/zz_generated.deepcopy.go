@@ -23,6 +23,7 @@ package v1beta1
 
 import (
 	"encoding/json"
+	certmanagerv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	networkv1beta1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
@@ -687,6 +688,11 @@ func (in *OpenstackDataPlaneServiceCert) DeepCopyInto(out *OpenstackDataPlaneSer
 	if in.Networks != nil {
 		in, out := &in.Networks, &out.Networks
 		*out = make([]networkv1beta1.NetNameStr, len(*in))
+		copy(*out, *in)
+	}
+	if in.KeyUsages != nil {
+		in, out := &in.KeyUsages, &out.KeyUsages
+		*out = make([]certmanagerv1.KeyUsage, len(*in))
 		copy(*out, *in)
 	}
 }

@@ -13,19 +13,57 @@ metadata:
     osdpns: openstack-edpm-tls
 type: kubernetes.io/tls
 ---
-# validate the alt-names - which is a list with elements that can be in any order
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    hostname: edpm-compute-0
+    osdp-service: default-service-tls-dnsnames
+    osdpns: openstack-edpm-tls
+  name: default-service-tls-dnsnames-edpm-compute-0
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneDeployment
+    name: openstack-edpm-tls-deployment
+spec:
+  issuerRef:
+    group: cert-manager.io
+    kind: Issuer
+    name: rootca-internal
+  secretName: cert-default-service-tls-dnsnames-edpm-compute-0
+  secretTemplate:
+    labels:
+      hostname: edpm-compute-0
+      osdp-service: default-service-tls-dnsnames
+      osdpns: openstack-edpm-tls
+---
+# validate the alt-names and usages - which is a list with elements that can be in any order
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
 commands:
   - script: |
-      template='{{index .metadata.annotations "cert-manager.io/alt-names" }}'
-      names=$(oc get secret cert-default-service-tls-dnsnames-edpm-compute-0 -n openstack -o go-template="$template")
+      template='{{index .spec.dnsNames }}'
+      names=$(oc get certificate default-service-tls-dnsnames-edpm-compute-0 -n openstack -o go-template="$template")
       echo $names > test123.data
       regex="(?=.*(edpm-compute-0\.internalapi\.example\.com))(?=.*(edpm-compute-0\.storage\.example\.com))(?=.*(edpm-compute-0\.tenant\.example\.com))(?=.*(edpm-compute-0\.ctlplane\.example\.com))"
       matches=$(grep -P "$regex" test123.data)
       rm test123.data
       if [ -z "$matches" ]; then
-         echo "bad match: $names"
+         echo "bad dnsnames match: $names"
+         exit 1
+      else
+         exit 0
+      fi
+  - script: |
+      template='{{index .spec.usages }}'
+      usages=$(oc get certificate default-service-tls-dnsnames-edpm-compute-0 -n openstack -o go-template="$template")
+      echo $usages > test123.data
+      regex="(?=.*(key encipherment))(?=.*(digital signature))(?=.*(server auth))"
+      matches=$(grep -P "$regex" test123.data)
+      rm test123.data
+      if [ -z "$matches" ]; then
+         echo "bad usages match: $usages"
          exit 1
       else
          exit 0
