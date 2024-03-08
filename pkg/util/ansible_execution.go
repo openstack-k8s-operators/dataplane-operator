@@ -122,6 +122,7 @@ func AnsibleExecution(
 			ansibleEE.Spec.ExtraVars["edpm_override_hosts"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", targetNodeset)))
 			util.LogForObject(helper, fmt.Sprintf("for service %s, substituting existing ansible play host with '%s'.", service.Name, targetNodeset), ansibleEE)
 		}
+		ansibleEE.Spec.ExtraVars["edpm_service_name"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Name)))
 
 		for sshKeyNodeName, sshKeySecret := range sshKeySecrets {
 			if service.Spec.DeployOnAllNodeSets {
