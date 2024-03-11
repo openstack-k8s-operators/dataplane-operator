@@ -231,16 +231,17 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	// Ensure DNSData Required for Nodes
-	dnsAddresses, dnsClusterAddresses, ctlplaneSearchDomain, isReady, allHostnames, allIPs, err := deployment.EnsureDNSData(
+	dnsData := deployment.DataplaneDNSData{}
+	dnsData.EnsureDNSData(
 		ctx, helper,
 		instance, allIPSets)
 	if err != nil || !isReady {
 		return ctrl.Result{}, err
 	}
-	instance.Status.DNSClusterAddresses = dnsClusterAddresses
-	instance.Status.CtlplaneSearchDomain = ctlplaneSearchDomain
-	instance.Status.AllHostnames = allHostnames
-	instance.Status.AllIPs = allIPs
+	instance.Status.DNSClusterAddresses = dnsData.ClusterAddresses
+	instance.Status.CtlplaneSearchDomain = dnsData.CtlplaneSearchDomain
+	instance.Status.AllHostnames = dnsData.Hostnames
+	instance.Status.AllIPs = dnsData.AllIPs
 
 	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 
@@ -259,7 +260,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		helper.GetClient(),
 		time.Second*5,
 	)
-
 	if err != nil {
 		if (result != ctrl.Result{}) {
 			instance.Status.Conditions.MarkFalse(
@@ -287,7 +287,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		instance.Status.Conditions.MarkUnknown(dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 			condition.InitReason, condition.InitReason)
 		isReady, err := deployment.DeployBaremetalSet(ctx, helper, instance,
-			allIPSets, dnsAddresses)
+			allIPSets, dnsData.ServerAddresses)
 		if err != nil || !isReady {
 			return ctrl.Result{}, err
 		}
@@ -302,7 +302,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	// Generate NodeSet Inventory
 	_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
-		allIPSets, dnsAddresses, dataplaneAnsibleImageDefaults)
+		allIPSets, dnsData.ServerAddresses, dataplaneAnsibleImageDefaults)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Unable to generate inventory for %s", instance.Name)
 		util.LogErrorForObject(helper, err, errorMsg, instance)
