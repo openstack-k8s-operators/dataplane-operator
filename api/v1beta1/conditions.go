@@ -26,7 +26,7 @@ const (
 
 	// ServiceReadyCondition Status=True condition indicates if the
 	// service is finished and successful.
-	ServiceReadyCondition string = "%s service ready"
+	ServiceReadyCondition condition.Type = "ServiceReady"
 
 	// ServiceReadyMessage ready
 	ServiceReadyMessage = "%s service ready"
@@ -87,7 +87,7 @@ const (
 
 	// NodeSetDeploymentReadyCondition Status=True condition indicates if the
 	// NodeSet Deployment is finished and successful.
-	NodeSetDeploymentReadyCondition string = "Deployment ready for NodeSet"
+	NodeSetDeploymentReadyCondition condition.Type = "NodeSetDeploymentReady"
 
 	// NodeSetDeploymentReadyMessage ready
 	NodeSetDeploymentReadyMessage = "Deployment ready for NodeSet"
@@ -97,10 +97,6 @@ const (
 
 	// NodeSetDeploymentErrorMessage error
 	NodeSetDeploymentErrorMessage = "Deployment error occurred %s for NodeSet"
-
-	// NodeSetServiceDeploymentReadyCondition Status=True condition indicates if the
-	// NodeSet Deployment is finished and successful.
-	NodeSetServiceDeploymentReadyCondition string = "%s Deployment ready"
 
 	// NodeSetServiceDeploymentReadyMessage ready
 	NodeSetServiceDeploymentReadyMessage = "%s Deployment ready"

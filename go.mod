@@ -8,6 +8,7 @@ require (
 	github.com/cert-manager/cert-manager v1.13.4
 	github.com/go-logr/logr v1.4.1
 	github.com/google/uuid v1.6.0
+	github.com/iancoleman/strcase v0.3.0
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
 	github.com/onsi/ginkgo/v2 v2.16.0
 	github.com/onsi/gomega v1.31.1
