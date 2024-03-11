@@ -3,10 +3,10 @@ module github.com/openstack-k8s-operators/dataplane-operator/api
 go 1.20
 
 require (
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240221083751-49edc0df8a12
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240229121803-169ced56d56e
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240229121803-169ced56d56e
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240228041515-b764323ce1de
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240310120756-8b35d05cd24e
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240306153230-dc65ab49ebc0
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240306153230-dc65ab49ebc0
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240306124145-51d0de73a123
 	k8s.io/api v0.28.7
 	k8s.io/apimachinery v0.28.7
 	sigs.k8s.io/controller-runtime v0.16.5
@@ -55,8 +55,8 @@ require (
 	go.uber.org/goleak v1.3.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/oauth2 v0.12.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
-	golang.org/x/term v0.17.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
