@@ -185,7 +185,7 @@ func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 			Usages:      usages,
 		}
 
-		certSecret, result, err = certmanager.EnsureCert(ctx, helper, request)
+		certSecret, result, err = certmanager.EnsureCert(ctx, helper, request, instance)
 		if err != nil {
 			return nil, ctrl.Result{}, err
 		} else if (result != ctrl.Result{}) {

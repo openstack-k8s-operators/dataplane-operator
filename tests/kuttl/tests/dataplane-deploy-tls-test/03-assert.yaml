@@ -26,8 +26,8 @@ metadata:
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
-    kind: OpenStackDataPlaneDeployment
-    name: openstack-edpm-tls-ovrd
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm-tls
 spec:
   dnsNames:
   - edpm-compute-0.ctlplane.example.com
@@ -68,8 +68,8 @@ metadata:
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
-    kind: OpenStackDataPlaneDeployment
-    name: openstack-edpm-tls-ovrd
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm-tls
 spec:
   issuerRef:
     group: cert-manager.io
