@@ -33,8 +33,8 @@ data:
           ansibleHost: 192.168.122.100
           ansibleVars:
             # Same options as above for all nodes, this time for an individual
-            # node with an extra disk. With this template, the node will use both
-            # vdb and vdc
+            # node with a different disk. This node will use only vdc. It would
+            # use vdb from parent section if not defined
             edpm_swift_disks:
               - device: /dev/vdc
                 path: /srv/node/vdc
