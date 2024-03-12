@@ -19,6 +19,7 @@ package deployment
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
 
@@ -51,7 +52,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 
 	// for each node in the nodeset, issue all the TLS certs needed based on the
 	// ips or DNS Names
-	for _, node := range instance.Spec.Nodes {
+	for nodeName, node := range instance.Spec.Nodes {
 		var dnsNames map[infranetworkv1.NetNameStr]string
 		var ipsMap map[infranetworkv1.NetNameStr]string
 		var hosts []string
@@ -132,10 +133,23 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		// TODO(alee) Add an owner reference to the secret so it can be monitored
 		// We'll do this once stuggi adds a function to do this in libcommon
 
+		// NOTE: we are assuming that there will always be a ctlplane network
+		// that means if you are not using network isolation with multiple networks
+		// you should still need to have a ctlplane network at a minimum to use tls-e
+		basename := allHostnames[nodeName][CtlPlaneNetwork]
+		// in case the control plane network is not present we will fall back to the
+		// hostname, and log a warning.
+		field := reflect.ValueOf(basename)
+		if field.IsZero() {
+			basename = hostName
+			helper.GetLogger().Error(fmt.Errorf(
+				"control plane network not found for node %s, falling back to hostname", nodeName),
+				"tls-e requires a control plane network to be present")
+		}
 		// To use this cert, add it to the relevant service data
-		certsData[hostName+"-tls.key"] = certSecret.Data["tls.key"]
-		certsData[hostName+"-tls.crt"] = certSecret.Data["tls.crt"]
-		certsData[hostName+"-ca.crt"] = certSecret.Data["ca.crt"]
+		certsData[basename+"-tls.key"] = certSecret.Data["tls.key"]
+		certsData[basename+"-tls.crt"] = certSecret.Data["tls.crt"]
+		certsData[basename+"-ca.crt"] = certSecret.Data["ca.crt"]
 	}
 
 	// create a secret to hold the certs for the service
