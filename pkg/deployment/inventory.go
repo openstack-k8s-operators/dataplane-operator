@@ -256,6 +256,9 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	if template.Ansible.AnsibleVars["edpm_neutron_metadata_agent_image"] == nil {
 		group.Vars["edpm_neutron_metadata_agent_image"] = defaultImages.NeutronMetadataAgent
 	}
+	if template.Ansible.AnsibleVars["edpm_neutron_sriov_agent_image"] == nil {
+		group.Vars["edpm_neutron_sriov_image"] = defaultImages.NeutronSRIOVAgent
+	}
 	if template.Ansible.AnsibleVars["edpm_nova_compute_image"] == nil {
 		group.Vars["edpm_nova_compute_image"] = defaultImages.NovaCompute
 	}

@@ -57,6 +57,8 @@ const (
 	LogrotateDefaultImage = "quay.io/podified-antelope-centos9/openstack-cron:current-podified"
 	// NeutronMetadataAgentDefaultImage -
 	NeutronMetadataAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
+	// NeutronSRIOVAgentDefaultImage -
+	NeutronSRIOVAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"
 	// NovaComputeDefaultImage -
 	NovaComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
 	// OvnControllerAgentDefaultImage -
@@ -78,6 +80,7 @@ func SetupAnsibleImageDefaults() {
 		IscsiD:                     util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_ISCSID_DEFAULT_IMG", IscsiDDefaultImage),
 		Logrotate:                  util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG", LogrotateDefaultImage),
 		NeutronMetadataAgent:       util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_METADATA_AGENT_DEFAULT_IMG", NeutronMetadataAgentDefaultImage),
+		NeutronSRIOVAgent:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_SRIOV_AGENT_DEFAULT_IMG", NeutronSRIOVAgentDefaultImage),
 		NovaCompute:                util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG", NovaComputeDefaultImage),
 		OvnControllerAgent:         util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_CONTROLLER_AGENT_DEFAULT_IMG", OvnControllerAgentDefaultImage),
 		OvnBgpAgent:                util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE", OvnBgpAgentDefaultImage),
