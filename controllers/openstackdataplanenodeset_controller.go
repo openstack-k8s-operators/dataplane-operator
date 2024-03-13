@@ -232,12 +232,13 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	// Ensure DNSData Required for Nodes
 	dnsData := deployment.DataplaneDNSData{}
-	dnsData.EnsureDNSData(
+	err = dnsData.EnsureDNSData(
 		ctx, helper,
 		instance, allIPSets)
 	if err != nil || !isReady {
 		return ctrl.Result{}, err
 	}
+
 	instance.Status.DNSClusterAddresses = dnsData.ClusterAddresses
 	instance.Status.CtlplaneSearchDomain = dnsData.CtlplaneSearchDomain
 	instance.Status.AllHostnames = dnsData.Hostnames
