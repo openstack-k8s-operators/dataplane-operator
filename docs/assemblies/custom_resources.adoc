@@ -32,6 +32,26 @@ AnsibleEESpec is a specification of the ansible EE attributes
 |===
 | Field | Description | Scheme | Required
 
+| extraMounts
+| ExtraMounts containing files which can be mounted into an Ansible Execution Pod
+| []storage.VolMounts
+| false
+
+| env
+| Env is a list containing the environment variables to pass to the pod
+| []corev1.EnvVar
+| false
+
+| extraVars
+| ExtraVars for ansible execution
+| map[string]json.RawMessage
+| false
+
+| dnsConfig
+| DNSConfig for setting dnsservers
+| *corev1.PodDNSConfig
+| false
+
 | networkAttachments
 | NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource which allows to connect the ansibleee runner to the given network
 | []string
@@ -56,26 +76,6 @@ AnsibleEESpec is a specification of the ansible EE attributes
 | AnsibleSkipTags for ansible execution
 | string
 | false
-
-| extraVars
-| ExtraVars for ansible execution
-| map[string]json.RawMessage
-| false
-
-| extraMounts
-| ExtraMounts containing files which can be mounted into an Ansible Execution Pod
-| []storage.VolMounts
-| false
-
-| env
-| Env is a list containing the environment variables to pass to the pod
-| []corev1.EnvVar
-| false
-
-| dnsConfig
-| DNSConfig for setting dnsservers
-| *corev1.PodDNSConfig
-| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -98,11 +98,6 @@ AnsibleOpts defines a logical grouping of Ansible related configuration options.
 | string
 | false
 
-| ansiblePort
-| AnsiblePort SSH port for Ansible connection
-| int
-| false
-
 | ansibleVars
 | AnsibleVars for configuring ansible
 | map[string]json.RawMessage
@@ -111,6 +106,11 @@ AnsibleOpts defines a logical grouping of Ansible related configuration options.
 | ansibleVarsFrom
 | AnsibleVarsFrom is a list of sources to populate ansible variables from. Values defined by an AnsibleVars with a duplicate key take precedence.
 | []corev1.EnvFromSource
+| false
+
+| ansiblePort
+| AnsiblePort SSH port for Ansible connection
+| int
 | false
 |===
 
@@ -124,29 +124,14 @@ NodeSection defines the top level attributes inherited by nodes in the CR.
 |===
 | Field | Description | Scheme | Required
 
-| hostName
-| HostName - node name
-| string
+| extraMounts
+| ExtraMounts containing files which can be mounted into an Ansible Execution Pod
+| []storage.VolMounts
 | false
 
 | networks
 | Networks - Instance networks
 | []infranetworkv1.IPSetNetwork
-| false
-
-| managementNetwork
-| ManagementNetwork - Name of network to use for management (SSH/Ansible)
-| string
-| false
-
-| ansible
-| Ansible is the group of Ansible related configuration options.
-| <<ansibleopts,AnsibleOpts>>
-| false
-
-| extraMounts
-| ExtraMounts containing files which can be mounted into an Ansible Execution Pod
-| []storage.VolMounts
 | false
 
 | userData
@@ -157,6 +142,21 @@ NodeSection defines the top level attributes inherited by nodes in the CR.
 | networkData
 | NetworkData  node specific network-data
 | *corev1.SecretReference
+| false
+
+| hostName
+| HostName - node name
+| string
+| false
+
+| managementNetwork
+| ManagementNetwork - Name of network to use for management (SSH/Ansible)
+| string
+| false
+
+| ansible
+| Ansible is the group of Ansible related configuration options.
+| <<ansibleopts,AnsibleOpts>>
 | false
 |===
 
@@ -170,29 +170,14 @@ NodeTemplate is a specification of the node attributes that override top level a
 |===
 | Field | Description | Scheme | Required
 
-| ansibleSSHPrivateKeySecret
-| AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing private SSH key for connecting to node. The named secret must be of the form: Secret.data.ssh-privatekey: +++<base64 encoded="" private="" key="" contents="">+++<https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>+++</base64>+++
-| string
-| true
+| extraMounts
+| ExtraMounts containing files which can be mounted into an Ansible Execution Pod
+| []storage.VolMounts
+| false
 
 | networks
 | Networks - Instance networks
 | []infranetworkv1.IPSetNetwork
-| false
-
-| managementNetwork
-| ManagementNetwork - Name of network to use for management (SSH/Ansible)
-| string
-| true
-
-| ansible
-| Ansible is the group of Ansible related configuration options.
-| <<ansibleopts,AnsibleOpts>>
-| false
-
-| extraMounts
-| ExtraMounts containing files which can be mounted into an Ansible Execution Pod
-| []storage.VolMounts
 | false
 
 | userData
@@ -203,6 +188,21 @@ NodeTemplate is a specification of the node attributes that override top level a
 | networkData
 | NetworkData  node specific network-data
 | *corev1.SecretReference
+| false
+
+| ansibleSSHPrivateKeySecret
+| AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing private SSH key for connecting to node. The named secret must be of the form: Secret.data.ssh-privatekey: +++<base64 encoded="" private="" key="" contents="">+++<https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>+++</base64>+++
+| string
+| true
+
+| managementNetwork
+| ManagementNetwork - Name of network to use for management (SSH/Ansible)
+| string
+| true
+
+| ansible
+| Ansible is the group of Ansible related configuration options.
+| <<ansibleopts,AnsibleOpts>>
 | false
 |===
 
@@ -263,16 +263,6 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 |===
 | Field | Description | Scheme | Required
 
-| play
-| Play is an inline playbook contents that ansible will run on execution.
-| string
-| false
-
-| playbook
-| Playbook is a path to the playbook that ansible will run on this execution
-| string
-| false
-
 | configMaps
 | ConfigMaps list of ConfigMap names to mount as ExtraMounts for the OpenStackAnsibleEE
 | []string
@@ -283,18 +273,28 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | []string
 | false
 
-| openStackAnsibleEERunnerImage
-| OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
-| string
-| false
-
 | tlsCert
 | TLSCert tls certs to be generated
 | *<<openstackdataplaneservicecert,OpenstackDataPlaneServiceCert>>
 | false
 
+| play
+| Play is an inline playbook contents that ansible will run on execution.
+| string
+| false
+
+| playbook
+| Playbook is a path to the playbook that ansible will run on this execution
+| string
+| false
+
 | caCerts
 | CACerts - Secret containing the CA certificate chain
+| string
+| false
+
+| openStackAnsibleEERunnerImage
+| OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
 | string
 | false
 
@@ -494,11 +494,6 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 | map[string]<<nodesection,NodeSection>>
 | true
 
-| preProvisioned
-| \n\nPreProvisioned - Set to true if the nodes have been Pre Provisioned.
-| bool
-| false
-
 | env
 | Env is a list containing the environment variables to pass to the pod
 | []corev1.EnvVar
@@ -514,15 +509,20 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 | []string
 | true
 
-| tlsEnabled
-| TLSEnabled - Whether the node set has TLS enabled.
-| bool
-| true
-
 | tags
 | Tags - Additional tags for NodeSet
 | []string
 | false
+
+| preProvisioned
+| \n\nPreProvisioned - Set to true if the nodes have been Pre Provisioned.
+| bool
+| false
+
+| tlsEnabled
+| TLSEnabled - Whether the node set has TLS enabled.
+| bool
+| true
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -540,24 +540,9 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | condition.Conditions
 | false
 
-| deployed
-| Deployed
-| bool
-| false
-
 | deploymentStatuses
 | DeploymentStatuses
 | map[string]condition.Conditions
-| false
-
-| dnsClusterAddresses
-| DNSClusterAddresses
-| []string
-| false
-
-| ctlplaneSearchDomain
-| CtlplaneSearchDomain
-| string
 | false
 
 | allHostnames
@@ -580,6 +565,16 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | map[string]string
 | false
 
+| dnsClusterAddresses
+| DNSClusterAddresses
+| []string
+| false
+
+| ctlplaneSearchDomain
+| CtlplaneSearchDomain
+| string
+| false
+
 | configHash
 | ConfigHash - holds the curret hash of the NodeTemplate and Node sections of the struct. This hash is used to determine when new Ansible executions are required to roll out config changes.
 | string
@@ -588,6 +583,11 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | deployedConfigHash
 | DeployedConfigHash - holds the hash of the NodeTemplate and Node sections of the struct that was last deployed. This hash is used to determine when new Ansible executions are required to roll out config changes.
 | string
+| false
+
+| deployed
+| Deployed
+| bool
 | false
 |===
 
@@ -694,19 +694,9 @@ OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPl
 |===
 | Field | Description | Scheme | Required
 
-| conditions
-| Conditions
-| condition.Conditions
-| false
-
 | nodeSetConditions
 | NodeSetConditions
 | map[string]condition.Conditions
-| false
-
-| deployed
-| Deployed
-| bool
 | false
 
 | configMapHashes
@@ -717,6 +707,16 @@ OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPl
 | secretHashes
 | SecretHashes
 | map[string]string
+| false
+
+| conditions
+| Conditions
+| condition.Conditions
+| false
+
+| deployed
+| Deployed
+| bool
 | false
 |===
 

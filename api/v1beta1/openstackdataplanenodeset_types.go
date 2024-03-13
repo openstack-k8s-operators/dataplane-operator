@@ -41,12 +41,6 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	// +kubebuilder:validation:Required
 	Nodes map[string]NodeSection `json:"nodes"`
 
-	// +kubebuilder:validation:Optional
-	//
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// PreProvisioned - Set to true if the nodes have been Pre Provisioned.
-	PreProvisioned bool `json:"preProvisioned,omitempty"`
-
 	// Env is a list containing the environment variables to pass to the pod
 	// +kubebuilder:validation:Optional
 	Env []corev1.EnvVar `json:"env,omitempty"`
@@ -61,15 +55,21 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	// Services list
 	Services []string `json:"services"`
 
+	// Tags - Additional tags for NodeSet
+	// +kubebuilder:validation:Optional
+	Tags []string `json:"tags,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	//
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// PreProvisioned - Set to true if the nodes have been Pre Provisioned.
+	PreProvisioned bool `json:"preProvisioned,omitempty"`
+
 	// TLSEnabled - Whether the node set has TLS enabled.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	TLSEnabled bool `json:"tlsEnabled" yaml:"tlsEnabled"`
-
-	// Tags - Additional tags for NodeSet
-	// +kubebuilder:validation:Optional
-	Tags []string `json:"tags,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -94,18 +94,8 @@ type OpenStackDataPlaneNodeSetStatus struct {
 	// Conditions
 	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
 
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Deployed
-	Deployed bool `json:"deployed,omitempty" optional:"true"`
-
 	// DeploymentStatuses
 	DeploymentStatuses map[string]condition.Conditions `json:"deploymentStatuses,omitempty" optional:"true"`
-
-	// DNSClusterAddresses
-	DNSClusterAddresses []string `json:"dnsClusterAddresses,omitempty" optional:"true"`
-
-	// CtlplaneSearchDomain
-	CtlplaneSearchDomain string `json:"ctlplaneSearchDomain,omitempty" optional:"true"`
 
 	// AllHostnames
 	AllHostnames map[string]map[infranetworkv1.NetNameStr]string `json:"allHostnames,omitempty" optional:"true"`
@@ -119,6 +109,12 @@ type OpenStackDataPlaneNodeSetStatus struct {
 	// SecretHashes
 	SecretHashes map[string]string `json:"secretHashes,omitempty" optional:"true"`
 
+	// DNSClusterAddresses
+	DNSClusterAddresses []string `json:"dnsClusterAddresses,omitempty" optional:"true"`
+
+	// CtlplaneSearchDomain
+	CtlplaneSearchDomain string `json:"ctlplaneSearchDomain,omitempty" optional:"true"`
+
 	// ConfigHash - holds the curret hash of the NodeTemplate and Node sections of the struct.
 	// This hash is used to determine when new Ansible executions are required to roll
 	// out config changes.
@@ -129,6 +125,10 @@ type OpenStackDataPlaneNodeSetStatus struct {
 	// This hash is used to determine when new Ansible executions are required to roll
 	// out config changes.
 	DeployedConfigHash string `json:"deployedConfigHash,omitempty"`
+
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Deployed
+	Deployed bool `json:"deployed,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true
