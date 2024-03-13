@@ -409,10 +409,13 @@ func checkDeployment(helper *helper.Helper,
 				instance.Status.DeploymentStatuses = make(map[string]condition.Conditions)
 			}
 			instance.Status.DeploymentStatuses[deployment.Name] = deploymentConditions
+			if condition.IsError(deployment.Status.Conditions.Get(condition.ReadyCondition)) {
+				err = fmt.Errorf("check deploymentStatuses for more details")
+			}
 		}
 	}
 
-	return deploymentExists, isDeploymentReady, nil
+	return deploymentExists, isDeploymentReady, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
