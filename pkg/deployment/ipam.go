@@ -77,8 +77,6 @@ type DataplaneDNSData struct {
 	Hostnames map[string]map[infranetworkv1.NetNameStr]string
 	// AllIPs holds a map of all IP addresses per hostname.
 	AllIPs map[string]map[infranetworkv1.NetNameStr]string
-	// Err holds any errors returned from the Kubernetes API while retrieving data.
-	Err error
 }
 
 // createOrPatchDNSData builds the DNSData
@@ -161,13 +159,13 @@ func (dns *DataplaneDNSData) createOrPatchDNSData(ctx context.Context, helper *h
 func (dns *DataplaneDNSData) EnsureDNSData(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	allIPSets map[string]infranetworkv1.IPSet,
-) {
+) error {
 	// Verify dnsmasq CR exists
-	dns.CheckDNSService(
+	err := dns.CheckDNSService(
 		ctx, helper, instance)
 
-	if dns.Err != nil || !dns.Ready || dns.ClusterAddresses == nil {
-		if dns.Err != nil {
+	if err != nil || !dns.Ready || dns.ClusterAddresses == nil {
+		if err != nil {
 			instance.Status.Conditions.MarkFalse(
 				dataplanev1.NodeSetDNSDataReadyCondition,
 				condition.ErrorReason, condition.SeverityError,
@@ -182,17 +180,17 @@ func (dns *DataplaneDNSData) EnsureDNSData(ctx context.Context, helper *helper.H
 		if dns.ClusterAddresses == nil {
 			instance.Status.Conditions.Remove(dataplanev1.NodeSetDNSDataReadyCondition)
 		}
-		return
+		return err
 	}
 	// Create or Patch DNSData
-	err := dns.createOrPatchDNSData(
+	err = dns.createOrPatchDNSData(
 		ctx, helper, instance, allIPSets)
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
 			dataplanev1.NodeSetDNSDataReadyErrorMessage)
-		return
+		return err
 	}
 
 	dnsData := &infranetworkv1.DNSData{
@@ -208,7 +206,7 @@ func (dns *DataplaneDNSData) EnsureDNSData(ctx context.Context, helper *helper.H
 			dataplanev1.NodeSetDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
 			dataplanev1.NodeSetDNSDataReadyErrorMessage)
-		return
+		return err
 	}
 
 	if !dnsData.IsReady() {
@@ -218,12 +216,14 @@ func (dns *DataplaneDNSData) EnsureDNSData(ctx context.Context, helper *helper.H
 			condition.RequestedReason, condition.SeverityInfo,
 			dataplanev1.NodeSetDNSDataReadyWaitingMessage)
 		dns.Ready = false
-		return
+		return nil
 	}
 	instance.Status.Conditions.MarkTrue(
 		dataplanev1.NodeSetDNSDataReadyCondition,
 		dataplanev1.NodeSetDNSDataReadyMessage)
 	dns.Ready = true
+
+	return nil
 }
 
 // reserveIPs Reserves IPs by creating IPSets
@@ -288,26 +288,27 @@ func reserveIPs(ctx context.Context, helper *helper.Helper,
 // CheckDNSService checks if DNS is configured and ready
 func (dns *DataplaneDNSData) CheckDNSService(ctx context.Context, helper *helper.Helper,
 	instance client.Object,
-) {
+) error {
 	dnsmasqList := &infranetworkv1.DNSMasqList{}
 	listOpts := []client.ListOption{
 		client.InNamespace(instance.GetNamespace()),
 	}
-	dns.Err = helper.GetClient().List(ctx, dnsmasqList, listOpts...)
-	if dns.Err != nil {
+	err := helper.GetClient().List(ctx, dnsmasqList, listOpts...)
+	if err != nil {
 		dns.Ready = false
-		return
+		return err
 	}
 	if len(dnsmasqList.Items) == 0 {
 		util.LogForObject(helper, "No DNSMasq CR exists yet, DNS Service won't be used", instance)
 		dns.Ready = true
-		return
+		return nil
 	} else if !dnsmasqList.Items[0].IsReady() {
 		util.LogForObject(helper, "DNSMasq service exists, but not ready yet ", instance)
 		dns.Ready = false
-		return
+		return nil
 	}
 	dns.ClusterAddresses = dnsmasqList.Items[0].Status.DNSClusterAddresses
 	dns.ServerAddresses = dnsmasqList.Items[0].Status.DNSAddresses
 	dns.Ready = true
+	return nil
 }
