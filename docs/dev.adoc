@@ -1,6 +1,10 @@
 = Contributing
 :toc: left
-:toclevels: 5
+:toclevels: 3
+:icons: font
+:compat-mode:
+:doctype: book
+:context: osp
 
 == Getting Started
 
