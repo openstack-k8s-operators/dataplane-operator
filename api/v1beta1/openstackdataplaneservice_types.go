@@ -48,12 +48,6 @@ type OpenstackDataPlaneServiceCert struct {
 
 // OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService
 type OpenStackDataPlaneServiceSpec struct {
-	// Play is an inline playbook contents that ansible will run on execution.
-	Play string `json:"play,omitempty"`
-
-	// Playbook is a path to the playbook that ansible will run on this execution
-	Playbook string `json:"playbook,omitempty"`
-
 	// ConfigMaps list of ConfigMap names to mount as ExtraMounts for the OpenStackAnsibleEE
 	// +kubebuilder:validation:Optional
 	ConfigMaps []string `json:"configMaps,omitempty" yaml:"configMaps,omitempty"`
@@ -62,17 +56,23 @@ type OpenStackDataPlaneServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	Secrets []string `json:"secrets,omitempty"`
 
-	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
-	// +kubebuilder:validation:Optional
-	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty" yaml:"openStackAnsibleEERunnerImage,omitempty"`
-
 	// TLSCert tls certs to be generated
 	// +kubebuilder:validation:Optional
 	TLSCert *OpenstackDataPlaneServiceCert `json:"tlsCert,omitempty" yaml:"tlsCert,omitempty"`
 
+	// Play is an inline playbook contents that ansible will run on execution.
+	Play string `json:"play,omitempty"`
+
+	// Playbook is a path to the playbook that ansible will run on this execution
+	Playbook string `json:"playbook,omitempty"`
+
 	// CACerts - Secret containing the CA certificate chain
 	// +kubebuilder:validation:Optional
 	CACerts string `json:"caCerts,omitempty" yaml:"caCerts,omitempty"`
+
+	// OpenStackAnsibleEERunnerImage image to use as the ansibleEE runner image
+	// +kubebuilder:validation:Optional
+	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty" yaml:"openStackAnsibleEERunnerImage,omitempty"`
 
 	// AddCertMounts - Whether to add cert mounts
 	// +kubebuilder:validation:Optional
