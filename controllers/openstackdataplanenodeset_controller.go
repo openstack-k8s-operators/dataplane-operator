@@ -399,7 +399,13 @@ func checkDeployment(helper *helper.Helper,
 			deployment.Spec.NodeSets, instance.Name) {
 			deploymentExists = true
 			isDeploymentReady = false
-			if deployment.Status.Deployed {
+
+			// Check if the deployment is deployed (finished), and the
+			// NodeSet's ConfigHash was set on the Deployment.Status which
+			// indicates it actually deployed this NodeSet instance.
+			if deployment.Status.Deployed &&
+				slices.Contains(deployment.Status.NodeSetHashes, instance.Status.ConfigHash) {
+
 				isDeploymentReady = true
 				for k, v := range deployment.Status.ConfigMapHashes {
 					instance.Status.ConfigMapHashes[k] = v
@@ -408,6 +414,7 @@ func checkDeployment(helper *helper.Helper,
 					instance.Status.SecretHashes[k] = v
 				}
 			}
+
 			deploymentConditions := deployment.Status.NodeSetConditions[instance.Name]
 			if instance.Status.DeploymentStatuses == nil {
 				instance.Status.DeploymentStatuses = make(map[string]condition.Conditions)

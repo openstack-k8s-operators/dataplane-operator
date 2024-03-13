@@ -130,6 +130,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	if instance.Status.SecretHashes == nil {
 		instance.Status.SecretHashes = make(map[string]string)
 	}
+	if instance.Status.NodeSetHashes == nil {
+		instance.Status.NodeSetHashes = make(map[string]string)
+	}
 
 	// Ensure NodeSets
 	nodeSets := dataplanev1.OpenStackDataPlaneNodeSetList{}
@@ -346,6 +349,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	err = r.setHashes(ctx, helper, instance, nodeSets)
 	if err != nil {
 		Log.Error(err, "Error setting service hashes")
+	}
+	for _, nodeSet := range nodeSets.Items {
+		instance.Status.NodeSetHashes[nodeSet.Name] = nodeSet.Status.ConfigHash
 	}
 	Log.Info("Set status deploy true", "instance", instance)
 	return ctrl.Result{}, nil

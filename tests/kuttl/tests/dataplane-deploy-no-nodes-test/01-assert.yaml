@@ -935,3 +935,17 @@ status:
     reason: Ready
     status: "True"
     type: AnsibleExecutionJobReady
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-compute-no-nodes
+spec:
+  nodeSets:
+    - edpm-compute-no-nodes
+  ansibleExtraVars:
+    foo: bar
+status:
+  deployed: true
+  nodeSetHashes:
+    edpm-compute-no-nodes: n7h5d6h5f4h6bh7dh5bch645h555h5f8h57bh79h55h557h644hd4h68h595h644h55ch658h56fh5d5h5f7h55chffh586h5ddhddh5d6h675h87hbbq
