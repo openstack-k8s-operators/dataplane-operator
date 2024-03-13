@@ -24,6 +24,19 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+// AnsibleVarsFromSource represents the source of a set of ConfigMaps/Secrets
+type AnsibleVarsFromSource struct {
+	// An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.
+	// +optional
+	Prefix string `json:"prefix,omitempty" protobuf:"bytes,1,opt,name=prefix"`
+	// The ConfigMap to select from
+	// +optional
+	ConfigMapRef *corev1.ConfigMapEnvSource `json:"configMapRef,omitempty" protobuf:"bytes,2,opt,name=configMapRef"`
+	// The Secret to select from
+	// +optional
+	SecretRef *corev1.SecretEnvSource `json:"secretRef,omitempty" protobuf:"bytes,3,opt,name=secretRef"`
+}
+
 // AnsibleOpts defines a logical grouping of Ansible related configuration options.
 type AnsibleOpts struct {
 	// AnsibleUser SSH user for Ansible connection
@@ -47,7 +60,7 @@ type AnsibleOpts struct {
 	// AnsibleVarsFrom is a list of sources to populate ansible variables from.
 	// Values defined by an AnsibleVars with a duplicate key take precedence.
 	// +kubebuilder:validation:Optional
-	AnsibleVarsFrom []corev1.EnvFromSource `json:"ansibleVarsFrom,omitempty"`
+	AnsibleVarsFrom []AnsibleVarsFromSource `json:"ansibleVarsFrom,omitempty"`
 }
 
 // NodeSection defines the top level attributes inherited by nodes in the CR.
