@@ -1,6 +1,10 @@
 = OpenStack Data Plane Operator
 :toc: left
-:toclevels: 5
+:toclevels: 3
+:icons: font
+:compat-mode:
+:doctype: book
+:context: osp
 
 The dataplane-operator automates the deployment of an OpenStack dataplane. A
 dataplane is a collection of nodes that will be used for hosting OpenStack
