@@ -1,0 +1,11 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+delete:
+  - kind: OpenStackDataPlaneNodeSet
+    apiVersion: dataplane.openstack.org/v1beta1
+  - kind: OpenStackDataPlaneDeployment
+    apiVersion: dataplane.openstack.org/v1beta1
+  - kind: OpenStackAnsibleEE
+    apiVersion: ansibleee.openstack.org/v1beta1
+  - kind: OpenStackDataPlaneService
+    apiVersion: dataplane.openstack.org/v1beta1
