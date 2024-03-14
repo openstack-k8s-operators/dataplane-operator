@@ -185,6 +185,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
 
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+					g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_name"])).To(Equal(fmt.Sprintf("\"%s\"", serviceName)))
 					g.Expect(ansibleEE.Spec.ExtraVars).To(HaveKey("edpm_override_hosts"))
 					if service.Spec.DeployOnAllNodeSets {
 						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_override_hosts"])).To(Equal("\"all\""))
@@ -386,6 +387,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					}
 					ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+					g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_name"])).To(Equal(fmt.Sprintf("\"%s\"", serviceName)))
 					if service.Spec.DeployOnAllNodeSets {
 						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_override_hosts"])).To(Equal("\"all\""))
 					}
@@ -415,6 +417,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					}
 					ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
+					g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_name"])).To(Equal(fmt.Sprintf("\"%s\"", serviceName)))
 				}, th.Timeout, th.Interval).Should(Succeed())
 			}
 
