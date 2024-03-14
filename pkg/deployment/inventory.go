@@ -40,11 +40,8 @@ import (
 // getAnsibleVarsFrom gets ansible vars from ConfigMap/Secret
 func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace string, ansible *dataplanev1.AnsibleOpts) (map[string]string, error) {
 
-	var (
-		configMaps = make(map[string]*v1.ConfigMap)
-		secrets    = make(map[string]*v1.Secret)
-		result     = make(map[string]string)
-	)
+	var result = make(map[string]string)
+
 	client := helper.GetClient()
 
 	// AnsibleVars will override AnsibleVarsFrom variables.
@@ -53,21 +50,16 @@ func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace st
 		switch {
 		case varFrom.ConfigMapRef != nil:
 			cm := varFrom.ConfigMapRef
-			name := cm.Name
-			configMap, ok := configMaps[name]
-			if !ok {
-				optional := cm.Optional != nil && *cm.Optional
-				configMap = &v1.ConfigMap{}
-				err := client.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, configMap)
-				if err != nil {
-					if errors.IsNotFound(err) && optional {
-						// ignore error when marked optional
-						utils.LogErrorForObject(helper, err, "could not get ansible vars, the configMap: "+name+"is missing", configMap)
-						continue
-					}
-					return result, err
+			optional := cm.Optional != nil && *cm.Optional
+			configMap := &v1.ConfigMap{}
+			err := client.Get(ctx, types.NamespacedName{Name: cm.Name, Namespace: namespace}, configMap)
+			if err != nil {
+				if errors.IsNotFound(err) && optional {
+					// ignore error when marked optional
+					utils.LogErrorForObject(helper, err, "could not get ansible vars, the configMap: "+cm.Name+"is missing", configMap)
+					continue
 				}
-				configMaps[name] = configMap
+				return result, err
 			}
 
 			for k, v := range configMap.Data {
@@ -80,21 +72,16 @@ func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace st
 
 		case varFrom.SecretRef != nil:
 			s := varFrom.SecretRef
-			name := s.Name
-			secret, ok := secrets[name]
-			if !ok {
-				optional := s.Optional != nil && *s.Optional
-				secret = &v1.Secret{}
-				err := client.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, secret)
-				if err != nil {
-					if errors.IsNotFound(err) && optional {
-						// ignore error when marked optional
-						utils.LogErrorForObject(helper, err, "could not get ansible vars, the secret: "+name+"is missing", secret)
-						continue
-					}
-					return result, err
+			optional := s.Optional != nil && *s.Optional
+			secret := &v1.Secret{}
+			err := client.Get(ctx, types.NamespacedName{Name: s.Name, Namespace: namespace}, secret)
+			if err != nil {
+				if errors.IsNotFound(err) && optional {
+					// ignore error when marked optional
+					utils.LogErrorForObject(helper, err, "could not get ansible vars, the secret: "+s.Name+"is missing", secret)
+					continue
 				}
-				secrets[name] = secret
+				return result, err
 			}
 
 			for k, v := range secret.Data {
