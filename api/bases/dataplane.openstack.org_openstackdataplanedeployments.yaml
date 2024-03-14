@@ -68,6 +68,9 @@ spec:
             - deploymentRequeueTime
             - nodeSets
             type: object
+            x-kubernetes-validations:
+            - message: OpenStackDataPlaneDeployment Spec is immutable
+              rule: self == oldSelf
           status:
             properties:
               conditions:
