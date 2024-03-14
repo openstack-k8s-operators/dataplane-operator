@@ -1,20 +1,24 @@
-# permissions for end users to view openstackdataplanenodes.
+# permissions for end users to edit openstackdataplaneroles.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: openstackdataplanenode-viewer-role
+  name: openstackdataplanenodeset-editor-role
 rules:
 - apiGroups:
   - dataplane.openstack.org
   resources:
-  - openstackdataplanenodes
+  - openstackdataplanenodesets
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - dataplane.openstack.org
   resources:
-  - openstackdataplanenodes/status
+  - openstackdataplanenodesets/status
   verbs:
   - get
