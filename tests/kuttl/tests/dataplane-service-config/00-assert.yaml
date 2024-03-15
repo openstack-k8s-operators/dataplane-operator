@@ -2,7 +2,7 @@
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: kuttl-service-edpm-compute-no-nodes
+  name: kuttl-service-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1

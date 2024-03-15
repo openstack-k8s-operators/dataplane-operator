@@ -23,7 +23,7 @@ spec:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: test-service-edpm-extramounts
+  name: test-service-edpm-extramounts-edpm-extramounts
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1

@@ -2,11 +2,11 @@
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: edpm-no-nodes-custom-service
+  name: edpm-no-nodes-custom-svc
 spec:
   preProvisioned: true
   services:
-    - custom-image-service
+    - custom-img-svc
   nodes: {}
   nodeTemplate:
     ansible:
@@ -37,7 +37,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: custom-image-service-edpm-compute-no-nodes
+  name: custom-img-svc-edpm-compute-no-nodes-edpm-no-nodes-custom-svc
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -67,7 +67,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-no-nodes-custom-service
+        secretName: dataplanenodeset-edpm-no-nodes-custom-svc
   image: example.com/repo/runner-image:latest
   name: openstackansibleee
   restartPolicy: Never

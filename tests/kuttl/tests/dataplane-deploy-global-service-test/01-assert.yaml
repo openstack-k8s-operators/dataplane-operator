@@ -1,7 +1,7 @@
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: edpm-compute-global-service
+  name: edpm-compute-global
   namespace: openstack
 spec:
   services:
@@ -50,14 +50,14 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: custom-global-service-edpm-compute-global-service
+  name: custom-global-service-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   env:
@@ -66,25 +66,25 @@ spec:
   envConfigMapName: openstack-aee-default-env
   extraMounts:
   - mounts:
-    - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-global-service
-      name: ssh-key-edpm-compute-global-service
-      subPath: ssh_key_edpm-compute-global-service
+    - mountPath: /runner/env/ssh_key/ssh_key_edpm-compute-global
+      name: ssh-key-edpm-compute-global
+      subPath: ssh_key_edpm-compute-global
     - mountPath: /runner/inventory/inventory-0
       name: inventory-0
       subPath: inventory-0
     volumes:
-    - name: ssh-key-edpm-compute-global-service
+    - name: ssh-key-edpm-compute-global
       secret:
         items:
         - key: ssh-privatekey
-          path: ssh_key_edpm-compute-global-service
+          path: ssh_key_edpm-compute-global
         secretName: dataplane-ansible-ssh-private-key-secret
     - name: inventory-0
       secret:
         items:
         - key: inventory
           path: inventory-0
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   extraVars:
     edpm_override_hosts: all
   name: openstackansibleee
@@ -114,14 +114,14 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: download-cache-edpm-compute-global-service
+  name: download-cache-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   extraMounts:
@@ -144,7 +144,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.download_cache
@@ -164,14 +164,14 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: bootstrap-edpm-compute-global-service
+  name: bootstrap-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   extraMounts:
@@ -194,7 +194,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.bootstrap
@@ -215,14 +215,14 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: configure-network-edpm-compute-global-service
+  name: configure-network-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   extraMounts:
@@ -245,7 +245,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.configure_network
@@ -265,14 +265,14 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: validate-network-edpm-compute-global-service
+  name: validate-network-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   extraMounts:
@@ -295,7 +295,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.validate_network
@@ -315,14 +315,14 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: install-os-edpm-compute-global-service
+  name: install-os-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   extraMounts:
@@ -345,7 +345,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.install_os
@@ -366,14 +366,14 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: configure-os-edpm-compute-global-service
+  name: configure-os-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   extraMounts:
@@ -396,7 +396,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.configure_os
@@ -416,14 +416,14 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: run-os-edpm-compute-global-service
+  name: run-os-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   extraMounts:
@@ -446,7 +446,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.run_os
@@ -466,14 +466,14 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: install-certs-edpm-compute-global-service
+  name: install-certs-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   extraMounts:
@@ -496,7 +496,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.install_certs
@@ -517,14 +517,14 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: ovn-edpm-compute-global-service
+  name: ovn-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   extraMounts:
@@ -558,7 +558,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.ovn
@@ -579,14 +579,14 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-metadata-edpm-compute-global-service
+  name: neutron-metadata-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   extraMounts:
@@ -649,7 +649,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.neutron_metadata
@@ -670,14 +670,14 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-ovn-edpm-compute-global-service
+  name: neutron-ovn-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   extraMounts:
@@ -711,7 +711,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.neutron_ovn
@@ -732,14 +732,14 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-sriov-edpm-compute-global-service
+  name: neutron-sriov-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   extraMounts:
@@ -773,7 +773,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.neutron_sriov
@@ -794,14 +794,14 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-dhcp-edpm-compute-global-service
+  name: neutron-dhcp-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   extraMounts:
@@ -835,7 +835,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   restartPolicy: Never
   playbook: osp.edpm.neutron_dhcp
@@ -855,14 +855,14 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: libvirt-edpm-compute-global-service
+  name: libvirt-edpm-compute-global-edpm-compute-global
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-global-service
+    name: edpm-compute-global
 spec:
   backoffLimit: 6
   envConfigMapName: openstack-aee-default-env
@@ -886,7 +886,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   preserveJobs: true
   restartPolicy: Never
@@ -907,7 +907,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: nova-edpm-compute-global-service
+  name: nova-edpm-compute-global-edpm-compute-global
   namespace: openstack
 spec:
   backoffLimit: 6
@@ -972,7 +972,7 @@ spec:
         items:
         - key: inventory
           path: inventory
-        secretName: dataplanenodeset-edpm-compute-global-service
+        secretName: dataplanenodeset-edpm-compute-global
   name: openstackansibleee
   preserveJobs: true
   restartPolicy: Never

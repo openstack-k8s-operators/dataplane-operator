@@ -168,12 +168,14 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					Namespace: namespace,
 				}
 				service := GetService(dataplaneServiceName)
-				executionName := dataplaneutil.GetAnsibleExecutionNamePrefix(service)
+				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
 				//Retrieve service AnsibleEE and set JobStatus to Successful
+				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabel(
+					service, deployment, &nodeSet)
 				Eventually(func(g Gomega) {
 					// Make an AnsibleEE name for each service
 					ansibleeeName := types.NamespacedName{
-						Name:      fmt.Sprintf("%s-%s", executionName, dataplaneDeploymentName.Name),
+						Name:      aeeName,
 						Namespace: dataplaneDeploymentName.Namespace,
 					}
 					ansibleEE := &ansibleeev1.OpenStackAnsibleEE{
@@ -371,12 +373,14 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					Namespace: namespace,
 				}
 				service := GetService(dataplaneServiceName)
-				executionName := dataplaneutil.GetAnsibleExecutionNamePrefix(service)
+				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
+				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabel(
+					service, deployment, &nodeSetAlpha)
 				//Retrieve service AnsibleEE and set JobStatus to Successful
 				Eventually(func(g Gomega) {
 					// Make an AnsibleEE name for each service
 					ansibleeeName := types.NamespacedName{
-						Name:      fmt.Sprintf("%s-%s", executionName, dataplaneMultiNodesetDeploymentName.Name),
+						Name:      aeeName,
 						Namespace: dataplaneMultiNodesetDeploymentName.Namespace,
 					}
 					ansibleEE := GetAnsibleee(ansibleeeName)
@@ -401,12 +405,15 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					Namespace: namespace,
 				}
 				service := GetService(dataplaneServiceName)
-				executionName := dataplaneutil.GetAnsibleExecutionNamePrefix(service)
+				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
+				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabel(
+					service, deployment, &nodeSetBeta)
+
 				//Retrieve service AnsibleEE and set JobStatus to Successful
 				Eventually(func(g Gomega) {
 					// Make an AnsibleEE name for each service
 					ansibleeeName := types.NamespacedName{
-						Name:      fmt.Sprintf("%s-%s", executionName, dataplaneMultiNodesetDeploymentName.Name),
+						Name:      aeeName,
 						Namespace: dataplaneMultiNodesetDeploymentName.Namespace,
 					}
 					ansibleEE := GetAnsibleee(ansibleeeName)

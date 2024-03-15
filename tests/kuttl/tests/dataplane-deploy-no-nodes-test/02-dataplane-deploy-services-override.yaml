@@ -2,9 +2,9 @@
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
-  name: custom-service-override
+  name: custom-svc
 spec:
-  label: custom-service-override
+  label: custom-svc
   play: |
     - hosts: localhost
       gather_facts: no
@@ -17,9 +17,9 @@ spec:
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
-  name: edpm-compute-no-nodes-services-override
+  name: edpm-compute-no-nodes-ovrd
 spec:
   nodeSets:
     - edpm-compute-no-nodes
   servicesOverride:
-    - custom-service-override
+    - custom-svc

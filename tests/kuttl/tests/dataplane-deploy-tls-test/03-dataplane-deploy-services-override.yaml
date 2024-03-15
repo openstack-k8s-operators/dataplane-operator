@@ -2,7 +2,7 @@
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
-  name: custom-service-tls-dns-ips
+  name: tls-dns-ips
 spec:
   caCerts: combined-ca-bundle
   tlsCert:
@@ -24,7 +24,7 @@ spec:
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
-  name: custom-service-tls-dns
+  name: custom-tls-dns
 spec:
   caCerts: combined-ca-bundle
   tlsCert:
@@ -47,7 +47,7 @@ spec:
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
-  name: install-certs-override
+  name: install-certs-ovrd
 spec:
   addCertMounts: True
   play: |
@@ -62,11 +62,11 @@ spec:
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
-  name: openstack-edpm-tls-services-override
+  name: openstack-edpm-tls-ovrd
 spec:
   nodeSets:
     - openstack-edpm-tls
   servicesOverride:
-    - install-certs-override
-    - custom-service-tls-dns-ips
-    - custom-service-tls-dns
+    - install-certs-ovrd
+    - tls-dns-ips
+    - custom-tls-dns

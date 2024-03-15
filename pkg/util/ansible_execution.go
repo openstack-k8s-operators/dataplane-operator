@@ -46,7 +46,7 @@ func AnsibleExecution(
 	sshKeySecrets map[string]string,
 	inventorySecrets map[string]string,
 	aeeSpec *dataplanev1.AnsibleEESpec,
-	targetNodeset string,
+	nodeSet client.Object,
 ) error {
 	var err error
 	var cmdLineArguments strings.Builder
@@ -59,21 +59,17 @@ func AnsibleExecution(
 
 	ansibleEEMounts := storage.VolMounts{}
 
-	ansibleEE, err := GetAnsibleExecution(ctx, helper, obj, service.Name)
+	executionName, label := GetAnsibleExecutionNameAndLabel(service, obj, nodeSet)
+	ansibleEE, err := GetAnsibleExecution(ctx, helper, obj, label)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
 	}
 	if ansibleEE == nil {
-
-		executionName := fmt.Sprintf("%s-%s", GetAnsibleExecutionNamePrefix(service), obj.GetName())
 		ansibleEE = &ansibleeev1.OpenStackAnsibleEE{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      executionName,
 				Namespace: obj.GetNamespace(),
-				Labels: map[string]string{
-					service.Name: string(obj.GetUID()),
-					"osdpd":      obj.GetName(),
-				},
+				Labels:    label,
 			},
 		}
 	}
@@ -119,8 +115,9 @@ func AnsibleExecution(
 			ansibleEE.Spec.ExtraVars["edpm_override_hosts"] = json.RawMessage([]byte("\"all\""))
 			util.LogForObject(helper, fmt.Sprintf("for service %s, substituting existing ansible play host with 'all'.", service.Name), ansibleEE)
 		} else {
-			ansibleEE.Spec.ExtraVars["edpm_override_hosts"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", targetNodeset)))
-			util.LogForObject(helper, fmt.Sprintf("for service %s, substituting existing ansible play host with '%s'.", service.Name, targetNodeset), ansibleEE)
+			ansibleEE.Spec.ExtraVars["edpm_override_hosts"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", nodeSet.GetName())))
+			util.LogForObject(helper,
+				fmt.Sprintf("for service %s, substituting existing ansible play host with '%s'.", service.Name, nodeSet.GetName()), ansibleEE)
 		}
 		ansibleEE.Spec.ExtraVars["edpm_service_name"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Name)))
 
@@ -130,7 +127,7 @@ func AnsibleExecution(
 				sshKeyMountSubPath = fmt.Sprintf("ssh_key_%s", sshKeyNodeName)
 				sshKeyMountPath = fmt.Sprintf("/runner/env/ssh_key/%s", sshKeyMountSubPath)
 			} else {
-				if sshKeyNodeName != targetNodeset {
+				if sshKeyNodeName != nodeSet.GetName() {
 					continue
 				}
 				sshKeyName = "ssh-key"
@@ -174,7 +171,7 @@ func AnsibleExecution(
 				inventoryName = fmt.Sprintf("inventory-%d", inventoryIndex)
 				inventoryMountPath = fmt.Sprintf("/runner/inventory/%s", inventoryName)
 			} else {
-				if nodeName != targetNodeset {
+				if nodeName != nodeSet.GetName() {
 					continue
 				}
 				inventoryName = "inventory"
@@ -227,15 +224,13 @@ func AnsibleExecution(
 // GetAnsibleExecution gets and returns an OpenStackAnsibleEE with the given
 // label where <label>=<node UID>
 // If none is found, return nil
-func GetAnsibleExecution(ctx context.Context, helper *helper.Helper, obj client.Object, label string) (*ansibleeev1.OpenStackAnsibleEE, error) {
+func GetAnsibleExecution(ctx context.Context,
+	helper *helper.Helper, obj client.Object, labelSelector map[string]string) (*ansibleeev1.OpenStackAnsibleEE, error) {
 	var err error
 	ansibleEEs := &ansibleeev1.OpenStackAnsibleEEList{}
 
 	listOpts := []client.ListOption{
 		client.InNamespace(obj.GetNamespace()),
-	}
-	labelSelector := map[string]string{
-		label: string(obj.GetUID()),
 	}
 	if len(labelSelector) > 0 {
 		labels := client.MatchingLabels(labelSelector)
@@ -248,23 +243,46 @@ func GetAnsibleExecution(ctx context.Context, helper *helper.Helper, obj client.
 
 	var ansibleEE *ansibleeev1.OpenStackAnsibleEE
 	if len(ansibleEEs.Items) == 0 {
-		return nil, k8serrors.NewNotFound(appsv1.Resource("OpenStackAnsibleEE"), fmt.Sprintf("with label %s=%s", label, obj.GetUID()))
+		return nil, k8serrors.NewNotFound(appsv1.Resource("OpenStackAnsibleEE"), fmt.Sprintf("with label %s", labelSelector))
 	} else if len(ansibleEEs.Items) == 1 {
 		ansibleEE = &ansibleEEs.Items[0]
 	} else {
-		return nil, fmt.Errorf("multiple OpenStackAnsibleEE's found with label %s=%s", label, obj.GetUID())
+		return nil, fmt.Errorf("multiple OpenStackAnsibleEE's found with label %s", labelSelector)
 	}
 
 	return ansibleEE, nil
 }
 
-// GetAnsibleExecutionNamePrefix compute the name of the AnsibleEE
-func GetAnsibleExecutionNamePrefix(service *dataplanev1.OpenStackDataPlaneService) string {
+// getAnsibleExecutionNamePrefix compute the name of the AnsibleEE
+func getAnsibleExecutionNamePrefix(serviceName string) string {
 	var executionNamePrefix string
-	if len(service.Name) > AnsibleExecutionServiceNameLen {
-		executionNamePrefix = service.Name[:AnsibleExecutionServiceNameLen]
+	if len(serviceName) > AnsibleExecutionServiceNameLen {
+		executionNamePrefix = serviceName[:AnsibleExecutionServiceNameLen]
 	} else {
-		executionNamePrefix = service.Name
+		executionNamePrefix = serviceName
 	}
 	return executionNamePrefix
+}
+
+// GetAnsibleExecutionNameAndLabel Name and Label of AnsibleEE
+func GetAnsibleExecutionNameAndLabel(service *dataplanev1.OpenStackDataPlaneService,
+	deployment client.Object,
+	nodeset client.Object) (string, map[string]string) {
+	executionName := fmt.Sprintf("%s-%s", getAnsibleExecutionNamePrefix(service.Name), deployment.GetName())
+	if !service.Spec.DeployOnAllNodeSets {
+		executionName = fmt.Sprintf("%s-%s", executionName, nodeset.GetName())
+	}
+	if len(executionName) > AnsibleExcecutionNameLabelLen {
+		executionName = executionName[:AnsibleExcecutionNameLabelLen]
+	}
+	labelValue := string(deployment.GetUID())
+	if !service.Spec.DeployOnAllNodeSets {
+		labelValue = fmt.Sprintf("%s-%s", string(deployment.GetUID()), string(nodeset.GetUID()))
+	}
+
+	if len(labelValue) > AnsibleExcecutionNameLabelLen {
+		labelValue = labelValue[:AnsibleExcecutionNameLabelLen]
+	}
+	label := map[string]string{getAnsibleExecutionNamePrefix(service.Name): labelValue}
+	return executionName, label
 }
