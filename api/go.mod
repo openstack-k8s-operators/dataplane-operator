@@ -7,8 +7,8 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240306153230-dc65ab49ebc0
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240306153230-dc65ab49ebc0
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240306124145-51d0de73a123
-	k8s.io/api v0.28.7
-	k8s.io/apimachinery v0.28.7
+	k8s.io/api v0.28.8
+	k8s.io/apimachinery v0.28.8
 	sigs.k8s.io/controller-runtime v0.16.5
 )
 
@@ -30,7 +30,7 @@ require (
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
@@ -66,9 +66,9 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.28.7 // indirect
-	k8s.io/client-go v0.28.7 // indirect
-	k8s.io/component-base v0.28.7 // indirect
+	k8s.io/apiextensions-apiserver v0.28.8 // indirect
+	k8s.io/client-go v0.28.8 // indirect
+	k8s.io/component-base v0.28.8 // indirect
 	k8s.io/klog/v2 v2.110.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230905202853-d090da108d2f // indirect
 	k8s.io/utils v0.0.0-20240310230437-4693a0247e57 // indirect
