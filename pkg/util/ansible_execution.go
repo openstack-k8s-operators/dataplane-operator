@@ -278,14 +278,11 @@ func GetAnsibleExecutionNameAndLabel(service *dataplanev1.OpenStackDataPlaneServ
 	if len(executionName) > AnsibleExcecutionNameLabelLen {
 		executionName = executionName[:AnsibleExcecutionNameLabelLen]
 	}
-	labelValue := string(deployment.GetUID())
-	if !service.Spec.DeployOnAllNodeSets {
-		labelValue = fmt.Sprintf("%s-%s", string(deployment.GetUID()), string(nodeset.GetUID()))
-	}
 
-	if len(labelValue) > AnsibleExcecutionNameLabelLen {
-		labelValue = labelValue[:AnsibleExcecutionNameLabelLen]
+	label := map[string]string{
+		"openstackdataplaneservice":    service.Name,
+		"openstackdataplanedeployment": deployment.GetName(),
+		"openstackdataplanenodeset":    nodeset.GetName(),
 	}
-	label := map[string]string{getAnsibleExecutionNamePrefix(service.Name): labelValue}
 	return executionName, label
 }
