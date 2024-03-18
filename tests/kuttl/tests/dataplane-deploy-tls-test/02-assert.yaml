@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cert-default-service-tls-dnsnames-edpm-compute-0
+  name: cert-tls-dnsnames-edpm-compute-0
   annotations:
-    cert-manager.io/certificate-name: default-service-tls-dnsnames-edpm-compute-0
+    cert-manager.io/certificate-name: tls-dnsnames-edpm-compute-0
     cert-manager.io/issuer-group: cert-manager.io
     cert-manager.io/issuer-kind: Issuer
     cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-0
-    osdp-service: default-service-tls-dnsnames
+    osdp-service: tls-dnsnames
     osdpns: openstack-edpm-tls
 type: kubernetes.io/tls
 ---
@@ -18,24 +18,24 @@ kind: Certificate
 metadata:
   labels:
     hostname: edpm-compute-0
-    osdp-service: default-service-tls-dnsnames
+    osdp-service: tls-dnsnames
     osdpns: openstack-edpm-tls
-  name: default-service-tls-dnsnames-edpm-compute-0
+  name: tls-dnsnames-edpm-compute-0
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneDeployment
-    name: openstack-edpm-tls-deployment
+    name: openstack-edpm-tls
 spec:
   issuerRef:
     group: cert-manager.io
     kind: Issuer
     name: rootca-internal
-  secretName: cert-default-service-tls-dnsnames-edpm-compute-0
+  secretName: cert-tls-dnsnames-edpm-compute-0
   secretTemplate:
     labels:
       hostname: edpm-compute-0
-      osdp-service: default-service-tls-dnsnames
+      osdp-service: tls-dnsnames
       osdpns: openstack-edpm-tls
 ---
 # validate the alt-names and usages - which is a list with elements that can be in any order
@@ -44,7 +44,7 @@ kind: TestAssert
 commands:
   - script: |
       template='{{index .spec.dnsNames }}'
-      names=$(oc get certificate default-service-tls-dnsnames-edpm-compute-0 -n openstack -o go-template="$template")
+      names=$(oc get certificate tls-dnsnames-edpm-compute-0 -n openstack -o go-template="$template")
       echo $names > test123.data
       regex="(?=.*(edpm-compute-0\.internalapi\.example\.com))(?=.*(edpm-compute-0\.storage\.example\.com))(?=.*(edpm-compute-0\.tenant\.example\.com))(?=.*(edpm-compute-0\.ctlplane\.example\.com))"
       matches=$(grep -P "$regex" test123.data)
@@ -57,7 +57,7 @@ commands:
       fi
   - script: |
       template='{{index .spec.usages }}'
-      usages=$(oc get certificate default-service-tls-dnsnames-edpm-compute-0 -n openstack -o go-template="$template")
+      usages=$(oc get certificate tls-dnsnames-edpm-compute-0 -n openstack -o go-template="$template")
       echo $usages > test123.data
       regex="(?=.*(key encipherment))(?=.*(digital signature))(?=.*(server auth))"
       matches=$(grep -P "$regex" test123.data)
@@ -72,7 +72,7 @@ commands:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: openstack-edpm-tls-default-service-tls-dnsnames-certs
+  name: openstack-edpm-tls-tls-dnsnames-certs
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneNodeSet
@@ -82,31 +82,29 @@ type: Opaque
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  labels:
-    osdpd: openstack-edpm-tls-deployment
-  name: default-install-certs-override-openstack-edpm-tls-deployment
+  name: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: openstack-edpm-tls-deployment
+    name: openstack-edpm-tls
 spec:
   backoffLimit: 6
   extraMounts:
   - mounts:
-    - mountPath: /var/lib/openstack/certs/default-service-tls-dnsnames
-      name: openstack-edpm-tls-default-service-tls-dnsnames-certs
+    - mountPath: /var/lib/openstack/certs/tls-dnsnames
+      name: openstack-edpm-tls-tls-dnsnames-certs
     volumes:
-    - name: openstack-edpm-tls-default-service-tls-dnsnames-certs
+    - name: openstack-edpm-tls-tls-dnsnames-certs
       secret:
-        secretName: openstack-edpm-tls-default-service-tls-dnsnames-certs
+        secretName: openstack-edpm-tls-tls-dnsnames-certs
   - mounts:
-    - mountPath: /var/lib/openstack/cacerts/default-service-tls-dnsnames
-      name: default-service-tls-dnsnames-combined-ca-bundle
+    - mountPath: /var/lib/openstack/cacerts/tls-dnsnames
+      name: tls-dnsnames-combined-ca-bundle
     volumes:
-    - name: default-service-tls-dnsnames-combined-ca-bundle
+    - name: tls-dnsnames-combined-ca-bundle
       secret:
         secretName: combined-ca-bundle
   - mounts:
@@ -147,14 +145,12 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  labels:
-    osdpd: openstack-edpm-tls-deployment
-  name: default-service-tls-dnsnames-openstack-edpm-tls-deployment
+  name: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneDeployment
-    name: openstack-edpm-tls-deployment
+    name: openstack-edpm-tls
 spec:
   backoffLimit: 6
   extraMounts:

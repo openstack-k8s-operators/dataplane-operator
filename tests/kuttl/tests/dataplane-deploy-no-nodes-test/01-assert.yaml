@@ -44,21 +44,11 @@ status:
     reason: Ready
     status: "True"
     type: SetupReady
-  configMapHashes:
-    ovncontroller-config: n647h6fh674h55fh56ch5bh68bh5fdh8dh59ch58dhdch59ch646h568h675h99h66bh59bhcch5b4h589h674h568hbch84h554h95h6dhc4hbh699q
-  secretHashes:
-    neutron-dhcp-agent-neutron-config: n68h676h98h689hd4h575h5dbh694h6fh688h57h665h5c5h56dh5ddh65bh5d7h5cdh644hb8h8fh5d9h5b9h555h9ch56dh5fh6chd4h5c5h5c5h68q
-    neutron-ovn-agent-neutron-config: n5f4h89hb8h645h55bh657h9fh5d9h5c6h595h9dh667h5f4hfhffh7fh685h56ch57fh679h5ddh5ddh95h696hbch5c7h669h84h54dh685hfh85q
-    neutron-ovn-metadata-agent-neutron-config: n68dh585h666h5c4h568hf7h65fh695h649hb9h657h5f6h548h679h77h5b4h664h8h5b8h654h5hf5h674h664h545h74h58ch57ch8ch56h54fh5ddq
-    neutron-sriov-agent-neutron-config: n685h567h697h5bch8ch5cfh87h698h658h684h8h99h5dch5c5h699h79hb5h87h66dh664h546h586h7bh56fh5d6h5d4h566h56bh87h678h696h56cq
-    nova-cell1-compute-config: n89hd6h5h545h644h58h556hd9h5c5h598hd4h7bh5f9h5bdh649hb5h99h686h677h8ch575h665h574h587h5b6h5ddh8fh687h9bh657h675h97q
-    nova-metadata-neutron-config: n7fh696h674h5b9h68dh77h677h5c5hd9h5dbh89h646h696h65ch64bh86hd8h56h78h558h5h5c7h87h86h5bh5bch78h6ch5cbh54fh56fhfdq
-    nova-migration-ssh-key: n64dh97h54dhffh65fh577h59bh664hbch54dhcbh547hdbhdch655hd9h675h5d4h67dh5ch67bh64h5fdh5c8h5cdh66bh5f5h58dhcbh9bh66bhd4q
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: download-cache-edpm-compute-no-nodes
+  name: download-cache-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -108,7 +98,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: bootstrap-edpm-compute-no-nodes
+  name: bootstrap-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -161,7 +151,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: configure-network-edpm-compute-no-nodes
+  name: configure-network-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -211,7 +201,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: validate-network-edpm-compute-no-nodes
+  name: validate-network-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -261,7 +251,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: install-os-edpm-compute-no-nodes
+  name: install-os-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -312,7 +302,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: configure-os-edpm-compute-no-nodes
+  name: configure-os-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -362,7 +352,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: run-os-edpm-compute-no-nodes
+  name: run-os-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -412,7 +402,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: install-certs-edpm-compute-no-nodes
+  name: install-certs-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -463,7 +453,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: ovn-edpm-compute-no-nodes
+  name: ovn-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -525,7 +515,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-metadata-edpm-compute-no-nodes
+  name: neutron-metadata-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -616,7 +606,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-ovn-edpm-compute-no-nodes
+  name: neutron-ovn-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -678,7 +668,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-sriov-edpm-compute-no-nodes
+  name: neutron-sriov-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -740,7 +730,7 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: neutron-dhcp-edpm-compute-no-nodes
+  name: neutron-dhcp-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -801,7 +791,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: libvirt-edpm-compute-no-nodes
+  name: libvirt-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -853,7 +843,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: nova-edpm-compute-no-nodes
+  name: nova-edpm-compute-no-nodes-edpm-compute-no-nodes
   namespace: openstack
 spec:
   backoffLimit: 6

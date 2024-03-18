@@ -1,17 +1,17 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cert-custom-service-tls-dns-ips-edpm-compute-0
+  name: cert-tls-dns-ips-edpm-compute-0
   annotations:
     cert-manager.io/alt-names: edpm-compute-0.ctlplane.example.com
-    cert-manager.io/certificate-name: custom-service-tls-dns-ips-edpm-compute-0
+    cert-manager.io/certificate-name: tls-dns-ips-edpm-compute-0
     cert-manager.io/ip-sans: 192.168.122.100
     cert-manager.io/issuer-group: cert-manager.io
     cert-manager.io/issuer-kind: Issuer
     cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-0
-    osdp-service: custom-service-tls-dns-ips
+    osdp-service: tls-dns-ips
     osdpns: openstack-edpm-tls
 type: kubernetes.io/tls
 ---
@@ -20,14 +20,14 @@ kind: Certificate
 metadata:
   labels:
     hostname: edpm-compute-0
-    osdp-service: custom-service-tls-dns-ips
+    osdp-service: tls-dns-ips
     osdpns: openstack-edpm-tls
-  name: custom-service-tls-dns-ips-edpm-compute-0
+  name: tls-dns-ips-edpm-compute-0
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneDeployment
-    name: openstack-edpm-tls-services-override
+    name: openstack-edpm-tls-ovrd
 spec:
   dnsNames:
   - edpm-compute-0.ctlplane.example.com
@@ -35,25 +35,25 @@ spec:
     group: cert-manager.io
     kind: Issuer
     name: rootca-internal
-  secretName: cert-custom-service-tls-dns-ips-edpm-compute-0
+  secretName: cert-tls-dns-ips-edpm-compute-0
   secretTemplate:
     labels:
       hostname: edpm-compute-0
-      osdp-service: custom-service-tls-dns-ips
+      osdp-service: tls-dns-ips
       osdpns: openstack-edpm-tls
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cert-custom-service-tls-dns-edpm-compute-0
+  name: cert-custom-tls-dns-edpm-compute-0
   annotations:
-    cert-manager.io/certificate-name: custom-service-tls-dns-edpm-compute-0
+    cert-manager.io/certificate-name: custom-tls-dns-edpm-compute-0
     cert-manager.io/issuer-group: cert-manager.io
     cert-manager.io/issuer-kind: Issuer
     cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-0
-    osdp-service: custom-service-tls-dns
+    osdp-service: custom-tls-dns
     osdpns: openstack-edpm-tls
 type: kubernetes.io/tls
 ---
@@ -62,24 +62,24 @@ kind: Certificate
 metadata:
   labels:
     hostname: edpm-compute-0
-    osdp-service: custom-service-tls-dns
+    osdp-service: custom-tls-dns
     osdpns: openstack-edpm-tls
-  name: custom-service-tls-dns-edpm-compute-0
+  name: custom-tls-dns-edpm-compute-0
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneDeployment
-    name: openstack-edpm-tls-services-override
+    name: openstack-edpm-tls-ovrd
 spec:
   issuerRef:
     group: cert-manager.io
     kind: Issuer
     name: rootca-internal
-  secretName: cert-custom-service-tls-dns-edpm-compute-0
+  secretName: cert-custom-tls-dns-edpm-compute-0
   secretTemplate:
     labels:
       hostname: edpm-compute-0
-      osdp-service: custom-service-tls-dns
+      osdp-service: custom-tls-dns
       osdpns: openstack-edpm-tls
 ---
 # validate the alt-names and usages - which is a list with elements that can be in any order
@@ -88,7 +88,7 @@ kind: TestAssert
 commands:
   - script: |
       template='{{index .spec.dnsNames }}'
-      names=$(oc get certificate custom-service-tls-dns-edpm-compute-0 -n openstack -o go-template="$template")
+      names=$(oc get certificate custom-tls-dns-edpm-compute-0 -n openstack -o go-template="$template")
       echo $names > test123.data
       regex="(?=.*(edpm-compute-0\.internalapi\.example\.com))(?=.*(edpm-compute-0\.storage\.example\.com))(?=.*(edpm-compute-0\.tenant\.example\.com))(?=.*(edpm-compute-0\.ctlplane\.example\.com))"
       matches=$(grep -P "$regex" test123.data)
@@ -101,7 +101,7 @@ commands:
       fi
   - script: |
       template='{{index .spec.usages }}'
-      usages=$(oc get certificate custom-service-tls-dns-edpm-compute-0 -n openstack -o go-template="$template")
+      usages=$(oc get certificate custom-tls-dns-edpm-compute-0 -n openstack -o go-template="$template")
       echo $usages > test123.data
       regex="(?=.*(key encipherment))(?=.*(digital signature))(?=.*(server auth))(?=.*(client auth))"
       matches=$(grep -P "$regex" test123.data)
@@ -116,7 +116,7 @@ commands:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: openstack-edpm-tls-custom-service-tls-dns-ips-certs
+  name: openstack-edpm-tls-tls-dns-ips-certs
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneNodeSet
@@ -126,7 +126,7 @@ type: Opaque
 apiVersion: v1
 kind: Secret
 metadata:
-  name: openstack-edpm-tls-custom-service-tls-dns-certs
+  name: openstack-edpm-tls-custom-tls-dns-certs
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneNodeSet
@@ -136,45 +136,43 @@ type: Opaque
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  labels:
-    osdpd: openstack-edpm-tls-services-override
-  name: install-certs-override-openstack-edpm-tls-services-override
+  name: install-certs-ovrd-openstack-edpm-tls-ovrd-openstack-edpm-tls
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: openstack-edpm-tls-services-override
+    name: openstack-edpm-tls-ovrd
 spec:
   backoffLimit: 6
   extraMounts:
   - mounts:
-    - mountPath: /var/lib/openstack/certs/custom-service-tls-dns-ips
-      name: openstack-edpm-tls-custom-service-tls-dns-ips-certs
+    - mountPath: /var/lib/openstack/certs/tls-dns-ips
+      name: openstack-edpm-tls-tls-dns-ips-certs
     volumes:
-    - name: openstack-edpm-tls-custom-service-tls-dns-ips-certs
+    - name: openstack-edpm-tls-tls-dns-ips-certs
       secret:
-        secretName: openstack-edpm-tls-custom-service-tls-dns-ips-certs
+        secretName: openstack-edpm-tls-tls-dns-ips-certs
   - mounts:
-    - mountPath: /var/lib/openstack/cacerts/custom-service-tls-dns-ips
-      name: custom-service-tls-dns-ips-combined-ca-bundle
+    - mountPath: /var/lib/openstack/cacerts/tls-dns-ips
+      name: tls-dns-ips-combined-ca-bundle
     volumes:
-    - name: custom-service-tls-dns-ips-combined-ca-bundle
+    - name: tls-dns-ips-combined-ca-bundle
       secret:
         secretName: combined-ca-bundle
   - mounts:
-    - mountPath: /var/lib/openstack/certs/custom-service-tls-dns
-      name: openstack-edpm-tls-custom-service-tls-dns-certs
+    - mountPath: /var/lib/openstack/certs/custom-tls-dns
+      name: openstack-edpm-tls-custom-tls-dns-certs
     volumes:
-    - name: openstack-edpm-tls-custom-service-tls-dns-certs
+    - name: openstack-edpm-tls-custom-tls-dns-certs
       secret:
-        secretName: openstack-edpm-tls-custom-service-tls-dns-certs
+        secretName: openstack-edpm-tls-custom-tls-dns-certs
   - mounts:
-    - mountPath: /var/lib/openstack/cacerts/custom-service-tls-dns
-      name: custom-service-tls-dns-combined-ca-bundle
+    - mountPath: /var/lib/openstack/cacerts/custom-tls-dns
+      name: custom-tls-dns-combined-ca-bundle
     volumes:
-    - name: custom-service-tls-dns-combined-ca-bundle
+    - name: custom-tls-dns-combined-ca-bundle
       secret:
         secretName: combined-ca-bundle
   - mounts:
@@ -215,14 +213,12 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  labels:
-    osdpd: openstack-edpm-tls-services-override
-  name: custom-service-tls-dns-ips-openstack-edpm-tls-services-override
+  name: tls-dns-ips-openstack-edpm-tls-ovrd-openstack-edpm-tls
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneDeployment
-    name: openstack-edpm-tls-services-override
+    name: openstack-edpm-tls-ovrd
 spec:
   backoffLimit: 6
   extraMounts:
@@ -264,14 +260,12 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  labels:
-    osdpd: openstack-edpm-tls-services-override
-  name: custom-service-tls-dns-openstack-edpm-tls-services-override
+  name: custom-tls-dns-openstack-edpm-tls-ovrd-openstack-edpm-tls
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     kind: OpenStackDataPlaneDeployment
-    name: openstack-edpm-tls-services-override
+    name: openstack-edpm-tls-ovrd
 spec:
   backoffLimit: 6
   extraMounts:

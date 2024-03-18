@@ -2,14 +2,14 @@ apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   generation: 1
-  name: custom-service-override-edpm-compute-no-nodes-services-override
+  name: custom-svc-edpm-compute-no-nodes-ovrd-edpm-compute-no-nodes
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: OpenStackDataPlaneDeployment
-    name: edpm-compute-no-nodes-services-override
+    name: edpm-compute-no-nodes-ovrd
 spec:
   backoffLimit: 6
   env:

@@ -149,7 +149,8 @@ func (d *Deployer) ConditionalDeploy(
 	}
 
 	if nsConditions.IsFalse(readyCondition) {
-		ansibleEE, err := dataplaneutil.GetAnsibleExecution(d.Ctx, d.Helper, d.Deployment, foundService.Name)
+		_, labelSelector := dataplaneutil.GetAnsibleExecutionNameAndLabel(&foundService, d.Deployment, d.NodeSet)
+		ansibleEE, err := dataplaneutil.GetAnsibleExecution(d.Ctx, d.Helper, d.Deployment, labelSelector)
 		if err != nil {
 			// Return nil if we don't have AnsibleEE available yet
 			if k8s_errors.IsNotFound(err) {

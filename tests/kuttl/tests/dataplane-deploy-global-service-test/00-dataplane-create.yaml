@@ -115,7 +115,7 @@ data:
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: edpm-compute-global-service
+  name: edpm-compute-global
 spec:
   preProvisioned: true
   services:

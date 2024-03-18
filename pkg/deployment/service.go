@@ -51,7 +51,7 @@ func (d *Deployer) DeployService(foundService dataplanev1.OpenStackDataPlaneServ
 		d.AnsibleSSHPrivateKeySecrets,
 		d.InventorySecrets,
 		d.AeeSpec,
-		d.NodeSet.Name)
+		d.NodeSet)
 
 	if err != nil {
 		d.Helper.GetLogger().Error(err, fmt.Sprintf("Unable to execute Ansible for %s", foundService.Name))

@@ -1,7 +1,7 @@
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
-  name: default-service-tls-dnsnames
+  name: tls-dnsnames
 spec:
   caCerts: combined-ca-bundle
   tlsCert:
@@ -19,7 +19,7 @@ spec:
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
-  name: default-install-certs-override
+  name: install-certs-ovrd
 spec:
   addCertMounts: True
   play: |
@@ -77,8 +77,8 @@ spec:
   preProvisioned: true
   tlsEnabled: true
   services:
-  - default-install-certs-override
-  - default-service-tls-dnsnames
+  - install-certs-ovrd
+  - tls-dnsnames
 status:
   conditions:
   - message: Deployment not started
