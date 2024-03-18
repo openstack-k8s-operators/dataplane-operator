@@ -155,8 +155,8 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				// OpenStackBaremetalSet has the same name as OpenStackDataPlaneNodeSet
 				g.Expect(th.K8sClient.Get(th.Ctx, dataplaneNodeSetName, &baremetal)).To(Succeed())
 				baremetal.Status.Conditions.MarkTrue(
-					baremetalv1.OpenStackBaremetalSetBmhProvisioningReadyCondition,
-					baremetalv1.OpenStackBaremetalSetBmhProvisioningReadyMessage)
+					condition.ReadyCondition,
+					condition.ReadyMessage)
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, &baremetal)).To(Succeed())
 
 			}, th.Timeout, th.Interval).Should(Succeed())
@@ -354,14 +354,14 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				// OpenStackBaremetalSet has the same name as OpenStackDataPlaneNodeSet
 				g.Expect(th.K8sClient.Get(th.Ctx, alphaNodeSetName, &baremetalAlpha)).To(Succeed())
 				baremetalAlpha.Status.Conditions.MarkTrue(
-					baremetalv1.OpenStackBaremetalSetBmhProvisioningReadyCondition,
-					baremetalv1.OpenStackBaremetalSetBmhProvisioningReadyMessage)
+					condition.ReadyCondition,
+					condition.ReadyMessage)
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, &baremetalAlpha)).To(Succeed())
 				// OpenStackBaremetalSet has the same name as OpenStackDataPlaneNodeSet
 				g.Expect(th.K8sClient.Get(th.Ctx, betaNodeSetName, &baremetalBeta)).To(Succeed())
 				baremetalBeta.Status.Conditions.MarkTrue(
-					baremetalv1.OpenStackBaremetalSetBmhProvisioningReadyCondition,
-					baremetalv1.OpenStackBaremetalSetBmhProvisioningReadyMessage)
+					condition.ReadyCondition,
+					condition.ReadyMessage)
 				g.Expect(th.K8sClient.Status().Update(th.Ctx, &baremetalBeta)).To(Succeed())
 
 			}, th.Timeout, th.Interval).Should(Succeed())

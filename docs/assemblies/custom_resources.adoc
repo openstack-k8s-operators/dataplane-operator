@@ -190,6 +190,11 @@ NodeSection defines the top level attributes inherited by nodes in the CR.
 | NetworkData  node specific network-data
 | *corev1.SecretReference
 | false
+
+| preprovisioningNetworkDataName
+| PreprovisioningNetworkDataName - NetworkData secret name in the local namespace for pre-provisioing
+| string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>

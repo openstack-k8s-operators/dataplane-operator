@@ -6,7 +6,7 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240310120756-8b35d05cd24e
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240306153230-dc65ab49ebc0
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240306153230-dc65ab49ebc0
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240306124145-51d0de73a123
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240318080957-e5f6ab918182
 	k8s.io/api v0.28.8
 	k8s.io/apimachinery v0.28.8
 	sigs.k8s.io/controller-runtime v0.16.5
@@ -41,7 +41,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
-	github.com/metal3-io/baremetal-operator/apis v0.5.0 // indirect
+	github.com/metal3-io/baremetal-operator/apis v0.5.1 // indirect
 	github.com/metal3-io/baremetal-operator/pkg/hardwareutils v0.4.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect

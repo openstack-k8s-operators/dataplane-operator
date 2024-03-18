@@ -91,6 +91,7 @@ func (spec *OpenStackDataPlaneNodeSetSpec) Default() {
 			instanceSpec := baremetalv1.InstanceSpec{}
 			instanceSpec.UserData = node.UserData
 			instanceSpec.NetworkData = node.NetworkData
+			instanceSpec.PreprovisioningNetworkDataName = node.PreprovisioningNetworkDataName
 			nodeSetHostMap[node.HostName] = instanceSpec
 		}
 		spec.BaremetalSetTemplate.BaremetalHosts = nodeSetHostMap
