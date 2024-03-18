@@ -59,7 +59,7 @@ func AnsibleExecution(
 
 	ansibleEEMounts := storage.VolMounts{}
 
-	executionName, label := GetAnsibleExecutionNameAndLabel(service, obj, nodeSet)
+	executionName, label := GetAnsibleExecutionNameAndLabel(service, obj.GetName(), nodeSet.GetName())
 	ansibleEE, err := GetAnsibleExecution(ctx, helper, obj, label)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
@@ -269,11 +269,11 @@ func getAnsibleExecutionNamePrefix(serviceName string) string {
 
 // GetAnsibleExecutionNameAndLabel Name and Label of AnsibleEE
 func GetAnsibleExecutionNameAndLabel(service *dataplanev1.OpenStackDataPlaneService,
-	deployment client.Object,
-	nodeset client.Object) (string, map[string]string) {
-	executionName := fmt.Sprintf("%s-%s", getAnsibleExecutionNamePrefix(service.Name), deployment.GetName())
+	deploymentName string,
+	nodeSetName string) (string, map[string]string) {
+	executionName := fmt.Sprintf("%s-%s", getAnsibleExecutionNamePrefix(service.Name), deploymentName)
 	if !service.Spec.DeployOnAllNodeSets {
-		executionName = fmt.Sprintf("%s-%s", executionName, nodeset.GetName())
+		executionName = fmt.Sprintf("%s-%s", executionName, nodeSetName)
 	}
 	if len(executionName) > AnsibleExcecutionNameLabelLen {
 		executionName = executionName[:AnsibleExcecutionNameLabelLen]
@@ -281,8 +281,8 @@ func GetAnsibleExecutionNameAndLabel(service *dataplanev1.OpenStackDataPlaneServ
 
 	label := map[string]string{
 		"openstackdataplaneservice":    service.Name,
-		"openstackdataplanedeployment": deployment.GetName(),
-		"openstackdataplanenodeset":    nodeset.GetName(),
+		"openstackdataplanedeployment": deploymentName,
+		"openstackdataplanenodeset":    nodeSetName,
 	}
 	return executionName, label
 }
