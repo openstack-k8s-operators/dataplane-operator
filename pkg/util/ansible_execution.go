@@ -41,7 +41,7 @@ import (
 func AnsibleExecution(
 	ctx context.Context,
 	helper *helper.Helper,
-	obj client.Object,
+	deployment *dataplanev1.OpenStackDataPlaneDeployment,
 	service *dataplanev1.OpenStackDataPlaneService,
 	sshKeySecrets map[string]string,
 	inventorySecrets map[string]string,
@@ -59,8 +59,8 @@ func AnsibleExecution(
 
 	ansibleEEMounts := storage.VolMounts{}
 
-	executionName, label := GetAnsibleExecutionNameAndLabel(service, obj.GetName(), nodeSet.GetName())
-	ansibleEE, err := GetAnsibleExecution(ctx, helper, obj, label)
+	executionName, label := GetAnsibleExecutionNameAndLabel(service, deployment.GetName(), nodeSet.GetName())
+	ansibleEE, err := GetAnsibleExecution(ctx, helper, deployment, label)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
 	}
@@ -68,7 +68,7 @@ func AnsibleExecution(
 		ansibleEE = &ansibleeev1.OpenStackAnsibleEE{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      executionName,
-				Namespace: obj.GetNamespace(),
+				Namespace: deployment.GetNamespace(),
 				Labels:    label,
 			},
 		}
@@ -208,7 +208,7 @@ func AnsibleExecution(
 		ansibleEE.Spec.ExtraMounts = append(aeeSpec.ExtraMounts, []storage.VolMounts{ansibleEEMounts}...)
 		ansibleEE.Spec.Env = aeeSpec.Env
 
-		err := controllerutil.SetControllerReference(obj, ansibleEE, helper.GetScheme())
+		err := controllerutil.SetControllerReference(deployment, ansibleEE, helper.GetScheme())
 		if err != nil {
 			return err
 		}
