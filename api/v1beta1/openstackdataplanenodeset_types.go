@@ -80,6 +80,7 @@ type OpenStackDataPlaneNodeSetSpec struct {
 //+kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
 
 // OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets API
+// OpenStackDataPlaneNodeSet name must be a valid RFC1123 as it is used in labels
 type OpenStackDataPlaneNodeSet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

@@ -87,6 +87,7 @@ type OpenStackDataPlaneDeploymentStatus struct {
 //+kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
 
 // OpenStackDataPlaneDeployment is the Schema for the openstackdataplanedeployments API
+// OpenStackDataPlaneDeployment name must be a valid RFC1123 as it is used in labels
 type OpenStackDataPlaneDeployment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

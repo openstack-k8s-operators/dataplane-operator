@@ -22,6 +22,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"golang.org/x/exp/slices"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -173,6 +174,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	Log := r.GetLogger(ctx)
 	Log.Info("Reconciling NodeSet")
 
+	validate := validator.New()
+
 	// Fetch the OpenStackDataPlaneNodeSet instance
 	instance := &dataplanev1.OpenStackDataPlaneNodeSet{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -243,7 +246,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	// Ensure Services
-	err = deployment.EnsureServices(ctx, helper, instance)
+	err = deployment.EnsureServices(ctx, helper, instance, validate)
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.SetupReadyCondition,

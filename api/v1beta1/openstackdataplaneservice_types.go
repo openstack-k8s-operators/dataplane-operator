@@ -99,6 +99,7 @@ type OpenStackDataPlaneServiceStatus struct {
 //+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Data Plane Service"
 
 // OpenStackDataPlaneService is the Schema for the openstackdataplaneservices API
+// OpenStackDataPlaneService name must be a valid RFC1123 as it is used in labels
 type OpenStackDataPlaneService struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

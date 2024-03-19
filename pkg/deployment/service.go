@@ -28,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	"github.com/go-playground/validator/v10"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -72,7 +73,7 @@ func GetService(ctx context.Context, helper *helper.Helper, service string) (dat
 }
 
 // EnsureServices - ensure the OpenStackDataPlaneServices exist
-func EnsureServices(ctx context.Context, helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneNodeSet) error {
+func EnsureServices(ctx context.Context, helper *helper.Helper, instance *dataplanev1.OpenStackDataPlaneNodeSet, validation *validator.Validate) error {
 	servicesPath, found := os.LookupEnv("OPERATOR_SERVICES")
 	if !found {
 		servicesPath = "config/services"
@@ -116,7 +117,11 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 			helper.GetLogger().Info("Service Metadata decode error")
 			return err
 		}
-
+		// Check if service name matches RFC1123 for use in labels
+		if err = validation.Var(serviceObjMeta.Name, "hostname_rfc1123"); err != nil {
+			helper.GetLogger().Info("service name must follow RFC1123")
+			return err
+		}
 		roleContainsService := false
 		for _, roleServiceName := range instance.Spec.Services {
 			if roleServiceName == serviceObjMeta.Name {

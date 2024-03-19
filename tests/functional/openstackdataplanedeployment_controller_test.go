@@ -170,7 +170,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				service := GetService(dataplaneServiceName)
 				deployment := GetDataplaneDeployment(dataplaneDeploymentName)
 				//Retrieve service AnsibleEE and set JobStatus to Successful
-				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabel(
+				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
 					service, deployment.GetName(), nodeSet.GetName())
 				Eventually(func(g Gomega) {
 					// Make an AnsibleEE name for each service
@@ -374,7 +374,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				}
 				service := GetService(dataplaneServiceName)
 				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
-				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabel(
+				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
 					service, deployment.GetName(), nodeSetAlpha.GetName())
 				//Retrieve service AnsibleEE and set JobStatus to Successful
 				Eventually(func(g Gomega) {
@@ -406,7 +406,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				}
 				service := GetService(dataplaneServiceName)
 				deployment := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
-				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabel(
+				aeeName, _ := dataplaneutil.GetAnsibleExecutionNameAndLabels(
 					service, deployment.GetName(), nodeSetBeta.GetName())
 
 				//Retrieve service AnsibleEE and set JobStatus to Successful

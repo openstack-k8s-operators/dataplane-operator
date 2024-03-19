@@ -59,8 +59,8 @@ func AnsibleExecution(
 
 	ansibleEEMounts := storage.VolMounts{}
 
-	executionName, label := GetAnsibleExecutionNameAndLabel(service, deployment.GetName(), nodeSet.GetName())
-	ansibleEE, err := GetAnsibleExecution(ctx, helper, deployment, label)
+	executionName, labels := GetAnsibleExecutionNameAndLabels(service, deployment.GetName(), nodeSet.GetName())
+	ansibleEE, err := GetAnsibleExecution(ctx, helper, deployment, labels)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
 	}
@@ -69,7 +69,7 @@ func AnsibleExecution(
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      executionName,
 				Namespace: deployment.GetNamespace(),
-				Labels:    label,
+				Labels:    labels,
 			},
 		}
 	}
@@ -225,8 +225,11 @@ func AnsibleExecution(
 }
 
 // GetAnsibleExecution gets and returns an OpenStackAnsibleEE with the given
-// label where <label>=<node UID>
-// If none is found, return nil
+// labels where
+// "openstackdataplaneservice":    <serviceName>,
+// "openstackdataplanedeployment": <deploymentName>,
+// "openstackdataplanenodeset":    <nodeSetName>,
+// If none or more than one is found, return nil and error
 func GetAnsibleExecution(ctx context.Context,
 	helper *helper.Helper, obj client.Object, labelSelector map[string]string) (*ansibleeev1.OpenStackAnsibleEE, error) {
 	var err error
@@ -267,8 +270,8 @@ func getAnsibleExecutionNamePrefix(serviceName string) string {
 	return executionNamePrefix
 }
 
-// GetAnsibleExecutionNameAndLabel Name and Label of AnsibleEE
-func GetAnsibleExecutionNameAndLabel(service *dataplanev1.OpenStackDataPlaneService,
+// GetAnsibleExecutionNameAndLabels Name and Labels of AnsibleEE
+func GetAnsibleExecutionNameAndLabels(service *dataplanev1.OpenStackDataPlaneService,
 	deploymentName string,
 	nodeSetName string) (string, map[string]string) {
 	executionName := fmt.Sprintf("%s-%s", getAnsibleExecutionNamePrefix(service.Name), deploymentName)
@@ -279,10 +282,10 @@ func GetAnsibleExecutionNameAndLabel(service *dataplanev1.OpenStackDataPlaneServ
 		executionName = executionName[:AnsibleExcecutionNameLabelLen]
 	}
 
-	label := map[string]string{
+	labels := map[string]string{
 		"openstackdataplaneservice":    service.Name,
 		"openstackdataplanedeployment": deploymentName,
 		"openstackdataplanenodeset":    nodeSetName,
 	}
-	return executionName, label
+	return executionName, labels
 }

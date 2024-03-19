@@ -24,6 +24,7 @@ import (
 
 	"golang.org/x/exp/slices"
 
+	"github.com/go-playground/validator/v10"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -126,6 +127,15 @@ func (r *OpenStackDataPlaneNodeSet) ValidateCreate() (admission.Warnings, error)
 	if err != nil {
 		return nil, err
 	}
+	// Check if OpenStackDataPlaneNodeSet name matches RFC1123 for use in labels
+	validate := validator.New()
+	if err = validate.Var(r.Name, "hostname_rfc1123"); err != nil {
+		openstackdataplanenodesetlog.Error(err, "Error validating OpenStackDataPlaneNodeSet name, name must follow RFC1123")
+		errors = append(errors, field.Invalid(
+			field.NewPath("Name"),
+			r.Name,
+			fmt.Sprintf("Error validating OpenStackDataPlaneNodeSet name %s, name must follow RFC1123", r.Name)))
+	}
 
 	// If this is the first NodeSet being created, then there can be no duplicates
 	// we can exit early here.
@@ -133,9 +143,9 @@ func (r *OpenStackDataPlaneNodeSet) ValidateCreate() (admission.Warnings, error)
 		return nil, nil
 	}
 
-	errors = r.duplicateNodeCheck(nodeSetList)
+	errors = append(errors, r.duplicateNodeCheck(nodeSetList)...)
 
-	if errors != nil {
+	if len(errors) > 0 {
 		return nil, apierrors.NewInvalid(
 			schema.GroupKind{Group: "dataplane.openstack.org", Kind: "OpenStackDataPlaneNodeSet"},
 			r.Name,
