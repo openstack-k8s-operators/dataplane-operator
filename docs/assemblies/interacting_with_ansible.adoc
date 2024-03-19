@@ -21,7 +21,7 @@ retrieved from the API.
 
 Sample output when the default list of services:
 
-NAME                                                  NETWORKATTACHMENTS   STATUS   MESSAGE
+ NAME                                                  NETWORKATTACHMENTS   STATUS   MESSAGE
  configure-network-edpm-compute                        True     AnsibleExecutionJob complete
  configure-os-edpm-compute                             True     AnsibleExecutionJob complete
  install-os-edpm-compute                               True     AnsibleExecutionJob complete
@@ -33,7 +33,7 @@ NAME                                                  NETWORKATTACHMENTS   STATU
 
 Querying for pods with the OpenStackAnsibleEE label
 
-oc get pods -l app=openstackansibleee
+ oc get pods -l app=openstackansibleee
 
 Sample output:
 
@@ -44,11 +44,11 @@ Sample output:
 
 Querying for jobs, shows the corresponding job for each OpenStackAnsibleEE resource:
 
-oc get jobs -l app=openstackansibleee
+ oc get jobs -l app=openstackansibleee
 
 Sample output:
 
-NAME                                                  COMPLETIONS   DURATION   AGE
+ NAME                             COMPLETIONS   DURATION   AGE
  configure-network-edpm-compute   1/1           8s         2m51s
  configure-os-edpm-compute        1/1           8s         2m27s
  install-os-edpm-compute          1/1           8s         2m35s
@@ -60,15 +60,11 @@ NAME                                                  COMPLETIONS   DURATION   A
 
 Using the job name, the corresponding pod can be retrieved:
 
-[cols=2*]
-|===
-| oc get pods
-| grep configure-network-edpm-compute
-|===
+ oc get pods | grep configure-network-edpm-compute
 
 Sample output:
 
-configure-network-edpm-compute-2hshp   0/1     Completed            0                5m45s
+ configure-network-edpm-compute-2hshp   0/1     Completed            0                5m45s
 
 Using the job name, the ansible logs can be retrieved:
 
