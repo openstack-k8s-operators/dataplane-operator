@@ -24,6 +24,7 @@ import (
 
 	"golang.org/x/exp/slices"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -44,7 +45,9 @@ import (
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/rolebinding"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/serviceaccount"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
@@ -135,7 +138,27 @@ func (r *OpenStackDataPlaneNodeSetReconciler) GetLogger(ctx context.Context) log
 //+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/status,verbs=get
 //+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/finalizers,verbs=update
 //+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete;
-//+kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch
+
+// RBAC for the ServiceAccount for the internal image registry
+//+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update
+//+kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=roles,verbs=get;list;watch;create;update
+//+kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=rolebindings,verbs=get;list;watch;create;update;patch
+//+kubebuilder:rbac:groups="security.openshift.io",resourceNames=anyuid,resources=securitycontextconstraints,verbs=use
+//+kubebuilder:rbac:groups="",resources=pods,verbs=create;delete;get;list;patch;update;watch
+//+kubebuilder:rbac:groups="",resources=projects,verbs=get
+//+kubebuilder:rbac:groups="project.openshift.io",resources=projects,verbs=get
+//+kubebuilder:rbac:groups="",resources=imagestreamimages,verbs=get;list;watch
+//+kubebuilder:rbac:groups="",resources=imagestreammappings,verbs=get;list;watch
+//+kubebuilder:rbac:groups="",resources=imagestreams,verbs=get;list;watch
+//+kubebuilder:rbac:groups="",resources=imagestreams/layers,verbs=get;list;watch
+//+kubebuilder:rbac:groups="",resources=imagestreamtags,verbs=get;list;watch
+//+kubebuilder:rbac:groups="",resources=imagetags,verbs=get;list;watch
+//+kubebuilder:rbac:groups="image.openshift.io",resources=imagestreamimages,verbs=get;list;watch
+//+kubebuilder:rbac:groups="image.openshift.io",resources=imagestreammappings,verbs=get;list;watch
+//+kubebuilder:rbac:groups="image.openshift.io",resources=imagestreams,verbs=get;list;watch
+//+kubebuilder:rbac:groups="image.openshift.io",resources=imagestreams/layers,verbs=get
+//+kubebuilder:rbac:groups="image.openshift.io",resources=imagetags,verbs=get;list;watch
+//+kubebuilder:rbac:groups="image.openshift.io",resources=imagestreamtags,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -288,6 +311,76 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 	// all our input checks out so report InputReady
 	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.InputReadyMessage)
+
+	// Reconcile ServiceAccount
+	nodeSetServiceAccount := serviceaccount.NewServiceAccount(
+		&corev1.ServiceAccount{
+			ObjectMeta: v1.ObjectMeta{
+				Namespace: instance.Namespace,
+				Name:      instance.Name,
+			},
+		},
+		time.Duration(10),
+	)
+	saResult, err := nodeSetServiceAccount.CreateOrPatch(ctx, helper)
+	if err != nil {
+		instance.Status.Conditions.MarkFalse(
+			condition.ServiceAccountReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			condition.ServiceAccountReadyErrorMessage,
+			err.Error())
+		return saResult, err
+	} else if (saResult != ctrl.Result{}) {
+		instance.Status.Conditions.MarkFalse(
+			condition.ServiceAccountReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			condition.ServiceAccountCreatingMessage)
+		return saResult, nil
+	}
+
+	regViewerRoleBinding := rolebinding.NewRoleBinding(
+		&rbacv1.RoleBinding{
+			ObjectMeta: v1.ObjectMeta{
+				Namespace: instance.Namespace,
+				Name:      instance.Name,
+			},
+			Subjects: []rbacv1.Subject{
+				{
+					Kind:      "ServiceAccount",
+					Name:      instance.Name,
+					Namespace: instance.Namespace,
+				},
+			},
+			RoleRef: rbacv1.RoleRef{
+				Kind: "ClusterRole",
+				Name: "registry-viewer",
+			},
+		},
+		time.Duration(10),
+	)
+	rbResult, err := regViewerRoleBinding.CreateOrPatch(ctx, helper)
+	if err != nil {
+		instance.Status.Conditions.MarkFalse(
+			condition.ServiceAccountReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			condition.ServiceAccountReadyErrorMessage,
+			err.Error())
+		return rbResult, err
+	} else if (rbResult != ctrl.Result{}) {
+		instance.Status.Conditions.MarkFalse(
+			condition.ServiceAccountReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			condition.ServiceAccountCreatingMessage)
+		return rbResult, nil
+	}
+
+	instance.Status.Conditions.MarkTrue(
+		condition.ServiceAccountReadyCondition,
+		condition.ServiceAccountReadyMessage)
 
 	// Reconcile BaremetalSet if required
 	if !instance.Spec.PreProvisioned {

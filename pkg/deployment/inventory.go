@@ -116,6 +116,9 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		return "", err
 	}
 
+	// add the NodeSet name variable
+	nodeSetGroup.Vars["edpm_nodeset_name"] = instance.Name
+
 	// add TLS ansible variable
 	nodeSetGroup.Vars["edpm_tls_certs_enabled"] = instance.Spec.TLSEnabled
 	if instance.Spec.Tags != nil {

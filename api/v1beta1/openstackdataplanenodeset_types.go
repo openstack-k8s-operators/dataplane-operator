@@ -160,6 +160,7 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(NodeSetIPReservationReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(NodeSetDNSDataReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(condition.ServiceAccountReadyCondition, condition.InitReason, condition.InitReason),
 	)
 
 	// Only set Baremetal related conditions if we have baremetal hosts included in the
@@ -178,6 +179,7 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 		NetworkAttachments: instance.Spec.NetworkAttachments,
 		ExtraMounts:        instance.Spec.NodeTemplate.ExtraMounts,
 		Env:                instance.Spec.Env,
+		ServiceAccountName: instance.Name,
 	}
 }
 

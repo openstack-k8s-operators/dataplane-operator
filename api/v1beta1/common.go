@@ -152,4 +152,8 @@ type AnsibleEESpec struct {
 	Env []corev1.EnvVar `json:"env,omitempty"`
 	// DNSConfig for setting dnsservers
 	DNSConfig *corev1.PodDNSConfig `json:"dnsConfig,omitempty"`
+	// ServiceAccountName allows to specify what ServiceAccountName do we want
+	// the ansible execution run with. Without specifying, it will run with
+	// default serviceaccount
+	ServiceAccountName string
 }
