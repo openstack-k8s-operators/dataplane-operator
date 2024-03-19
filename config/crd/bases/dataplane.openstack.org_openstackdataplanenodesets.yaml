@@ -1932,6 +1932,7 @@ spec:
                 items:
                   type: string
                 type: array
+                uniqueItems: true
               tags:
                 items:
                   type: string
