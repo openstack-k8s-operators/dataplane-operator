@@ -116,8 +116,9 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 			issuerLabelSelector = map[string]string{service.Spec.TLSCert.Issuer: ""}
 		}
 
-		issuer, err = certmanager.GetIssuerByLabels(ctx, helper, "", issuerLabelSelector)
+		issuer, err = certmanager.GetIssuerByLabels(ctx, helper, instance.Namespace, issuerLabelSelector)
 		if err != nil {
+			helper.GetLogger().Info("Error retrieving issuer by label", "issuerLabelSelector", issuerLabelSelector)
 			return &result, err
 		}
 
