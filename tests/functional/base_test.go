@@ -94,7 +94,6 @@ func CreateSSHSecret(name types.NamespacedName) *corev1.Secret {
 func DefaultDataPlaneNodeSetSpec(nodeSetName string) map[string]interface{} {
 
 	return map[string]interface{}{
-		"preProvisioned": false,
 		"services": []string{
 			"foo-service",
 			"global-service",

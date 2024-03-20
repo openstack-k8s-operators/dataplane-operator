@@ -65,6 +65,8 @@ spec:
                               type: string
                           type: object
                           x-kubernetes-map-type: atomic
+                        preprovisioningNetworkDataName:
+                          type: string
                         userData:
                           properties:
                             name:
@@ -1900,6 +1902,8 @@ spec:
                         - subnetName
                         type: object
                       type: array
+                    preprovisioningNetworkDataName:
+                      type: string
                     userData:
                       properties:
                         name:

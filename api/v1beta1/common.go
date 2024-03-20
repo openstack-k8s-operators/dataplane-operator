@@ -92,6 +92,10 @@ type NodeSection struct {
 	// NetworkData  node specific network-data
 	// +kubebuilder:validation:Optional
 	NetworkData *corev1.SecretReference `json:"networkData,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	// PreprovisioningNetworkDataName - NetworkData secret name in the local namespace for pre-provisioing
+	PreprovisioningNetworkDataName string `json:"preprovisioningNetworkDataName,omitempty"`
 }
 
 // NodeTemplate is a specification of the node attributes that override top level attributes.
