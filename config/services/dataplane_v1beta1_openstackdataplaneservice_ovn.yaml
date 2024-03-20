@@ -12,7 +12,7 @@ spec:
     - ips
     networks:
     - ctlplane
-    issuer: osp-rootca-issuer-ovndb
+    issuer: osp-rootca-issuer-ovn
     keyUsages:
       - digital signature
       - key encipherment
