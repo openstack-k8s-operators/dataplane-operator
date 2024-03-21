@@ -15,7 +15,7 @@ require (
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240310120756-8b35d05cd24e
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240306153230-dc65ab49ebc0
-	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240306153230-dc65ab49ebc0
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240314165949-fec16b14c33b
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240306153230-dc65ab49ebc0
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240306153230-dc65ab49ebc0
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240306153230-dc65ab49ebc0

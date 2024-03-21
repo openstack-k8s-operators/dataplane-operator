@@ -24,7 +24,7 @@ metadata:
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
-    kind: OpenStackDataPlaneDeployment
+    kind: OpenStackDataPlaneNodeSet
     name: openstack-edpm-tls
 spec:
   issuerRef:
