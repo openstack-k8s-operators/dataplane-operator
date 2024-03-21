@@ -259,7 +259,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	if err != nil || !isReady {
 		return ctrl.Result{}, err
 	}
-
+	Log.Info("DNM this is a test.")
 	// Ensure DNSData Required for Nodes
 	dnsData := deployment.DataplaneDNSData{}
 	err = dnsData.EnsureDNSData(
