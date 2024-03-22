@@ -300,12 +300,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			} else {
 				deploymentErrMsg = fmt.Sprintf("%s & %s", deploymentErrMsg, errMsg)
 			}
-			instance.Status.Conditions.MarkFalse(
-				dataplanev1.NodeSetDeploymentReadyCondition,
-				condition.ErrorReason,
-				condition.SeverityError,
-				dataplanev1.DataPlaneNodeSetErrorMessage,
-				errMsg)
 			nsConditions.MarkFalse(
 				dataplanev1.NodeSetDeploymentReadyCondition,
 				condition.ErrorReason,

@@ -170,13 +170,6 @@ status:
     reason: Ready
     status: "True"
     type: InputReady
-  - message: 'DataPlaneNodeSet error occurred nodeSet: edpm-compute-no-nodes error:
-      OpenStackDataPlaneService.dataplane.openstack.org "this-service-does-not-exist"
-      not found'
-    reason: Error
-    severity: Error
-    status: "False"
-    type: NodeSetDeploymentReady
   nodeSetConditions:
     edpm-compute-no-nodes:
     - message: Deployment error occurred OpenStackDataPlaneService.dataplane.openstack.org
