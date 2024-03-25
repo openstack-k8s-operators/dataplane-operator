@@ -1926,7 +1926,6 @@ spec:
                 - configure-os
                 - ssh-known-hosts
                 - run-os
-                - reboot-os
                 - install-certs
                 - ovn
                 - neutron-metadata
