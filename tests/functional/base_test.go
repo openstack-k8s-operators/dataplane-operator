@@ -134,7 +134,8 @@ func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]interface{} {
 		"nodeTemplate": map[string]interface{}{
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 		},
-		"nodes": map[string]interface{}{},
+		"nodes":            map[string]interface{}{},
+		"servicesOverride": []string{},
 	}
 	if tlsEnabled {
 		spec["tlsEnabled"] = true
@@ -149,6 +150,7 @@ func DefaultDataPlaneDeploymentSpec() map[string]interface{} {
 		"nodeSets": []string{
 			"edpm-compute-nodeset",
 		},
+		"servicesOverride": []string{},
 	}
 }
 
