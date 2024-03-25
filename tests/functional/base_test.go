@@ -122,7 +122,8 @@ func DefaultDataPlaneNodeSetSpec(nodeSetName string) map[string]interface{} {
 			"deploymentSSHSecret": "dataplane-ansible-ssh-private-key-secret",
 			"ctlplaneInterface":   "172.20.12.1",
 		},
-		"tlsEnabled": true,
+		"secretMaxSize": 1048576,
+		"tlsEnabled":    true,
 	}
 }
 

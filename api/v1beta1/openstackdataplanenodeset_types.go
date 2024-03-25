@@ -41,6 +41,12 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	// +kubebuilder:validation:Required
 	Nodes map[string]NodeSection `json:"nodes"`
 
+	// SecretMaxSize - Maximum size in bytes of a Kubernetes secret. This size is currently situated around
+	// 1 MiB (nearly 1 MB).
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=1048576
+	SecretMaxSize int `json:"secretMaxSize" yaml:"secretMaxSize"`
+
 	// +kubebuilder:validation:Optional
 	//
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}

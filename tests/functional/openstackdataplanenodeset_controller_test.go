@@ -164,6 +164,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					Env:                nil,
 					PreProvisioned:     true,
 					NetworkAttachments: nil,
+					SecretMaxSize:      1048576,
 					TLSEnabled:         tlsEnabled,
 					Nodes:              map[string]dataplanev1.NodeSection{},
 					Services: []string{
@@ -293,6 +294,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					Env:                nil,
 					PreProvisioned:     true,
 					NetworkAttachments: nil,
+					SecretMaxSize:      1048576,
 					TLSEnabled:         tlsEnabled,
 					Nodes:              map[string]dataplanev1.NodeSection{},
 					Services: []string{
@@ -691,6 +693,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					Env:                nil,
 					PreProvisioned:     true,
 					NetworkAttachments: nil,
+					SecretMaxSize:      1048576,
 					TLSEnabled:         tlsEnabled,
 					Nodes:              map[string]dataplanev1.NodeSection{},
 					Services: []string{

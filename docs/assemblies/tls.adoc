@@ -145,19 +145,21 @@ When tlsEnabled is set to True on the nodeset, and tlsCert is defined for the da
 service, certificates will be requested from the certmanager issuer designated in the issuer attribute
 (or a default) as described above.
 
-The contents of the certificate (subject name, subject alternative names, etc.) is defined using the
+The contents of the certificate (subject name, subject alternative names, etc.) are defined using the
 contents and issuer attributes as described above.
 
 The certficates are generated when an OpenstackDataplaneDeployment is created, but before any ansible EE
 pods are created.
 
 When the certificates are created, certmanager stores the certificates in secrets which are named
-"cert-<service_name>-<node_name>".  Each secret contains the certificate, key and cacert.
+"cert-<service_name>-<node_name>-#".  The # symbol represents the secret number, beginning with 0.
+Kubernetes distributions, such as Red Hat Openshift Platform, have a maximum secret size of 1 MiB. If the size
+of the created certificates and keys is larger than the maximum size of a single secret, then multiple secrets
+are created. Each secret receives its number and contains the certificate, key and cacert.
 
-The certificates for all the nodes in the nodeset for a given service are all collected in a secret named
-"<nodeset>-<service_name>-certs".  This secret is the one that is mounted in the ansibleEE when
-when addCertMounts is enabled.  The code here is also slated to be refactored soon to ensure that we are
-able to accomodate large deployments.
+The certificates for all the nodes in the node set for a given service are collected in secrets named
+"<nodeset>-<service_name>-certs-#", where the `#` symbol represents the generated secret number that starts at `0`.
+These secrets are mounted in the ansibleEE when `addCertMounts` is enabled.
 
 === How the certificates are transferred to the compute nodes
 
@@ -167,10 +169,9 @@ that this service will be executed before any other services that require TLS ce
 
 The service:
 
-* Mounts the <nodeset>-<service_name>-certs secrets for all services that have tlsCertsEnabled set to true.
-* Calls the osp.edpm.install_certs role which - for each node - copies all the certificates and keys for that
-node to /var/lib/openstack/certs/<service_name>.  The ca cert bundles are copied to
-/var/lib/openstack/cacerts/<service_name>
+* Mounts the `<nodeset>-<service_name>-certs-#` secrets for all services that have `tlsCertsEnabled` set to "true".
+* For each node, calls the `osp.edpm.install_certs` role which copies all the certificates and keys for that node to
+`/var/lib/openstack/certs/<service_name>`.  The cacert bundles are copied to `/var/lib/openstack/cacerts/<service_name>`.
 
 Code should then be added to each service's ansible role to use the certs as needed.  For example, in
 libvirt's role, we move the certs and keys to standard locations on the compute host.  Other roles may

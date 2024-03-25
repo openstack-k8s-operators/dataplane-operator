@@ -1,78 +1,109 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cert-tls-dnsnames-edpm-compute-0
+  name: cert-generic-service1-edpm-compute-0
   annotations:
-    cert-manager.io/certificate-name: tls-dnsnames-edpm-compute-0
+    cert-manager.io/certificate-name: generic-service1-edpm-compute-0
     cert-manager.io/issuer-group: cert-manager.io
     cert-manager.io/issuer-kind: Issuer
     cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-0
-    osdp-service: tls-dnsnames
+    osdp-service: generic-service1
     osdpns: openstack-edpm-tls
 type: kubernetes.io/tls
 ---
-apiVersion: cert-manager.io/v1
-kind: Certificate
+apiVersion: v1
+kind: Secret
 metadata:
+  name: cert-generic-service1-edpm-compute-1
+  annotations:
+    cert-manager.io/certificate-name: generic-service1-edpm-compute-1
+    cert-manager.io/issuer-group: cert-manager.io
+    cert-manager.io/issuer-kind: Issuer
+    cert-manager.io/issuer-name: rootca-internal
   labels:
-    hostname: edpm-compute-0
-    osdp-service: tls-dnsnames
+    hostname: edpm-compute-1
+    osdp-service: generic-service1
     osdpns: openstack-edpm-tls
-  name: tls-dnsnames-edpm-compute-0
-  namespace: openstack
-  ownerReferences:
-  - apiVersion: dataplane.openstack.org/v1beta1
-    kind: OpenStackDataPlaneNodeSet
-    name: openstack-edpm-tls
-spec:
-  issuerRef:
-    group: cert-manager.io
-    kind: Issuer
-    name: rootca-internal
-  secretName: cert-tls-dnsnames-edpm-compute-0
-  secretTemplate:
-    labels:
-      hostname: edpm-compute-0
-      osdp-service: tls-dnsnames
-      osdpns: openstack-edpm-tls
+type: kubernetes.io/tls
 ---
-# validate the alt-names and usages - which is a list with elements that can be in any order
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cert-generic-service1-edpm-compute-2
+  annotations:
+    cert-manager.io/certificate-name: generic-service1-edpm-compute-2
+    cert-manager.io/issuer-group: cert-manager.io
+    cert-manager.io/issuer-kind: Issuer
+    cert-manager.io/issuer-name: rootca-internal
+  labels:
+    hostname: edpm-compute-2
+    osdp-service: generic-service1
+    osdpns: openstack-edpm-tls
+type: kubernetes.io/tls
+---
+# validate the alt-names - which is a list with elements that can be in any order
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
 commands:
   - script: |
-      template='{{index .spec.dnsNames }}'
-      names=$(oc get certificate tls-dnsnames-edpm-compute-0 -n openstack -o go-template="$template")
+      template='{{index .metadata.annotations "cert-manager.io/alt-names" }}'
+      names=$(oc get secret cert-generic-service1-edpm-compute-0 -n openstack -o go-template="$template")
       echo $names > test123.data
       regex="(?=.*(edpm-compute-0\.internalapi\.example\.com))(?=.*(edpm-compute-0\.storage\.example\.com))(?=.*(edpm-compute-0\.tenant\.example\.com))(?=.*(edpm-compute-0\.ctlplane\.example\.com))"
       matches=$(grep -P "$regex" test123.data)
       rm test123.data
       if [ -z "$matches" ]; then
-         echo "bad dnsnames match: $names"
-         exit 1
-      else
-         exit 0
-      fi
-  - script: |
-      template='{{index .spec.usages }}'
-      usages=$(oc get certificate tls-dnsnames-edpm-compute-0 -n openstack -o go-template="$template")
-      echo $usages > test123.data
-      regex="(?=.*(key encipherment))(?=.*(digital signature))(?=.*(server auth))"
-      matches=$(grep -P "$regex" test123.data)
-      rm test123.data
-      if [ -z "$matches" ]; then
-         echo "bad usages match: $usages"
+         echo "bad match: $names"
          exit 1
       else
          exit 0
       fi
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack-edpm-tls-generic-service1-certs-0
+  labels:
+    numberOfSecrets: "3"
+    secretNumber: "0"
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm-tls
+type: Opaque
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack-edpm-tls-generic-service1-certs-1
+  labels:
+    numberOfSecrets: "3"
+    secretNumber: "1"
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm-tls
+type: Opaque
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack-edpm-tls-generic-service1-certs-2
+  labels:
+    numberOfSecrets: "3"
+    secretNumber: "2"
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm-tls
+type: Opaque
+---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: install-certs-ovrd-openstack-edpm-tls-openstack-edpm-tls
+  name: install-certs-ovr-openstack-edpm-tls-openstack-edpm-tls
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -84,19 +115,23 @@ spec:
   backoffLimit: 6
   extraMounts:
   - mounts:
-    - mountPath: /var/lib/openstack/certs/tls-dnsnames
-      name: openstack-edpm-tls-tls-dnsnames-certs-0
+    - mountPath: /var/lib/openstack/certs/generic-service1
+      name: openstack-edpm-tls-generic-service1-certs-0
     volumes:
-    - name: openstack-edpm-tls-tls-dnsnames-certs-0
+    - name: openstack-edpm-tls-generic-service1-certs-0
       projected:
         sources:
         - secret:
-            name: openstack-edpm-tls-tls-dnsnames-certs-0
+            name: openstack-edpm-tls-generic-service1-certs-0
+        - secret:
+            name: openstack-edpm-tls-generic-service1-certs-1
+        - secret:
+            name: openstack-edpm-tls-generic-service1-certs-2
   - mounts:
-    - mountPath: /var/lib/openstack/cacerts/tls-dnsnames
-      name: tls-dnsnames-combined-ca-bundle
+    - mountPath: /var/lib/openstack/cacerts/generic-service1
+      name: generic-service1-combined-ca-bundle
     volumes:
-    - name: tls-dnsnames-combined-ca-bundle
+    - name: generic-service1-combined-ca-bundle
       secret:
         secretName: combined-ca-bundle
   - mounts:
@@ -137,7 +172,7 @@ status:
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
-  name: tls-dnsnames-openstack-edpm-tls-openstack-edpm-tls
+  name: generic-service1-openstack-edpm-tls-openstack-edpm-tls
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1

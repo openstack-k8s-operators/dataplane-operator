@@ -215,27 +215,46 @@ func (d *Deployer) addCertMounts(
 			volMounts := storage.VolMounts{}
 
 			// add mount for certs and keys
-			secretName := GetServiceCertsSecretName(d.NodeSet, service.Name)
+			secretName := GetServiceCertsSecretName(d.NodeSet, service.Name, 0) // Need to get the number of secrets
 			certSecret := &corev1.Secret{}
 			err := client.Get(d.Ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, certSecret)
 			if err != nil {
 				return d.AeeSpec, err
 			}
-			certVolume := corev1.Volume{
-				Name: secretName,
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName: secretName,
+			numberOfSecrets, _ := strconv.Atoi(certSecret.Labels["numberOfSecrets"])
+			projectedVolumeSource := corev1.ProjectedVolumeSource{
+				Sources: []corev1.VolumeProjection{},
+			}
+			for i := 0; i < numberOfSecrets; i++ {
+				secretName := GetServiceCertsSecretName(d.NodeSet, service.Name, i)
+				certSecret := &corev1.Secret{}
+				err := client.Get(d.Ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, certSecret)
+				if err != nil {
+					return d.AeeSpec, err
+				}
+				volumeProjection := corev1.VolumeProjection{
+					Secret: &corev1.SecretProjection{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: secretName,
+						},
 					},
+				}
+				projectedVolumeSource.Sources = append(projectedVolumeSource.Sources, volumeProjection)
+			}
+			certVolume := corev1.Volume{
+				Name: GetServiceCertsSecretName(d.NodeSet, service.Name, 0),
+				VolumeSource: corev1.VolumeSource{
+					Projected: &projectedVolumeSource,
 				},
 			}
 			certVolumeMount := corev1.VolumeMount{
-				Name:      secretName,
+				Name:      GetServiceCertsSecretName(d.NodeSet, service.Name, 0),
 				MountPath: path.Join(CertPaths, service.Name),
 			}
 			volMounts.Volumes = append(volMounts.Volumes, certVolume)
 			volMounts.Mounts = append(volMounts.Mounts, certVolumeMount)
 			d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
+
 		}
 
 		// add mount for cacert bundle
@@ -266,6 +285,7 @@ func (d *Deployer) addCertMounts(
 			d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
 		}
 	}
+
 	return d.AeeSpec, nil
 }
 
