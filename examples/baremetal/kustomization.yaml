@@ -14,7 +14,7 @@ replacements:
 # OpenStackDataPlaneNodeSet customizations
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-baremetal-values
     fieldPath: data.nodeset.nodetemplate.ansible.vars.edpm_sshd_allowed_ranges
   targets:
   - select:
@@ -25,7 +25,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-baremetal-values
     fieldPath: data.nodeset.baremetalsettemplate
   targets:
   - select:
@@ -36,7 +36,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-baremetal-values
     fieldPath: data.preProvisioned
   targets:
   - select:
@@ -47,7 +47,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-baremetal-values
     fieldPath: data.nodeset.nodetemplate.networks
   targets:
   - select:

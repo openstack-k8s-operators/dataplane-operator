@@ -21,11 +21,11 @@ Create an `OpenStackDataPlaneNodeSet` CR for each logical grouping of nodes in y
 
   * Pre-provisioned nodes:
 
-  kustomize build preprovisioned > openstack-edpm.yaml
+  oc kustomize --load-restrictor LoadRestrictionsNone preprovisioned > openstack-edpm.yaml
 
   * Bare metal nodes:
 
-  kustomize build baremetal > openstack-edpm.yaml
+  oc kustomize --load-restrictor LoadRestrictionsNone baremetal > openstack-edpm.yaml
 
 +
 [NOTE]
