@@ -169,6 +169,12 @@ var _ = BeforeSuite(func() {
 	err = (&dataplanev1.OpenStackDataPlaneNodeSet{}).SetupWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
 
+	err = (&dataplanev1.OpenStackDataPlaneDeployment{}).SetupWebhookWithManager(k8sManager)
+	Expect(err).NotTo(HaveOccurred())
+
+	err = (&dataplanev1.OpenStackDataPlaneService{}).SetupWebhookWithManager(k8sManager)
+	Expect(err).NotTo(HaveOccurred())
+
 	kclient, err := kubernetes.NewForConfig(cfg)
 	Expect(err).ToNot(HaveOccurred(), "failed to create kclient")
 	err = (&controllers.OpenStackDataPlaneNodeSetReconciler{
