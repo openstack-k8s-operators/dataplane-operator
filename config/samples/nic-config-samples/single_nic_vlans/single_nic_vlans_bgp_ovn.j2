@@ -1,6 +1,6 @@
 ---
 {% set mtu_list = [ctlplane_mtu] %}
-{% for network in role_networks %}
+{% for network in nodeset_networks %}
 {{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
 {%- endfor %}
 {% set min_viable_mtu = mtu_list | max %}
@@ -13,7 +13,7 @@ network_config:
   use_dhcp: false
   addresses:
   - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
-{% for network in role_networks %}
+{% for network in nodeset_networks %}
 - type: vlan
   device: nic1
   mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}

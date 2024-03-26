@@ -58,7 +58,7 @@ spec:
           Tenant: tenant
         neutron_physical_bridge_name: br-ex
         neutron_public_interface_name: eth0
-        role_networks:
+        nodeset_networks:
         - InternalApi
         - Storage
         - Tenant
