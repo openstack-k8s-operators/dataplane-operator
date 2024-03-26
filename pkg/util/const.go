@@ -19,5 +19,6 @@ package util
 const (
 	// AnsibleExecutionServiceNameLen max length for the ansibleEE service name prefix
 	AnsibleExecutionServiceNameLen = 53
-	AnsibleExcecutionNameLabelLen  = 63
+	// AnsibleExcecutionNameLabelLen max length for the ansibleEE execution name
+	AnsibleExcecutionNameLabelLen = 63
 )
