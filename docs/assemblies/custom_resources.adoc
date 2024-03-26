@@ -760,6 +760,11 @@ OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPl
 | SecretHashes
 | map[string]string
 | false
+
+| nodeSetHashes
+| NodeSetHashes
+| map[string]string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>

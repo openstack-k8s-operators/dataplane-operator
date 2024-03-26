@@ -130,6 +130,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	if instance.Status.SecretHashes == nil {
 		instance.Status.SecretHashes = make(map[string]string)
 	}
+	if instance.Status.NodeSetHashes == nil {
+		instance.Status.NodeSetHashes = make(map[string]string)
+	}
 
 	// Ensure NodeSets
 	nodeSets := dataplanev1.OpenStackDataPlaneNodeSetList{}
@@ -384,6 +387,10 @@ func (r *OpenStackDataPlaneDeploymentReconciler) setHashes(
 		if err != nil {
 			return err
 		}
+	}
+
+	for _, nodeSet := range nodeSets.Items {
+		instance.Status.NodeSetHashes[nodeSet.Name] = nodeSet.Status.ConfigHash
 	}
 
 	return nil
