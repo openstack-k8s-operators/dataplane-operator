@@ -69,6 +69,13 @@ type OpenStackDataPlaneNodeSetReconciler struct {
 	Scheme  *runtime.Scheme
 }
 
+// DeploymentResult
+type DeploymentResult struct {
+	Exists          bool
+	Deployed        bool
+	DeployedVersion string
+}
+
 // GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
 func (r *OpenStackDataPlaneNodeSetReconciler) GetLogger(ctx context.Context) logr.Logger {
 	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackDataPlaneNodeSet")
@@ -173,6 +180,9 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 			return
 		}
 	}()
+
+	// always init conditions to unknown
+	instance.InitConditions()
 
 	// Initialize Status
 	if instance.Status.Conditions == nil {
@@ -391,7 +401,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 			condition.DeploymentReadyInitMessage)
 	}
 
-	deploymentExists, isDeploymentReady, err := checkDeployment(helper, instance)
+	deploymentReady, err := checkDeployment(helper, instance, version)
 	if err != nil {
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
@@ -402,41 +412,33 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		Log.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
 		return ctrl.Result{}, err
 	}
-	if isDeploymentReady {
-		Log.Info("Set NodeSet DeploymentReadyCondition true")
-		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
-			condition.DeploymentReadyMessage)
+	if deploymentReady {
+		Log.Info("Set NodeSet Status configHash")
 		instance.Status.DeployedConfigHash = configHash
-	} else if deploymentExists {
-		Log.Info("Set NodeSet DeploymentReadyCondition false")
-		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
-			condition.RequestedReason, condition.SeverityInfo,
-			condition.DeploymentReadyRunningMessage)
-	} else {
-		Log.Info("Set NodeSet DeploymentReadyCondition false")
-		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
-			condition.RequestedReason, condition.SeverityInfo,
-			condition.DeploymentReadyInitMessage)
+		Log.Info("Set NodeSet Status containerImages")
+		instance.Status.ContainerImages = containerImages
 	}
 	return ctrl.Result{}, nil
 }
 
 func checkDeployment(helper *helper.Helper,
-	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-) (bool, bool, error) {
+	nodeSet *dataplanev1.OpenStackDataPlaneNodeSet,
+	version *openstackv1.OpenStackVersion,
+) (bool, error) {
+
+	Log := helper.GetLogger()
 	// Get all completed deployments
 	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
 	opts := []client.ListOption{
-		client.InNamespace(instance.Namespace),
+		client.InNamespace(nodeSet.Namespace),
 	}
 	err := helper.GetClient().List(context.Background(), deployments, opts...)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneDeployment CRs %v")
-		return false, false, err
+		return false, err
 	}
 
-	isDeploymentReady := false
-	deploymentExists := false
+	deploymentReady := false
 
 	// Sort deployments from oldest to newest by the LastTransitionTime of
 	// their DeploymentReadyCondition
@@ -452,34 +454,151 @@ func checkDeployment(helper *helper.Helper,
 	})
 
 	for _, deployment := range deployments.Items {
+		err = nil
 		if !deployment.DeletionTimestamp.IsZero() {
 			continue
 		}
 		if slices.Contains(
-			deployment.Spec.NodeSets, instance.Name) {
-			deploymentExists = true
-			isDeploymentReady = false
-			if deployment.Status.Deployed {
-				isDeploymentReady = true
-				for k, v := range deployment.Status.ConfigMapHashes {
-					instance.Status.ConfigMapHashes[k] = v
-				}
-				for k, v := range deployment.Status.SecretHashes {
-					instance.Status.SecretHashes[k] = v
-				}
+			deployment.Spec.NodeSets, nodeSet.Name) {
+			deploymentReady = false
+
+			Log.Info("Set NodeSet DeploymentReadyCondition false")
+			nodeSet.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
+				condition.RequestedReason, condition.SeverityInfo,
+				condition.DeploymentReadyInitMessage)
+			Log.Info("Set NodeSet OpenStackVersionMinorUpdateOVNDataplane to false")
+			nodeSet.Status.Conditions.MarkFalse(openstackv1.OpenStackVersionMinorUpdateOVNDataplane,
+				condition.NotRequestedReason, condition.SeverityInfo,
+				openstackv1.OpenStackVersionMinorUpdateInitMessage)
+			Log.Info("Set NodeSet OpenStackVersionMinorUpdateDataplane to false")
+			nodeSet.Status.Conditions.MarkFalse(openstackv1.OpenStackVersionMinorUpdateDataplane,
+				condition.NotRequestedReason, condition.SeverityInfo,
+				openstackv1.OpenStackVersionMinorUpdateInitMessage)
+
+			// Set NodeSet DeploymentStatuses
+			// Done regardless of the state of the Deployment.
+			deploymentConditions := deployment.Status.NodeSetConditions[nodeSet.Name]
+			if nodeSet.Status.DeploymentStatuses == nil {
+				nodeSet.Status.DeploymentStatuses = make(map[string]condition.Conditions)
 			}
-			deploymentConditions := deployment.Status.NodeSetConditions[instance.Name]
-			if instance.Status.DeploymentStatuses == nil {
-				instance.Status.DeploymentStatuses = make(map[string]condition.Conditions)
-			}
-			instance.Status.DeploymentStatuses[deployment.Name] = deploymentConditions
+			nodeSet.Status.DeploymentStatuses[deployment.Name] = deploymentConditions
+
 			if condition.IsError(deployment.Status.Conditions.Get(condition.ReadyCondition)) {
 				err = fmt.Errorf("check deploymentStatuses for more details")
+				return deploymentReady, err
 			}
-		}
-	}
 
-	return deploymentExists, isDeploymentReady, err
+			if deployment.Status.Deployed {
+				// Set NodeSet ConfigMapHashes, SecretHashes, and DeployedVersion
+				// Done only when the Deployment is Deployed (successful).
+				for k, v := range deployment.Status.ConfigMapHashes {
+					nodeSet.Status.ConfigMapHashes[k] = v
+				}
+				for k, v := range deployment.Status.SecretHashes {
+					nodeSet.Status.SecretHashes[k] = v
+				}
+				nodeSet.Status.DeployedVersion = deployment.Status.DeployedVersion
+			}
+
+			if version != nil {
+
+				// The logic when checking the version relies on the fact that
+				// we are looping through the deployments from oldest to newest
+				// and in order to be considered fully updated, we expect to
+				// see 2 completed Deployments (Deployed==true) where
+				// TargetVersion==DeployedVersion. 2 completed Deployments
+				// means 1 Deployment was done for OVN, and 1 was done for all
+				// the other services.
+				//
+				// When TargetVersion != DeployedVersion, then OVN update is
+				// needed, so set OpenStackVersionMinorUpdateOVNDataplane to
+				// False.
+				//
+				// When TargetVersion == DeployedVersion, but
+				// OpenStackVersionMinorUpdateOVNDataplane is False, if the
+				// Deployment is Deployed then set
+				// OpenStackVersionMinorUpdateOVNDataplane to True, otherwise
+				// the Deployment is still in progress so set
+				// OpenStackVersionMinorUpdateOVNDataplane to False, but with
+				// RequestedReason.
+				//
+				// When TargetVersion == DeployedVersion, and
+				// OpenStackVersionMinorUpdateOVNDataplane is already True and
+				// OpenStackVersionMinorUpdateDataplane is False,
+				// then if the Deployment is Deployed, set
+				// OpenStackVersionMinorUpdateDataplane to True, otherwise the
+				// Deployment is still in progress so set
+				// OpenStackVersionMinorUpdateDataplane to False, but with
+				// RequestedReason.
+				//
+				// When TargetVersion == DeployedVersion, and
+				// OpenStackVersionMinorUpdateDataplane is True, then if the
+				// Deployment is Deployed, set DeploymentReadyCondition to
+				// True.
+
+				if version.Spec.TargetVersion != deployment.Status.DeployedVersion {
+					nodeSet.Status.Conditions.MarkFalse(
+						openstackv1.OpenStackVersionMinorUpdateOVNDataplane,
+						condition.NotRequestedReason,
+						condition.SeverityInfo,
+						openstackv1.OpenStackVersionMinorUpdateInitMessage)
+				}
+
+				if version.Spec.TargetVersion == deployment.Status.DeployedVersion &&
+					nodeSet.Status.Conditions.IsFalse(openstackv1.OpenStackVersionMinorUpdateOVNDataplane) {
+					if deployment.Status.Deployed {
+						nodeSet.Status.Conditions.MarkTrue(
+							openstackv1.OpenStackVersionMinorUpdateOVNDataplane,
+							openstackv1.OpenStackVersionMinorUpdateReadyMessage)
+					} else {
+						nodeSet.Status.Conditions.MarkFalse(
+							openstackv1.OpenStackVersionMinorUpdateOVNDataplane,
+							condition.RequestedReason,
+							condition.SeverityInfo,
+							openstackv1.OpenStackVersionMinorUpdateInitMessage)
+					}
+				} else if version.Spec.TargetVersion == deployment.Status.DeployedVersion &&
+					nodeSet.Status.Conditions.IsTrue(openstackv1.OpenStackVersionMinorUpdateOVNDataplane) &&
+					nodeSet.Status.Conditions.IsFalse(openstackv1.OpenStackVersionMinorUpdateDataplane) {
+					if deployment.Status.Deployed {
+						nodeSet.Status.Conditions.MarkTrue(
+							openstackv1.OpenStackVersionMinorUpdateDataplane,
+							openstackv1.OpenStackVersionMinorUpdateReadyMessage)
+					} else {
+						nodeSet.Status.Conditions.MarkFalse(
+							openstackv1.OpenStackVersionMinorUpdateDataplane,
+							condition.RequestedReason,
+							condition.SeverityInfo,
+							openstackv1.OpenStackVersionMinorUpdateInitMessage)
+					}
+				} else if version.Spec.TargetVersion == deployment.Status.DeployedVersion &&
+					nodeSet.Status.Conditions.IsTrue(openstackv1.OpenStackVersionMinorUpdateDataplane) {
+					if deployment.Status.Deployed {
+						deploymentReady = true
+						Log.Info("Set NodeSet DeploymentReadyCondition true")
+						nodeSet.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
+							condition.DeploymentReadyMessage)
+					}
+				}
+			} else { // end version != nil
+				if deployment.Status.Deployed {
+					deploymentReady = true
+					nodeSet.Status.Conditions.MarkTrue(
+						openstackv1.OpenStackVersionMinorUpdateOVNDataplane,
+						openstackv1.OpenStackVersionMinorUpdateReadyMessage)
+					nodeSet.Status.Conditions.MarkTrue(
+						openstackv1.OpenStackVersionMinorUpdateDataplane,
+						openstackv1.OpenStackVersionMinorUpdateReadyMessage)
+					Log.Info("Set NodeSet DeploymentReadyCondition true")
+					nodeSet.Status.Conditions.MarkTrue(
+						condition.DeploymentReadyCondition,
+						condition.DeploymentReadyMessage)
+				}
+			} // end version == nil
+		} // end Deployment.Spec.NodeSets contains NodeSet
+	} // end Deployment loop
+
+	return deploymentReady, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

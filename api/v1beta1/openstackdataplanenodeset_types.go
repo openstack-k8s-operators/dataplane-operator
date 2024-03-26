@@ -21,6 +21,7 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -174,6 +175,8 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 		condition.UnknownCondition(NodeSetIPReservationReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(NodeSetDNSDataReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(condition.ServiceAccountReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(openstackv1.OpenStackVersionMinorUpdateDataplane, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(openstackv1.OpenStackVersionMinorUpdateOVNDataplane, condition.InitReason, condition.InitReason),
 	)
 
 	// Only set Baremetal related conditions if we have baremetal hosts included in the
