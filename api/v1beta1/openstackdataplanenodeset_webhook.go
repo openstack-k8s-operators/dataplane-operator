@@ -143,21 +143,30 @@ func (r *OpenStackDataPlaneNodeSet) ValidateCreate() (admission.Warnings, error)
 		return nil, nil
 	}
 
-	errors = append(errors, r.duplicateNodeCheck(nodeSetList)...)
+	errors = append(errors, r.Spec.duplicateNodeCheck(nodeSetList)...)
 
 	if len(errors) > 0 {
+		openstackdataplanenodesetlog.Info("validation failed", "name", r.Name)
+
 		return nil, apierrors.NewInvalid(
 			schema.GroupKind{Group: "dataplane.openstack.org", Kind: "OpenStackDataPlaneNodeSet"},
 			r.Name,
 			errors)
 	}
-
 	return nil, nil
+}
+
+func (r *OpenStackDataPlaneNodeSetSpec) ValidateCreate(nodeSetList *OpenStackDataPlaneNodeSetList) field.ErrorList {
+
+	errors := r.duplicateNodeCheck(nodeSetList)
+
+	return errors
+
 }
 
 // duplicateNodeCheck checks the NodeSetList for pre-existing nodes. If the user is trying to redefine an
 // existing node, we will return an error and block resource creation.
-func (r *OpenStackDataPlaneNodeSet) duplicateNodeCheck(nodeSetList *OpenStackDataPlaneNodeSetList) (errors field.ErrorList) {
+func (r *OpenStackDataPlaneNodeSetSpec) duplicateNodeCheck(nodeSetList *OpenStackDataPlaneNodeSetList) (errors field.ErrorList) {
 	existingNodeNames := make([]string, 0)
 	for _, existingNode := range nodeSetList.Items {
 		for _, node := range existingNode.Spec.Nodes {
@@ -168,11 +177,11 @@ func (r *OpenStackDataPlaneNodeSet) duplicateNodeCheck(nodeSetList *OpenStackDat
 		}
 	}
 
-	for _, newNodeName := range r.Spec.Nodes {
+	for _, newNodeName := range r.Nodes {
 		if slices.Contains(existingNodeNames, newNodeName.HostName) || slices.Contains(existingNodeNames, newNodeName.Ansible.AnsibleHost) {
 			errors = append(errors, field.Invalid(
 				field.NewPath("Spec").Child("nodes"),
-				r.Name,
+				newNodeName,
 				fmt.Sprintf("node already exists in the cluster: %s", newNodeName.HostName)))
 		}
 	}
@@ -189,24 +198,10 @@ func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(old runtime.Object) (admissio
 			fmt.Errorf("expected a OpenStackDataPlaneNodeSet object, but got %T", oldNodeSet))
 	}
 
-	var errors field.ErrorList
-	// Some changes to the baremetalSetTemplate after the initial deployment would necessitate
-	// a redeploy of the node. Thus we should block these changes and require the user to
-	// delete and redeploy should they wish to make such changes after the initial deploy.
-	// If the BaremetalSetTemplate is changed, we will offload the parsing of these details
-	// to the openstack-baremetal-operator webhook to avoid duplicating logic.
-	if !reflect.DeepEqual(r.Spec.BaremetalSetTemplate, oldNodeSet.Spec.BaremetalSetTemplate) {
-
-		// Call openstack-baremetal-operator webhook Validate() to parse changes
-		err := r.Spec.BaremetalSetTemplate.Validate(oldNodeSet.Spec.BaremetalSetTemplate)
-		if err != nil {
-			errors = append(errors, field.Forbidden(
-				field.NewPath("spec.baremetalSetTemplate"),
-				fmt.Sprintf("%s", err)))
-		}
-	}
+	errors := r.Spec.ValidateUpdate(&oldNodeSet.Spec)
 
 	if errors != nil {
+		openstackdataplanenodesetlog.Info("validation failed", "name", r.Name)
 		return nil, apierrors.NewInvalid(
 			schema.GroupKind{Group: "dataplane.openstack.org", Kind: "OpenStackDataPlaneNodeSet"},
 			r.Name,
@@ -217,10 +212,48 @@ func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(old runtime.Object) (admissio
 	return nil, nil
 }
 
+func (r *OpenStackDataPlaneNodeSetSpec) ValidateUpdate(oldSpec *OpenStackDataPlaneNodeSetSpec) field.ErrorList {
+
+	var errors field.ErrorList
+	// Some changes to the baremetalSetTemplate after the initial deployment would necessitate
+	// a redeploy of the node. Thus we should block these changes and require the user to
+	// delete and redeploy should they wish to make such changes after the initial deploy.
+	// If the BaremetalSetTemplate is changed, we will offload the parsing of these details
+	// to the openstack-baremetal-operator webhook to avoid duplicating logic.
+	if !reflect.DeepEqual(r.BaremetalSetTemplate, oldSpec.BaremetalSetTemplate) {
+
+		// Call openstack-baremetal-operator webhook Validate() to parse changes
+		err := r.BaremetalSetTemplate.Validate(oldSpec.BaremetalSetTemplate)
+		if err != nil {
+			errors = append(errors, field.Forbidden(
+				field.NewPath("spec.baremetalSetTemplate"),
+				fmt.Sprintf("%s", err)))
+		}
+	}
+
+	return errors
+}
+
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
 func (r *OpenStackDataPlaneNodeSet) ValidateDelete() (admission.Warnings, error) {
 	openstackdataplanenodesetlog.Info("validate delete", "name", r.Name)
+	errors := r.Spec.ValidateDelete()
 
-	// TODO(user): fill in your validation logic upon object deletion.
+	if len(errors) != 0 {
+		openstackdataplanenodesetlog.Info("validation failed", "name", r.Name)
+
+		return nil, apierrors.NewInvalid(
+			schema.GroupKind{Group: "dataplane.openstack.org", Kind: "OpenStackDataplaneNodeSet"},
+			r.Name,
+			errors,
+		)
+	}
 	return nil, nil
+}
+
+func (r *OpenStackDataPlaneNodeSetSpec) ValidateDelete() field.ErrorList {
+	// TODO(user): fill in your validation logic upon object deletion.
+
+	return field.ErrorList{}
+
 }
