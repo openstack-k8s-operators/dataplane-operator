@@ -18,7 +18,7 @@ data:
           edpm_network_config_template: |
             ---
             {% set mtu_list = [ctlplane_mtu] %}
-            {% for network in role_networks %}
+            {% for network in nodeset_networks %}
             {{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}
             {%- endfor %}
             {% set min_viable_mtu = mtu_list | max %}
@@ -39,7 +39,7 @@ data:
                   address:
                     - ip: {{ ctlplane_ip }}
                       prefix-length: {{ ctlplane_cidr }}
-            {% for network in role_networks %}
+            {% for network in nodeset_networks %}
               - name: {{ "vlan" ~ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
                 type: ovs-interface
                 state: up
@@ -58,7 +58,7 @@ data:
                   port:
                   - name: {{ neutron_public_interface_name }}
                   - name: {{ neutron_physical_bridge_name }}
-            {% for network in role_networks %}
+            {% for network in nodeset_networks %}
                   - name: {{ "vlan" ~ lookup('vars', networks_lower[network] ~ '_vlan_id') }}
                     vlan:
                       mode: access
