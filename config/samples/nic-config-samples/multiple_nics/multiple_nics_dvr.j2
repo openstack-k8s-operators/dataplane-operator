@@ -9,7 +9,7 @@ network_config:
   use_dhcp: false
   addresses:
   - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
-{% for network in role_networks %}
+{% for network in nodeset_networks %}
 {% if network == 'external' %}
 - type: ovs_bridge
   name: {{ neutron_physical_bridge_name }}

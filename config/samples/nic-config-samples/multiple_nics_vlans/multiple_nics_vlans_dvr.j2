@@ -9,7 +9,7 @@ network_config:
   use_dhcp: false
   addresses:
   - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_cidr }}
-{% for network in role_networks %}
+{% for network in nodeset_networks %}
 {% if network == 'external' %}
 - type: ovs_bridge
   name: {{ neutron_physical_bridge_name }}
@@ -43,7 +43,7 @@ network_config:
   - ip_netmask:
       {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}
   routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}
-{% elif network == 'Tenant' and network in role_networks %}
+{% elif network == 'tenant' and network in nodeset_networks %}
 - type: ovs_bridge
   name: {{ 'br-' ~ networks_lower[network] }}
   mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}
