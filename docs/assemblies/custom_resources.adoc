@@ -17,7 +17,7 @@
 * <<openstackdataplaneservicespec,OpenStackDataPlaneServiceSpec>>
 * <<openstackdataplaneservicestatus,OpenStackDataPlaneServiceStatus>>
 * <<openstackdataplaneservicecert,OpenstackDataPlaneServiceCert>>
-* <<dataplaneansibleimagedefaults,DataplaneAnsibleImageDefaults>>
+* <<containerimages,ContainerImages>>
 * <<openstackdataplanenodesetlist,OpenStackDataPlaneNodeSetList>>
 * <<openstackdataplanenodesetspec,OpenStackDataPlaneNodeSetSpec>>
 * <<openstackdataplanenodesetstatus,OpenStackDataPlaneNodeSetStatus>>
@@ -395,67 +395,67 @@ OpenstackDataPlaneServiceCert defines the property of a TLS cert issued for a da
 
 <<custom-resources,Back to Custom Resources>>
 
-[#dataplaneansibleimagedefaults]
-==== DataplaneAnsibleImageDefaults
+[#containerimages]
+==== ContainerImages
 
-DataplaneAnsibleImageDefaults default images for dataplane services
+ContainerImages default images for dataplane services
 
 |===
 | Field | Description | Scheme | Required
 
-| Frr
+| frrImage
 |
-| string
+| *string
 | false
 
-| IscsiD
+| iscsiDImage
 |
-| string
+| *string
 | false
 
-| Logrotate
+| logrotateCrondImage
 |
-| string
+| *string
 | false
 
-| NeutronMetadataAgent
+| neutronMetadataAgentImage
 |
-| string
+| *string
 | false
 
-| NeutronSRIOVAgent
+| neutronSRIOVAgentImage
 |
-| string
+| *string
 | false
 
-| NovaCompute
+| novaComputeImage
 |
-| string
+| *string
 | false
 
-| OvnControllerAgent
+| ovnControllerImage
 |
-| string
+| *string
 | false
 
-| OvnBgpAgent
+| ovnBgpAgentImage
 |
-| string
+| *string
 | false
 
-| TelemetryCeilometerCompute
+| telemetryCeilometerComputeImage
 |
-| string
+| *string
 | false
 
-| TelemetryCeilometerIpmi
+| telemetryCeilometerIpmiImage
 |
-| string
+| *string
 | false
 
-| TelemetryNodeExporter
+| telemetryNodeExporterImage
 |
-| string
+| *string
 | false
 |===
 
@@ -631,6 +631,16 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | DeployedConfigHash - holds the hash of the NodeTemplate and Node sections of the struct that was last deployed. This hash is used to determine when new Ansible executions are required to roll out config changes.
 | string
 | false
+
+| containerImages
+| ContainerImages
+| <<containerimages,ContainerImages>>
+| false
+
+| deployedVersion
+| DeployedVersion
+| string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -759,6 +769,11 @@ OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPl
 | secretHashes
 | SecretHashes
 | map[string]string
+| false
+
+| deployedVersion
+| DeployedVersion
+| string
 | false
 |===
 

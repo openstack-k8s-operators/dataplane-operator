@@ -1992,11 +1992,38 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              containerImages:
+                properties:
+                  frrImage:
+                    type: string
+                  iscsiDImage:
+                    type: string
+                  logrotateCrondImage:
+                    type: string
+                  neutronMetadataAgentImage:
+                    type: string
+                  neutronSRIOVAgentImage:
+                    type: string
+                  novaComputeImage:
+                    type: string
+                  ovnBgpAgentImage:
+                    type: string
+                  ovnControllerImage:
+                    type: string
+                  telemetryCeilometerComputeImage:
+                    type: string
+                  telemetryCeilometerIpmiImage:
+                    type: string
+                  telemetryNodeExporterImage:
+                    type: string
+                type: object
               ctlplaneSearchDomain:
                 type: string
               deployed:
                 type: boolean
               deployedConfigHash:
+                type: string
+              deployedVersion:
                 type: string
               deploymentStatuses:
                 additionalProperties:
