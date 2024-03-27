@@ -19,7 +19,9 @@ package v1beta1
 import (
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -135,6 +137,12 @@ type OpenStackDataPlaneNodeSetStatus struct {
 	// This hash is used to determine when new Ansible executions are required to roll
 	// out config changes.
 	DeployedConfigHash string `json:"deployedConfigHash,omitempty"`
+
+	// ContainerImages
+	ContainerImages ContainerImages `json:"containerImages,omitempty" optional:"true"`
+
+	// DeployedVersion
+	DeployedVersion string `json:"deployedVersion,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -167,6 +175,8 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 		condition.UnknownCondition(NodeSetIPReservationReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(NodeSetDNSDataReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(condition.ServiceAccountReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(openstackv1.OpenStackVersionMinorUpdateDataplane, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(openstackv1.OpenStackVersionMinorUpdateOVNDataplane, condition.InitReason, condition.InitReason),
 	)
 
 	// Only set Baremetal related conditions if we have baremetal hosts included in the
@@ -189,17 +199,67 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 	}
 }
 
-// DataplaneAnsibleImageDefaults default images for dataplane services
-type DataplaneAnsibleImageDefaults struct {
-	Frr                        string
-	IscsiD                     string
-	Logrotate                  string
-	NeutronMetadataAgent       string
-	NeutronSRIOVAgent          string
-	NovaCompute                string
-	OvnControllerAgent         string
-	OvnBgpAgent                string
-	TelemetryCeilometerCompute string
-	TelemetryCeilometerIpmi    string
-	TelemetryNodeExporter      string
+// ContainerImages default images for dataplane services
+type ContainerImages struct {
+	FrrImage                        *string `json:"frrImage,omitempty"`
+	IscsiDImage                     *string `json:"iscsiDImage,omitempty"`
+	LogrotateCrondImage             *string `json:"logrotateCrondImage,omitempty"`
+	NeutronMetadataAgentImage       *string `json:"neutronMetadataAgentImage,omitempty"`
+	NeutronSRIOVAgentImage          *string `json:"neutronSRIOVAgentImage,omitempty"`
+	NovaComputeImage                *string `json:"novaComputeImage,omitempty"`
+	OvnControllerImage              *string `json:"ovnControllerImage,omitempty"`
+	OvnBgpAgentImage                *string `json:"ovnBgpAgentImage,omitempty"`
+	TelemetryCeilometerComputeImage *string `json:"telemetryCeilometerComputeImage,omitempty"`
+	TelemetryCeilometerIpmiImage    *string `json:"telemetryCeilometerIpmiImage,omitempty"`
+	TelemetryNodeExporterImage      *string `json:"telemetryNodeExporterImage,omitempty"`
+}
+
+const (
+	// FrrDefaultImage -
+	FrrDefaultImage = "quay.io/podified-antelope-centos9/openstack-frr:current-podified"
+	// IscsiDDefaultImage -
+	IscsiDDefaultImage = "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
+	// LogrotateDefaultImage -
+	LogrotateCrondDefaultImage = "quay.io/podified-antelope-centos9/openstack-cron:current-podified"
+	// NeutronMetadataAgentDefaultImage -
+	NeutronMetadataAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
+	// NeutronSRIOVAgentDefaultImage -
+	NeutronSRIOVAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"
+	// NovaComputeDefaultImage -
+	NovaComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
+	// OvnControllerDefaultImage -
+	OvnControllerDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
+	// OvnBgpAgentDefaultImage -
+	OvnBgpAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
+	// TelemetryCeilometerComputeImage -
+	TelemetryCeilometerComputeImage = "quay.io/podified-antelope-centos9/openstack-telemetry-ceilometer-compute:current-podified"
+	// TelemetryCeilometerIpmiImage -
+	TelemetryCeilometerIpmiImage = "quay.io/podified-antelope-centos9/openstack-telemetry-ceilometer-ipmi:current-podified"
+	// TelemetryNodeExporterImage -
+	TelemetryNodeExporterImage = "quay.io/podified-antelope-centos9/openstack-telemetry-node-exporter:current-podified"
+)
+
+var ContainerImageDefaults ContainerImages
+
+// SetupDefaults - initializes any CRD field defaults based on environment variables (the defaulting mechanism itself is implemented via webhooks)
+func SetupDefaults() {
+	// Acquire environmental defaults and initialize dataplane defaults with them
+	ContainerImageDefaults = ContainerImages{
+		FrrImage:                        getImageDefault("RELATED_IMAGE_OPENSTACK_EDPM_FRR_DEFAULT_IMG", FrrDefaultImage),
+		IscsiDImage:                     getImageDefault("RELATED_IMAGE_OPENSTACK_EDPM_ISCSID_DEFAULT_IMG", IscsiDDefaultImage),
+		LogrotateCrondImage:             getImageDefault("RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG", LogrotateCrondDefaultImage),
+		NeutronMetadataAgentImage:       getImageDefault("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_METADATA_AGENT_DEFAULT_IMG", NeutronMetadataAgentDefaultImage),
+		NeutronSRIOVAgentImage:          getImageDefault("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_SRIOV_AGENT_DEFAULT_IMG", NeutronSRIOVAgentDefaultImage),
+		NovaComputeImage:                getImageDefault("RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG", NovaComputeDefaultImage),
+		OvnControllerImage:              getImageDefault("RELATED_IMAGE_OPENSTACK_EDPM_OVN_CONTROLLER_AGENT_DEFAULT_IMG", OvnControllerDefaultImage),
+		OvnBgpAgentImage:                getImageDefault("RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE", OvnBgpAgentDefaultImage),
+		TelemetryCeilometerComputeImage: getImageDefault("RELATED_IMAGE_OPENSTACK_EDPM_TELEMETRY_CEILOMETER_COMPUTE_IMAGE", TelemetryCeilometerComputeImage),
+		TelemetryCeilometerIpmiImage:    getImageDefault("RELATED_IMAGE_OPENSTACK_EDPM_TELEMETRY_CEILOMETER_IMPI", TelemetryCeilometerIpmiImage),
+		TelemetryNodeExporterImage:      getImageDefault("RELATED_IMAGE_OPENSTACK_EDPM_TELEMETRY_NODE_EXPORTER_IMAGE", TelemetryNodeExporterImage),
+	}
+}
+
+func getImageDefault(envVar string, defaultImage string) *string {
+	d := util.GetEnvVar(envVar, defaultImage)
+	return &d
 }

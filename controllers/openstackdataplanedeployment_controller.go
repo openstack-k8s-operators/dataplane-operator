@@ -33,6 +33,7 @@ import (
 	"github.com/go-logr/logr"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
+	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
@@ -337,6 +338,11 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	Log.Info("Set DeploymentReadyCondition true")
 	instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
 	instance.Status.Deployed = true
+	version, err := dataplaneutil.GetVersion(ctx, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	instance.Status.DeployedVersion = version.Spec.TargetVersion
 	err = r.setHashes(ctx, helper, instance, nodeSets)
 	if err != nil {
 		Log.Error(err, "Error setting service hashes")
