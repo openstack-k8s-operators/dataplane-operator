@@ -718,7 +718,7 @@ OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlane
 | servicesOverride
 | ServicesOverride list
 | []string
-| true
+| false
 
 | deploymentRequeueTime
 | Time before the deployment is requeued in seconds
