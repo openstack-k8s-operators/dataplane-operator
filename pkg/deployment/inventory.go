@@ -303,6 +303,8 @@ func resolveHostAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host) e
 	if len(node.Networks) != 0 {
 		nets, netsLower := buildNetworkVars(node.Networks)
 		host.Vars["role_networks"] = nets
+		// (TODO) Remove this once all templates are converted
+		host.Vars["nodeset_networks"] = nets
 		host.Vars["networks_lower"] = netsLower
 	}
 	return nil
