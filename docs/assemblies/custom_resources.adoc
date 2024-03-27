@@ -248,7 +248,7 @@ NodeTemplate is a specification of the node attributes that override top level a
 [#openstackdataplaneservice]
 ==== OpenStackDataPlaneService
 
-OpenStackDataPlaneService is the Schema for the openstackdataplaneservices API
+OpenStackDataPlaneService is the Schema for the openstackdataplaneservices API OpenStackDataPlaneService name must be a valid RFC1123 as it is used in labels
 
 |===
 | Field | Description | Scheme | Required
@@ -464,7 +464,7 @@ DataplaneAnsibleImageDefaults default images for dataplane services
 [#openstackdataplanenodeset]
 ==== OpenStackDataPlaneNodeSet
 
-OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets API
+OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets API OpenStackDataPlaneNodeSet name must be a valid RFC1123 as it is used in labels
 
 |===
 | Field | Description | Scheme | Required
@@ -638,7 +638,7 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 [#openstackdataplanedeployment]
 ==== OpenStackDataPlaneDeployment
 
-OpenStackDataPlaneDeployment is the Schema for the openstackdataplanedeployments API
+OpenStackDataPlaneDeployment is the Schema for the openstackdataplanedeployments API OpenStackDataPlaneDeployment name must be a valid RFC1123 as it is used in labels
 
 |===
 | Field | Description | Scheme | Required

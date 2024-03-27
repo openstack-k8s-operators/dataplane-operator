@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	corev1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -68,6 +69,12 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	Log := r.GetLogger(ctx)
 	Log.Info("Reconciling Deployment")
 
+	// Check if deployment name matches RFC1123 for use in labels
+	validate := validator.New()
+	if err := validate.Var(req.Name, "hostname_rfc1123"); err != nil {
+		Log.Error(err, "error validating OpenStackDataPlaneDeployment name, the name must follow RFC1123")
+		return ctrl.Result{}, err
+	}
 	// Fetch the OpenStackDataPlaneDeployment instance
 	instance := &dataplanev1.OpenStackDataPlaneDeployment{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
