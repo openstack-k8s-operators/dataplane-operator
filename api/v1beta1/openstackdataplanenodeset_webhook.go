@@ -22,8 +22,6 @@ import (
 	"reflect"
 	"strings"
 
-	"golang.org/x/exp/slices"
-
 	"github.com/go-playground/validator/v10"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -162,31 +160,6 @@ func (r *OpenStackDataPlaneNodeSetSpec) ValidateCreate(nodeSetList *OpenStackDat
 
 	return errors
 
-}
-
-// duplicateNodeCheck checks the NodeSetList for pre-existing nodes. If the user is trying to redefine an
-// existing node, we will return an error and block resource creation.
-func (r *OpenStackDataPlaneNodeSetSpec) duplicateNodeCheck(nodeSetList *OpenStackDataPlaneNodeSetList) (errors field.ErrorList) {
-	existingNodeNames := make([]string, 0)
-	for _, existingNode := range nodeSetList.Items {
-		for _, node := range existingNode.Spec.Nodes {
-			existingNodeNames = append(existingNodeNames, node.HostName)
-			if node.Ansible.AnsibleHost != "" {
-				existingNodeNames = append(existingNodeNames, node.Ansible.AnsibleHost)
-			}
-		}
-	}
-
-	for _, newNodeName := range r.Nodes {
-		if slices.Contains(existingNodeNames, newNodeName.HostName) || slices.Contains(existingNodeNames, newNodeName.Ansible.AnsibleHost) {
-			errors = append(errors, field.Invalid(
-				field.NewPath("Spec").Child("nodes"),
-				newNodeName,
-				fmt.Sprintf("node already exists in the cluster: %s", newNodeName.HostName)))
-		}
-	}
-
-	return
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type

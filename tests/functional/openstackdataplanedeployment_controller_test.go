@@ -125,7 +125,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
 				DeploymentRequeueTime: 15,
-				ServicesOverride:      []string{},
+				ServicesOverride:      nil,
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -292,7 +292,6 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					"alpha-nodeset",
 					"beta-nodeset",
 				},
-				"servicesOverride": []string{},
 			}
 			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneMultiNodesetDeploymentName, deploymentSpec))
 		})
@@ -310,7 +309,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
 				DeploymentRequeueTime: 15,
-				ServicesOverride:      []string{},
+				ServicesOverride:      nil,
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
