@@ -45,7 +45,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		})
 
 		It("Should block changes to the BmhLabelSelector object in baremetalSetTemplate spec", func() {
-			Eventually(func(g Gomega) string {
+			Eventually(func(_ Gomega) string {
 				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
 				instance.Spec.BaremetalSetTemplate = baremetalv1.OpenStackBaremetalSetSpec{
 					CloudUserName: "new-user",
@@ -77,7 +77,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 		})
 		It("Should allow changes to the CloudUserName", func() {
-			Eventually(func(g Gomega) error {
+			Eventually(func(_ Gomega) error {
 				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
 				instance.Spec.BaremetalSetTemplate = baremetalv1.OpenStackBaremetalSetSpec{
 					CloudUserName: "new-user",
@@ -137,7 +137,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		})
 
 		It("Should block duplicate node declaration", func() {
-			Eventually(func(g Gomega) string {
+			Eventually(func(_ Gomega) string {
 				newNodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 				newNodeSetSpec["preProvisioned"] = true
 				newNodeSetSpec["nodes"] = map[string]interface{}{
@@ -153,7 +153,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 		})
 
 		It("Should block NodeSets if they contain a duplicate ansibleHost", func() {
-			Eventually(func(g Gomega) string {
+			Eventually(func(_ Gomega) string {
 				newNodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
 				newNodeSetSpec["preProvisioned"] = true
 				newNodeSetSpec["nodes"] = map[string]interface{}{

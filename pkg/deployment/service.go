@@ -160,7 +160,7 @@ func EnsureServices(ctx context.Context, helper *helper.Helper, instance *datapl
 	return nil
 }
 
-// Check that global services are defined only once in all nodesets, report and fail if there are duplicates
+// CheckGlobalServiceExecutionConsistency - Check that global services are defined only once in all nodesets, report and fail if there are duplicates
 func CheckGlobalServiceExecutionConsistency(ctx context.Context, helper *helper.Helper, nodesets []dataplanev1.OpenStackDataPlaneNodeSet) error {
 	var globalServices []string
 	var allServices []string

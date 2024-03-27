@@ -1044,7 +1044,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		})
 
 		It("Should change the ConfigHash", func() {
-			Eventually(func(g Gomega) error {
+			Eventually(func(_ Gomega) error {
 				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
 				dataplaneConfigHash = instance.Status.ConfigHash
 				instance.Spec.NodeTemplate.Ansible.AnsibleVars = map[string]json.RawMessage{
@@ -1052,7 +1052,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				}
 				return th.K8sClient.Update(th.Ctx, instance)
 			}).Should(Succeed())
-			Eventually(func(g Gomega) bool {
+			Eventually(func(_ Gomega) bool {
 				updatedInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
 				return dataplaneConfigHash != updatedInstance.Status.ConfigHash
 			}).Should(BeTrue())

@@ -73,11 +73,11 @@ const (
 	OvnControllerAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
 	// OvnBgpAgentDefaultImage -
 	OvnBgpAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
-	// TelemetryCeilometerComputeDefaultImage
+	// TelemetryCeilometerComputeDefaultImage -
 	TelemetryCeilometerComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified"
-	// TelemetryCeilometerIpmiDefaultImage
+	// TelemetryCeilometerIpmiDefaultImage -
 	TelemetryCeilometerIpmiDefaultImage = "quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi:current-podified"
-	// NodeExporterDefaultImage -
+	// TelemetryNodeExporterDefaultImage -
 	TelemetryNodeExporterDefaultImage = "quay.io/prometheus/node-exporter:v1.5.0"
 )
 
