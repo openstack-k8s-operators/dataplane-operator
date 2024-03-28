@@ -658,7 +658,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		podsInterface := r.Kclient.CoreV1().Pods(namespace)
 		// List service pods in the given namespace
 		podsList, err := podsInterface.List(context.TODO(), v1.ListOptions{
-			LabelSelector: fmt.Sprintf("osdpd=%s", deployment.Name),
+			LabelSelector: fmt.Sprintf("openstackdataplanedeployment=%s", deployment.Name),
 			FieldSelector: "status.phase=Failed",
 		})
 
