@@ -11,17 +11,17 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
-	github.com/onsi/ginkgo/v2 v2.16.0
+	github.com/onsi/ginkgo/v2 v2.17.1
 	github.com/onsi/gomega v1.32.0
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-00010101000000-000000000000
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240313161042-88282483a04f
-	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240314165949-fec16b14c33b
-	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240314165949-fec16b14c33b
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240314165949-fec16b14c33b
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240314165949-fec16b14c33b
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240314165949-fec16b14c33b
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240319125140-1daeeada041d
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240318132611-4df20882649d
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240327192142-3a7330c5f527
+	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240326081751-56015b1ae3f6
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240326081751-56015b1ae3f6
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240326081751-56015b1ae3f6
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240326081751-56015b1ae3f6
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240326081751-56015b1ae3f6
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240327210902-c97c074df691
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240327125944-20c4db02e417
 	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.28.8
