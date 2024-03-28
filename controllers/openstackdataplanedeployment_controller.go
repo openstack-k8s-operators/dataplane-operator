@@ -131,6 +131,10 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		// in the cli
 		return ctrl.Result{}, nil
 	}
+	// Reset all conditions to Unknown as the state is not yet known for
+	// this reconcile loop.
+	instance.InitConditions()
+
 	if instance.Status.ConfigMapHashes == nil {
 		instance.Status.ConfigMapHashes = make(map[string]string)
 	}
