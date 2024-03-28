@@ -1,3 +1,14 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+collectors:
+- type: command
+  command: oc get OpenStackDataPlaneDeployment -n openstack edpm-compute-global -o yaml
+  name: edpm-compute-global-deployment
+- type: command
+  command: oc logs -n openstack-operators -l openstack.org/operator-name=dataplane
+  name: dataplane-operator-logs
+---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
