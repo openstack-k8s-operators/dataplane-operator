@@ -65,6 +65,7 @@ metadata:
   name: edpm-compute-no-nodes
 spec:
   preProvisioned: true
+  tlsEnabled: false
   services:
   - download-cache
   - bootstrap

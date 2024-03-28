@@ -635,8 +635,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			})
 		})
 	})
-	When("TLS is not enabled", func() {
-		tlsEnabled := false
+	When("TLS is not enabled explicitly its enabled by default", func() {
+		tlsEnabled := true
 		When("A Dataplane resorce is created with PreProvisioned nodes, no deployment", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
