@@ -1,0 +1,42 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-existing-nodeset
+  namespace: openstack
+spec:
+  preProvisioned: true
+  services:
+  - download-cache
+  - bootstrap
+  - configure-network
+  - validate-network
+  - install-os
+  - configure-os
+  - run-os
+  - install-certs
+  - ovn
+  - neutron-metadata
+  - neutron-ovn
+  - neutron-sriov
+  - neutron-dhcp
+  - libvirt
+  - nova
+  env:
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  nodes: {}
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+status:
+  conditions:
+  - message: Deployment not started
+    reason: Requested
+    status: "False"
+    type: Ready
+---
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+collectors:
+- type: command
+  command: oc get OpenStackDataPlaneDeployment -n openstack edpm-deployment -o yaml
+  name: edpm-deployment
