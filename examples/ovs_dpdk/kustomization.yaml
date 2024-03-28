@@ -5,7 +5,7 @@ namespace: openstack
 nameSuffix: -ovs-dpdk
 
 components:
-- ../base
+- ../baremetal
 
 resources:
   - values.yaml
@@ -14,7 +14,7 @@ replacements:
 # OpenStackDataPlaneNodeSet customizations
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-ovs-dpdk-values
     fieldPath: data.nodeset.nodetemplate.ansible.vars
   targets:
   - select:
@@ -25,7 +25,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-ovs-dpdk-values
     fieldPath: data.nodeset.services
   targets:
   - select:
@@ -36,7 +36,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-ovs-dpdk-values
     fieldPath: data.nodeset.nodes
   targets:
   - select:
@@ -47,7 +47,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-ovs-dpdk-values
     fieldPath: data.nodeset.baremetalsettemplate
   targets:
   - select:
@@ -58,7 +58,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-ovs-dpdk-values
     fieldPath: data.preProvisioned
   targets:
   - select:
@@ -69,7 +69,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-ovs-dpdk-values
     fieldPath: data.nodeset.nodetemplate.networks
   targets:
   - select:

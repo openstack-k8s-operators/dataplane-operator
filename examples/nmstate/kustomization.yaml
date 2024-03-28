@@ -4,7 +4,7 @@ kind: Component
 namespace: openstack
 
 components:
-- ../base
+- ../preprovisioned # for baremetal nodes, replace with baremetal
 
 resources:
   - values.yaml
@@ -13,7 +13,7 @@ replacements:
 # OpenStackDataPlaneNodeSet customizations
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-nmstate-values
     fieldPath: data.nodeset.nodetemplate.ansible.vars
   targets:
   - select:

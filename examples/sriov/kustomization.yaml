@@ -5,7 +5,7 @@ namespace: openstack
 nameSuffix: -sriov
 
 components:
-- ../base
+- ../preprovisioned # for baremetal nodes, replace with baremetal
 
 resources:
   - values.yaml
@@ -14,7 +14,7 @@ replacements:
 # OpenStackDataPlaneNodeSet customizations
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-sriov-values
     fieldPath: data.nodeset.services
   targets:
   - select:

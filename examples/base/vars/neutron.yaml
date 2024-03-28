@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: neutron-edpm
-data:
-  physical_bridge_name: br-ex
-  public_interface_name: eth0

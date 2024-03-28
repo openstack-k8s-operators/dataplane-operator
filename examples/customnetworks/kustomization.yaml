@@ -5,7 +5,7 @@ namespace: openstack
 nameSuffix: -custom-network
 
 components:
-- ../base
+- ../preprovisioned # for baremetal nodes, replace with baremetal
 
 resources:
   - values.yaml
@@ -14,7 +14,7 @@ replacements:
 # OpenStackDataPlaneNodeSet customizations
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-custom-networks-values
     fieldPath: data.nodeset.nodetemplate.ansible.vars.neutron_public_interface_name
   targets:
   - select:
@@ -25,7 +25,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-custom-networks-values
     fieldPath: data.nodeset.nodetemplate.ansible.vars.ctlplane_dns_nameservers
   targets:
   - select:
@@ -36,7 +36,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-custom-networks-values
     fieldPath: data.nodeset.nodetemplate.ansible.vars.edpm_ovn_dbs
   targets:
   - select:
@@ -47,7 +47,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-custom-networks-values
     fieldPath: data.nodeset.nodetemplate.ansible.vars.edpm_sshd_allowed_ranges
   targets:
   - select:
@@ -58,7 +58,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-custom-networks-values
     fieldPath: data.nodeset.nodes
   targets:
   - select:
