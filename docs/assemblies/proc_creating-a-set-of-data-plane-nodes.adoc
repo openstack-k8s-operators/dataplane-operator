@@ -8,31 +8,19 @@ Create an `OpenStackDataPlaneNodeSet` CR for each logical grouping of nodes in y
 
 .Procedure
 
-. Copy the https://kustomize.io/[kustomize] examples on your workstation:
-
-  git clone -n --depth=1 --filter=tree:0 \
-    https://github.com/openstack-k8s-operators/dataplane-operator
-  cd dataplane-operator
-  git sparse-checkout set --no-cone examples
-  git checkout
-  cd examples
-
-. Use kustomize to create the `OpenStackDataPlaneDeployment` and `OpenStackDataPlaneNodeSet` CRs:
-
-  * Pre-provisioned nodes:
-
-  oc kustomize --load-restrictor LoadRestrictionsNone preprovisioned > openstack-edpm.yaml
-
-  * Bare metal nodes:
-
-  oc kustomize --load-restrictor LoadRestrictionsNone baremetal > openstack-edpm.yaml
-
+. Create an `OpenStackDataPlaneNodeSet` CR and save it to a file named `openstack-edpm.yaml` on your workstation:
 +
-[NOTE]
-====
-If desired, update the `values.yaml` file with values from your environment and add other kustomizations as needed before generating the CRs. Alternatively, the generated CRS can be directly edited before being applied.
-====
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: openstack-edpm-ipam
+spec:
+  ...
+----
 +
+* xref:ref_example-OpenStackDataPlaneNodeSet-CR-for-preprovisioned-nodes_dataplane[Example `OpenStackDataPlaneNodeSet` CR for pre-provisioned nodes]
+* xref:ref_example-OpenStackDataPlaneNodeSet-CR-for-bare-metal-nodes_dataplane[Example `OpenStackDataPlaneNodeSet` CR for bare metal nodes]
 
 . The sample `OpenStackDataPlaneNodeSet` CR is connected to `cell1` by default. If you added additional Compute cells to the control plane and you want to connect the node set to one of the other cells, then you must create a custom service for the node set that includes the `Secret` CR for the cell:
 
@@ -310,7 +298,7 @@ endif::[]
 
 . Save the `openstack-edpm.yaml` definition file.
 
-. Create and <<proc_deploying-the-data-plane_dataplane,deploy>> the data plane resources:
+. Create the data plane resources:
 +
 ----
 $ oc create -f openstack-edpm.yaml
