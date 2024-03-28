@@ -1,0 +1,24 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-compute-beta-nodeset
+spec:
+  preProvisioned: true
+  services:
+  - download-cache
+  - bootstrap
+  env:
+  - name: ANSIBLE_FORCE_COLOR
+    value: "True"
+  nodes: {}
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-multinodeset
+spec:
+  nodeSets:
+    - edpm-compute-global
+    - edpm-compute-beta-nodeset
