@@ -1,0 +1,6 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+collectors:
+- type: command
+  command: oc get OpenStackDataPlaneDeployment -n openstack edpm-deployment -o yaml
+  name: edpm-deployment
