@@ -50,7 +50,7 @@ type OpenStackDataPlaneDeploymentSpec struct {
 
 	// +kubebuilder:validation:Optional
 	// ServicesOverride list
-	ServicesOverride []string `json:"servicesOverride"`
+	ServicesOverride []string `json:"servicesOverride,omitempty"`
 
 	// Time before the deployment is requeued in seconds
 	// +kubebuilder:validation:Minimum:=1

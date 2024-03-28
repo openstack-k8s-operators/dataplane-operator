@@ -147,6 +147,14 @@ func main() {
 			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackDataPlaneNodeSet")
 			os.Exit(1)
 		}
+		if err = (&dataplanev1.OpenStackDataPlaneDeployment{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackDataPlaneDeployment")
+			os.Exit(1)
+		}
+		if err = (&dataplanev1.OpenStackDataPlaneService{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackDataPlaneService")
+			os.Exit(1)
+		}
 		checker = mgr.GetWebhookServer().StartedChecker()
 	}
 
