@@ -225,7 +225,12 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		// Register overall status immediately to have an early feedback e.g.
 		// in the cli
 		return ctrl.Result{}, nil
+	} else {
+		// Reset all conditions to Unknown as the state is not yet known for
+		// this reconcile loop.
+		instance.InitConditions()
 	}
+
 	if instance.Status.ConfigMapHashes == nil {
 		instance.Status.ConfigMapHashes = make(map[string]string)
 	}
