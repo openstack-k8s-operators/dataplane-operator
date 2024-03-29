@@ -6,7 +6,7 @@ namespace: openstack
 nameSuffix: -ceph
 
 components:
-- ../base
+- ../preprovisioned # for baremetal nodes, replace with baremetal
 
 resources:
   - values.yaml
@@ -15,7 +15,7 @@ replacements:
 # OpenStackDataPlaneNodeSet customizations
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-ceph-values
     fieldPath: data.nodeset.nodetemplate.ansible.vars
   targets:
   - select:
@@ -26,7 +26,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-ceph-values
     fieldPath: data.nodeset.nodes
   targets:
   - select:
@@ -37,7 +37,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-ceph-values
     fieldPath: data.deployment.services
   targets:
   - select:

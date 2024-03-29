@@ -4,7 +4,7 @@ kind: Component
 namespace: openstack
 
 components:
-- ../base
+- ../preprovisioned # for baremetal nodes, replace with baremetal
 
 resources:
   - values.yaml
@@ -13,7 +13,7 @@ replacements:
 # OpenStackDataPlaneNodeSet customizations
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-swift-values
     fieldPath: data.nodeset.nodetemplate.ansible.vars.edpm_swift_disks
   targets:
   - select:
@@ -24,7 +24,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-swift-values
     fieldPath: data.nodeset.services
   targets:
   - select:
@@ -35,7 +35,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-swift-values
     fieldPath: data.nodeset.networkattachments
   targets:
   - select:
@@ -46,7 +46,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-swift-values
     fieldPath: data.nodeset.nodes
   targets:
   - select:

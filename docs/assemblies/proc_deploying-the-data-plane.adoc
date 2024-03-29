@@ -6,15 +6,13 @@ You use the `OpenStackDataPlaneDeployment` CRD to configure the services on the 
 
 .Procedure
 
-. Complete the steps from <<proc_creating-a-set-of-data-plane-nodes_dataplane,Creating a DataPlane>> procedure, ensuring that you have a file named `openstack-edpm.yaml` on your workstation.
-
-. Optional: Update `nodeSets` to include all the `OpenStackDataPlaneNodeSet` CRs that you want to deploy:
+. Create an `OpenStackDataPlaneDeployment` CR and save it to a file named `openstack-edpm-deploy.yaml` on your workstation.
 +
 ----
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
-  name: openstack-edpm-ipam
+  name: edpm-deployment-ipam
 spec:
   nodeSets:
     - openstack-edpm-ipam
@@ -25,10 +23,12 @@ spec:
 +
 * Replace `<nodeSet_name>` with the names of the `OpenStackDataPlaneNodeSet` CRs that you want to include in your data plane deployment.
 
+. Save the `openstack-edpm-deploy.yaml` deployment file.
+
 . Deploy the data plane:
 +
 ----
-$ oc create -f openstack-edpm.yaml
+$ oc create -f openstack-edpm-deploy.yaml
 ----
 +
 You can view the Ansible logs while the deployment executes:
@@ -43,7 +43,7 @@ $ oc logs -l app=openstackansibleee -f --max-log-requests 20
 ----
 $ oc get openstackdataplanedeployment
 NAME             	STATUS   MESSAGE
-openstack-edpm-ipam   True     Setup Complete
+edpm-deployment-ipam   True     Setup Complete
 
 
 $ oc get openstackdataplanenodeset

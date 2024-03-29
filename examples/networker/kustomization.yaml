@@ -5,7 +5,7 @@ namespace: openstack
 nameSuffix: -networker
 
 components:
-- ../base
+- ../preprovisioned # for baremetal nodes, replace with baremetal
 
 resources:
   - values.yaml
@@ -14,7 +14,7 @@ replacements:
 # OpenStackDataPlaneNodeSet customizations
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-networker-values
     fieldPath: data.nodeset.nodetemplate.ansible.vars.edpm_enable_chassis_gw
   targets:
   - select:
@@ -25,7 +25,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-networker-values
     fieldPath: data.nodeset.services
   targets:
   - select:
@@ -36,7 +36,7 @@ replacements:
       create: true
 - source:
     kind: DataPlaneConfig
-    name: edpm-values
+    name: edpm-networker-values
     fieldPath: data.nodeset.nodes
   targets:
   - select:

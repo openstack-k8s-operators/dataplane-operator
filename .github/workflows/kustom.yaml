@@ -29,5 +29,5 @@ jobs:
 
           for d in */ ; do
               echo "=============== $d ==============="
-              ../bin/kustomize build "$d"
+              ../bin/kustomize build --load-restrictor LoadRestrictionsNone "$d"
           done
