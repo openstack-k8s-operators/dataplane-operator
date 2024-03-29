@@ -97,19 +97,42 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		Log,
 	)
 
+	// If the deploy is already done, return immediately.
+	if instance.Status.Deployed {
+		Log.Info("Already deployed", "instance.Status.Deployed", instance.Status.Deployed)
+		return ctrl.Result{}, nil
+	}
+
+	// initialize status if Conditions is nil, but do not reset if it already
+	// exists
+	isNewInstance := instance.Status.Conditions == nil
+	if isNewInstance {
+		instance.Status.Conditions = condition.Conditions{}
+	}
+
+	// Save a copy of the conditions so that we can restore the LastTransitionTime
+	// when a condition's state doesn't change.
+	savedConditions := instance.Status.Conditions.DeepCopy()
+
+	// Reset all conditions to Unknown as the state is not yet known for
+	// this reconcile loop.
+	instance.InitConditions()
+	// Set ObservedGeneration since we've reset conditions
+	instance.Status.ObservedGeneration = instance.Generation
+
 	// Always patch the instance status when exiting this function so we can persist any changes.
 	defer func() { // update the Ready condition based on the sub conditions
+		condition.RestoreLastTransitionTimes(
+			&instance.Status.Conditions, savedConditions)
 		if instance.Status.Conditions.AllSubConditionIsTrue() {
 			instance.Status.Conditions.MarkTrue(
 				condition.ReadyCondition, condition.ReadyMessage)
-		} else {
-			// something is not ready so reset the Ready condition
-			instance.Status.Conditions.MarkUnknown(
-				condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage)
-			// and recalculate it based on the state of the rest of the conditions
+		} else if instance.Status.Conditions.IsUnknown(condition.ReadyCondition) {
+			// Recalculate ReadyCondition based on the state of the rest of the conditions
 			instance.Status.Conditions.Set(
 				instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
+
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
 			Log.Error(err, "Error updating instance status conditions")
@@ -117,23 +140,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			return
 		}
 	}()
-
-	// If the deploy is already done, return immediately.
-	if instance.Status.Deployed {
-		Log.Info("Already deployed", "instance.Status.Deployed", instance.Status.Deployed)
-		return ctrl.Result{}, nil
-	}
-
-	// Initialize Status
-	if instance.Status.Conditions == nil {
-		instance.InitConditions()
-		// Register overall status immediately to have an early feedback e.g.
-		// in the cli
-		return ctrl.Result{}, nil
-	}
-	// Reset all conditions to Unknown as the state is not yet known for
-	// this reconcile loop.
-	instance.InitConditions()
 
 	if instance.Status.ConfigMapHashes == nil {
 		instance.Status.ConfigMapHashes = make(map[string]string)

@@ -2026,6 +2026,9 @@ spec:
                 items:
                   type: string
                 type: array
+              observedGeneration:
+                format: int64
+                type: integer
               secretHashes:
                 additionalProperties:
                   type: string

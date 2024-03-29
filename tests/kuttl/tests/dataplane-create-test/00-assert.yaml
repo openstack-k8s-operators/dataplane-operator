@@ -91,6 +91,7 @@ spec:
   - libvirt
   - nova
 status:
+  observedGeneration: 1
   conditions:
   - message: Deployment not started
     reason: Requested

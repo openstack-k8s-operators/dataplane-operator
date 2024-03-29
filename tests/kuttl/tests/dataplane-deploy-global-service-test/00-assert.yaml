@@ -107,6 +107,7 @@ spec:
          # SELinux module
          edpm_selinux_mode: enforcing
 status:
+  observedGeneration: 1
   conditions:
   - message: Deployment not started
     reason: Requested

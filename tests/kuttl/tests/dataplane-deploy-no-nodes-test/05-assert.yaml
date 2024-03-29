@@ -27,6 +27,7 @@ spec:
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
 status:
+  observedGeneration: 1
   conditions:
   - message: Deployment error occurred check deploymentStatuses for more details
     reason: Error
@@ -153,6 +154,7 @@ spec:
   servicesOverride:
     - this-service-does-not-exist
 status:
+  observedGeneration: 1
   conditions:
   - message: 'Deployment error occurred nodeSet: edpm-compute-no-nodes error: OpenStackDataPlaneService.dataplane.openstack.org
          "this-service-does-not-exist" not found'
