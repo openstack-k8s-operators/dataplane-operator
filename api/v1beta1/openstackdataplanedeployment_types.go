@@ -76,6 +76,9 @@ type OpenStackDataPlaneDeploymentStatus struct {
 
 	// SecretHashes
 	SecretHashes map[string]string `json:"secretHashes,omitempty" optional:"true"`
+
+	// NodeSetHashes
+	NodeSetHashes map[string]string `json:"nodeSetHashes,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true

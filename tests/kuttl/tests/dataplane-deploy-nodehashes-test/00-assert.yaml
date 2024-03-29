@@ -1,0 +1,25 @@
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: edpm-compute-no-nodes
+spec:
+  nodeSets:
+  - edpm-compute-no-nodes
+status:
+  deployed: true
+  nodeSetHashes:
+    edpm-compute-no-nodes: n5b9h656h576hb6h59bh99hbfh67bhchbch7ch679hc6h68dh5d9h54bh656hfh5d8hc4h9fhfh684h545hdbh694hf5h7h5dbhbch5c6h5b4q
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneNodeSet
+metadata:
+  name: edpm-compute-no-nodes
+spec:
+  nodeTemplate:
+    ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
+  nodes: {}
+  services:
+  - download-cache
+status:
+  configHash: n5b9h656h576hb6h59bh99hbfh67bhchbch7ch679hc6h68dh5d9h54bh656hfh5d8hc4h9fhfh684h545hdbh694hf5h7h5dbhbch5c6h5b4q
+  deployedConfigHash: n5b9h656h576hb6h59bh99hbfh67bhchbch7ch679hc6h68dh5d9h54bh656hfh5d8hc4h9fhfh684h545hdbh694hf5h7h5dbhbch5c6h5b4q

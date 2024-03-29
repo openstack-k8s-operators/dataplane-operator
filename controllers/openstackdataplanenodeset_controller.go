@@ -446,7 +446,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		Log.Info("Set NodeSet DeploymentReadyCondition true")
 		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
 			condition.DeploymentReadyMessage)
-		instance.Status.DeployedConfigHash = configHash
 	} else if deploymentExists {
 		Log.Info("Set NodeSet DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
@@ -507,6 +506,7 @@ func checkDeployment(helper *helper.Helper,
 				for k, v := range deployment.Status.SecretHashes {
 					instance.Status.SecretHashes[k] = v
 				}
+				instance.Status.DeployedConfigHash = deployment.Status.NodeSetHashes[instance.Name]
 			}
 			deploymentConditions := deployment.Status.NodeSetConditions[instance.Name]
 			if instance.Status.DeploymentStatuses == nil {
