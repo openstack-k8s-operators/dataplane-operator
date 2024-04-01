@@ -337,43 +337,6 @@ metadata:
   name: openstack-edpm-tls
 spec:
   dnsDataLabelSelectorValue: dnsdata
-  hosts:
-  - hostnames:
-      - edpm-compute-0.ctlplane.example.com
-    ip: 192.168.122.100
-  - hostnames:
-      - edpm-compute-0.internalapi.example.com
-    ip: 172.17.0.100
-  - hostnames:
-      - edpm-compute-0.storage.example.com
-    ip: 172.18.0.100
-  - hostnames:
-      - edpm-compute-0.tenant.example.com
-    ip: 172.19.0.100
-  - hostnames:
-      - edpm-compute-1.ctlplane.example.com
-    ip: 192.168.122.101
-  - hostnames:
-      - edpm-compute-1.internalapi.example.com
-    ip: 172.17.0.101
-  - hostnames:
-      - edpm-compute-1.storage.example.com
-    ip: 172.18.0.101
-  - hostnames:
-      - edpm-compute-1.tenant.example.com
-    ip: 172.19.0.101
-  - hostnames:
-      - edpm-compute-2.ctlplane.example.com
-    ip: 192.168.122.102
-  - hostnames:
-      - edpm-compute-2.internalapi.example.com
-    ip: 172.17.0.102
-  - hostnames:
-      - edpm-compute-2.storage.example.com
-    ip: 172.18.0.102
-  - hostnames:
-      - edpm-compute-2.tenant.example.com
-    ip: 172.19.0.102
 status:
   conditions:
   - message: Setup complete
