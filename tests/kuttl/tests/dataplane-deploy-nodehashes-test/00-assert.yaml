@@ -8,7 +8,7 @@ spec:
 status:
   deployed: true
   nodeSetHashes:
-    edpm-compute-no-nodes: n5b9h656h576hb6h59bh99hbfh67bhchbch7ch679hc6h68dh5d9h54bh656hfh5d8hc4h9fhfh684h545hdbh694hf5h7h5dbhbch5c6h5b4q
+    edpm-compute-no-nodes: n595h74h98h5d8h579h5c7h84h5dh599h544hf8h65bh686h5f7h99h669h676h97h678h646h9fh5cch649h66fhcch5fh688h95h7bhbh675hd9q
 ---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
@@ -21,5 +21,5 @@ spec:
   services:
   - download-cache
 status:
-  configHash: n5b9h656h576hb6h59bh99hbfh67bhchbch7ch679hc6h68dh5d9h54bh656hfh5d8hc4h9fhfh684h545hdbh694hf5h7h5dbhbch5c6h5b4q
-  deployedConfigHash: n5b9h656h576hb6h59bh99hbfh67bhchbch7ch679hc6h68dh5d9h54bh656hfh5d8hc4h9fhfh684h545hdbh694hf5h7h5dbhbch5c6h5b4q
+  configHash: n595h74h98h5d8h579h5c7h84h5dh599h544hf8h65bh686h5f7h99h669h676h97h678h646h9fh5cch649h66fhcch5fh688h95h7bhbh675hd9q
+  deployedConfigHash: n595h74h98h5d8h579h5c7h84h5dh599h544hf8h65bh686h5f7h99h669h676h97h678h646h9fh5cch649h66fhcch5fh688h95h7bhbh675hd9q

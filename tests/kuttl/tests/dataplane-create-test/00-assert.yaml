@@ -76,6 +76,7 @@ spec:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     managementNetwork: ctlplane
   preProvisioned: true
+  tlsEnabled: true
   services:
   - download-cache
   - bootstrap

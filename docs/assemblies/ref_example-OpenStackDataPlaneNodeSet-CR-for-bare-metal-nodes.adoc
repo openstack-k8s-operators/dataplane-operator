@@ -96,6 +96,7 @@ spec:
     - libvirt
     - nova
     - telemetry
+  tlsEnabled: true
 ----
 
 <1> Configure the bare metal template for bare metal nodes that must be provisioned when creating the resource.
