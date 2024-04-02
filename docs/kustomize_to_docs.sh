@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -ex pipefail
 
+source $LOCALBIN/.virtualenv/bin/activate
+
 BAREMETAL=docs/assemblies/ref_example-OpenStackDataPlaneNodeSet-CR-for-bare-metal-nodes.adoc
 FOOTER=$(sed '0,/----/d' $BAREMETAL | sed -e '0,/----/d')
 sed -i '/----/q' $BAREMETAL
 sed -i 's/preprovisioned/baremetal/' examples/no_vars_from/kustomization.yaml
-oc kustomize --load-restrictor LoadRestrictionsNone examples/no_vars_from | yq ' select(.kind == "OpenStackDataPlaneNodeSet")' >> $BAREMETAL
+$KUSTOMIZE --load-restrictor LoadRestrictionsNone build examples/no_vars_from | yq ' select(.kind == "OpenStackDataPlaneNodeSet")' -Y >> $BAREMETAL
 sed -i 's/\/baremetal/\/preprovisioned/' examples/no_vars_from/kustomization.yaml
 echo -e "----\n$FOOTER" >> $BAREMETAL
 
@@ -33,7 +35,7 @@ done
 PREPROVISIONED=docs/assemblies/ref_example-OpenStackDataPlaneNodeSet-CR-for-preprovisioned-nodes.adoc
 FOOTER=$(sed '0,/----/d' $PREPROVISIONED | sed -e '0,/----/d')
 sed -i '/----/q' $PREPROVISIONED
-oc kustomize --load-restrictor LoadRestrictionsNone examples/no_vars_from | yq ' select(.kind == "OpenStackDataPlaneNodeSet")' >> $PREPROVISIONED
+$KUSTOMIZE --load-restrictor LoadRestrictionsNone build examples/no_vars_from | yq ' select(.kind == "OpenStackDataPlaneNodeSet")' -Y >> $PREPROVISIONED
 echo -e "----\n$FOOTER" >> $PREPROVISIONED
 
 COUNT=1
@@ -54,3 +56,4 @@ do
   sed -i "/$callout:/ s/$/ #<$COUNT>/" $PREPROVISIONED
   COUNT=$((COUNT + 1))
 done
+deactivate

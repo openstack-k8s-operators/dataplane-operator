@@ -94,7 +94,7 @@ docs-dependencies: .bundle
 	bundle config set --local path 'local/bundle'; bundle install
 
 .PHONY: docs
-docs: manifests docs-dependencies crd-to-markdown ## Build docs
+docs: manifests docs-dependencies crd-to-markdown  docs-kustomize-examples ## Build docs
 	$(CRD_MARKDOWN) -f api/v1beta1/common.go -f api/v1beta1/openstackdataplaneservice_types.go -f api/v1beta1/openstackdataplanenodeset_types.go -f api/v1beta1/openstackdataplanedeployment_types.go -n OpenStackDataPlaneService -n OpenStackDataPlaneNodeSet -n OpenStackDataPlaneDeployment > docs/assemblies/custom_resources.md
 	bundle exec kramdoc --auto-ids docs/assemblies/custom_resources.md && rm docs/assemblies/custom_resources.md
 	sed -i "s/=== Custom/== Custom/g" docs/assemblies/custom_resources.adoc
@@ -112,6 +112,10 @@ docs-watch: docs-preview
 .PHONY: docs-clean
 docs-clean:
 	rm -r docs_build
+
+.PHONY: docs-examples
+docs-kustomize-examples: yq kustomize ## Generate updated docs from examples using kustomize
+	KUSTOMIZE=$(KUSTOMIZE) LOCALBIN=$(LOCALBIN) ./docs/kustomize_to_docs.sh
 
 ##@ General
 
@@ -337,6 +341,12 @@ else
 OPM = $(shell which opm)
 endif
 endif
+
+.PHONY: yq
+yq: ## Download and install yq in local env
+	python -m venv $(LOCALBIN)/.virtualenv && \
+	source $(LOCALBIN)/.virtualenv/bin/activate && \
+	pip install yq
 
 # A comma-separated list of bundle images (e.g. make catalog-build BUNDLE_IMGS=example.com/operator-bundle:v0.1.0,example.com/operator-bundle:v0.2.0).
 # These images MUST exist in a registry and be pull-able.
