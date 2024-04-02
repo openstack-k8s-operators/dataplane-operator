@@ -1,11 +1,6 @@
 repos:
 - repo: local
   hooks:
-    - id: kustomize-docs
-      name: kustomize-docs
-      language: system
-      require_serial: true
-      entry: docs/kustomize_to_docs.sh
     - id: gotidy
       name: gotidy
       language: system
