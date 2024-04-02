@@ -118,6 +118,7 @@ metadata:
   name: edpm-compute-global
 spec:
   preProvisioned: true
+  tlsEnabled: false
   services:
   - download-cache
   - bootstrap

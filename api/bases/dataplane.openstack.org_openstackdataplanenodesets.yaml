@@ -1944,7 +1944,7 @@ spec:
                   type: string
                 type: array
               tlsEnabled:
-                default: false
+                default: true
                 type: boolean
             required:
             - nodeTemplate

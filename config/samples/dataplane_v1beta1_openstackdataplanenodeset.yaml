@@ -3,6 +3,7 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: openstack-edpm
 spec:
+  tlsEnabled: true
   env:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
