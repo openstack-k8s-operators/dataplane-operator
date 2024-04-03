@@ -226,9 +226,9 @@ func (r *OpenStackDataPlaneNodeSetSpec) duplicateNodeCheck(nodeSetList *OpenStac
 	for _, newNodeName := range r.Nodes {
 		if slices.Contains(existingNodeNames, newNodeName.HostName) || slices.Contains(existingNodeNames, newNodeName.Ansible.AnsibleHost) {
 			errors = append(errors, field.Invalid(
-				field.NewPath("Spec").Child("nodes"),
+				field.NewPath("spec").Child("nodes"),
 				newNodeName,
-				fmt.Sprintf("node already exists in the cluster: %s", newNodeName.HostName)))
+				fmt.Sprintf("node %s already exists in another cluster", newNodeName.HostName)))
 		}
 	}
 

@@ -149,7 +149,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 				_, err := controllerutil.CreateOrPatch(
 					th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
 				return fmt.Sprintf("%s", err)
-			}).Should(ContainSubstring("node already exists"))
+			}).Should(ContainSubstring("already exists in another cluster"))
 		})
 
 		It("Should block NodeSets if they contain a duplicate ansibleHost", func() {
@@ -178,7 +178,7 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 				_, err := controllerutil.CreateOrPatch(
 					th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
 				return fmt.Sprintf("%s", err)
-			}).Should(ContainSubstring("node already exists"))
+			}).Should(ContainSubstring("already exists in another cluster"))
 		})
 	})
 })

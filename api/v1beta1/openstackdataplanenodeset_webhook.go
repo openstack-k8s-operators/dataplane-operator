@@ -108,12 +108,6 @@ var _ webhook.Validator = &OpenStackDataPlaneNodeSet{}
 func (r *OpenStackDataPlaneNodeSet) ValidateCreate() (admission.Warnings, error) {
 	openstackdataplanenodesetlog.Info("validate create", "name", r.Name)
 
-	// Currently, this check is only valid for PreProvisioned nodes. Since we can't possibly
-	// have duplicates in Baremetal Deployments, we can exit early here for Baremetal NodeSets.
-	if !r.Spec.PreProvisioned {
-		return nil, nil
-	}
-
 	var errors field.ErrorList
 
 	nodeSetList := &OpenStackDataPlaneNodeSetList{}
@@ -135,13 +129,7 @@ func (r *OpenStackDataPlaneNodeSet) ValidateCreate() (admission.Warnings, error)
 			fmt.Sprintf("Error validating OpenStackDataPlaneNodeSet name %s, name must follow RFC1123", r.Name)))
 	}
 
-	// If this is the first NodeSet being created, then there can be no duplicates
-	// we can exit early here.
-	if len(nodeSetList.Items) == 0 {
-		return nil, nil
-	}
-
-	errors = append(errors, r.Spec.duplicateNodeCheck(nodeSetList)...)
+	errors = append(errors, r.Spec.ValidateCreate(nodeSetList)...)
 
 	if len(errors) > 0 {
 		openstackdataplanenodesetlog.Info("validation failed", "name", r.Name)
@@ -155,8 +143,14 @@ func (r *OpenStackDataPlaneNodeSet) ValidateCreate() (admission.Warnings, error)
 }
 
 func (r *OpenStackDataPlaneNodeSetSpec) ValidateCreate(nodeSetList *OpenStackDataPlaneNodeSetList) field.ErrorList {
-
-	errors := r.duplicateNodeCheck(nodeSetList)
+	var errors field.ErrorList
+	// Currently, this check is only valid for PreProvisioned nodes. Since we can't possibly
+	// have duplicates in Baremetal Deployments, we can exit early here for Baremetal NodeSets.
+	// If this is the first NodeSet being created, then there can be no duplicates
+	// we can exit early here.
+	if r.PreProvisioned && len(nodeSetList.Items) != 0 {
+		errors = append(errors, r.duplicateNodeCheck(nodeSetList)...)
+	}
 
 	return errors
 
@@ -216,7 +210,7 @@ func (r *OpenStackDataPlaneNodeSet) ValidateDelete() (admission.Warnings, error)
 		openstackdataplanenodesetlog.Info("validation failed", "name", r.Name)
 
 		return nil, apierrors.NewInvalid(
-			schema.GroupKind{Group: "dataplane.openstack.org", Kind: "OpenStackDataplaneNodeSet"},
+			schema.GroupKind{Group: "dataplane.openstack.org", Kind: "OpenStackDataPlaneNodeSet"},
 			r.Name,
 			errors,
 		)
