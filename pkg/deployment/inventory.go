@@ -123,8 +123,6 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	nodeSetGroup.Vars["edpm_tls_certs_enabled"] = instance.Spec.TLSEnabled
 	if instance.Spec.Tags != nil {
 		nodeSetGroup.Vars["nodeset_tags"] = instance.Spec.Tags
-		// (TODO) Remove this once all templates are converted
-		nodeSetGroup.Vars["role_tags"] = instance.Spec.Tags
 	}
 
 	nodeSetGroup.Vars["ansible_ssh_private_key_file"] = fmt.Sprintf("/runner/env/ssh_key/ssh_key_%s", instance.Name)
@@ -275,8 +273,6 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	if len(template.Networks) != 0 {
 		nets, netsLower := buildNetworkVars(template.Networks)
 		group.Vars["nodeset_networks"] = nets
-		// (TODO) Remove this once all templates are converted
-		group.Vars["role_networks"] = nets
 		group.Vars["networks_lower"] = netsLower
 	}
 
@@ -302,8 +298,6 @@ func resolveHostAnsibleVars(node *dataplanev1.NodeSection, host *ansible.Host) e
 	}
 	if len(node.Networks) != 0 {
 		nets, netsLower := buildNetworkVars(node.Networks)
-		host.Vars["role_networks"] = nets
-		// (TODO) Remove this once all templates are converted
 		host.Vars["nodeset_networks"] = nets
 		host.Vars["networks_lower"] = netsLower
 	}

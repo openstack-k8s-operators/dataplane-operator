@@ -84,7 +84,7 @@ spec:
          tenant_vlan_id: 22
          tenant_cidr: '24'
          tenant_host_routes: []
-         role_networks:
+         nodeset_networks:
          - InternalApi
          - Storage
          - Tenant
