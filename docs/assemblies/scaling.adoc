@@ -7,12 +7,12 @@ nodes to the `nodes` section of the `OpenStackDataPlaneNodeSet` spec. Ensure tha
 there are enough BMHs in `Available` state in the required namespace with the desired
 labels for baremetal nodes.
 
-Pre-Provisioned:
+.Pre-Provisioned:
 
  apiVersion: dataplane.openstack.org/v1beta1
  kind: OpenStackDataPlaneNodeSet
  metadata:
-   name: openstack-edpm
+   name: openstack-edpm-ipam
  spec:
    preProvisioned: True
    nodes:
@@ -34,12 +34,12 @@ Pre-Provisioned:
          subnetName: subnet1
    ...
 
-Baremetal:
+.Baremetal:
 
  apiVersion: dataplane.openstack.org/v1beta1
  kind: OpenStackDataPlaneNodeSet
  metadata:
-   name: openstack-edpm
+   name: openstack-edpm-ipam
  spec:
    nodes:
    ...
@@ -47,14 +47,25 @@ Baremetal:
        hostName: edpm-compute-2
    ...
 
-To deploy on the additional nodes, a new `OpenStackDataPlaneDeployment` CR should be
+WARNING: To deploy on the additional nodes, a *new* `OpenStackDataPlaneDeployment` CR should be
 created with the `OpenStackDataPlaneNodeSet` in the `nodeSets` section.
+
+.New OpenStackDataPlaneDeployment:
+
+ apiVersion: dataplane.openstack.org/v1beta1
+ kind: OpenStackDataPlaneDeployment
+ metadata:
+   name: new-deployment # Do not re-use the name from previous OpenStackDataPlaneDeployment
+ spec:
+  nodeSets:
+    - openstack-edpm-ipam # scaled out nodeset name
+
 
 Once deployment completes `OpenStackDataPlaneNodeSet` would be ready as shown below.
 
 [,console]
 ----
-$ oc get openstackdataplanenodeset openstack-edpm
+$ oc get openstackdataplanenodeset openstack-edpm-ipam
 NAME                  STATUS   MESSAGE
 openstack-edpm-ipam   True     NodeSet Ready
 ----
