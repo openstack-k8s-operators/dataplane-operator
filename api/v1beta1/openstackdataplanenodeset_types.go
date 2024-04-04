@@ -23,7 +23,9 @@ import (
 
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -144,6 +146,9 @@ type OpenStackDataPlaneNodeSetStatus struct {
 
 	//ObservedGeneration - the most recent generation observed for this NodeSet. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+
+	// DeployedVersion
+	DeployedVersion string `json:"deployedVersion,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -198,20 +203,56 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 	}
 }
 
-// DataplaneAnsibleImageDefaults default images for dataplane services
-type DataplaneAnsibleImageDefaults struct {
-	Frr                        string
-	IscsiD                     string
-	Logrotate                  string
-	Multipathd                 string
-	NeutronMetadataAgent       string
-	NeutronSRIOVAgent          string
-	NovaCompute                string
-	OvnControllerAgent         string
-	OvnBgpAgent                string
-	TelemetryCeilometerCompute string
-	TelemetryCeilometerIpmi    string
-	TelemetryNodeExporter      string
+// ContainerImageDefaults - the hardcoded defaults which are the last fallback
+// if no values are set elsewhere.
+var ContainerImageDefaults = openstackv1.ContainerImages{
+	ContainerTemplate: openstackv1.ContainerTemplate{
+		EdpmFrrImage:                  getStrPtr("quay.io/podified-antelope-centos9/openstack-frr:current-podified"),
+		EdpmIscsidImage:               getStrPtr("quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"),
+		EdpmLogrotateCrondImage:       getStrPtr("quay.io/podified-antelope-centos9/openstack-cron:current-podified"),
+		EdpmNeutronMetadataAgentImage: getStrPtr("quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"),
+		EdpmNeutronSriovAgentImage:    getStrPtr("quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"),
+		EdpmMultipathdImage:           getStrPtr("quay.io/podified-antelope-centos9/openstack-multipathd:current-podified"),
+		NovaComputeImage:              getStrPtr("quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"),
+		OvnControllerImage:            getStrPtr("quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"),
+		EdpmOvnBgpAgentImage:          getStrPtr("quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"),
+		CeilometerComputeImage:        getStrPtr("quay.io/podified-antelope-centos9/openstack-telemetry-ceilometer-compute:current-podified"),
+		CeilometerIpmiImage:           getStrPtr("quay.io/podified-antelope-centos9/openstack-telemetry-ceilometer-ipmi:current-podified"),
+		EdpmNodeExporterImage:         getStrPtr("quay.io/podified-antelope-centos9/openstack-telemetry-node-exporter:current-podified"),
+	}}
+
+// ContainerImages - the values if no OpenStackVersion is used
+var ContainerImages openstackv1.ContainerImages
+
+// SetupDefaults - initializes any CRD field defaults based on environment variables
+// called from main.go
+func SetupDefaults() {
+	// Acquire environmental defaults and initialize dataplane defaults with them
+	ContainerImages = openstackv1.ContainerImages{
+		ContainerTemplate: openstackv1.ContainerTemplate{
+			EdpmFrrImage:                  getImageDefault("RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmFrrImage),
+			EdpmIscsidImage:               getImageDefault("RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmIscsidImage),
+			EdpmLogrotateCrondImage:       getImageDefault("RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmLogrotateCrondImage),
+			EdpmMultipathdImage:           getImageDefault("RELATED_IMAGE_EDPM_MULTIPATHD_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmMultipathdImage),
+			EdpmNeutronMetadataAgentImage: getImageDefault("RELATED_IMAGE_EDPM_NEUTRON_METADATA_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmNeutronMetadataAgentImage),
+			EdpmNeutronSriovAgentImage:    getImageDefault("RELATED_IMAGE_EDPM_NEUTRON_SRIOV_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmNeutronSriovAgentImage),
+			EdpmNodeExporterImage:         getImageDefault("RELATED_IMAGE_EDPM_NODE_EXPORTER_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmNodeExporterImage),
+			EdpmOvnBgpAgentImage:          getImageDefault("RELATED_IMAGE_EDPM_OVN_BGP_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmOvnBgpAgentImage),
+			CeilometerComputeImage:        getImageDefault("RELATED_IMAGE_CEILOMETER_COMPUTE_IMAGE_URL_DEFAULT", ContainerImageDefaults.CeilometerComputeImage),
+			CeilometerIpmiImage:           getImageDefault("RELATED_IMAGE_CEILOMETER_IPMI_IMAGE_URL_DEFAULT", ContainerImageDefaults.CeilometerIpmiImage),
+			NovaComputeImage:              getImageDefault("RELATED_IMAGE_NOVA_COMPUTE_IMAGE_URL_DEFAULT", ContainerImageDefaults.NovaComputeImage),
+			OvnControllerImage:            getImageDefault("RELATED_IMAGE_OVN_CONTROLLER_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.OvnControllerImage),
+		},
+	}
+}
+
+func getImageDefault(envVar string, defaultImage *string) *string {
+	d := util.GetEnvVar(envVar, *defaultImage)
+	return &d
+}
+
+func getStrPtr(in string) *string {
+	return &in
 }
 
 // duplicateNodeCheck checks the NodeSetList for pre-existing nodes. If the user is trying to redefine an

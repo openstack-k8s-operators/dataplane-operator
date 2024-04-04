@@ -43,6 +43,7 @@ import (
 	"github.com/go-logr/logr"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
+	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -52,54 +53,8 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 )
-
-var dataplaneAnsibleImageDefaults dataplanev1.DataplaneAnsibleImageDefaults
-
-const (
-	// FrrDefaultImage -
-	FrrDefaultImage = "quay.io/podified-antelope-centos9/openstack-frr:current-podified"
-	// IscsiDDefaultImage -
-	IscsiDDefaultImage = "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
-	// LogrotateDefaultImage -
-	LogrotateDefaultImage = "quay.io/podified-antelope-centos9/openstack-cron:current-podified"
-	// MultipathdDefaultImage -
-	MultipathdDefaultImage = "quay.io/podified-antelope-centos9/openstack-multipathd:current-podified"
-	// NeutronMetadataAgentDefaultImage -
-	NeutronMetadataAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
-	// NeutronSRIOVAgentDefaultImage -
-	NeutronSRIOVAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"
-	// NovaComputeDefaultImage -
-	NovaComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
-	// OvnControllerAgentDefaultImage -
-	OvnControllerAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
-	// OvnBgpAgentDefaultImage -
-	OvnBgpAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
-	// TelemetryCeilometerComputeDefaultImage -
-	TelemetryCeilometerComputeDefaultImage = "quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified"
-	// TelemetryCeilometerIpmiDefaultImage -
-	TelemetryCeilometerIpmiDefaultImage = "quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi:current-podified"
-	// TelemetryNodeExporterDefaultImage -
-	TelemetryNodeExporterDefaultImage = "quay.io/prometheus/node-exporter:v1.5.0"
-)
-
-// SetupAnsibleImageDefaults -
-func SetupAnsibleImageDefaults() {
-	dataplaneAnsibleImageDefaults = dataplanev1.DataplaneAnsibleImageDefaults{
-		Frr:                        util.GetEnvVar("RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT", FrrDefaultImage),
-		IscsiD:                     util.GetEnvVar("RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT", IscsiDDefaultImage),
-		Logrotate:                  util.GetEnvVar("RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT", LogrotateDefaultImage),
-		Multipathd:                 util.GetEnvVar("RELATED_IMAGE_EDPM_MULTIPATHD_IMAGE_URL_DEFAULT", MultipathdDefaultImage),
-		NeutronMetadataAgent:       util.GetEnvVar("RELATED_IMAGE_EDPM_NEUTRON_METADATA_AGENT_IMAGE_URL_DEFAULT", NeutronMetadataAgentDefaultImage),
-		NeutronSRIOVAgent:          util.GetEnvVar("RELATED_IMAGE_EDPM_NEUTRON_SRIOV_AGENT_IMAGE_URL_DEFAULT", NeutronSRIOVAgentDefaultImage),
-		NovaCompute:                util.GetEnvVar("RELATED_IMAGE_EDPM_NOVA_COMPUTE_IMAGE_URL_DEFAULT", NovaComputeDefaultImage),
-		OvnControllerAgent:         util.GetEnvVar("RELATED_IMAGE_EDPM_OVN_CONTROLLER_AGENT_IMAGE_URL_DEFAULT", OvnControllerAgentDefaultImage),
-		OvnBgpAgent:                util.GetEnvVar("RELATED_IMAGE_EDPM_OVN_BGP_AGENT_IMAGE_URL_DEFAULT", OvnBgpAgentDefaultImage),
-		TelemetryCeilometerCompute: util.GetEnvVar("RELATED_IMAGE_EDPM_CEILOMETER_COMPUTE_IMAGE_URL_DEFAULT", TelemetryCeilometerComputeDefaultImage),
-		TelemetryCeilometerIpmi:    util.GetEnvVar("RELATED_IMAGE_EDPM_CEILOMETER_IPMI_IMAGE_URL_DEFAULT", TelemetryCeilometerIpmiDefaultImage),
-		TelemetryNodeExporter:      util.GetEnvVar("RELATED_IMAGE_EDPM_NODE_EXPORTER_IMAGE_URL_DEFAULT", TelemetryNodeExporterDefaultImage),
-	}
-}
 
 const (
 	// AnsibleSSHPrivateKey ssh private key
@@ -142,6 +97,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) GetLogger(ctx context.Context) log
 //+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/status,verbs=get
 //+kubebuilder:rbac:groups=network.openstack.org,resources=dnsdata/finalizers,verbs=update
 //+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete;
+//+kubebuilder:rbac:groups=core.openstack.org,resources=openstackversions,verbs=get;list;watch
 
 // RBAC for the ServiceAccount for the internal image registry
 //+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update
@@ -418,8 +374,13 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	// Generate NodeSet Inventory
+	version, err := dataplaneutil.GetVersion(ctx, helper, instance.Namespace)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	containerImages := dataplaneutil.GetContainerImages(version)
 	_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
-		allIPSets, dnsData.ServerAddresses, dataplaneAnsibleImageDefaults)
+		allIPSets, dnsData.ServerAddresses, containerImages)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Unable to generate inventory for %s", instance.Name)
 		util.LogErrorForObject(helper, err, errorMsg, instance)
@@ -520,6 +481,7 @@ func checkDeployment(helper *helper.Helper,
 					instance.Status.SecretHashes[k] = v
 				}
 				instance.Status.DeployedConfigHash = deployment.Status.NodeSetHashes[instance.Name]
+				instance.Status.DeployedVersion = deployment.Status.DeployedVersion
 			}
 			deploymentConditions := deployment.Status.NodeSetConditions[instance.Name]
 			if instance.Status.DeploymentStatuses == nil {
@@ -595,7 +557,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		Owns(&infranetworkv1.DNSData{}).
 		Owns(&corev1.Secret{}).
 		Watches(&infranetworkv1.DNSMasq{},
-			handler.EnqueueRequestsFromMapFunc(r.dnsMasqWatcherFn)).
+			handler.EnqueueRequestsFromMapFunc(r.genericWatcherFn)).
 		Watches(&dataplanev1.OpenStackDataPlaneDeployment{},
 			handler.EnqueueRequestsFromMapFunc(r.deploymentWatcherFn)).
 		Watches(&corev1.ConfigMap{},
@@ -604,6 +566,8 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		Watches(&corev1.Secret{},
 			handler.EnqueueRequestsFromMapFunc(r.secretWatcherFn),
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+		Watches(&openstackv1.OpenStackVersion{},
+			handler.EnqueueRequestsFromMapFunc(r.genericWatcherFn)).
 		Complete(r)
 }
 
@@ -642,7 +606,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) secretWatcherFn(
 	return requests
 }
 
-func (r *OpenStackDataPlaneNodeSetReconciler) dnsMasqWatcherFn(
+func (r *OpenStackDataPlaneNodeSetReconciler) genericWatcherFn(
 	ctx context.Context, obj client.Object) []reconcile.Request {
 	Log := r.GetLogger(ctx)
 	nodeSets := &dataplanev1.OpenStackDataPlaneNodeSetList{}
@@ -663,6 +627,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) dnsMasqWatcherFn(
 				Name:      nodeSet.Name,
 			},
 		})
+		Log.Info(fmt.Sprintf("Reconciling NodeSet %s due to watcher on %s/%s", nodeSet.Name, obj.GetObjectKind().GroupVersionKind().Kind, obj.GetName()))
 	}
 	return requests
 }

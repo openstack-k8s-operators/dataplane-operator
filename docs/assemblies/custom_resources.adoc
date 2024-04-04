@@ -17,7 +17,6 @@
 * <<openstackdataplaneservicespec,OpenStackDataPlaneServiceSpec>>
 * <<openstackdataplaneservicestatus,OpenStackDataPlaneServiceStatus>>
 * <<openstackdataplaneservicecert,OpenstackDataPlaneServiceCert>>
-* <<dataplaneansibleimagedefaults,DataplaneAnsibleImageDefaults>>
 * <<openstackdataplanenodesetlist,OpenStackDataPlaneNodeSetList>>
 * <<openstackdataplanenodesetspec,OpenStackDataPlaneNodeSetSpec>>
 * <<openstackdataplanenodesetstatus,OpenStackDataPlaneNodeSetStatus>>
@@ -395,77 +394,6 @@ OpenstackDataPlaneServiceCert defines the property of a TLS cert issued for a da
 
 <<custom-resources,Back to Custom Resources>>
 
-[#dataplaneansibleimagedefaults]
-==== DataplaneAnsibleImageDefaults
-
-DataplaneAnsibleImageDefaults default images for dataplane services
-
-|===
-| Field | Description | Scheme | Required
-
-| Frr
-|
-| string
-| false
-
-| IscsiD
-|
-| string
-| false
-
-| Logrotate
-|
-| string
-| false
-
-| Multipathd
-|
-| string
-| false
-
-| NeutronMetadataAgent
-|
-| string
-| false
-
-| NeutronSRIOVAgent
-|
-| string
-| false
-
-| NovaCompute
-|
-| string
-| false
-
-| OvnControllerAgent
-|
-| string
-| false
-
-| OvnBgpAgent
-|
-| string
-| false
-
-| TelemetryCeilometerCompute
-|
-| string
-| false
-
-| TelemetryCeilometerIpmi
-|
-| string
-| false
-
-| TelemetryNodeExporter
-|
-| string
-| false
-|===
-
-<<custom-resources,Back to Custom Resources>>
-
 [#openstackdataplanenodeset]
 ==== OpenStackDataPlaneNodeSet
 
@@ -641,6 +569,11 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | ObservedGeneration - the most recent generation observed for this NodeSet. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
 | int64
 | false
+
+| deployedVersion
+| DeployedVersion
+| string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -779,6 +712,11 @@ OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPl
 | observedGeneration
 | ObservedGeneration - the most recent generation observed for this Deployment. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
 | int64
+| false
+
+| deployedVersion
+| DeployedVersion
+| string
 | false
 |===
 

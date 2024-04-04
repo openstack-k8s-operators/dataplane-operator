@@ -101,6 +101,8 @@ spec:
                 type: object
               deployed:
                 type: boolean
+              deployedVersion:
+                type: string
               nodeSetConditions:
                 additionalProperties:
                   items:

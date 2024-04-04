@@ -1998,6 +1998,8 @@ spec:
                 type: boolean
               deployedConfigHash:
                 type: string
+              deployedVersion:
+                type: string
               deploymentStatuses:
                 additionalProperties:
                   items:
