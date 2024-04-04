@@ -201,6 +201,9 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	if instance.Status.SecretHashes == nil {
 		instance.Status.SecretHashes = make(map[string]string)
 	}
+	if instance.Status.ContainerImages == nil {
+		instance.Status.ContainerImages = make(map[string]string)
+	}
 
 	instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 
@@ -479,6 +482,9 @@ func checkDeployment(helper *helper.Helper,
 				}
 				for k, v := range deployment.Status.SecretHashes {
 					instance.Status.SecretHashes[k] = v
+				}
+				for k, v := range deployment.Status.ContainerImages {
+					instance.Status.ContainerImages[k] = v
 				}
 				instance.Status.DeployedConfigHash = deployment.Status.NodeSetHashes[instance.Name]
 				instance.Status.DeployedVersion = deployment.Status.DeployedVersion

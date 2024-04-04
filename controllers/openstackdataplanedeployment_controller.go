@@ -151,6 +151,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	if instance.Status.NodeSetHashes == nil {
 		instance.Status.NodeSetHashes = make(map[string]string)
 	}
+	if instance.Status.ContainerImages == nil {
+		instance.Status.ContainerImages = make(map[string]string)
+	}
 
 	// Ensure NodeSets
 	nodeSets := dataplanev1.OpenStackDataPlaneNodeSetList{}
@@ -302,6 +305,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			AeeSpec:                     &ansibleEESpec,
 			InventorySecrets:            globalInventorySecrets,
 			AnsibleSSHPrivateKeySecrets: globalSSHKeySecrets,
+			Version:                     version,
 		}
 
 		// When ServicesOverride is set on the OpenStackDataPlaneDeployment,

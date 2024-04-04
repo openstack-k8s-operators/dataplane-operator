@@ -343,6 +343,11 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | DeployOnAllNodeSets - should the service be deploy across all nodesets This will override default target of a service play, setting it to 'all'.
 | bool
 | false
+
+| containerImageFields
+| ContainerImageFields - list of container image fields names that this service deploys. The field names should match the ContainerImages struct field names from github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1
+| []string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -574,6 +579,11 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | DeployedVersion
 | string
 | false
+
+| containerImages
+| ContainerImages
+| map[string]string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -717,6 +727,11 @@ OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPl
 | deployedVersion
 | DeployedVersion
 | string
+| false
+
+| containerImages
+| ContainerImages
+| map[string]string
 | false
 |===
 

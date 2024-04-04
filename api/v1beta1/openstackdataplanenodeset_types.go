@@ -149,6 +149,9 @@ type OpenStackDataPlaneNodeSetStatus struct {
 
 	// DeployedVersion
 	DeployedVersion string `json:"deployedVersion,omitempty"`
+
+	// ContainerImages
+	ContainerImages map[string]string `json:"containerImages,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true

@@ -1992,6 +1992,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              containerImages:
+                additionalProperties:
+                  type: string
+                type: object
               ctlplaneSearchDomain:
                 type: string
               deployed:

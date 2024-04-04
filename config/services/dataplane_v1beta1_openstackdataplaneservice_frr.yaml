@@ -4,3 +4,5 @@ metadata:
   name: frr
 spec:
   playbook: osp.edpm.frr
+  containerImageFields:
+  - EdpmFrrImage

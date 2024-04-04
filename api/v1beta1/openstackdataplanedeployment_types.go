@@ -85,6 +85,9 @@ type OpenStackDataPlaneDeploymentStatus struct {
 
 	// DeployedVersion
 	DeployedVersion string `json:"deployedVersion,omitempty"`
+
+	// ContainerImages
+	ContainerImages map[string]string `json:"containerImages,omitempty"`
 }
 
 //+kubebuilder:object:root=true

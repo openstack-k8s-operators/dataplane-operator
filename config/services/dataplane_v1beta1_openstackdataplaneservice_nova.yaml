@@ -11,3 +11,6 @@ spec:
     - nova-migration-ssh-key
   playbook: osp.edpm.nova
   caCerts: combined-ca-bundle
+  containerImageFields:
+  - NovaComputeImage
+  - EdpmIscsidImage

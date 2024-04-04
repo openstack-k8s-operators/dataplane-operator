@@ -99,6 +99,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              containerImages:
+                additionalProperties:
+                  type: string
+                type: object
               deployed:
                 type: boolean
               deployedVersion:

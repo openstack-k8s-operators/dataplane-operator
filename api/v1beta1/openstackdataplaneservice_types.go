@@ -84,6 +84,12 @@ type OpenStackDataPlaneServiceSpec struct {
 	// This will override default target of a service play, setting it to 'all'.
 	// +kubebuilder:validation:Optional
 	DeployOnAllNodeSets bool `json:"deployOnAllNodeSets,omitempty" yaml:"deployOnAllNodeSets,omitempty"`
+
+	// ContainerImageFields - list of container image fields names that this
+	// service deploys. The field names should match the
+	// ContainerImages struct field names from
+	// github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1
+	ContainerImageFields []string `json:"containerImageFields,omitempty" yaml:"containerImageFields,omitempty"`
 }
 
 // OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService
