@@ -2,7 +2,4 @@
 - project:
     name: openstack-k8s-operators/dataplane-operator
     github-check:
-      jobs:
-        - dataplane-operator-docs-preview
-    templates:
-      - podified-multinode-edpm-baremetal-pipeline
+      jobs: []
