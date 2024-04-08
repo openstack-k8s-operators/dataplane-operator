@@ -90,7 +90,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -142,7 +142,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -193,7 +193,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -243,7 +243,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -293,7 +293,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -344,7 +344,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -394,7 +394,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -444,7 +444,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -506,7 +506,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -597,7 +597,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -659,7 +659,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -721,7 +721,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -783,7 +783,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -835,7 +835,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
@@ -921,7 +921,7 @@ spec:
 status:
   JobStatus: Succeeded
   conditions:
-  - message: AnsibleExecutionJob complete
+  - message: Setup complete
     reason: Ready
     status: "True"
     type: Ready
