@@ -6,3 +6,16 @@ spec:
   playbook: osp.edpm.ovn_bgp_agent
   secrets:
   - neutron-ovn-agent-neutron-config
+  tlsCert:
+    contents:
+    - dnsnames
+    - ips
+    networks:
+    - ctlplane
+    issuer: osp-rootca-issuer-ovn
+    keyUsages:
+      - digital signature
+      - key encipherment
+      - server auth
+      - client auth
+  caCerts: combined-ca-bundle
