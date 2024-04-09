@@ -7,3 +7,15 @@ spec:
   secrets:
   - neutron-ovn-metadata-agent-neutron-config
   - nova-metadata-neutron-config
+  tlsCert:
+    contents:
+    - dnsnames
+    - ips
+    networks:
+    - ctlplane
+    issuer: osp-rootca-issuer-ovn
+    keyUsages:
+      - digital signature
+      - key encipherment
+      - client auth
+  caCerts: combined-ca-bundle
