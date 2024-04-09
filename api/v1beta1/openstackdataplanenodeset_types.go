@@ -203,6 +203,7 @@ type DataplaneAnsibleImageDefaults struct {
 	Frr                        string
 	IscsiD                     string
 	Logrotate                  string
+	Multipathd                 string
 	NeutronMetadataAgent       string
 	NeutronSRIOVAgent          string
 	NovaCompute                string
