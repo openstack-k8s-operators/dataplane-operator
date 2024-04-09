@@ -27,6 +27,7 @@ spec:
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
 status:
+  observedGeneration: 1
   conditions:
   - message: NodeSet Ready
     reason: Ready

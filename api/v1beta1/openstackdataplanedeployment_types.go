@@ -79,6 +79,9 @@ type OpenStackDataPlaneDeploymentStatus struct {
 
 	// NodeSetHashes
 	NodeSetHashes map[string]string `json:"nodeSetHashes,omitempty" optional:"true"`
+
+	//ObservedGeneration - the most recent generation observed for this Deployment. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
 //+kubebuilder:object:root=true

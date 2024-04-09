@@ -112,6 +112,7 @@ spec:
   - install-certs-ovr
   - generic-service1
 status:
+  observedGeneration: 1
   conditions:
   - message: Deployment not started
     reason: Requested

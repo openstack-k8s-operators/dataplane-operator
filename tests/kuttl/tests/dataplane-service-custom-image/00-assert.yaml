@@ -14,6 +14,7 @@ spec:
       ansiblePort: 22
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
 status:
+  observedGeneration: 1
   conditions:
   - message: Deployment in progress
     reason: Requested

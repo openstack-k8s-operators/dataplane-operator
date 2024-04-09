@@ -56,6 +56,7 @@ spec:
   - libvirt
   - nova
 status:
+  observedGeneration: 1
   allHostnames:
     edpm-compute-0:
       ctlplane: edpm-compute-0.ctlplane.example.com

@@ -631,6 +631,11 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | DeployedConfigHash - holds the hash of the NodeTemplate and Node sections of the struct that was last deployed. This hash is used to determine when new Ansible executions are required to roll out config changes.
 | string
 | false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this NodeSet. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
+| int64
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
@@ -764,6 +769,11 @@ OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPl
 | nodeSetHashes
 | NodeSetHashes
 | map[string]string
+| false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this Deployment. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
+| int64
 | false
 |===
 

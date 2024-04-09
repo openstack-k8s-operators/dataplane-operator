@@ -141,6 +141,9 @@ type OpenStackDataPlaneNodeSetStatus struct {
 	// This hash is used to determine when new Ansible executions are required to roll
 	// out config changes.
 	DeployedConfigHash string `json:"deployedConfigHash,omitempty"`
+
+	//ObservedGeneration - the most recent generation observed for this NodeSet. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
 //+kubebuilder:object:root=true
