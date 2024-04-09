@@ -125,6 +125,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
 				DeploymentRequeueTime: 15,
+				ServicesOverride:      nil,
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
@@ -308,6 +309,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
 				DeploymentRequeueTime: 15,
+				ServicesOverride:      nil,
 			}
 			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
 		})
