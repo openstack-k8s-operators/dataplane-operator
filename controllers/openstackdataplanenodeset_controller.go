@@ -63,6 +63,8 @@ const (
 	IscsiDDefaultImage = "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
 	// LogrotateDefaultImage -
 	LogrotateDefaultImage = "quay.io/podified-antelope-centos9/openstack-cron:current-podified"
+	// MultipathdDefaultImage -
+	MultipathdDefaultImage = "quay.io/podified-antelope-centos9/openstack-multipathd:current-podified"
 	// NeutronMetadataAgentDefaultImage -
 	NeutronMetadataAgentDefaultImage = "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
 	// NeutronSRIOVAgentDefaultImage -
@@ -87,6 +89,7 @@ func SetupAnsibleImageDefaults() {
 		Frr:                        util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_FRR_DEFAULT_IMG", FrrDefaultImage),
 		IscsiD:                     util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_ISCSID_DEFAULT_IMG", IscsiDDefaultImage),
 		Logrotate:                  util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG", LogrotateDefaultImage),
+		Multipathd:                 util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_MULTIPATHD_DEFAULT_IMG", MultipathdDefaultImage),
 		NeutronMetadataAgent:       util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_METADATA_AGENT_DEFAULT_IMG", NeutronMetadataAgentDefaultImage),
 		NeutronSRIOVAgent:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_SRIOV_AGENT_DEFAULT_IMG", NeutronSRIOVAgentDefaultImage),
 		NovaCompute:                util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG", NovaComputeDefaultImage),
