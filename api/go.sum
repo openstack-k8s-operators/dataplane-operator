@@ -92,6 +92,8 @@ github.com/onsi/ginkgo/v2 v2.17.1 h1:V++EzdbhI4ZV4ev0UTIj0PzhzOcReJFyJaLjtSF55M8
 github.com/onsi/gomega v1.32.0 h1:JRYU78fJ1LPxlckP6Txi/EYqJvjtMrDC04/MM5XRHPk=
 github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240408085033-bddcca32ce6e h1:6LYYB0FKVr1QUpPe25Zf7P/vowRifdDEnwQ492VT1XY=
 github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240408085033-bddcca32ce6e/go.mod h1:ii0O3I9B+mkX6/D8qDQjg/q76sojufkYhM7bq7qo41E=
+github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240408095526-357d8fffa034 h1:ncErNKpZkhwMFf2j3rl/dZWqCdVIX74u7ToiIKVWvoQ=
+github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240408095526-357d8fffa034/go.mod h1:MkhvdDYL/CI7aQdKGHLVmUwnBGTnWhcUQMdCB9ZE4BI=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240408095526-357d8fffa034 h1:HLI/aUA7KnBK5oLPIWXMasz7zqjal4GhNn1P/fdLI20=
 github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240408095526-357d8fffa034/go.mod h1:gqByVGUdKQB/NkhKV4eD+8NWYkHq961nC96rTCB3ywE=
 github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240408095526-357d8fffa034 h1:LDWJWy545zW7KsZ2d2d+J5mJJK5eX/pL7mnSqn63PH4=

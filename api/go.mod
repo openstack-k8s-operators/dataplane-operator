@@ -15,7 +15,9 @@ require (
 require (
 	github.com/cert-manager/cert-manager v1.13.5
 	github.com/go-playground/validator/v10 v10.19.0
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240408095526-357d8fffa034
 	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a
+	k8s.io/client-go v0.28.8
 )
 
 require (
@@ -72,7 +74,6 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/apiextensions-apiserver v0.28.8 // indirect
-	k8s.io/client-go v0.28.8 // indirect
 	k8s.io/component-base v0.28.8 // indirect
 	k8s.io/klog/v2 v2.110.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230905202853-d090da108d2f // indirect

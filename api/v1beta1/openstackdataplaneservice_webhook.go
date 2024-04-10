@@ -17,20 +17,58 @@ limitations under the License.
 package v1beta1
 
 import (
+	"context"
+	"fmt"
+
+	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
+var webhookHelper *helper.Helper
 var openstackdataplaneservicelog = logf.Log.WithName("openstackdataplaneservice-resource")
+
+// namespace of the service objects
+var webhookNamespace string
 
 // SetupWebhookWithManager sets up the webhook with the Manager
 func (r *OpenStackDataPlaneService) SetupWebhookWithManager(mgr ctrl.Manager) error {
+	if webhookClient == nil {
+		webhookClient = mgr.GetClient()
+	}
+
+	if webhookHelper == nil {
+		cfg, err := config.GetConfig()
+		if err != nil {
+			return err
+		}
+
+		kclient, err := kubernetes.NewForConfig(cfg)
+		if err != nil {
+			return err
+		}
+
+		scheme := runtime.NewScheme()
+
+		webhookHelper, _ = helper.NewHelper(
+			r,
+			webhookClient,
+			kclient,
+			scheme,
+			openstackdataplaneservicelog,
+		)
+	}
+
 	return ctrl.NewWebhookManagedBy(mgr).For(r).Complete()
 }
 
@@ -60,6 +98,7 @@ var _ webhook.Validator = &OpenStackDataPlaneService{}
 func (r *OpenStackDataPlaneService) ValidateCreate() (admission.Warnings, error) {
 
 	openstackdataplaneservicelog.Info("validate create", "name", r.Name)
+	webhookNamespace = r.ObjectMeta.Namespace
 
 	errors := r.Spec.ValidateCreate()
 
@@ -75,14 +114,65 @@ func (r *OpenStackDataPlaneService) ValidateCreate() (admission.Warnings, error)
 	return nil, nil
 }
 
-func (r *OpenStackDataPlaneServiceSpec) ValidateCreate() field.ErrorList {
-	// TODO(user): fill in your validation logic upon object creation.
+func (r *OpenStackDataPlaneServiceSpec) ValidateCACerts() (string, error) {
+	if len(r.CACerts) > 0 {
+		_, _, err := secret.GetSecret(context.TODO(), webhookHelper, r.CACerts, webhookNamespace)
+		return r.CACerts, err
+	}
+	return "", nil
+}
 
-	return field.ErrorList{}
+func (r *OpenStackDataPlaneServiceSpec) ValidateIssuer() (string, error) {
+	var label string
+	if r.TLSCert != nil {
+		if r.TLSCert.Issuer == "" {
+			// by default, use the internal root Ca
+			label = certmanager.RootCAIssuerInternalLabel
+		} else {
+			label = r.TLSCert.Issuer
+		}
+
+		issuerLabelSelector := map[string]string{label: ""}
+
+		_, err := certmanager.GetIssuerByLabels(
+			context.TODO(), webhookHelper, webhookNamespace, issuerLabelSelector)
+		return label, err
+	}
+	return "", nil
+}
+
+func (r *OpenStackDataPlaneServiceSpec) ValidateCreate() field.ErrorList {
+	var errors field.ErrorList
+
+	// Validate issuers if present
+	if label, err := r.ValidateIssuer(); err != nil {
+		openstackdataplaneservicelog.Error(
+			err, "Error validating OpenStackDataPlaneService issuer",
+			"issuer", label)
+		errors = append(errors, field.Invalid(
+			field.NewPath("Spec").Child("TLSCert").Child("Issuer"),
+			label,
+			fmt.Sprintf("Error getting issuer with label %s: %s", label, err)))
+	}
+
+	// Validate cacerts if present
+	if secretName, err := r.ValidateCACerts(); err != nil {
+		openstackdataplaneservicelog.Error(
+			err, "Error validating OpenStackDataPlaneService caCerts secret",
+			"secretName", secretName)
+		errors = append(errors, field.Invalid(
+			field.NewPath("Spec").Child("CACerts"),
+			secretName,
+			fmt.Sprintf("Error getting cacerts secret %s: %s", secretName, err)))
+	}
+
+	return errors
 }
 
 func (r *OpenStackDataPlaneService) ValidateUpdate(original runtime.Object) (admission.Warnings, error) {
 	openstackdataplaneservicelog.Info("validate update", "name", r.Name)
+	webhookNamespace = r.ObjectMeta.Namespace
+
 	errors := r.Spec.ValidateUpdate()
 
 	if len(errors) != 0 {
@@ -97,9 +187,31 @@ func (r *OpenStackDataPlaneService) ValidateUpdate(original runtime.Object) (adm
 }
 
 func (r *OpenStackDataPlaneServiceSpec) ValidateUpdate() field.ErrorList {
-	// TODO(user): fill in your validation logic upon object creation.
+	var errors field.ErrorList
 
-	return field.ErrorList{}
+	// Validate issuers if present
+	if label, err := r.ValidateIssuer(); err != nil {
+		openstackdataplaneservicelog.Error(
+			err, "Error validating OpenStackDataPlaneService issuer",
+			"issuer", label)
+		errors = append(errors, field.Invalid(
+			field.NewPath("Spec").Child("TLSCert").Child("Issuer"),
+			label,
+			fmt.Sprintf("Error getting issuer with label %s: %s", label, err)))
+	}
+
+	// Validate cacerts if present
+	if secretName, err := r.ValidateCACerts(); err != nil {
+		openstackdataplaneservicelog.Error(
+			err, "Error validating OpenStackDataPlaneService caCerts secret",
+			"secretName", secretName)
+		errors = append(errors, field.Invalid(
+			field.NewPath("Spec").Child("CACerts"),
+			secretName,
+			fmt.Sprintf("Error getting cacerts secret %s: %s", secretName, err)))
+	}
+
+	return errors
 }
 
 func (r *OpenStackDataPlaneService) ValidateDelete() (admission.Warnings, error) {
