@@ -21,6 +21,8 @@ To create and deploy a data plane, you must perform the following tasks:
 
 * A functional control plane, created with the OpenStack Operator.
 * Pre-provisioned nodes must be configured with an SSH public key in the `$HOME/.ssh/authorized_keys` file for a user with passwordless `sudo` privileges.
+* Pre-provisioned nodes must be configured with an FQDN. An FQDN is configured in `/etc/hosts` using an IP of the node, and a short hostname with domainname. The line in `/etc/hosts` looks like:
+** `<ip-address> <short-hostname>.<domainname> <short-hostname>`
 * For bare metal nodes that are not pre-provisioned and must be provisioned when creating the `OpenStackDataPlaneNodeSet` resource:
 ** CBO is installed and configured for provisioning.
 ** `BareMetalHosts` registered, inspected, and have the label `app:openstack`.
