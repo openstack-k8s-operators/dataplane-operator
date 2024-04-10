@@ -117,6 +117,22 @@ kind: OpenStackDataPlaneNodeSet
 metadata:
   name: edpm-compute-global
 spec:
+  baremetalSetTemplate:
+    automatedCleaningMode: metadata
+    bmhNamespace: openshift-machine-api
+    cloudUserName: ""
+    ctlplaneInterface: ""
+    ctlplaneNetmask: 255.255.255.0
+    deploymentSSHSecret: ""
+    hardwareReqs:
+      cpuReqs:
+        countReq: {}
+        mhzReq: {}
+      diskReqs:
+        gbReq: {}
+        ssdReq: {}
+      memReqs:
+        gbReq: {}
   preProvisioned: true
   tlsEnabled: false
   services:
