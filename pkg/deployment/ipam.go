@@ -114,7 +114,7 @@ func (dns *DataplaneDNSData) createOrPatchDNSData(ctx context.Context, helper *h
 					fqdnName := strings.Join([]string{shortName, res.DNSDomain}, ".")
 					if fqdnName != hostName {
 						fqdnNames = append(fqdnNames, fqdnName)
-						dns.Hostnames[hostName][res.Network] = fqdnName
+						dns.Hostnames[hostName][infranetworkv1.NetNameStr(netLower)] = fqdnName
 					}
 					if dataplanev1.NodeHostNameIsFQDN(hostName) && netLower == CtlPlaneNetwork {
 						fqdnNames = append(fqdnNames, hostName)
