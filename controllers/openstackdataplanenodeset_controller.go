@@ -86,18 +86,18 @@ const (
 // SetupAnsibleImageDefaults -
 func SetupAnsibleImageDefaults() {
 	dataplaneAnsibleImageDefaults = dataplanev1.DataplaneAnsibleImageDefaults{
-		Frr:                        util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_FRR_DEFAULT_IMG", FrrDefaultImage),
-		IscsiD:                     util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_ISCSID_DEFAULT_IMG", IscsiDDefaultImage),
-		Logrotate:                  util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG", LogrotateDefaultImage),
-		Multipathd:                 util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_MULTIPATHD_DEFAULT_IMG", MultipathdDefaultImage),
-		NeutronMetadataAgent:       util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_METADATA_AGENT_DEFAULT_IMG", NeutronMetadataAgentDefaultImage),
-		NeutronSRIOVAgent:          util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_SRIOV_AGENT_DEFAULT_IMG", NeutronSRIOVAgentDefaultImage),
-		NovaCompute:                util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG", NovaComputeDefaultImage),
-		OvnControllerAgent:         util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_CONTROLLER_AGENT_DEFAULT_IMG", OvnControllerAgentDefaultImage),
-		OvnBgpAgent:                util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE", OvnBgpAgentDefaultImage),
-		TelemetryCeilometerCompute: util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_CEILOMETER_COMPUTE_IMAGE", TelemetryCeilometerComputeDefaultImage),
-		TelemetryCeilometerIpmi:    util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_CEILOMETER_IPMI_IMAGE", TelemetryCeilometerIpmiDefaultImage),
-		TelemetryNodeExporter:      util.GetEnvVar("RELATED_IMAGE_OPENSTACK_EDPM_NODE_EXPORTER_IMAGE", TelemetryNodeExporterDefaultImage),
+		Frr:                        util.GetEnvVar("RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT", FrrDefaultImage),
+		IscsiD:                     util.GetEnvVar("RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT", IscsiDDefaultImage),
+		Logrotate:                  util.GetEnvVar("RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT", LogrotateDefaultImage),
+		Multipathd:                 util.GetEnvVar("RELATED_IMAGE_EDPM_MULTIPATHD_IMAGE_URL_DEFAULT", MultipathdDefaultImage),
+		NeutronMetadataAgent:       util.GetEnvVar("RELATED_IMAGE_EDPM_NEUTRON_METADATA_AGENT_IMAGE_URL_DEFAULT", NeutronMetadataAgentDefaultImage),
+		NeutronSRIOVAgent:          util.GetEnvVar("RELATED_IMAGE_EDPM_NEUTRON_SRIOV_AGENT_IMAGE_URL_DEFAULT", NeutronSRIOVAgentDefaultImage),
+		NovaCompute:                util.GetEnvVar("RELATED_IMAGE_EDPM_NOVA_COMPUTE_IMAGE_URL_DEFAULT", NovaComputeDefaultImage),
+		OvnControllerAgent:         util.GetEnvVar("RELATED_IMAGE_EDPM_OVN_CONTROLLER_AGENT_IMAGE_URL_DEFAULT", OvnControllerAgentDefaultImage),
+		OvnBgpAgent:                util.GetEnvVar("RELATED_IMAGE_EDPM_OVN_BGP_AGENT_IMAGE_URL_DEFAULT", OvnBgpAgentDefaultImage),
+		TelemetryCeilometerCompute: util.GetEnvVar("RELATED_IMAGE_EDPM_CEILOMETER_COMPUTE_IMAGE_URL_DEFAULT", TelemetryCeilometerComputeDefaultImage),
+		TelemetryCeilometerIpmi:    util.GetEnvVar("RELATED_IMAGE_EDPM_CEILOMETER_IPMI_IMAGE_URL_DEFAULT", TelemetryCeilometerIpmiDefaultImage),
+		TelemetryNodeExporter:      util.GetEnvVar("RELATED_IMAGE_EDPM_NODE_EXPORTER_IMAGE_URL_DEFAULT", TelemetryNodeExporterDefaultImage),
 	}
 }
 
