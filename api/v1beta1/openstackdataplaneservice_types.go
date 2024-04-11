@@ -84,6 +84,12 @@ type OpenStackDataPlaneServiceSpec struct {
 	// This will override default target of a service play, setting it to 'all'.
 	// +kubebuilder:validation:Optional
 	DeployOnAllNodeSets bool `json:"deployOnAllNodeSets,omitempty" yaml:"deployOnAllNodeSets,omitempty"`
+
+	//ServiceType - denotes what purpose does the service perform for the dataplane
+	// +kubebuilder:validation:Optional
+	// +kubekuilder:default=standard
+	// +kubebuilder:validation:Enum=standard;nova
+	ServiceType string `json:"serviceType,omitempty"`
 }
 
 // OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService

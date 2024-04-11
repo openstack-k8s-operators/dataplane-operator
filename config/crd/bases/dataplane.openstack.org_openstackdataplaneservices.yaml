@@ -52,6 +52,11 @@ spec:
                 items:
                   type: string
                 type: array
+              serviceType:
+                enum:
+                - standard
+                - nova
+                type: string
               tlsCert:
                 properties:
                   contents:
