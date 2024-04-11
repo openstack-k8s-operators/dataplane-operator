@@ -188,6 +188,14 @@ rules:
 - apiGroups:
   - core.openstack.org
   resources:
+  - openstackcontrolplanes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - core.openstack.org
+  resources:
   - openstackversions
   verbs:
   - get

@@ -33,7 +33,7 @@ spec:
   - libvirt
   - nova
   - custom-global-service
-  tlsEnabled: false
+  tlsEnabled: true
   env:
   - name: ANSIBLE_FORCE_COLOR
     value: "True"

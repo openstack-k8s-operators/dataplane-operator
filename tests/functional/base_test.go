@@ -9,6 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
@@ -342,6 +343,38 @@ func DefaultDataplaneGlobalService(name types.NamespacedName) map[string]interfa
 			"deployOnAllNodeSets": true,
 		},
 	}
+}
+
+// Create simple OpenStackControlPlane
+func CreateOpenStackControlPlane(name types.NamespacedName, tlsEnabled bool) client.Object {
+
+	raw := map[string]interface{}{
+		"apiVersion": "core.openstack.org/v1beta1",
+		"kind":       "OpenStackControlPlane",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		},
+		"spec": map[string]interface{}{
+			"secret":       "osp-secret",
+			"storageClass": "local-storage",
+			"tls": map[string]interface{}{
+				"ingress": map[string]interface{}{
+					"enabled": tlsEnabled,
+					"ca": map[string]interface{}{
+						"duration": "100h",
+					},
+					"cert": map[string]interface{}{
+						"duration": "10h",
+					},
+				},
+				"podLevel": map[string]interface{}{
+					"enabled": tlsEnabled,
+				},
+			},
+		},
+	}
+	return th.CreateUnstructured(raw)
 }
 
 // Get resources

@@ -141,7 +141,7 @@ spec:
       memReqs:
         gbReq: {}
   preProvisioned: true
-  tlsEnabled: false
+  tlsEnabled: true
   services:
   - download-cache
   - bootstrap
