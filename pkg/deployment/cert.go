@@ -160,27 +160,27 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 			return &result, err
 		}
 
-		// TODO: paramaterize usage
-		certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, certName,
-			issuer.Name, labels, hosts, ips, service.Spec.TLSCert.KeyUsages)
-
-		// handle cert request errors
-		if (err != nil) || (result != ctrl.Result{}) {
-			return &result, err
-		}
-		// TODO(alee) Add an owner reference to the secret so it can be monitored
-		// We'll do this once stuggi adds a function to do this in libcommon
-
 		// NOTE: we are assuming that there will always be a ctlplane network
 		// that means if you are not using network isolation with multiple networks
 		// you should still need to have a ctlplane network at a minimum to use tls-e
-
 		baseName, ok := dnsNames[CtlPlaneNetwork]
 		if !ok {
 			return &result, fmt.Errorf(
 				"control plane network not found for node %s , tls-e requires a control plane network to be present",
 				nodeName)
 		}
+
+		certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, certName,
+			issuer.Name, labels, baseName, hosts, ips, service.Spec.TLSCert.KeyUsages)
+
+		// handle cert request errors
+		if (err != nil) || (result != ctrl.Result{}) {
+			return &result, err
+		}
+
+		// TODO(alee) Add an owner reference to the secret so it can be monitored
+		// We'll do this once stuggi adds a function to do this in libcommon
+
 		// To use this cert, add it to the relevant service data
 		certsData[baseName+"-tls.key"] = certSecret.Data["tls.key"]
 		certsData[baseName+"-tls.crt"] = certSecret.Data["tls.crt"]
@@ -221,6 +221,7 @@ func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
 	certName string, issuer string,
 	labels map[string]string,
+	commonName string,
 	hostnames []string, ips []string, usages []certmgrv1.KeyUsage,
 ) (*corev1.Secret, ctrl.Result, error) {
 	secretName := "cert-" + certName
@@ -234,6 +235,7 @@ func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 
 		duration := ptr.To(time.Hour * 24 * 365)
 		request := certmanager.CertificateRequest{
+			CommonName:  &commonName,
 			IssuerName:  issuer,
 			CertName:    certName,
 			Duration:    duration,
@@ -242,6 +244,10 @@ func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 			Annotations: nil,
 			Labels:      labels,
 			Usages:      usages,
+			Subject: &certmgrv1.X509Subject{
+				// NOTE(owalsh): For libvirt/QEMU this should match issuer CN
+				Organizations: []string{issuer},
+			},
 		}
 
 		certSecret, result, err = certmanager.EnsureCert(ctx, helper, request, instance)
