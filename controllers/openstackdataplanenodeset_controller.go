@@ -538,156 +538,55 @@ func checkDeployment(helper *helper.Helper,
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// index for ConfigMaps listed on ansibleVarsFrom
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &dataplanev1.OpenStackDataPlaneNodeSet{}, "spec.ansibleVarsFrom.ansible.configMaps", func(rawObj client.Object) []string {
-		// Extract the ConfigMap name from the OpenStackDataPlaneNodeSet Spec, if one is provided
-		nodeSet := rawObj.(*dataplanev1.OpenStackDataPlaneNodeSet)
-		configMaps := []string{}
-		if len(nodeSet.Spec.NodeTemplate.Ansible.AnsibleVarsFrom) > 0 {
-			for _, ref := range nodeSet.Spec.NodeTemplate.Ansible.AnsibleVarsFrom {
-				if ref.ConfigMapRef != nil {
-					configMaps = append(configMaps, ref.ConfigMapRef.Name)
-				}
-			}
-		}
-		for _, node := range nodeSet.Spec.Nodes {
-			if len(node.Ansible.AnsibleVarsFrom) > 0 {
-				for _, ref := range node.Ansible.AnsibleVarsFrom {
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(),
+		&dataplanev1.OpenStackDataPlaneNodeSet{}, "spec.ansibleVarsFrom.ansible.configMaps",
+		func(rawObj client.Object) []string {
+			nodeSet := rawObj.(*dataplanev1.OpenStackDataPlaneNodeSet)
+			configMaps := make([]string, 0)
+
+			appendConfigMaps := func(varsFrom []dataplanev1.AnsibleVarsFromSource) {
+				for _, ref := range varsFrom {
 					if ref.ConfigMapRef != nil {
 						configMaps = append(configMaps, ref.ConfigMapRef.Name)
 					}
 				}
 			}
-		}
-		return configMaps
-	}); err != nil {
+
+			appendConfigMaps(nodeSet.Spec.NodeTemplate.Ansible.AnsibleVarsFrom)
+			for _, node := range nodeSet.Spec.Nodes {
+				appendConfigMaps(node.Ansible.AnsibleVarsFrom)
+			}
+			return configMaps
+		}); err != nil {
 		return err
 	}
 
 	// index for Secrets listed on ansibleVarsFrom
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &dataplanev1.OpenStackDataPlaneNodeSet{}, "spec.ansibleVarsFrom.ansible.secrets", func(rawObj client.Object) []string {
-		// Extract the Secret name from the OpenStackDataPlaneNodeSet Spec, if one is provided
-		nodeSet := rawObj.(*dataplanev1.OpenStackDataPlaneNodeSet)
-		secrets := []string{}
-		if len(nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret) > 0 {
-			secrets = append(secrets, nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret)
-		}
-		if len(nodeSet.Spec.NodeTemplate.Ansible.AnsibleVarsFrom) > 0 {
-			for _, ref := range nodeSet.Spec.NodeTemplate.Ansible.AnsibleVarsFrom {
-				if ref.SecretRef != nil {
-					secrets = append(secrets, ref.SecretRef.Name)
-				}
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(),
+		&dataplanev1.OpenStackDataPlaneNodeSet{}, "spec.ansibleVarsFrom.ansible.secrets",
+		func(rawObj client.Object) []string {
+			nodeSet := rawObj.(*dataplanev1.OpenStackDataPlaneNodeSet)
+			secrets := make([]string, 0, len(nodeSet.Spec.Nodes)+1)
+			if nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret != "" {
+				secrets = append(secrets, nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret)
 			}
-		}
-		for _, node := range nodeSet.Spec.Nodes {
-			if len(node.Ansible.AnsibleVarsFrom) > 0 {
-				for _, ref := range node.Ansible.AnsibleVarsFrom {
+
+			appendSecrets := func(varsFrom []dataplanev1.AnsibleVarsFromSource) {
+				for _, ref := range varsFrom {
 					if ref.SecretRef != nil {
 						secrets = append(secrets, ref.SecretRef.Name)
 					}
 				}
 			}
-		}
-		return secrets
-	}); err != nil {
+
+			appendSecrets(nodeSet.Spec.NodeTemplate.Ansible.AnsibleVarsFrom)
+			for _, node := range nodeSet.Spec.Nodes {
+				appendSecrets(node.Ansible.AnsibleVarsFrom)
+			}
+			return secrets
+		}); err != nil {
 		return err
 	}
-	varsFromWatcher := handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
-		Log := r.GetLogger(ctx)
-		nodeSets := &dataplanev1.OpenStackDataPlaneNodeSetList{}
-		kind := strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind)
-
-		selector := "spec.ansibleVarsFrom.ansible.configMaps"
-		if kind == "secret" {
-			selector = "spec.ansibleVarsFrom.ansible.secrets"
-		}
-
-		listOpts := &client.ListOptions{
-			FieldSelector: fields.OneTermEqualSelector(selector, obj.GetName()),
-			Namespace:     obj.GetNamespace(),
-		}
-
-		if err := r.List(ctx, nodeSets, listOpts); err != nil {
-			Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSetList %w")
-			return nil
-		}
-
-		requests := make([]reconcile.Request, len(nodeSets.Items))
-		for i, nodeSet := range nodeSets.Items {
-			requests[i] = reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Namespace: obj.GetNamespace(),
-					Name:      nodeSet.Name,
-				},
-			}
-			Log.Info(
-				fmt.Sprintf(
-					"reconcile loop for openstackdataplanenodeset %s triggered by %s %s",
-					nodeSet.Name, kind, obj.GetName()))
-		}
-		return requests
-	})
-
-	dnsMasqWatcher := handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
-		Log := r.GetLogger(ctx)
-		result := []reconcile.Request{}
-
-		// For each DNSMasq change event get the list of all
-		// OpenStackDataPlaneNodeSet to trigger reconcile for the
-		// ones in the same namespace.
-		nodeSets := &dataplanev1.OpenStackDataPlaneNodeSetList{}
-
-		listOpts := []client.ListOption{
-			client.InNamespace(obj.GetNamespace()),
-		}
-		if err := r.Client.List(ctx, nodeSets, listOpts...); err != nil {
-			Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSetList %w")
-			return nil
-		}
-
-		// For each NodeSet instance create a reconcile request
-		for _, i := range nodeSets.Items {
-			name := client.ObjectKey{
-				Namespace: obj.GetNamespace(),
-				Name:      i.Name,
-			}
-			result = append(result, reconcile.Request{NamespacedName: name})
-		}
-		return result
-	})
-
-	deploymentWatcher := handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
-		Log := r.GetLogger(ctx)
-		var namespace string = obj.GetNamespace()
-		result := []reconcile.Request{}
-
-		deployment := obj.(*dataplanev1.OpenStackDataPlaneDeployment)
-		for _, nodeSet := range deployment.Spec.NodeSets {
-			name := client.ObjectKey{
-				Namespace: namespace,
-				Name:      nodeSet,
-			}
-			result = append(result, reconcile.Request{NamespacedName: name})
-		}
-		podsInterface := r.Kclient.CoreV1().Pods(namespace)
-		// List service pods in the given namespace
-		podsList, err := podsInterface.List(context.TODO(), v1.ListOptions{
-			LabelSelector: fmt.Sprintf("openstackdataplanedeployment=%s", deployment.Name),
-			FieldSelector: "status.phase=Failed",
-		})
-
-		if err != nil {
-			Log.Error(err, "unable to retrieve list of pods for dataplane diagnostic")
-		} else {
-			for _, pod := range podsList.Items {
-				Log.Info(
-					fmt.Sprintf(
-						"openstackansibleee job %s failed due to %s with message: %s",
-						pod.Name, pod.Status.Reason, pod.Status.Message))
-			}
-		}
-		return result
-	})
-
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dataplanev1.OpenStackDataPlaneNodeSet{}).
 		Owns(&ansibleeev1.OpenStackAnsibleEE{}).
@@ -696,14 +595,108 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 		Owns(&infranetworkv1.DNSData{}).
 		Owns(&corev1.Secret{}).
 		Watches(&infranetworkv1.DNSMasq{},
-			dnsMasqWatcher).
+			handler.EnqueueRequestsFromMapFunc(r.dnsMasqWatcherFn)).
 		Watches(&dataplanev1.OpenStackDataPlaneDeployment{},
-			deploymentWatcher).
+			handler.EnqueueRequestsFromMapFunc(r.deploymentWatcherFn)).
 		Watches(&corev1.ConfigMap{},
-			varsFromWatcher, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+			handler.EnqueueRequestsFromMapFunc(r.secretWatcherFn),
+			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Watches(&corev1.Secret{},
-			varsFromWatcher, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+			handler.EnqueueRequestsFromMapFunc(r.secretWatcherFn),
+			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
+}
+
+func (r *OpenStackDataPlaneNodeSetReconciler) secretWatcherFn(
+	ctx context.Context, obj client.Object) []reconcile.Request {
+	Log := r.GetLogger(ctx)
+	nodeSets := &dataplanev1.OpenStackDataPlaneNodeSetList{}
+	kind := strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind)
+
+	selector := "spec.ansibleVarsFrom.ansible.configMaps"
+	if kind == "secret" {
+		selector = "spec.ansibleVarsFrom.ansible.secrets"
+	}
+
+	listOpts := &client.ListOptions{
+		FieldSelector: fields.OneTermEqualSelector(selector, obj.GetName()),
+		Namespace:     obj.GetNamespace(),
+	}
+
+	if err := r.List(ctx, nodeSets, listOpts); err != nil {
+		Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSetList")
+		return nil
+	}
+
+	requests := make([]reconcile.Request, 0, len(nodeSets.Items))
+	for _, nodeSet := range nodeSets.Items {
+		requests = append(requests, reconcile.Request{
+			NamespacedName: types.NamespacedName{
+				Namespace: obj.GetNamespace(),
+				Name:      nodeSet.Name,
+			},
+		})
+		Log.Info(fmt.Sprintf("reconcile loop for openstackdataplanenodeset %s triggered by %s %s",
+			nodeSet.Name, kind, obj.GetName()))
+	}
+	return requests
+}
+
+func (r *OpenStackDataPlaneNodeSetReconciler) dnsMasqWatcherFn(
+	ctx context.Context, obj client.Object) []reconcile.Request {
+	Log := r.GetLogger(ctx)
+	nodeSets := &dataplanev1.OpenStackDataPlaneNodeSetList{}
+
+	listOpts := []client.ListOption{
+		client.InNamespace(obj.GetNamespace()),
+	}
+	if err := r.Client.List(ctx, nodeSets, listOpts...); err != nil {
+		Log.Error(err, "Unable to retrieve OpenStackDataPlaneNodeSetList")
+		return nil
+	}
+
+	requests := make([]reconcile.Request, 0, len(nodeSets.Items))
+	for _, nodeSet := range nodeSets.Items {
+		requests = append(requests, reconcile.Request{
+			NamespacedName: types.NamespacedName{
+				Namespace: obj.GetNamespace(),
+				Name:      nodeSet.Name,
+			},
+		})
+	}
+	return requests
+}
+
+func (r *OpenStackDataPlaneNodeSetReconciler) deploymentWatcherFn(
+	ctx context.Context, obj client.Object) []reconcile.Request {
+	Log := r.GetLogger(ctx)
+	namespace := obj.GetNamespace()
+	deployment := obj.(*dataplanev1.OpenStackDataPlaneDeployment)
+
+	requests := make([]reconcile.Request, 0, len(deployment.Spec.NodeSets))
+	for _, nodeSet := range deployment.Spec.NodeSets {
+		requests = append(requests, reconcile.Request{
+			NamespacedName: types.NamespacedName{
+				Namespace: namespace,
+				Name:      nodeSet,
+			},
+		})
+	}
+
+	podsInterface := r.Kclient.CoreV1().Pods(namespace)
+	podsList, err := podsInterface.List(ctx, v1.ListOptions{
+		LabelSelector: fmt.Sprintf("openstackdataplanedeployment=%s", deployment.Name),
+		FieldSelector: "status.phase=Failed",
+	})
+
+	if err != nil {
+		Log.Error(err, "unable to retrieve list of pods for dataplane diagnostic")
+	} else {
+		for _, pod := range podsList.Items {
+			Log.Info(fmt.Sprintf("openstackansibleee job %s failed due to %s with message: %s", pod.Name, pod.Status.Reason, pod.Status.Message))
+		}
+	}
+	return requests
 }
 
 // GetSpecConfigHash initialises a new struct with only the field we want to check for variances in.
