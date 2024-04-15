@@ -444,4 +444,135 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			)
 		})
 	})
+
+	When("A dataplaneDeployment is created with a missing nodeset", func() {
+		BeforeEach(func() {
+			CreateSSHSecret(dataplaneSSHSecretName)
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(neutronOvnMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaNeutronMetadataSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaCellComputeConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(novaMigrationSSHKey, map[string][]byte{
+				"ssh-privatekey": []byte("fake-ssh-private-key"),
+				"ssh-publickey":  []byte("fake-ssh-public-key"),
+			}))
+			DeferCleanup(th.DeleteInstance, th.CreateSecret(ceilometerConfigSecretName, map[string][]byte{
+				"fake_keys": []byte("blih"),
+			}))
+
+			alphaNodeSetName := types.NamespacedName{
+				Name:      "alpha-nodeset",
+				Namespace: namespace,
+			}
+
+			// Two services on both nodesets
+			CreateDataplaneService(dataplaneServiceName, false)
+
+			DeferCleanup(th.DeleteService, dataplaneServiceName)
+
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+
+			// Create only one nodeset
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(alphaNodeSetName, DefaultDataPlaneNodeSetSpec(alphaNodeSetName.Name)))
+
+			deploymentSpec := map[string]interface{}{
+				"nodeSets": []string{
+					"alpha-nodeset",
+					"beta-nodeset",
+				},
+			}
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneMultiNodesetDeploymentName, deploymentSpec))
+		})
+
+		It("Should have Spec fields initialized", func() {
+			dataplaneDeploymentInstance := GetDataplaneDeployment(dataplaneMultiNodesetDeploymentName)
+			nodeSetsNames := []string{
+				"alpha-nodeset",
+				"beta-nodeset",
+			}
+
+			expectedSpec := dataplanev1.OpenStackDataPlaneDeploymentSpec{
+				NodeSets:              nodeSetsNames,
+				AnsibleTags:           "",
+				AnsibleLimit:          "",
+				AnsibleSkipTags:       "",
+				DeploymentRequeueTime: 15,
+				ServicesOverride:      nil,
+			}
+			Expect(dataplaneDeploymentInstance.Spec).Should(Equal(expectedSpec))
+		})
+
+		It("should have conditions set to unknown", func() {
+			alphaNodeSetName := types.NamespacedName{
+				Name:      "alpha-nodeset",
+				Namespace: namespace,
+			}
+			betaNodeSetName := types.NamespacedName{
+				Name:      "beta-nodeset",
+				Namespace: namespace,
+			}
+
+			baremetalAlpha := baremetalv1.OpenStackBaremetalSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      alphaNodeSetName.Name,
+					Namespace: alphaNodeSetName.Namespace,
+				},
+			}
+
+			baremetalBeta := baremetalv1.OpenStackBaremetalSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      betaNodeSetName.Name,
+					Namespace: betaNodeSetName.Namespace,
+				},
+			}
+
+			// Create config map for OVN service
+			ovnConfigMapName := types.NamespacedName{
+				Namespace: namespace,
+				Name:      "ovncontroller-config",
+			}
+			mapData := map[string]interface{}{
+				"ovsdb-config": "test-ovn-config",
+			}
+			th.CreateConfigMap(ovnConfigMapName, mapData)
+
+			// Set baremetal provisioning conditions to True
+			// This must succeed, as the "alpha-nodeset" exists
+			Eventually(func(g Gomega) {
+				// OpenStackBaremetalSet has the same name as OpenStackDataPlaneNodeSet
+				g.Expect(th.K8sClient.Get(th.Ctx, alphaNodeSetName, &baremetalAlpha)).To(Succeed())
+				baremetalAlpha.Status.Conditions.MarkTrue(
+					condition.ReadyCondition,
+					condition.ReadyMessage)
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, &baremetalAlpha)).To(Succeed())
+
+			}, th.Timeout, th.Interval).Should(Succeed())
+
+			// These must fail, as there is no "beta-nodeset"
+			Expect(th.K8sClient.Get(th.Ctx, betaNodeSetName, &baremetalBeta)).NotTo(Succeed())
+			baremetalBeta.Status.Conditions.MarkTrue(
+				condition.ReadyCondition,
+				condition.ReadyMessage)
+			Expect(th.K8sClient.Status().Update(th.Ctx, &baremetalBeta)).NotTo(Succeed())
+
+			// These conditions must remain unknown
+			th.ExpectCondition(
+				dataplaneMultiNodesetDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.ReadyCondition,
+				corev1.ConditionUnknown,
+			)
+			th.ExpectCondition(
+				dataplaneMultiNodesetDeploymentName,
+				ConditionGetterFunc(DataplaneDeploymentConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionUnknown,
+			)
+		})
+	})
 })
