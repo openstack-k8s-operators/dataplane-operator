@@ -131,9 +131,10 @@ func main() {
 
 	controllers.SetupAnsibleImageDefaults()
 	if err = (&controllers.OpenStackDataPlaneNodeSetReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Kclient: kclient,
+		Client:   mgr.GetClient(),
+		Scheme:   mgr.GetScheme(),
+		Kclient:  kclient,
+		Recorder: mgr.GetEventRecorderFor("OpenStackDataPlaneNodeSet"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneNodeSet")
 		os.Exit(1)
@@ -159,9 +160,10 @@ func main() {
 	}
 
 	if err = (&controllers.OpenStackDataPlaneDeploymentReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Kclient: kclient,
+		Client:   mgr.GetClient(),
+		Scheme:   mgr.GetScheme(),
+		Kclient:  kclient,
+		Recorder: mgr.GetEventRecorderFor("OpenStackDataPlaneDeployment"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneDeployment")
 		os.Exit(1)

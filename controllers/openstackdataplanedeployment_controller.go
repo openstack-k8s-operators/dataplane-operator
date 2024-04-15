@@ -27,6 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -43,8 +44,9 @@ import (
 // OpenStackDataPlaneDeploymentReconciler reconciles a OpenStackDataPlaneDeployment object
 type OpenStackDataPlaneDeploymentReconciler struct {
 	client.Client
-	Kclient kubernetes.Interface
-	Scheme  *runtime.Scheme
+	Kclient  kubernetes.Interface
+	Scheme   *runtime.Scheme
+	Recorder record.EventRecorder
 }
 
 // GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
@@ -95,6 +97,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		r.Kclient,
 		r.Scheme,
 		Log,
+		r.Recorder,
 	)
 
 	// If the deploy is already done, return immediately.
@@ -170,6 +173,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 				Log.Info("NodeSet not found", "NodeSet", nodeSet)
 				return ctrl.Result{RequeueAfter: time.Second * time.Duration(instance.Spec.DeploymentRequeueTime)}, nil
 			}
+			r.Recorder.Event(instance, corev1.EventTypeWarning, "NodeSetSetupError", fmt.Sprintf("dataplanenodeset-%s error", nodeSet))
 			instance.Status.Conditions.MarkFalse(
 				dataplanev1.SetupReadyCondition,
 				condition.ErrorReason,
@@ -203,6 +207,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			for _, serviceName := range services {
 				service, err := deployment.GetService(ctx, helper, serviceName)
 				if err != nil {
+					r.Recorder.Event(instance, corev1.EventTypeWarning, "DataplaneServiceError", fmt.Sprintf("dataplaneservice-%s error", serviceName))
 					instance.Status.Conditions.MarkFalse(
 						condition.InputReadyCondition,
 						condition.ErrorReason,
@@ -215,6 +220,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 					result, err := deployment.EnsureTLSCerts(ctx, helper, &nodeSet,
 						nodeSet.Status.AllHostnames, nodeSet.Status.AllIPs, service)
 					if err != nil {
+						r.Recorder.Event(instance, corev1.EventTypeWarning, "NodeSetInputError", fmt.Sprintf("dataplanenodeset-%s error", nodeSet.Name))
 						instance.Status.Conditions.MarkFalse(
 							condition.InputReadyCondition,
 							condition.ErrorReason,
@@ -232,6 +238,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 
 	// All nodeSets successfully fetched.
 	// Mark InputReadyCondition=True
+	if !savedConditions.IsTrue(condition.InputReadyCondition) {
+		r.Recorder.Event(instance, corev1.EventTypeNormal, "NodeSetInputReady", fmt.Sprintf("dataplanedeployment-%s input ready", instance.Name))
+	}
 	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.ReadyMessage)
 	shouldRequeue := false
 	haveError := false
@@ -250,6 +259,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	if instance.Spec.ServicesOverride == nil {
 		if err := deployment.CheckGlobalServiceExecutionConsistency(ctx, helper, nodeSets.Items); err != nil {
 			util.LogErrorForObject(helper, err, "OpenStackDeployment error for deployment", instance)
+			r.Recorder.Event(instance, corev1.EventTypeWarning, "DataplaneDeployError", fmt.Sprintf("dataplanedeployment-%s error", instance.Name))
 			instance.Status.Conditions.MarkFalse(
 				condition.DeploymentReadyCondition,
 				condition.ErrorReason,
@@ -320,6 +330,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			} else {
 				deploymentErrMsg = fmt.Sprintf("%s & %s", deploymentErrMsg, errMsg)
 			}
+			r.Recorder.Event(instance, corev1.EventTypeWarning, "NodeSetError", fmt.Sprintf("dataplanenodeset-%s error", nodeSet.Name))
 			nsConditions.MarkFalse(
 				dataplanev1.NodeSetDeploymentReadyCondition,
 				condition.ErrorReason,
@@ -340,6 +351,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	}
 
 	if haveError {
+		r.Recorder.Event(instance, corev1.EventTypeWarning, "DataplaneDeployError", fmt.Sprintf("dataplanedeployment-%s error", instance.Name))
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
 			condition.ErrorReason,
@@ -355,6 +367,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	}
 
 	Log.Info("Set DeploymentReadyCondition true")
+	if !savedConditions.IsTrue(condition.DeploymentReadyCondition) {
+		r.Recorder.Event(instance, corev1.EventTypeNormal, "DataplaneDeploymentReady", fmt.Sprintf("dataplanedeployment-%s deployed", instance.Name))
+	}
 	instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
 	instance.Status.Deployed = true
 	err = r.setHashes(ctx, helper, instance, nodeSets)
