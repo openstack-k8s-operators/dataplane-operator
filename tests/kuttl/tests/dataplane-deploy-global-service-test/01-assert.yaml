@@ -884,6 +884,17 @@ spec:
   envConfigMapName: openstack-aee-default-env
   extraMounts:
   - mounts:
+    - mountPath: /var/lib/openstack/configs/libvirt/LibvirtPassword
+      name: libvirt-secret-0
+      subPath: LibvirtPassword
+    volumes:
+    - name: libvirt-secret-0
+      secret:
+        items:
+        - key: LibvirtPassword
+          path: LibvirtPassword
+        secretName: libvirt-secret
+  - mounts:
     - mountPath: /runner/env/ssh_key
       name: ssh-key
       subPath: ssh_key
