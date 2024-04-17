@@ -249,7 +249,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	instance.Status.Conditions.MarkFalse(dataplanev1.SetupReadyCondition, condition.RequestedReason, condition.SeverityInfo, condition.ReadyInitMessage)
 
 	// Detect config changes and set Status ConfigHash
-	configHash, err := r.GetSpecConfigHash(instance)
+	configHash, err := instance.GetSpecConfigHash()
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -697,15 +697,4 @@ func (r *OpenStackDataPlaneNodeSetReconciler) deploymentWatcherFn(
 		}
 	}
 	return requests
-}
-
-// GetSpecConfigHash initialises a new struct with only the field we want to check for variances in.
-// We then hash the contents of the new struct using md5 and return the hashed string.
-func (r *OpenStackDataPlaneNodeSetReconciler) GetSpecConfigHash(instance *dataplanev1.OpenStackDataPlaneNodeSet) (string, error) {
-	configHash, err := util.ObjectHash(&instance.Spec)
-	if err != nil {
-		return "", err
-	}
-
-	return configHash, nil
 }

@@ -46,7 +46,7 @@ func AnsibleExecution(
 	sshKeySecrets map[string]string,
 	inventorySecrets map[string]string,
 	aeeSpec *dataplanev1.AnsibleEESpec,
-	nodeSet client.Object,
+	nodeSet *dataplanev1.OpenStackDataPlaneNodeSet,
 ) error {
 	var err error
 	var cmdLineArguments strings.Builder
@@ -64,14 +64,24 @@ func AnsibleExecution(
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
 	}
+	nodeSetHash, err := nodeSet.GetSpecConfigHash()
+	if err != nil {
+		return err
+	}
+	annotations := map[string]string{
+		"nodesethash": nodeSetHash,
+	}
 	if ansibleEE == nil {
 		ansibleEE = &ansibleeev1.OpenStackAnsibleEE{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      executionName,
-				Namespace: deployment.GetNamespace(),
-				Labels:    labels,
+				Name:        executionName,
+				Namespace:   deployment.GetNamespace(),
+				Labels:      labels,
+				Annotations: annotations,
 			},
 		}
+	} else if ansibleEE.Annotations["nodesethash"] != annotations["nodesethash"] {
+		return fmt.Errorf("openstackdataplanenodeset %s hash changed while deploying", nodeSet.GetName())
 	}
 
 	_, err = controllerutil.CreateOrPatch(ctx, helper.GetClient(), ansibleEE, func() error {

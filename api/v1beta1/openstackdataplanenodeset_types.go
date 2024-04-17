@@ -23,6 +23,7 @@ import (
 
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -237,4 +238,15 @@ func (r *OpenStackDataPlaneNodeSetSpec) duplicateNodeCheck(nodeSetList *OpenStac
 	}
 
 	return
+}
+
+// GetSpecConfigHash initialises a new struct with only the field we want to check for variances in.
+// We then hash the contents of the new struct using sha256 and return the hashed string.
+func (instance *OpenStackDataPlaneNodeSet) GetSpecConfigHash() (string, error) {
+	configHash, err := util.ObjectHash(&instance.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	return configHash, nil
 }
