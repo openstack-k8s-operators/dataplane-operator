@@ -58,6 +58,13 @@ data:
   ssh-privatekey: ZmFrZQo=
   ssh-publickey: ZmFrZQo=
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: libvirt-secret
+data:
+  LibvirtPassword: ZmFrZQo=
+---
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
