@@ -205,10 +205,14 @@ func populateInventoryFromIPAM(
 
 		if entry == CtlPlaneNetwork {
 			host.Vars[entry+"_dns_nameservers"] = dnsAddresses
-			if !dataplanev1.NodeHostNameIsFQDN(hostName) {
-				host.Vars["canonical_hostname"] = strings.Join([]string{hostName, res.DNSDomain}, ".")
-			} else {
+			if dataplanev1.NodeHostNameIsFQDN(hostName) {
 				host.Vars["canonical_hostname"] = hostName
+				domain := strings.SplitN(hostName, ".", 2)[1]
+				if domain != res.DNSDomain {
+					dnsSearchDomains = append(dnsSearchDomains, domain)
+				}
+			} else {
+				host.Vars["canonical_hostname"] = strings.Join([]string{hostName, res.DNSDomain}, ".")
 			}
 		}
 		dnsSearchDomains = append(dnsSearchDomains, res.DNSDomain)
