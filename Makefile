@@ -284,7 +284,6 @@ $(GINKGO): $(LOCALBIN)
 
 .PHONY: kuttl-test
 kuttl-test: ## Run kuttl tests
-	if oc get dnsmasq dns; then echo "dnsmasq/dns CR can not exist during kuttl tests"; exit 1; fi
 	$(LOCALBIN)/kubectl-kuttl test --config kuttl-test.yaml tests/kuttl/tests $(KUTTL_ARGS)
 
 .PHONY: kuttl
