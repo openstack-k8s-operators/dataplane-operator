@@ -14,7 +14,8 @@ spec:
   customresourcedefinitions:
     owned:
     - description: OpenStackDataPlaneDeployment is the Schema for the openstackdataplanedeployments
-        API
+        API OpenStackDataPlaneDeployment name must be a valid RFC1123 as it is used
+        in labels
       displayName: OpenStack Data Plane Deployments
       kind: OpenStackDataPlaneDeployment
       name: openstackdataplanedeployments.dataplane.openstack.org
@@ -31,7 +32,8 @@ spec:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       version: v1beta1
     - description: OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets
-        API
+        API OpenStackDataPlaneNodeSet name must be a valid RFC1123 as it is used in
+        labels
       displayName: OpenStack Data Plane NodeSet
       kind: OpenStackDataPlaneNodeSet
       name: openstackdataplanenodesets.dataplane.openstack.org
@@ -77,7 +79,8 @@ spec:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       version: v1beta1
     - description: OpenStackDataPlaneService is the Schema for the openstackdataplaneservices
-        API
+        API OpenStackDataPlaneService name must be a valid RFC1123 as it is used in
+        labels
       displayName: OpenStack Data Plane Service
       kind: OpenStackDataPlaneService
       name: openstackdataplaneservices.dataplane.openstack.org
