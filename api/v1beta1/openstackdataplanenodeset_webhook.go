@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -174,6 +175,19 @@ func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(old runtime.Object) (admissio
 			r.Name,
 			errors,
 		)
+
+	}
+	if oldNodeSet.Status.DeploymentStatuses != nil {
+		for _, deployConditions := range oldNodeSet.Status.DeploymentStatuses {
+			deployCondition := deployConditions.Get(condition.ReadyCondition)
+			if !deployConditions.IsTrue(condition.ReadyCondition) && !condition.IsError(deployCondition) {
+				return nil, apierrors.NewConflict(
+					schema.GroupResource{Group: "dataplane.openstack.org", Resource: "OpenStackDataPlaneNodeSet"},
+					r.Name,
+					fmt.Errorf("could not patch openstackdataplanenodeset while openstackdataplanedeployment is running"),
+				)
+			}
+		}
 	}
 
 	return nil, nil
