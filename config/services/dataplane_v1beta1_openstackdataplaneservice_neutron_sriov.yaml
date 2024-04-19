@@ -6,3 +6,4 @@ spec:
   playbook: osp.edpm.neutron_sriov
   secrets:
   - neutron-sriov-agent-neutron-config
+  caCerts: combined-ca-bundle
