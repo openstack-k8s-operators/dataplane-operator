@@ -35,6 +35,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
 	utils "github.com/openstack-k8s-operators/lib-common/modules/common/util"
+	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 )
 
 // getAnsibleVarsFrom gets ansible vars from ConfigMap/Secret
@@ -99,7 +100,8 @@ func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace st
 // GenerateNodeSetInventory yields a parsed Inventory for role
 func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	allIPSets map[string]infranetworkv1.IPSet, dnsAddresses []string, defaultImages dataplanev1.DataplaneAnsibleImageDefaults) (string, error) {
+	allIPSets map[string]infranetworkv1.IPSet, dnsAddresses []string,
+	containerImages openstackv1.ContainerImages) (string, error) {
 	inventory := ansible.MakeInventory()
 	nodeSetGroup := inventory.AddGroup(instance.Name)
 	groupVars, err := getAnsibleVarsFrom(ctx, helper, instance.Namespace, &instance.Spec.NodeTemplate.Ansible)
@@ -110,7 +112,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 	for k, v := range groupVars {
 		nodeSetGroup.Vars[k] = v
 	}
-	err = resolveGroupAnsibleVars(&instance.Spec.NodeTemplate, &nodeSetGroup, defaultImages)
+	err = resolveGroupAnsibleVars(&instance.Spec.NodeTemplate, &nodeSetGroup, containerImages)
 	if err != nil {
 		utils.LogErrorForObject(helper, err, "Could not resolve ansible group vars", instance)
 		return "", err
@@ -222,7 +224,7 @@ func populateInventoryFromIPAM(
 
 // set group ansible vars from NodeTemplate
 func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.Group,
-	defaultImages dataplanev1.DataplaneAnsibleImageDefaults) error {
+	containerImages openstackv1.ContainerImages) error {
 
 	if template.Ansible.AnsibleUser != "" {
 		group.Vars["ansible_user"] = template.Ansible.AnsibleUser
@@ -234,43 +236,43 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 		group.Vars["management_network"] = template.ManagementNetwork
 	}
 
-	// Set default Service Image Variables in they are not provided by the user.
-	// This uses the default values provided by dataplanev1.DataplaneAnsibleImageDefaults
+	// Set the ansible variables for the container images if they are not
+	// provided by the user in the spec.
 	if template.Ansible.AnsibleVars["edpm_frr_image"] == nil {
-		group.Vars["edpm_frr_image"] = defaultImages.Frr
+		group.Vars["edpm_frr_image"] = containerImages.EdpmFrrImage
 	}
 	if template.Ansible.AnsibleVars["edpm_iscsid_image"] == nil {
-		group.Vars["edpm_iscsid_image"] = defaultImages.IscsiD
+		group.Vars["edpm_iscsid_image"] = containerImages.EdpmIscsidImage
 	}
 	if template.Ansible.AnsibleVars["edpm_logrotate_crond_image"] == nil {
-		group.Vars["edpm_logrotate_crond_image"] = defaultImages.Logrotate
+		group.Vars["edpm_logrotate_crond_image"] = containerImages.EdpmLogrotateCrondImage
 	}
 	if template.Ansible.AnsibleVars["edpm_multipathd_image"] == nil {
-		group.Vars["edpm_multipathd_image"] = defaultImages.Multipathd
+		group.Vars["edpm_multipathd_image"] = containerImages.EdpmMultipathdImage
 	}
 	if template.Ansible.AnsibleVars["edpm_neutron_metadata_agent_image"] == nil {
-		group.Vars["edpm_neutron_metadata_agent_image"] = defaultImages.NeutronMetadataAgent
+		group.Vars["edpm_neutron_metadata_agent_image"] = containerImages.EdpmNeutronMetadataAgentImage
 	}
 	if template.Ansible.AnsibleVars["edpm_neutron_sriov_agent_image"] == nil {
-		group.Vars["edpm_neutron_sriov_image"] = defaultImages.NeutronSRIOVAgent
+		group.Vars["edpm_neutron_sriov_image"] = containerImages.EdpmNeutronSriovAgentImage
 	}
 	if template.Ansible.AnsibleVars["edpm_nova_compute_image"] == nil {
-		group.Vars["edpm_nova_compute_image"] = defaultImages.NovaCompute
+		group.Vars["edpm_nova_compute_image"] = containerImages.NovaComputeImage
 	}
 	if template.Ansible.AnsibleVars["edpm_ovn_controller_agent_image"] == nil {
-		group.Vars["edpm_ovn_controller_agent_image"] = defaultImages.OvnControllerAgent
+		group.Vars["edpm_ovn_controller_agent_image"] = containerImages.OvnControllerImage
 	}
 	if template.Ansible.AnsibleVars["edpm_ovn_bgp_agent_image"] == nil {
-		group.Vars["edpm_ovn_bgp_agent_image"] = defaultImages.OvnBgpAgent
+		group.Vars["edpm_ovn_bgp_agent_image"] = containerImages.EdpmOvnBgpAgentImage
 	}
 	if template.Ansible.AnsibleVars["edpm_telemetry_ceilometer_compute_image"] == nil {
-		group.Vars["edpm_telemetry_ceilometer_compute_image"] = defaultImages.TelemetryCeilometerCompute
+		group.Vars["edpm_telemetry_ceilometer_compute_image"] = containerImages.CeilometerComputeImage
 	}
 	if template.Ansible.AnsibleVars["edpm_telemetry_ceilometer_ipmi_image"] == nil {
-		group.Vars["edpm_telemetry_ceilometer_ipmi_image"] = defaultImages.TelemetryCeilometerIpmi
+		group.Vars["edpm_telemetry_ceilometer_ipmi_image"] = containerImages.CeilometerIpmiImage
 	}
 	if template.Ansible.AnsibleVars["edpm_telemetry_node_exporter_image"] == nil {
-		group.Vars["edpm_telemetry_node_exporter_image"] = defaultImages.TelemetryNodeExporter
+		group.Vars["edpm_telemetry_node_exporter_image"] = containerImages.EdpmNodeExporterImage
 	}
 
 	err := unmarshalAnsibleVars(template.Ansible.AnsibleVars, group.Vars)

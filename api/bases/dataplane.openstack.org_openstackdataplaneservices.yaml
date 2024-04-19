@@ -40,6 +40,10 @@ spec:
                 items:
                   type: string
                 type: array
+              containerImageFields:
+                items:
+                  type: string
+                type: array
               deployOnAllNodeSets:
                 type: boolean
               openStackAnsibleEERunnerImage:

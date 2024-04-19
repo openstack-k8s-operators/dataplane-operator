@@ -19,3 +19,5 @@ spec:
       - server auth
       - client auth
   caCerts: combined-ca-bundle
+  containerImageFields:
+  - EdpmOvnBpgAgentImage

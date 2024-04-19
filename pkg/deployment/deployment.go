@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"reflect"
 	"sort"
 	"strconv"
 
@@ -35,6 +36,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
+	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -48,6 +50,7 @@ type Deployer struct {
 	AeeSpec                     *dataplanev1.AnsibleEESpec
 	InventorySecrets            map[string]string
 	AnsibleSSHPrivateKeySecrets map[string]string
+	Version                     *openstackv1.OpenStackVersion
 }
 
 // Deploy function encapsulating primary deloyment handling
@@ -113,6 +116,17 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 		}
 
 		log.Info(fmt.Sprintf("Condition %s ready", readyCondition))
+
+		// (TODO) Only considers the container image values from the Version
+		// for the time being. Can be expanded later to look at the actual
+		// values used from the inventory, etc.
+		if d.Version != nil {
+			vContainerImages := reflect.ValueOf(d.Version.Status.ContainerImages)
+			for _, cif := range foundService.Spec.ContainerImageFields {
+				d.Deployment.Status.ContainerImages[cif] = reflect.Indirect(vContainerImages.FieldByName(cif)).String()
+			}
+		}
+
 	}
 
 	return nil, nil

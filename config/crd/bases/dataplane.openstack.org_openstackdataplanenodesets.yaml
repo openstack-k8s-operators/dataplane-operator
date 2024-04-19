@@ -1992,11 +1992,17 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              containerImages:
+                additionalProperties:
+                  type: string
+                type: object
               ctlplaneSearchDomain:
                 type: string
               deployed:
                 type: boolean
               deployedConfigHash:
+                type: string
+              deployedVersion:
                 type: string
               deploymentStatuses:
                 additionalProperties:

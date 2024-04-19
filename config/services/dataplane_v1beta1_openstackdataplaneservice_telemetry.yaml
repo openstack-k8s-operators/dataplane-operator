@@ -10,3 +10,7 @@ spec:
     contents:
     - ips
   caCerts: combined-ca-bundle
+  containerImageFields:
+  - CeilometerComputeImage
+  - CeilometerIpmiImage
+  - EdpmNodeExporterImage

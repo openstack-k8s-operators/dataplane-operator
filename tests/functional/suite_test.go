@@ -46,6 +46,7 @@ import (
 	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	aee "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 
 	//revive:disable-next-line:dot-imports
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
@@ -97,6 +98,9 @@ var _ = BeforeSuite(func() {
 	infraCRDs, err := test.GetCRDDirFromModule(
 		"github.com/openstack-k8s-operators/infra-operator/apis", gomod, "bases")
 	Expect(err).ShouldNot(HaveOccurred())
+	openstackCRDs, err := test.GetCRDDirFromModule(
+		"github.com/openstack-k8s-operators/openstack-operator/apis", gomod, "bases")
+	Expect(err).ShouldNot(HaveOccurred())
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
@@ -105,6 +109,7 @@ var _ = BeforeSuite(func() {
 			aeeCRDs,
 			baremetalCRDs,
 			infraCRDs,
+			openstackCRDs,
 		},
 		WebhookInstallOptions: envtest.WebhookInstallOptions{
 			Paths: []string{filepath.Join("..", "..", "config", "webhook")},
@@ -122,9 +127,8 @@ var _ = BeforeSuite(func() {
 	Expect(cfg).NotTo(BeNil())
 
 	// NOTE(gibi): Need to add all API schemas our operator can own.
-	// Keep this in synch with PlacementAPIReconciler.SetupWithManager,
-	// otherwise the reconciler loop will silently not start
-	// in the test env.
+	// Keep this in synch with SetupWithManager, otherwise the reconciler loop
+	// will silently not start in the test env.
 	err = dataplanev1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = aee.AddToScheme(scheme.Scheme)
@@ -138,6 +142,8 @@ var _ = BeforeSuite(func() {
 	err = baremetalv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = infrav1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = openstackv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	//+kubebuilder:scaffold:scheme
 

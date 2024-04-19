@@ -42,6 +42,7 @@ import (
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
+	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -66,6 +67,7 @@ func init() {
 	utilruntime.Must(infranetworkv1.AddToScheme(scheme))
 	utilruntime.Must(certmgrv1.AddToScheme(scheme))
 	utilruntime.Must(certmgrmetav1.AddToScheme(scheme))
+	utilruntime.Must(openstackv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -129,7 +131,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	controllers.SetupAnsibleImageDefaults()
 	if err = (&controllers.OpenStackDataPlaneNodeSetReconciler{
 		Client:  mgr.GetClient(),
 		Scheme:  mgr.GetScheme(),
@@ -138,7 +139,9 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackDataPlaneNodeSet")
 		os.Exit(1)
 	}
-	controllers.SetupAnsibleImageDefaults()
+
+	// Acquire environmental defaults and initialize operator defaults with them
+	dataplanev1.SetupDefaults()
 
 	checker := healthz.Ping
 	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) != "false" {

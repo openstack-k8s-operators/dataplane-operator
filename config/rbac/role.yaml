@@ -186,6 +186,14 @@ rules:
   - update
   - watch
 - apiGroups:
+  - core.openstack.org
+  resources:
+  - openstackversions
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - dataplane.openstack.org
   resources:
   - openstackdataplanedeployments

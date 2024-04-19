@@ -7,3 +7,5 @@ spec:
   secrets:
   - neutron-sriov-agent-neutron-config
   caCerts: combined-ca-bundle
+  containerImageFields:
+  - EdpmSriovAgentImage

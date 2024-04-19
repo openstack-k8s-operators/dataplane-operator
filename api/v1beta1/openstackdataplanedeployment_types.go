@@ -82,6 +82,12 @@ type OpenStackDataPlaneDeploymentStatus struct {
 
 	//ObservedGeneration - the most recent generation observed for this Deployment. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+
+	// DeployedVersion
+	DeployedVersion string `json:"deployedVersion,omitempty"`
+
+	// ContainerImages
+	ContainerImages map[string]string `json:"containerImages,omitempty"`
 }
 
 //+kubebuilder:object:root=true

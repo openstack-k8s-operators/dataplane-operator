@@ -34,6 +34,7 @@ import (
 	"github.com/go-logr/logr"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/dataplane-operator/pkg/deployment"
+	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
@@ -150,6 +151,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	if instance.Status.NodeSetHashes == nil {
 		instance.Status.NodeSetHashes = make(map[string]string)
 	}
+	if instance.Status.ContainerImages == nil {
+		instance.Status.ContainerImages = make(map[string]string)
+	}
 
 	// Ensure NodeSets
 	nodeSets := dataplanev1.OpenStackDataPlaneNodeSetList{}
@@ -261,6 +265,11 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 
 	}
 
+	version, err := dataplaneutil.GetVersion(ctx, helper, instance.Namespace)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	// Deploy each nodeSet
 	// The loop starts and checks NodeSet deployments sequentially. However, after they
 	// are started, they are running in parallel, since the loop does not wait
@@ -296,6 +305,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			AeeSpec:                     &ansibleEESpec,
 			InventorySecrets:            globalInventorySecrets,
 			AnsibleSSHPrivateKeySecrets: globalSSHKeySecrets,
+			Version:                     version,
 		}
 
 		// When ServicesOverride is set on the OpenStackDataPlaneDeployment,
@@ -357,6 +367,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	Log.Info("Set DeploymentReadyCondition true")
 	instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
 	instance.Status.Deployed = true
+	if version != nil {
+		instance.Status.DeployedVersion = version.Spec.TargetVersion
+	}
 	err = r.setHashes(ctx, helper, instance, nodeSets)
 	if err != nil {
 		Log.Error(err, "Error setting service hashes")
