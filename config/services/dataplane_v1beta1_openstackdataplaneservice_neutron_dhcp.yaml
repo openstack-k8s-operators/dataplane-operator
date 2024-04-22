@@ -6,3 +6,4 @@ spec:
   playbook: osp.edpm.neutron_dhcp
   secrets:
   - neutron-dhcp-agent-neutron-config
+  caCerts: combined-ca-bundle
