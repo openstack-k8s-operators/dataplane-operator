@@ -30,11 +30,17 @@ var _ = Describe("Dataplane Deployment Test", func() {
 	var novaMigrationSSHKey types.NamespacedName
 	var ceilometerConfigSecretName types.NamespacedName
 	var dataplaneNetConfigName types.NamespacedName
+	var dnsMasqName types.NamespacedName
+	var dataplaneNodeName types.NamespacedName
 	var dataplaneMultiNodesetDeploymentName types.NamespacedName
 	var dataplaneServiceName types.NamespacedName
 	var dataplaneGlobalServiceName types.NamespacedName
 
 	BeforeEach(func() {
+		dnsMasqName = types.NamespacedName{
+			Name:      "dnsmasq",
+			Namespace: namespace,
+		}
 		dataplaneDeploymentName = types.NamespacedName{
 			Name:      "edpm-deployment",
 			Namespace: namespace,
@@ -42,6 +48,10 @@ var _ = Describe("Dataplane Deployment Test", func() {
 		dataplaneNodeSetName = types.NamespacedName{
 			Name:      "edpm-compute-nodeset",
 			Namespace: namespace,
+		}
+		dataplaneNodeName = types.NamespacedName{
+			Namespace: namespace,
+			Name:      "edpm-compute-node-1",
 		}
 		dataplaneSSHSecretName = types.NamespacedName{
 			Namespace: namespace,
@@ -113,7 +123,11 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
 			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec(dataplaneNodeSetName.Name)))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
 			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
 		})
 
@@ -250,9 +264,11 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
 
 			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
-
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
 			// Create both nodesets
 
+			betaNodeName := fmt.Sprintf("%s-node-1", betaNodeSetName.Name)
 			betaNodeSetSpec := map[string]interface{}{
 				"preProvisioned": false,
 				"services": []string{
@@ -265,12 +281,11 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					},
 				},
 				"nodes": map[string]interface{}{
-					fmt.Sprintf("%s-node-1", betaNodeSetName.Name): map[string]interface{}{
-						"hostname": "edpm-bm-compute-2",
+					betaNodeName: map[string]interface{}{
+						"hostname": betaNodeName,
 						"networks": []map[string]interface{}{{
 							"name":       "CtlPlane",
-							"fixedIP":    "172.20.12.77",
-							"subnetName": "ctlplane_subnet",
+							"subnetName": "subnet1",
 						},
 						},
 					},
@@ -286,6 +301,10 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			}
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(alphaNodeSetName, DefaultDataPlaneNodeSetSpec(alphaNodeSetName.Name)))
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(betaNodeSetName, betaNodeSetSpec))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(alphaNodeSetName)
+			SimulateIPSetComplete(types.NamespacedName{Name: betaNodeName, Namespace: namespace})
+			SimulateDNSDataComplete(betaNodeSetName)
 
 			deploymentSpec := map[string]interface{}{
 				"nodeSets": []string{
@@ -476,9 +495,13 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 
 			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
 
 			// Create only one nodeset
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(alphaNodeSetName, DefaultDataPlaneNodeSetSpec(alphaNodeSetName.Name)))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(alphaNodeSetName)
 
 			deploymentSpec := map[string]interface{}{
 				"nodeSets": []string{
@@ -598,8 +621,12 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			// DefaultDataPlanenodeSetSpec comes with two mock services, one marked for deployment on all nodesets
 			// But we will not create them to test this scenario
 			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNodeSetSpec(dataplaneNodeSetName.Name)))
 			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
 		})
 
 		It("Should have Spec fields initialized", func() {

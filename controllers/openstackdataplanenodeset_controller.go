@@ -236,18 +236,16 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	// Ensure DNSData Required for Nodes
-	dnsData := deployment.DataplaneDNSData{}
-	err = dnsData.EnsureDNSData(
+	dnsDetails, err := deployment.EnsureDNSData(
 		ctx, helper,
 		instance, allIPSets)
-	if err != nil || !dnsData.Ready {
+	if err != nil || !dnsDetails.IsReady {
 		return ctrl.Result{}, err
 	}
-
-	instance.Status.DNSClusterAddresses = dnsData.ClusterAddresses
-	instance.Status.CtlplaneSearchDomain = dnsData.CtlplaneSearchDomain
-	instance.Status.AllHostnames = dnsData.Hostnames
-	instance.Status.AllIPs = dnsData.AllIPs
+	instance.Status.DNSClusterAddresses = dnsDetails.ClusterAddresses
+	instance.Status.CtlplaneSearchDomain = dnsDetails.CtlplaneSearchDomain
+	instance.Status.AllHostnames = dnsDetails.Hostnames
+	instance.Status.AllIPs = dnsDetails.AllIPs
 
 	ansibleSSHPrivateKeySecret := instance.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret
 
@@ -363,7 +361,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		instance.Status.Conditions.MarkUnknown(dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 			condition.InitReason, condition.InitReason)
 		isReady, err := deployment.DeployBaremetalSet(ctx, helper, instance,
-			allIPSets, dnsData.ServerAddresses)
+			allIPSets, dnsDetails.ServerAddresses)
 		if err != nil || !isReady {
 			return ctrl.Result{}, err
 		}
@@ -383,7 +381,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 	containerImages := dataplaneutil.GetContainerImages(version)
 	_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
-		allIPSets, dnsData.ServerAddresses, containerImages)
+		allIPSets, dnsDetails.ServerAddresses, containerImages)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Unable to generate inventory for %s", instance.Name)
 		util.LogErrorForObject(helper, err, errorMsg, instance)

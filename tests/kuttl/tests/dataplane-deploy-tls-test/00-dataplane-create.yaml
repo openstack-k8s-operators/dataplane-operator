@@ -1,16 +1,3 @@
-apiVersion: network.openstack.org/v1beta1
-kind: DNSMasq
-metadata:
-  name: dnsmasq
-spec:
-  replicas: 1
-  options:
-  - key: server
-    values:
-    - 192.168.122.1
-  debug:
-    service: false
----
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:

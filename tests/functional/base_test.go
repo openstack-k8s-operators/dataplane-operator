@@ -63,17 +63,25 @@ func CustomServiceImageSpec() map[string]interface{} {
 	return map[string]interface{}{
 		"preProvisioned": true,
 		"nodeTemplate": map[string]interface{}{
+			"networks": []infrav1.IPSetNetwork{
+				{Name: "ctlplane", SubnetName: "subnet1"},
+			},
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 			"ansible": map[string]interface{}{
 				"ansibleVars": ansibleServiceVars,
 			},
 		},
-		"nodes": map[string]interface{}{},
+		"nodes": map[string]dataplanev1.NodeSection{"edpm-compute-node-1": {}},
 	}
 }
 
 func CreateNetConfig(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
 	raw := DefaultNetConfig(name, spec)
+	return th.CreateUnstructured(raw)
+}
+
+func CreateDNSMasq(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
+	raw := DefaultDNSMasq(name, spec)
 	return th.CreateUnstructured(raw)
 }
 
@@ -106,12 +114,9 @@ func DefaultDataPlaneNodeSetSpec(nodeSetName string) map[string]interface{} {
 		},
 		"nodes": map[string]interface{}{
 			fmt.Sprintf("%s-node-1", nodeSetName): map[string]interface{}{
-				"hostname": "edpm-bm-compute-1",
-				"networks": []map[string]interface{}{{
-					"name":       "CtlPlane",
-					"fixedIP":    "172.20.12.76",
-					"subnetName": "ctlplane_subnet",
-				},
+				"hostName": "edpm-compute-node-1",
+				"networks": []infrav1.IPSetNetwork{
+					{Name: "ctlplane", SubnetName: "subnet1"},
 				},
 			},
 		},
@@ -132,6 +137,9 @@ func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]interface{} {
 	spec := map[string]interface{}{
 		"preProvisioned": true,
 		"nodeTemplate": map[string]interface{}{
+			"networks": []infrav1.IPSetNetwork{
+				{Name: "ctlplane", SubnetName: "subnet1"},
+			},
 			"ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
 		},
 		"nodes":            map[string]interface{}{},
@@ -140,6 +148,7 @@ func DefaultDataPlaneNoNodeSetSpec(tlsEnabled bool) map[string]interface{} {
 	if tlsEnabled {
 		spec["tlsEnabled"] = true
 	}
+	spec["nodes"] = map[string]dataplanev1.NodeSection{"edpm-compute-node-1": {}}
 	return spec
 }
 
@@ -166,7 +175,7 @@ func DefaultNetConfigSpec() map[string]interface{} {
 					"start": "172.20.12.0",
 				},
 				},
-				"name":    "ctlplane_subnet",
+				"name":    "subnet1",
 				"cidr":    "172.20.12.0/16",
 				"gateway": "172.20.12.1",
 			},
@@ -174,6 +183,39 @@ func DefaultNetConfigSpec() map[string]interface{} {
 		},
 		},
 	}
+}
+
+func DefaultDNSMasqSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"replicas": 1,
+	}
+}
+
+func SimulateDNSMasqComplete(name types.NamespacedName) {
+	Eventually(func(g Gomega) {
+		dnsMasq := &infrav1.DNSMasq{}
+		g.Expect(th.K8sClient.Get(th.Ctx, name, dnsMasq)).Should(Succeed())
+		dnsMasq.Status.Conditions.MarkTrue(condition.ReadyCondition, condition.ReadyMessage)
+		dnsMasq.Status.DNSClusterAddresses = []string{"192.168.122.80"}
+		dnsMasq.Status.DNSAddresses = []string{"192.168.122.80"}
+		g.Expect(th.K8sClient.Status().Update(th.Ctx, dnsMasq)).To(Succeed())
+	}, th.Timeout, th.Interval).Should(Succeed())
+	th.Logger.Info("Simulated DNS creation completed", "on", name)
+}
+
+// SimulateIPSetComplete - Simulates the result of the IPSet status
+func SimulateDNSDataComplete(name types.NamespacedName) {
+	Eventually(func(g Gomega) {
+		dnsData := &infrav1.DNSData{}
+
+		g.Expect(th.K8sClient.Get(th.Ctx, name, dnsData)).Should(Succeed())
+		dnsData.Status.Conditions.MarkTrue(condition.ReadyCondition, condition.ReadyMessage)
+		// This can return conflict so we have the gomega.Eventually block to retry
+		g.Expect(th.K8sClient.Status().Update(th.Ctx, dnsData)).To(Succeed())
+
+	}, th.Timeout, th.Interval).Should(Succeed())
+
+	th.Logger.Info("Simulated dnsData creation completed", "on", name)
 }
 
 // SimulateIPSetComplete - Simulates the result of the IPSet status
@@ -197,7 +239,7 @@ func SimulateIPSetComplete(name types.NamespacedName) {
 
 	}, th.Timeout, th.Interval).Should(Succeed())
 
-	th.Logger.Info("Simulated DB completed", "on", name)
+	th.Logger.Info("Simulated IPSet creation completed", "on", name)
 }
 
 // Build OpenStackDataPlaneNodeSet struct and fill it with preset values
@@ -233,6 +275,18 @@ func DefaultNetConfig(name types.NamespacedName, spec map[string]interface{}) ma
 	return map[string]interface{}{
 		"apiVersion": "network.openstack.org/v1beta1",
 		"kind":       "NetConfig",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		},
+		"spec": spec,
+	}
+}
+
+func DefaultDNSMasq(name types.NamespacedName, spec map[string]interface{}) map[string]interface{} {
+	return map[string]interface{}{
+		"apiVersion": "network.openstack.org/v1beta1",
+		"kind":       "DNSMasq",
 		"metadata": map[string]interface{}{
 			"name":      name.Name,
 			"namespace": name.Namespace,
