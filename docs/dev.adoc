@@ -8,6 +8,8 @@
 
 == Getting Started
 
+DNM - REALLY DNM
+
 You'll need a Kubernetes cluster to run against. You can use
 https://sigs.k8s.io/kind[KIND] to get a local cluster for testing, or run
 against a remote cluster.  *Note:* Your controller will automatically use the
