@@ -18,6 +18,7 @@ package v1beta1
 
 import (
 	"fmt"
+	"regexp"
 
 	"golang.org/x/exp/slices"
 
@@ -281,4 +282,14 @@ func (r *OpenStackDataPlaneNodeSetSpec) duplicateNodeCheck(nodeSetList *OpenStac
 	}
 
 	return
+}
+
+// NodeHostNameIsFQDN Helper to check if a hostname is fqdn
+func NodeHostNameIsFQDN(hostname string) bool {
+	// Regular expression to match a valid FQDN
+	// This regex assumes that the hostname and domain name segments only contain letters, digits, hyphens, and periods.
+	regex := `^([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$`
+
+	match, _ := regexp.MatchString(regex, hostname)
+	return match
 }
