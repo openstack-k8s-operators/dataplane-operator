@@ -240,7 +240,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	err = dnsData.EnsureDNSData(
 		ctx, helper,
 		instance, allIPSets)
-	if err != nil || !isReady {
+	if err != nil || !dnsData.Ready {
 		return ctrl.Result{}, err
 	}
 
