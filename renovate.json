@@ -8,8 +8,12 @@
      {
        "matchPackageNames": ["github.com/openstack-k8s-operators/dataplane-operator/api"],
        "enabled": false
-     }
-   ],
+     },
+     {
+      "matchPackageNames": ["github.com/openstack-k8s-operators/openstack-operator/api"],
+      "enabled": false
+    }
+  ],
   "postUpgradeTasks": {
     "commands": ["make gowork", "make tidy", "make manifests generate"],
     "fileFilters": ["**/go.mod", "**/go.sum", "**/*.go", "**/*.yaml"],
