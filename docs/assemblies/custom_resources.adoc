@@ -353,6 +353,11 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | ContainerImageFields - list of container image fields names that this service deploys. The field names should match the ContainerImages struct field names from github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1
 | []string
 | false
+
+| edpmServiceName
+| EDPMServiceName - name to use for edpm_service_name ansible variable
+| string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>

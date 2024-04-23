@@ -48,6 +48,8 @@ spec:
                 type: array
               deployOnAllNodeSets:
                 type: boolean
+              edpmServiceName:
+                type: string
               openStackAnsibleEERunnerImage:
                 type: string
               play:

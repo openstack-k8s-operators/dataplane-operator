@@ -51,6 +51,21 @@ func CreateDataplaneService(name types.NamespacedName, globalService bool) *unst
 	return th.CreateUnstructured(raw)
 }
 
+// Create an OpenStackDataPlaneService with a given NamespacedName, and a given unstructured spec
+func CreateDataPlaneServiceFromSpec(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {
+	raw := map[string]interface{}{
+
+		"apiVersion": "dataplane.openstack.org/v1beta1",
+		"kind":       "OpenStackDataPlaneService",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		},
+		"spec": spec,
+	}
+	return th.CreateUnstructured(raw)
+}
+
 // Build CustomServiceImageSpec struct with empty `Nodes` list
 func CustomServiceImageSpec() map[string]interface{} {
 
@@ -96,6 +111,7 @@ func DefaultDataPlaneNodeSetSpec(nodeSetName string) map[string]interface{} {
 	return map[string]interface{}{
 		"services": []string{
 			"foo-service",
+			"foo-update-service",
 			"global-service",
 		},
 		"nodeTemplate": map[string]interface{}{
