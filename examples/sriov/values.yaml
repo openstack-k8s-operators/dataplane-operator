@@ -18,6 +18,8 @@ data:
     - run-os
     - reboot-os
     - install-certs
+    - ovn
+    - neutron-ovn
     - neutron-sriov
     - libvirt
     - nova

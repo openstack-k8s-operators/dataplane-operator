@@ -123,6 +123,7 @@ data:
     - run-os
     - install-certs
     - ovn
+    - neutron-ovn
     - neutron-metadata
     - libvirt
     - nova
