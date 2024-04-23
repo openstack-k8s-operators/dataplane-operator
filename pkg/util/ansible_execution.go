@@ -124,6 +124,10 @@ func AnsibleExecution(
 		}
 		ansibleEE.Spec.ExtraVars["edpm_service_name"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Name)))
 
+		if len(deployment.Spec.ServicesOverride) > 0 {
+			ansibleEE.Spec.ExtraVars["edpm_services_override"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", deployment.Spec.ServicesOverride)))
+		}
+
 		for sshKeyNodeName, sshKeySecret := range sshKeySecrets {
 			if service.Spec.DeployOnAllNodeSets {
 				sshKeyName = fmt.Sprintf("ssh-key-%s", sshKeyNodeName)

@@ -127,6 +127,9 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		nodeSetGroup.Vars["nodeset_tags"] = instance.Spec.Tags
 	}
 
+	// add services list
+	nodeSetGroup.Vars["edpm_services"] = instance.Spec.Services
+
 	nodeSetGroup.Vars["ansible_ssh_private_key_file"] = fmt.Sprintf("/runner/env/ssh_key/ssh_key_%s", instance.Name)
 
 	for _, node := range instance.Spec.Nodes {
