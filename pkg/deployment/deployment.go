@@ -24,6 +24,7 @@ import (
 	"sort"
 	"strconv"
 
+	slices "golang.org/x/exp/slices"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -224,6 +225,17 @@ func (d *Deployer) addCertMounts(
 		if err != nil {
 			return nil, err
 		}
+
+		if service.Spec.CertsFrom != "" && service.Spec.TLSCert == nil && service.Spec.CACerts == "" {
+			if slices.Contains(services, service.Spec.CertsFrom) {
+				continue
+			}
+			service, err = GetService(d.Ctx, d.Helper, service.Spec.CertsFrom)
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		if service.Spec.TLSCert != nil {
 			log.Info("Mounting TLS cert for service", "service", svc)
 			volMounts := storage.VolMounts{}

@@ -334,6 +334,11 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | string
 | false
 
+| certsFrom
+| CertsFrom - Service name used to obtain TLSCert and CACerts data. If both CertsFrom and either TLSCert or CACerts is set, then those fields take precedence.
+| string
+| false
+
 | addCertMounts
 | AddCertMounts - Whether to add cert mounts
 | bool

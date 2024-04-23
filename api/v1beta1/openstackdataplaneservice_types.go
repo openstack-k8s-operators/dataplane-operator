@@ -74,6 +74,12 @@ type OpenStackDataPlaneServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty" yaml:"openStackAnsibleEERunnerImage,omitempty"`
 
+	// CertsFrom - Service name used to obtain TLSCert and CACerts data. If both
+	// CertsFrom and either TLSCert or CACerts is set, then those fields take
+	// precedence.
+	// +kubebuilder:validation:Optional
+	CertsFrom string `json:"certsFrom,omitempty" yaml:"certsFrom,omitempty"`
+
 	// AddCertMounts - Whether to add cert mounts
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false

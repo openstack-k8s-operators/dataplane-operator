@@ -36,6 +36,8 @@ spec:
                 type: boolean
               caCerts:
                 type: string
+              certsFrom:
+                type: string
               configMaps:
                 items:
                   type: string
