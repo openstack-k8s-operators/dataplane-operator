@@ -47,11 +47,6 @@ type AnsibleOpts struct {
 	// +kubebuilder:validation:Optional
 	AnsibleHost string `json:"ansibleHost,omitempty"`
 
-	// AnsiblePort SSH port for Ansible connection
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
-	AnsiblePort int `json:"ansiblePort,omitempty"`
-
 	// AnsibleVars for configuring ansible
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
@@ -61,29 +56,22 @@ type AnsibleOpts struct {
 	// Values defined by an AnsibleVars with a duplicate key take precedence.
 	// +kubebuilder:validation:Optional
 	AnsibleVarsFrom []AnsibleVarsFromSource `json:"ansibleVarsFrom,omitempty"`
+
+	// AnsiblePort SSH port for Ansible connection
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
+	AnsiblePort int `json:"ansiblePort,omitempty"`
 }
 
 // NodeSection defines the top level attributes inherited by nodes in the CR.
 type NodeSection struct {
-	// HostName - node name
+	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
 	// +kubebuilder:validation:Optional
-	HostName string `json:"hostName,omitempty"`
+	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 
 	// Networks - Instance networks
 	// +kubebuilder:validation:Optional
 	Networks []infranetworkv1.IPSetNetwork `json:"networks,omitempty"`
-
-	// ManagementNetwork - Name of network to use for management (SSH/Ansible)
-	// +kubebuilder:validation:Optional
-	ManagementNetwork string `json:"managementNetwork,omitempty"`
-
-	// Ansible is the group of Ansible related configuration options.
-	// +kubebuilder:validation:Optional
-	Ansible AnsibleOpts `json:"ansible,omitempty"`
-
-	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
-	// +kubebuilder:validation:Optional
-	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 
 	// UserData  node specific user-data
 	// +kubebuilder:validation:Optional
@@ -92,6 +80,18 @@ type NodeSection struct {
 	// NetworkData  node specific network-data
 	// +kubebuilder:validation:Optional
 	NetworkData *corev1.SecretReference `json:"networkData,omitempty"`
+
+	// Ansible is the group of Ansible related configuration options.
+	// +kubebuilder:validation:Optional
+	Ansible AnsibleOpts `json:"ansible,omitempty"`
+
+	// HostName - node name
+	// +kubebuilder:validation:Optional
+	HostName string `json:"hostName,omitempty"`
+
+	// ManagementNetwork - Name of network to use for management (SSH/Ansible)
+	// +kubebuilder:validation:Optional
+	ManagementNetwork string `json:"managementNetwork,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// PreprovisioningNetworkDataName - NetworkData secret name in the local namespace for pre-provisioing
@@ -100,31 +100,13 @@ type NodeSection struct {
 
 // NodeTemplate is a specification of the node attributes that override top level attributes.
 type NodeTemplate struct {
-	// AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing
-	// private SSH key for connecting to node.
-	// The named secret must be of the form:
-	// Secret.data.ssh-privatekey: <base64 encoded private key contents>
-	// <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>
-	// +kubebuilder:validation:Required
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
-	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret"`
+	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
+	// +kubebuilder:validation:Optional
+	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 
 	// Networks - Instance networks
 	// +kubebuilder:validation:Optional
 	Networks []infranetworkv1.IPSetNetwork `json:"networks,omitempty"`
-
-	// ManagementNetwork - Name of network to use for management (SSH/Ansible)
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=ctlplane
-	ManagementNetwork string `json:"managementNetwork"`
-
-	// Ansible is the group of Ansible related configuration options.
-	// +kubebuilder:validation:Optional
-	Ansible AnsibleOpts `json:"ansible,omitempty"`
-
-	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
-	// +kubebuilder:validation:Optional
-	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 
 	// UserData  node specific user-data
 	// +kubebuilder:validation:Optional
@@ -133,10 +115,35 @@ type NodeTemplate struct {
 	// NetworkData  node specific network-data
 	// +kubebuilder:validation:Optional
 	NetworkData *corev1.SecretReference `json:"networkData,omitempty"`
+
+	// AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing
+	// private SSH key for connecting to node.
+	// The named secret must be of the form:
+	// Secret.data.ssh-privatekey: <base64 encoded private key contents>
+	// <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>
+	// +kubebuilder:validation:Required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:io.kubernetes:Secret"}
+	AnsibleSSHPrivateKeySecret string `json:"ansibleSSHPrivateKeySecret"`
+	// ManagementNetwork - Name of network to use for management (SSH/Ansible)
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=ctlplane
+	ManagementNetwork string `json:"managementNetwork"`
+
+	// Ansible is the group of Ansible related configuration options.
+	// +kubebuilder:validation:Optional
+	Ansible AnsibleOpts `json:"ansible,omitempty"`
 }
 
 // AnsibleEESpec is a specification of the ansible EE attributes
 type AnsibleEESpec struct {
+	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
+	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
+	// Env is a list containing the environment variables to pass to the pod
+	Env []corev1.EnvVar `json:"env,omitempty"`
+	// ExtraVars for ansible execution
+	ExtraVars map[string]json.RawMessage `json:"extraVars,omitempty"`
+	// DNSConfig for setting dnsservers
+	DNSConfig *corev1.PodDNSConfig `json:"dnsConfig,omitempty"`
 	// NetworkAttachments is a list of NetworkAttachment resource names to pass to the ansibleee resource
 	// which allows to connect the ansibleee runner to the given network
 	NetworkAttachments []string `json:"networkAttachments"`
@@ -148,14 +155,6 @@ type AnsibleEESpec struct {
 	AnsibleLimit string `json:"ansibleLimit,omitempty"`
 	// AnsibleSkipTags for ansible execution
 	AnsibleSkipTags string `json:"ansibleSkipTags,omitempty"`
-	// ExtraVars for ansible execution
-	ExtraVars map[string]json.RawMessage `json:"extraVars,omitempty"`
-	// ExtraMounts containing files which can be mounted into an Ansible Execution Pod
-	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
-	// Env is a list containing the environment variables to pass to the pod
-	Env []corev1.EnvVar `json:"env,omitempty"`
-	// DNSConfig for setting dnsservers
-	DNSConfig *corev1.PodDNSConfig `json:"dnsConfig,omitempty"`
 	// ServiceAccountName allows to specify what ServiceAccountName do we want
 	// the ansible execution run with. Without specifying, it will run with
 	// default serviceaccount

@@ -65,18 +65,20 @@ func EnsureIPSets(ctx context.Context, helper *helper.Helper,
 
 // DataplaneDNSData holds information relevant to the OpenStack DNS configuration of the cluster.
 type DataplaneDNSData struct {
+	// Err holds any errors returned from the Kubernetes API while retrieving data.
+	Err error
+	// AllIPs holds a map of all IP addresses per hostname.
+	AllIPs map[string]map[infranetworkv1.NetNameStr]string
+	// Hostnames is a map of hostnames provided by the NodeSet to the FQDNs
+	Hostnames map[string]map[infranetworkv1.NetNameStr]string
+	// CtlplaneSearchDomain is the search domain provided by IPAM
+	CtlplaneSearchDomain string
 	// ServerAddresses holds a slice of DNS servers in the environment
 	ServerAddresses []string
 	// ClusterAddresses holds a slice of Kubernetes service ClusterIPs for the DNSMasq services
 	ClusterAddresses []string
-	// CtlplaneSearchDomain is the search domain provided by IPAM
-	CtlplaneSearchDomain string
 	// Ready indicates the ready status of the DNS service
 	Ready bool
-	// Hostnames is a map of hostnames provided by the NodeSet to the FQDNs
-	Hostnames map[string]map[infranetworkv1.NetNameStr]string
-	// AllIPs holds a map of all IP addresses per hostname.
-	AllIPs map[string]map[infranetworkv1.NetNameStr]string
 }
 
 // createOrPatchDNSData builds the DNSData

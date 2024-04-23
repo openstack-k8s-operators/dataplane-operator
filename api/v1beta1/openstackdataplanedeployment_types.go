@@ -25,7 +25,6 @@ import (
 
 // OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlaneDeployment
 type OpenStackDataPlaneDeploymentSpec struct {
-
 	// +kubebuilder:validation:Required
 	// NodeSets is the list of NodeSets deployed
 	NodeSets []string `json:"nodeSets"`
@@ -60,16 +59,8 @@ type OpenStackDataPlaneDeploymentSpec struct {
 
 // OpenStackDataPlaneDeploymentStatus defines the observed state of OpenStackDataPlaneDeployment
 type OpenStackDataPlaneDeploymentStatus struct {
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
-	// Conditions
-	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
-
 	// NodeSetConditions
 	NodeSetConditions map[string]condition.Conditions `json:"nodeSetConditions,omitempty" optional:"true"`
-
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Deployed
-	Deployed bool `json:"deployed,omitempty" optional:"true"`
 
 	// ConfigMapHashes
 	ConfigMapHashes map[string]string `json:"configMapHashes,omitempty" optional:"true"`
@@ -80,14 +71,22 @@ type OpenStackDataPlaneDeploymentStatus struct {
 	// NodeSetHashes
 	NodeSetHashes map[string]string `json:"nodeSetHashes,omitempty" optional:"true"`
 
+	// ContainerImages
+	ContainerImages map[string]string `json:"containerImages,omitempty"`
+
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
+	// Conditions
+	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
+
 	//ObservedGeneration - the most recent generation observed for this Deployment. If the observed generation is less than the spec generation, then the controller has not processed the latest changes.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 
 	// DeployedVersion
 	DeployedVersion string `json:"deployedVersion,omitempty"`
 
-	// ContainerImages
-	ContainerImages map[string]string `json:"containerImages,omitempty"`
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// Deployed
+	Deployed bool `json:"deployed,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true
