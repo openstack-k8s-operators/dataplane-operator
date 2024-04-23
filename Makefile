@@ -343,9 +343,9 @@ endif
 
 .PHONY: yq
 yq: ## Download and install yq in local env
-	python -m venv $(LOCALBIN)/.virtualenv && \
-	source $(LOCALBIN)/.virtualenv/bin/activate && \
-	pip install yq
+	test -s $(LOCALBIN)/yq || ( cd $(LOCALBIN) &&\
+	wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64.tar.gz -O - |\
+	tar xz && mv yq_linux_amd64 $(LOCALBIN)/yq )
 
 # A comma-separated list of bundle images (e.g. make catalog-build BUNDLE_IMGS=example.com/operator-bundle:v0.1.0,example.com/operator-bundle:v0.2.0).
 # These images MUST exist in a registry and be pull-able.
