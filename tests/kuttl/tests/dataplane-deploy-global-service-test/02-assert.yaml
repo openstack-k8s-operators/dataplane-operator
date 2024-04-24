@@ -35,10 +35,8 @@ status:
     reason: Ready
     status: "True"
     type: SetupReady
-  configHash: ncbh88h5c5h59bh8bh664hffh564hf8h697h5cbh585h6fh55dh5f6h66ch57dh5cdh585h678hb9h65ch547h595h596h8bh65bh5h585h68chfbh5dcq
   configMapHashes:
     ovncontroller-config: n647h6fh674h55fh56ch5bh68bh5fdh8dh59ch58dhdch59ch646h568h675h99h66bh59bhcch5b4h589h674h568hbch84h554h95h6dhc4hbh699q
-  deployedConfigHash: ncbh88h5c5h59bh8bh664hffh564hf8h697h5cbh585h6fh55dh5f6h66ch57dh5cdh585h678hb9h65ch547h595h596h8bh65bh5h585h68chfbh5dcq
   deploymentStatuses: {}
   secretHashes:
     neutron-dhcp-agent-neutron-config: n68h676h98h689hd4h575h5dbh694h6fh688h57h665h5c5h56dh5ddh65bh5d7h5cdh644hb8h8fh5d9h5b9h555h9ch56dh5fh6chd4h5c5h5c5h68q
