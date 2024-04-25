@@ -334,6 +334,11 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | string
 | false
 
+| certsFrom
+| CertsFrom - Service name used to obtain TLSCert and CACerts data. If both CertsFrom and either TLSCert or CACerts is set, then those fields take precedence.
+| string
+| false
+
 | addCertMounts
 | AddCertMounts - Whether to add cert mounts
 | bool
@@ -347,6 +352,11 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | containerImageFields
 | ContainerImageFields - list of container image fields names that this service deploys. The field names should match the ContainerImages struct field names from github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1
 | []string
+| false
+
+| edpmServiceName
+| EDPMServiceName - name to use for edpm_service_name ansible variable
+| string
 | false
 |===
 

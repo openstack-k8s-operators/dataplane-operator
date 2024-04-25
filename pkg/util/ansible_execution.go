@@ -122,7 +122,11 @@ func AnsibleExecution(
 			util.LogForObject(helper,
 				fmt.Sprintf("for service %s, substituting existing ansible play host with '%s'.", service.Name, nodeSet.GetName()), ansibleEE)
 		}
-		ansibleEE.Spec.ExtraVars["edpm_service_name"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Name)))
+		if service.Spec.EDPMServiceName != "" {
+			ansibleEE.Spec.ExtraVars["edpm_service_name"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceName)))
+		} else {
+			ansibleEE.Spec.ExtraVars["edpm_service_name"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Name)))
+		}
 
 		for sshKeyNodeName, sshKeySecret := range sshKeySecrets {
 			if service.Spec.DeployOnAllNodeSets {

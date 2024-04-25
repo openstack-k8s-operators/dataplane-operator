@@ -74,6 +74,12 @@ type OpenStackDataPlaneServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	OpenStackAnsibleEERunnerImage string `json:"openStackAnsibleEERunnerImage,omitempty" yaml:"openStackAnsibleEERunnerImage,omitempty"`
 
+	// CertsFrom - Service name used to obtain TLSCert and CACerts data. If both
+	// CertsFrom and either TLSCert or CACerts is set, then those fields take
+	// precedence.
+	// +kubebuilder:validation:Optional
+	CertsFrom string `json:"certsFrom,omitempty" yaml:"certsFrom,omitempty"`
+
 	// AddCertMounts - Whether to add cert mounts
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=false
@@ -90,6 +96,10 @@ type OpenStackDataPlaneServiceSpec struct {
 	// ContainerImages struct field names from
 	// github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1
 	ContainerImageFields []string `json:"containerImageFields,omitempty" yaml:"containerImageFields,omitempty"`
+
+	// EDPMServiceName - name to use for edpm_service_name ansible variable
+	// +kubebuilder:validation:Optional
+	EDPMServiceName string `json:"edpmServiceName,omitempty" yaml:"edpmServiceName,omitempty"`
 }
 
 // OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService
