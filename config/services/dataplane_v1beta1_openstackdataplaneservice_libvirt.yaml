@@ -19,5 +19,5 @@ spec:
       - key encipherment
       - server auth
       - client auth
-    issuer: osp-rootca-issuer-internal
+    issuer: osp-rootca-issuer-libvirt
   caCerts: combined-ca-bundle
