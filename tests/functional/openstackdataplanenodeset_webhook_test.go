@@ -9,6 +9,8 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 
+	v1beta1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
@@ -17,10 +19,15 @@ import (
 var _ = Describe("DataplaneNodeSet Webhook", func() {
 
 	var dataplaneNodeSetName types.NamespacedName
+	var dataplaneDeploymentName types.NamespacedName
 
 	BeforeEach(func() {
 		dataplaneNodeSetName = types.NamespacedName{
 			Name:      "edpm-compute-nodeset",
+			Namespace: namespace,
+		}
+		dataplaneDeploymentName = types.NamespacedName{
+			Name:      "edpm-deployment",
 			Namespace: namespace,
 		}
 		err := os.Setenv("OPERATOR_SERVICES", "../../config/services")
@@ -179,6 +186,60 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 					th.Ctx, th.K8sClient, unstructuredObj, func() error { return nil })
 				return fmt.Sprintf("%s", err)
 			}).Should(ContainSubstring("already exists in another cluster"))
+		})
+	})
+	When("A NodeSet is updated with a OpenStackDataPlaneDeployment", func() {
+		BeforeEach(func() {
+			nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(false)
+			nodeSetSpec["preProvisioned"] = true
+			nodeSetSpec["nodes"] = map[string]interface{}{
+				"compute-0": map[string]interface{}{
+					"hostName": "compute-0"},
+			}
+
+			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+			DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
+		})
+		It("Should allow for NodeSet updates if Deployment is Completed", func() {
+			Eventually(func(g Gomega) error {
+				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+				instance.Spec.NodeTemplate.Ansible = v1beta1.AnsibleOpts{
+					AnsibleUser: "random-user",
+				}
+
+				deploymentReadyConditions := condition.Conditions{}
+				deploymentReadyConditions.MarkTrue(
+					v1beta1.NodeSetDeploymentReadyCondition,
+					condition.ReadyMessage)
+
+				instance.Status.DeploymentStatuses = make(map[string]condition.Conditions)
+				instance.Status.DeploymentStatuses[dataplaneDeploymentName.Name] = deploymentReadyConditions
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, instance)).To(Succeed())
+
+				return th.K8sClient.Update(th.Ctx, instance)
+			}).Should(Succeed())
+		})
+		It("Should block NodeSet updates if Deployment is NOT completed", func() {
+			Eventually(func(g Gomega) string {
+				instance := GetDataplaneNodeSet(dataplaneNodeSetName)
+
+				deploymentReadyConditions := condition.Conditions{}
+				deploymentReadyConditions.MarkFalse(
+					v1beta1.NodeSetDeploymentReadyCondition,
+					"mock-error",
+					condition.SeverityWarning,
+					condition.ReadyMessage)
+
+				instance.Status.DeploymentStatuses = make(map[string]condition.Conditions)
+				instance.Status.DeploymentStatuses[dataplaneDeploymentName.Name] = deploymentReadyConditions
+				g.Expect(th.K8sClient.Status().Update(th.Ctx, instance)).To(Succeed())
+
+				instance.Spec.NodeTemplate.Ansible = v1beta1.AnsibleOpts{
+					AnsibleUser: "random-user",
+				}
+				err := th.K8sClient.Update(th.Ctx, instance)
+				return fmt.Sprintf("%s", err)
+			}).Should(ContainSubstring("could not patch openstackdataplanenodeset while openstackdataplanedeployment is running"))
 		})
 	})
 })
