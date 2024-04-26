@@ -369,13 +369,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		}
 	}
 
-	if instance.Status.Deployed && instance.DeletionTimestamp.IsZero() {
-		// The NodeSet is already deployed and not being deleted, so reconciliation
-		// is already complete.
-		Log.Info("NodeSet already deployed", "instance", instance)
-		return ctrl.Result{}, nil
-	}
-
 	// Generate NodeSet Inventory
 	version, err := dataplaneutil.GetVersion(ctx, helper, instance.Namespace)
 	if err != nil {

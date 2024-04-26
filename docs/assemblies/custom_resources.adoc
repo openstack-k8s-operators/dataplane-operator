@@ -589,11 +589,6 @@ OpenStackDataPlaneNodeSetStatus defines the observed state of OpenStackDataPlane
 | DeployedVersion
 | string
 | false
-
-| deployed
-| Deployed
-| bool
-| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
