@@ -239,7 +239,8 @@ var _ = Describe("DataplaneNodeSet Webhook", func() {
 				}
 				err := th.K8sClient.Update(th.Ctx, instance)
 				return fmt.Sprintf("%s", err)
-			}).Should(ContainSubstring("could not patch openstackdataplanenodeset while openstackdataplanedeployment is running"))
+			}).Should(ContainSubstring(fmt.Sprintf("could not patch openstackdataplanenodeset while openstackdataplanedeployment %s (blocked on %s condition) is running",
+				dataplaneDeploymentName.Name, string(v1beta1.NodeSetDeploymentReadyCondition))))
 		})
 	})
 })

@@ -178,13 +178,14 @@ func (r *OpenStackDataPlaneNodeSet) ValidateUpdate(old runtime.Object) (admissio
 
 	}
 	if oldNodeSet.Status.DeploymentStatuses != nil {
-		for _, deployConditions := range oldNodeSet.Status.DeploymentStatuses {
+		for deployName, deployConditions := range oldNodeSet.Status.DeploymentStatuses {
 			deployCondition := deployConditions.Get(NodeSetDeploymentReadyCondition)
 			if !deployConditions.IsTrue(NodeSetDeploymentReadyCondition) && !condition.IsError(deployCondition) {
 				return nil, apierrors.NewConflict(
 					schema.GroupResource{Group: "dataplane.openstack.org", Resource: "OpenStackDataPlaneNodeSet"},
 					r.Name,
-					fmt.Errorf("could not patch openstackdataplanenodeset while openstackdataplanedeployment is running"),
+					fmt.Errorf("could not patch openstackdataplanenodeset while openstackdataplanedeployment %s (blocked on %s condition) is running",
+						deployName, string(deployCondition.Type)),
 				)
 			}
 		}
