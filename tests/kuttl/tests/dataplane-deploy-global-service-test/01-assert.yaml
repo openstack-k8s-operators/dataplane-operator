@@ -53,6 +53,14 @@ status:
     reason: Ready
     status: "True"
     type: InputReady
+  - message: NodeSetDNSDataReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetDNSDataReady
+  - message: NodeSetIPReservationReady ready
+    reason: Ready
+    status: "True"
+    type: NodeSetIPReservationReady
   - message: ServiceAccount created
     reason: Ready
     status: "True"

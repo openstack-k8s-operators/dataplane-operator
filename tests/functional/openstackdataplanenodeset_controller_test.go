@@ -22,10 +22,12 @@ import (
 
 	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
 	. "github.com/onsi/gomega"    //revive:disable:dot-imports
+	"github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 
 	//revive:disable-next-line:dot-imports
+	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	"gopkg.in/yaml.v3"
@@ -58,7 +60,8 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 	var dataplaneSecretName types.NamespacedName
 	var dataplaneSSHSecretName types.NamespacedName
 	var dataplaneNetConfigName types.NamespacedName
-	var dataplaneIPSetName types.NamespacedName
+	var dnsMasqName types.NamespacedName
+	var dataplaneNodeName types.NamespacedName
 	var dataplaneDeploymentName types.NamespacedName
 	var dataplaneConfigHash string
 	var dataplaneGlobalServiceName types.NamespacedName
@@ -74,6 +77,10 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 	}
 
 	BeforeEach(func() {
+		dnsMasqName = types.NamespacedName{
+			Name:      "dnsmasq",
+			Namespace: namespace,
+		}
 		dataplaneNodeSetName = types.NamespacedName{
 			Name:      "edpm-compute-nodeset",
 			Namespace: namespace,
@@ -90,7 +97,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			Namespace: namespace,
 			Name:      "dataplane-netconfig",
 		}
-		dataplaneIPSetName = types.NamespacedName{
+		dataplaneNodeName = types.NamespacedName{
 			Namespace: namespace,
 			Name:      "edpm-compute-node-1",
 		}
@@ -105,12 +112,84 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		err := os.Setenv("OPERATOR_SERVICES", "../../config/services")
 		Expect(err).NotTo(HaveOccurred())
 	})
+	When("A Dataplane nodeset is created and no netconfig", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance,
+				CreateDataplaneNodeSet(dataplaneNodeSetName,
+					DefaultDataPlaneNoNodeSetSpec(false)))
+		})
+		It("should have ip reservation not ready and unknown Conditions initialized", func() {
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.ReadyCondition,
+				corev1.ConditionFalse,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionUnknown,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				dataplanev1.NodeSetIPReservationReadyCondition,
+				corev1.ConditionFalse,
+			)
+		})
+	})
+
+	When("A Dataplane nodeset is created and no dnsmasq", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance,
+				CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance,
+				CreateDataplaneNodeSet(dataplaneNodeSetName,
+					DefaultDataPlaneNoNodeSetSpec(false)))
+			SimulateIPSetComplete(dataplaneNodeName)
+		})
+		It("should have dnsdata not ready and unknown Conditions initialized", func() {
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.ReadyCondition,
+				corev1.ConditionFalse,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionUnknown,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				dataplanev1.NodeSetIPReservationReadyCondition,
+				corev1.ConditionTrue,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				dataplanev1.NodeSetDNSDataReadyCondition,
+				corev1.ConditionFalse,
+			)
+
+		})
+	})
 
 	When("TLS is enabled", func() {
 		tlsEnabled := true
-		When("A Dataplane resorce is created with PreProvisioned nodes, no deployment", func() {
+		When("A Dataplane resource is created with PreProvisioned nodes, no deployment", func() {
 			BeforeEach(func() {
-				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+				SimulateDNSMasqComplete(dnsMasqName)
+				DeferCleanup(th.DeleteInstance,
+					CreateDataplaneNodeSet(dataplaneNodeSetName,
+						DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
@@ -149,7 +228,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					},
 					NodeTemplate: dataplanev1.NodeTemplate{
 						AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-						Networks:                   nil,
 						ManagementNetwork:          "ctlplane",
 						Ansible: dataplanev1.AnsibleOpts{
 							AnsibleUser: "cloud-admin",
@@ -160,13 +238,22 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 						ExtraMounts: nil,
 						UserData:    nil,
 						NetworkData: nil,
+						Networks: []infrav1.IPSetNetwork{{
+							Name:       "ctlplane",
+							SubnetName: "subnet1",
+						},
+						},
 					},
 					Env:                nil,
 					PreProvisioned:     true,
 					NetworkAttachments: nil,
 					SecretMaxSize:      1048576,
 					TLSEnabled:         tlsEnabled,
-					Nodes:              map[string]dataplanev1.NodeSection{},
+					Nodes: map[string]dataplanev1.NodeSection{
+						dataplaneNodeName.Name: {
+							HostName: dataplaneNodeName.Name,
+						},
+					},
 					Services: []string{
 						"download-cache",
 						"bootstrap",
@@ -239,8 +326,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					"global-service"}
 
 				CreateDataplaneService(dataplaneGlobalServiceName, true)
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+				SimulateDNSMasqComplete(dnsMasqName)
 				DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
@@ -279,8 +371,12 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					},
 					NodeTemplate: dataplanev1.NodeTemplate{
 						AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-						Networks:                   nil,
-						ManagementNetwork:          "ctlplane",
+						Networks: []infrav1.IPSetNetwork{{
+							Name:       "ctlplane",
+							SubnetName: "subnet1",
+						},
+						},
+						ManagementNetwork: "ctlplane",
 						Ansible: dataplanev1.AnsibleOpts{
 							AnsibleUser: "cloud-admin",
 							AnsibleHost: "",
@@ -296,7 +392,11 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					NetworkAttachments: nil,
 					SecretMaxSize:      1048576,
 					TLSEnabled:         tlsEnabled,
-					Nodes:              map[string]dataplanev1.NodeSection{},
+					Nodes: map[string]dataplanev1.NodeSection{
+						dataplaneNodeName.Name: {
+							HostName: dataplaneNodeName.Name,
+						},
+					},
 					Services: []string{
 						"download-cache",
 						"bootstrap",
@@ -358,7 +458,12 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				spec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
 				spec["metadata"] = map[string]interface{}{"ansiblesshprivatekeysecret": ""}
 				spec["preProvisioned"] = false
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, spec))
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
@@ -406,7 +511,12 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			BeforeEach(func() {
 				spec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
 				spec["metadata"] = map[string]interface{}{"ansiblesshprivatekeysecret": ""}
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, spec))
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
@@ -453,8 +563,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		When("A ssh secret is created", func() {
 
 			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should have created a Secret", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -474,8 +589,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 		When("No default service image is provided", func() {
 			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should have default service values provided", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -488,8 +608,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 		When("A user provides a custom service image", func() {
 			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, CustomServiceImageSpec()))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should have the user defined image in the inventory", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -502,8 +627,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 		When("No default service image is provided", func() {
 			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should have default service values provided", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -516,8 +646,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 		When("A user provides a custom service image", func() {
 			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, CustomServiceImageSpec()))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should have the user defined image in the inventory", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -533,9 +668,12 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
 				nodeSetSpec["preProvisioned"] = true
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 				CreateSSHSecret(dataplaneSSHSecretName)
-				SimulateIPSetComplete(dataplaneIPSetName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should not have set the node specific ansible_user variable", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -554,16 +692,15 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		When("The individual node has a AnsibleUser override", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
-				nodeOverrideSpec := map[string]interface{}{
-					"hostname": "edpm-bm-compute-1",
-					"networks": []map[string]interface{}{{
-						"name":       "CtlPlane",
-						"fixedIP":    "172.20.12.76",
-						"subnetName": "ctlplane_subnet",
+				nodeOverrideSpec := v1beta1.NodeSection{
+					HostName: dataplaneNodeName.Name,
+					Networks: []infrav1.IPSetNetwork{{
+						Name:       "ctlplane",
+						SubnetName: "subnet1",
 					},
 					},
-					"ansible": map[string]interface{}{
-						"ansibleUser": "test-user",
+					Ansible: v1beta1.AnsibleOpts{
+						AnsibleUser: "test-user",
 					},
 				}
 
@@ -575,12 +712,15 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				}
 
 				nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
-				nodeSetSpec["nodes"].(map[string]interface{})["edpm-compute-node-1"] = nodeOverrideSpec
+				nodeSetSpec["nodes"].(map[string]v1beta1.NodeSection)[dataplaneNodeName.Name] = nodeOverrideSpec
 				nodeSetSpec["nodeTemplate"] = nodeTemplateOverrideSpec
 
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 				CreateSSHSecret(dataplaneSSHSecretName)
-				SimulateIPSetComplete(dataplaneIPSetName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should have a node specific override that is different to the group", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -601,9 +741,12 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
 				nodeSetSpec["preProvisioned"] = true
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 				CreateSSHSecret(dataplaneSSHSecretName)
-				SimulateIPSetComplete(dataplaneIPSetName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should set the ctlplane_ip variable in the Ansible inventory secret", func() {
 				Eventually(func() string {
@@ -615,9 +758,14 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 		When("A DataPlaneNodeSet is created with NoNodes and a OpenStackDataPlaneDeployment is created", func() {
 			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should reach Input and Setup Ready completion", func() {
 				var conditionList = []condition.Type{
@@ -639,7 +787,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		tlsEnabled := true
 		When("A Dataplane resorce is created with PreProvisioned nodes, no deployment", func() {
 			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
+
 			})
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
@@ -678,8 +832,12 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					},
 					NodeTemplate: dataplanev1.NodeTemplate{
 						AnsibleSSHPrivateKeySecret: "dataplane-ansible-ssh-private-key-secret",
-						Networks:                   nil,
-						ManagementNetwork:          "ctlplane",
+						Networks: []infrav1.IPSetNetwork{{
+							Name:       "ctlplane",
+							SubnetName: "subnet1",
+						},
+						},
+						ManagementNetwork: "ctlplane",
 						Ansible: dataplanev1.AnsibleOpts{
 							AnsibleUser: "cloud-admin",
 							AnsibleHost: "",
@@ -695,7 +853,11 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					NetworkAttachments: nil,
 					SecretMaxSize:      1048576,
 					TLSEnabled:         tlsEnabled,
-					Nodes:              map[string]dataplanev1.NodeSection{},
+					Nodes: map[string]dataplanev1.NodeSection{
+						dataplaneNodeName.Name: {
+							HostName: dataplaneNodeName.Name,
+						},
+					},
 					Services: []string{
 						"download-cache",
 						"bootstrap",
@@ -752,7 +914,12 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				spec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
 				spec["metadata"] = map[string]interface{}{"ansiblesshprivatekeysecret": ""}
 				spec["preProvisioned"] = false
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, spec))
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
@@ -800,7 +967,12 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			BeforeEach(func() {
 				spec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
 				spec["metadata"] = map[string]interface{}{"ansiblesshprivatekeysecret": ""}
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, spec))
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
@@ -847,8 +1019,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		When("A ssh secret is created", func() {
 
 			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should have created a Secret", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -868,8 +1045,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 		When("No default service image is provided", func() {
 			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should have default service values provided", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -882,8 +1064,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 		When("A user provides a custom service image", func() {
 			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, CustomServiceImageSpec()))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should have the user defined image in the inventory", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -896,8 +1083,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 		When("No default service image is provided", func() {
 			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should have default service values provided", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -910,8 +1102,13 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 		When("A user provides a custom service image", func() {
 			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, CustomServiceImageSpec()))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should have the user defined image in the inventory", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -927,9 +1124,12 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
 				nodeSetSpec["preProvisioned"] = true
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 				CreateSSHSecret(dataplaneSSHSecretName)
-				SimulateIPSetComplete(dataplaneIPSetName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should not have set the node specific ansible_user variable", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -948,16 +1148,16 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		When("The individual node has a AnsibleUser override", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
-				nodeOverrideSpec := map[string]interface{}{
-					"hostname": "edpm-bm-compute-1",
-					"networks": []map[string]interface{}{{
-						"name":       "CtlPlane",
-						"fixedIP":    "172.20.12.76",
-						"subnetName": "ctlplane_subnet",
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+				nodeOverrideSpec := v1beta1.NodeSection{
+					HostName: dataplaneNodeName.Name,
+					Networks: []infrav1.IPSetNetwork{{
+						Name:       "ctlplane",
+						SubnetName: "subnet1",
 					},
 					},
-					"ansible": map[string]interface{}{
-						"ansibleUser": "test-user",
+					Ansible: v1beta1.AnsibleOpts{
+						AnsibleUser: "test-user",
 					},
 				}
 
@@ -969,12 +1169,14 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				}
 
 				nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
-				nodeSetSpec["nodes"].(map[string]interface{})["edpm-compute-node-1"] = nodeOverrideSpec
+				nodeSetSpec["nodes"].(map[string]v1beta1.NodeSection)[dataplaneNodeName.Name] = nodeOverrideSpec
 				nodeSetSpec["nodeTemplate"] = nodeTemplateOverrideSpec
 
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 				CreateSSHSecret(dataplaneSSHSecretName)
-				SimulateIPSetComplete(dataplaneIPSetName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should have a node specific override that is different to the group", func() {
 				secret := th.GetSecret(dataplaneSecretName)
@@ -995,9 +1197,12 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
 				nodeSetSpec["preProvisioned"] = true
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
 				CreateSSHSecret(dataplaneSSHSecretName)
-				SimulateIPSetComplete(dataplaneIPSetName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should set the ctlplane_ip variable in the Ansible inventory secret", func() {
 				Eventually(func() string {
@@ -1009,9 +1214,14 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 		When("A DataPlaneNodeSet is created with NoNodes and a OpenStackDataPlaneDeployment is created", func() {
 			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, DefaultDataPlaneNoNodeSetSpec(tlsEnabled)))
 				DeferCleanup(th.DeleteInstance, CreateDataplaneDeployment(dataplaneDeploymentName, DefaultDataPlaneDeploymentSpec()))
 				CreateSSHSecret(dataplaneSSHSecretName)
+				SimulateDNSMasqComplete(dnsMasqName)
+				SimulateIPSetComplete(dataplaneNodeName)
+				SimulateDNSDataComplete(dataplaneNodeSetName)
 			})
 			It("Should reach Input and Setup Ready completion", func() {
 				var conditionList = []condition.Type{
@@ -1032,7 +1242,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 
 	When("A user changes spec field that would require a new Ansible execution", func() {
 		BeforeEach(func() {
-			nodeSetSpec := DefaultDataPlaneNodeSetSpec("edpm-compute")
+			nodeSetSpec := DefaultDataPlaneNodeSetSpec(dataplaneNodeSetName.Name)
 			nodeSetSpec["nodeTemplate"] = dataplanev1.NodeTemplate{
 				Ansible: dataplanev1.AnsibleOpts{
 					AnsibleVars: map[string]json.RawMessage{
@@ -1040,7 +1250,12 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 					},
 				},
 			}
+			DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
+			SimulateDNSMasqComplete(dnsMasqName)
 			DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
+			SimulateIPSetComplete(dataplaneNodeName)
+			SimulateDNSDataComplete(dataplaneNodeSetName)
 		})
 
 		It("Should change the ConfigHash", func() {
