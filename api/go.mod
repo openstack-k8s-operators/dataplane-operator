@@ -13,7 +13,7 @@ require (
 )
 
 require (
-	github.com/cert-manager/cert-manager v1.13.5
+	github.com/cert-manager/cert-manager v1.13.6
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240422120541-8f652bde5abf
 	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8
