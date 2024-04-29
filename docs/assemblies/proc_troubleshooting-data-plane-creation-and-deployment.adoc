@@ -67,7 +67,7 @@ AnsibleEE jobs have an associated condition message that indicates the current s
 * `AnsibleExecutionJob not found`: The job could not be found.
 * `AnsibleExecutionJob is running`: The job is currently running.
 * `AnsibleExecutionJob complete`: The job execution is complete.
-* `AnsibleExecutionJob error occured <error_message>`: The job stopped executed unexpectedly. The `<error_message>` is replaced with a specific error message.
+* `AnsibleExecutionJob error occured <error_message>`: The job execution stopped unexpectedly. The `<error_message>` is replaced with a specific error message.
 
 To further investigate a service displaying a particular job condition message, use the command `oc logs job/<service>` to display the logs associated with that service. For example, to display the logs for the `repo-setup-openstack-edpm` service, use the command `oc logs job/repo-setup-openstack-edpm`.
 
