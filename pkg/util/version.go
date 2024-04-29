@@ -73,6 +73,9 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.EdpmOvnBgpAgentImage = version.Status.ContainerImages.EdpmOvnBgpAgentImage
 		containerImages.NovaComputeImage = version.Status.ContainerImages.NovaComputeImage
 		containerImages.OvnControllerImage = version.Status.ContainerImages.OvnControllerImage
+		containerImages.OsContainerImage = version.Status.ContainerImages.OsContainerImage
+		containerImages.AgentImage = version.Status.ContainerImages.AgentImage
+		containerImages.ApacheImage = version.Status.ContainerImages.ApacheImage
 	} else {
 		containerImages.CeilometerComputeImage = dataplanev1.ContainerImages.CeilometerComputeImage
 		containerImages.CeilometerIpmiImage = dataplanev1.ContainerImages.CeilometerIpmiImage
@@ -86,6 +89,10 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.EdpmOvnBgpAgentImage = dataplanev1.ContainerImages.EdpmOvnBgpAgentImage
 		containerImages.NovaComputeImage = dataplanev1.ContainerImages.NovaComputeImage
 		containerImages.OvnControllerImage = dataplanev1.ContainerImages.OvnControllerImage
+		containerImages.OsContainerImage = dataplanev1.ContainerImages.OsContainerImage
+		containerImages.AgentImage = dataplanev1.ContainerImages.AgentImage
+		containerImages.ApacheImage = dataplanev1.ContainerImages.ApacheImage
+
 	}
 
 	return containerImages

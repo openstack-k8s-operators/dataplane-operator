@@ -355,11 +355,28 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		condition.ServiceAccountReadyCondition,
 		condition.ServiceAccountReadyMessage)
 
+	version, err := dataplaneutil.GetVersion(ctx, helper, instance.Namespace)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	containerImages := dataplaneutil.GetContainerImages(version)
+
 	// Reconcile BaremetalSet if required
 	if !instance.Spec.PreProvisioned {
 		// Reset the NodeSetBareMetalProvisionReadyCondition to unknown
 		instance.Status.Conditions.MarkUnknown(dataplanev1.NodeSetBareMetalProvisionReadyCondition,
 			condition.InitReason, condition.InitReason)
+
+		// Set Images
+		if containerImages.OsContainerImage != nil {
+			instance.Spec.BaremetalSetTemplate.OSContainerImageURL = *containerImages.OsContainerImage
+		}
+		if containerImages.AgentImage != nil {
+			instance.Spec.BaremetalSetTemplate.AgentImageURL = *containerImages.AgentImage
+		}
+		if containerImages.ApacheImage != nil {
+			instance.Spec.BaremetalSetTemplate.ApacheImageURL = *containerImages.ApacheImage
+		}
 		isReady, err := deployment.DeployBaremetalSet(ctx, helper, instance,
 			allIPSets, dnsDetails.ServerAddresses)
 		if err != nil || !isReady {
@@ -375,11 +392,6 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	// Generate NodeSet Inventory
-	version, err := dataplaneutil.GetVersion(ctx, helper, instance.Namespace)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-	containerImages := dataplaneutil.GetContainerImages(version)
 	_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
 		allIPSets, dnsDetails.ServerAddresses, containerImages)
 	if err != nil {

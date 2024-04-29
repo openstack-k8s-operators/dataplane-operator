@@ -210,6 +210,8 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 // if no values are set elsewhere.
 var ContainerImageDefaults = openstackv1.ContainerImages{
 	ContainerTemplate: openstackv1.ContainerTemplate{
+		AgentImage:                    getStrPtr("quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:current-podfied"),
+		ApacheImage:                   getStrPtr("registry.redhat.io/ubi9/httpd-24:current-podified"),
 		EdpmFrrImage:                  getStrPtr("quay.io/podified-antelope-centos9/openstack-frr:current-podified"),
 		EdpmIscsidImage:               getStrPtr("quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"),
 		EdpmLogrotateCrondImage:       getStrPtr("quay.io/podified-antelope-centos9/openstack-cron:current-podified"),
@@ -222,6 +224,7 @@ var ContainerImageDefaults = openstackv1.ContainerImages{
 		CeilometerComputeImage:        getStrPtr("quay.io/podified-antelope-centos9/openstack-telemetry-ceilometer-compute:current-podified"),
 		CeilometerIpmiImage:           getStrPtr("quay.io/podified-antelope-centos9/openstack-telemetry-ceilometer-ipmi:current-podified"),
 		EdpmNodeExporterImage:         getStrPtr("quay.io/podified-antelope-centos9/openstack-telemetry-node-exporter:current-podified"),
+		OsContainerImage:              getStrPtr("quay.io/podified-antelope-centos9/edpm-hardened-uefi:current-podified"),
 	}}
 
 // ContainerImages - the values if no OpenStackVersion is used
@@ -233,6 +236,8 @@ func SetupDefaults() {
 	// Acquire environmental defaults and initialize dataplane defaults with them
 	ContainerImages = openstackv1.ContainerImages{
 		ContainerTemplate: openstackv1.ContainerTemplate{
+			AgentImage:                    getImageDefault("RELATED_IMAGE_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.AgentImage),
+			ApacheImage:                   getImageDefault("RELATED_IMAGE_APACHE_IMAGE_URL_DEFAULT", ContainerImageDefaults.ApacheImage),
 			EdpmFrrImage:                  getImageDefault("RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmFrrImage),
 			EdpmIscsidImage:               getImageDefault("RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmIscsidImage),
 			EdpmLogrotateCrondImage:       getImageDefault("RELATED_IMAGE_EDPM_LOGROTATE_CROND_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmLogrotateCrondImage),
@@ -245,6 +250,7 @@ func SetupDefaults() {
 			CeilometerIpmiImage:           getImageDefault("RELATED_IMAGE_CEILOMETER_IPMI_IMAGE_URL_DEFAULT", ContainerImageDefaults.CeilometerIpmiImage),
 			NovaComputeImage:              getImageDefault("RELATED_IMAGE_NOVA_COMPUTE_IMAGE_URL_DEFAULT", ContainerImageDefaults.NovaComputeImage),
 			OvnControllerImage:            getImageDefault("RELATED_IMAGE_OVN_CONTROLLER_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.OvnControllerImage),
+			OsContainerImage:              getImageDefault("RELATED_IMAGE_OS_CONTAINER_IMAGE_URL_DEFAULT", ContainerImageDefaults.OsContainerImage),
 		},
 	}
 }
