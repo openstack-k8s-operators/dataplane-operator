@@ -3,10 +3,10 @@ module github.com/openstack-k8s-operators/dataplane-operator/api
 go 1.20
 
 require (
-	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240419144952-326611519a8c
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240420115137-a02d94f5aa66
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240420115137-a02d94f5aa66
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240422041901-293e48aceb9b
+	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240429104248-25176c735750
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240429052447-09a614506ca6
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240429052447-09a614506ca6
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240429105634-0e5b0838b580
 	k8s.io/api v0.28.9
 	k8s.io/apimachinery v0.28.9
 	sigs.k8s.io/controller-runtime v0.16.5
@@ -15,7 +15,7 @@ require (
 require (
 	github.com/cert-manager/cert-manager v1.13.6
 	github.com/go-playground/validator/v10 v10.19.0
-	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240422120541-8f652bde5abf
+	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240429122434-ae5a142f5a54
 	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8
 )
 
@@ -51,26 +51,25 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/onsi/ginkgo/v2 v2.17.2 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
-	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240422095355-066b5ce845c1 // indirect
-	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240422110332-6ed2fef78115 // indirect
-	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240403153039-29d27af23767 // indirect
-	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240422132508-f70e0bce1bb6 // indirect
-	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240422125749-ff05088a9c5f // indirect
-	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240422122457-4fad41f6b28f // indirect
-	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240408054123-cb7b79a22b47 // indirect
-	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240422083029-9546ece5eb4f // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240420115137-a02d94f5aa66 // indirect
-	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240422122211-bccd8acbdde6 // indirect
-	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240418060416-9de2d1f1915e // indirect
-	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240422111921-f979f931e18c // indirect
-	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240422112427-13e4c8de493e // indirect
-	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240419104752-ab112a2c09f3 // indirect
-	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240422140910-e68a45de92f4 // indirect
-	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240422132507-fcac8d9e33fc // indirect
-	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240418150616-4d9e60def8ba // indirect
-	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240422130014-0607c4aa4a7b // indirect
+	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240429121904-17877ea85633 // indirect
+	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240429080317-62d86c6d7f84 // indirect
+	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240429120805-3281a6a123c3 // indirect
+	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240429121057-e1edee632eef // indirect
+	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240428220353-a722e6839c66 // indirect
+	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240428220640-1e2724e9dbcf // indirect
+	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240429052915-792d53d4efc2 // indirect
+	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240429064045-7c2a9826c3cd // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240429052447-09a614506ca6 // indirect
+	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240428214145-9229b352eb4e // indirect
+	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240429121622-952f44520872 // indirect
+	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240429104005-b993362468c9 // indirect
+	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240429121059-d19faee2e1dc // indirect
+	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240429130933-cdc034d69b2f // indirect
+	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240429053730-0fb309dc545b // indirect
+	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240429085003-ccaae3e750db // indirect
+	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240429105919-dd984a016366 // indirect
+	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240429095317-40ac2890007c // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
@@ -99,7 +98,7 @@ require (
 	k8s.io/component-base v0.28.9 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
-	k8s.io/utils v0.0.0-20240310230437-4693a0247e57 // indirect
+	k8s.io/utils v0.0.0-20240423183400-0849a56e8f22 // indirect
 	sigs.k8s.io/gateway-api v0.8.0 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
