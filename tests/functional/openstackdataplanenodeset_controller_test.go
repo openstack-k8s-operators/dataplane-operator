@@ -274,11 +274,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				Expect(dataplaneNodeSetInstance.Spec).Should(Equal(emptyNodeSpec))
 			})
 
-			It("should have the Status fields initialized", func() {
-				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				Expect(dataplaneNodeSetInstance.Status.Deployed).Should(BeFalse())
-			})
-
 			It("should have input not ready and unknown Conditions initialized", func() {
 				th.ExpectCondition(
 					dataplaneNodeSetName,
@@ -417,11 +412,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				Expect(dataplaneNodeSetInstance.Spec).Should(Equal(emptyNodeSpec))
 			})
 
-			It("should have the Status fields initialized", func() {
-				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				Expect(dataplaneNodeSetInstance.Status.Deployed).Should(BeFalse())
-			})
-
 			It("should have input not ready and unknown Conditions initialized", func() {
 				th.ExpectCondition(
 					dataplaneNodeSetName,
@@ -470,11 +460,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				Expect(dataplaneNodeSetInstance.Spec.PreProvisioned).Should(BeFalse())
 			})
 
-			It("should have the Status fields initialized", func() {
-				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				Expect(dataplaneNodeSetInstance.Status.Deployed).Should(BeFalse())
-			})
-
 			It("should have ReadyCondition, InputReadyCondition and SetupReadyCondition set to false, and DeploymentReadyCondition set to Unknown", func() {
 				th.ExpectCondition(
 					dataplaneNodeSetName,
@@ -521,11 +506,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
 				Expect(dataplaneNodeSetInstance.Spec.PreProvisioned).Should(BeTrue())
-			})
-
-			It("should have the Status fields initialized", func() {
-				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				Expect(dataplaneNodeSetInstance.Status.Deployed).Should(BeFalse())
 			})
 
 			It("should have ReadyCondition, InputReadCondition and SetupReadyCondition set to false, and DeploymentReadyCondition set to unknown", func() {
@@ -878,11 +858,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				Expect(dataplaneNodeSetInstance.Spec).Should(Equal(emptyNodeSpec))
 			})
 
-			It("should have the Status fields initialized", func() {
-				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				Expect(dataplaneNodeSetInstance.Status.Deployed).Should(BeFalse())
-			})
-
 			It("should have input not ready and unknown Conditions initialized", func() {
 				th.ExpectCondition(
 					dataplaneNodeSetName,
@@ -924,11 +899,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
 				Expect(dataplaneNodeSetInstance.Spec.PreProvisioned).Should(BeFalse())
-			})
-
-			It("should have the Status fields initialized", func() {
-				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				Expect(dataplaneNodeSetInstance.Status.Deployed).Should(BeFalse())
 			})
 
 			It("should have ReadyCondition, InputReadyCondition and SetupReadyCondition set to false, and DeploymentReadyCondition set to Unknown", func() {
@@ -977,11 +947,6 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			It("should have the Spec fields initialized", func() {
 				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
 				Expect(dataplaneNodeSetInstance.Spec.PreProvisioned).Should(BeTrue())
-			})
-
-			It("should have the Status fields initialized", func() {
-				dataplaneNodeSetInstance := GetDataplaneNodeSet(dataplaneNodeSetName)
-				Expect(dataplaneNodeSetInstance.Status.Deployed).Should(BeFalse())
 			})
 
 			It("should have ReadyCondition, InputReadCondition and SetupReadyCondition set to false, and DeploymentReadyCondition set to unknown", func() {

@@ -148,10 +148,6 @@ type OpenStackDataPlaneNodeSetStatus struct {
 
 	// DeployedVersion
 	DeployedVersion string `json:"deployedVersion,omitempty"`
-
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// Deployed
-	Deployed bool `json:"deployed,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true
@@ -193,7 +189,6 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 	}
 
 	instance.Status.Conditions.Init(&cl)
-	instance.Status.Deployed = false
 }
 
 // GetAnsibleEESpec - get the fields that will be passed to AEE

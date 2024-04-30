@@ -1998,8 +1998,6 @@ spec:
                 type: object
               ctlplaneSearchDomain:
                 type: string
-              deployed:
-                type: boolean
               deployedConfigHash:
                 type: string
               deployedVersion:
