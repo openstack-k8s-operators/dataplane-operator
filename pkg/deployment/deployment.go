@@ -262,7 +262,7 @@ func (d *Deployer) addCertMounts(
 			return nil, err
 		}
 
-		if service.Spec.CertsFrom != "" && service.Spec.TLSCert == nil && service.Spec.CACerts == "" {
+		if service.Spec.CertsFrom != "" && service.Spec.TLSCerts == nil && service.Spec.CACerts == "" {
 			if slices.Contains(services, service.Spec.CertsFrom) {
 				continue
 			}
@@ -272,55 +272,58 @@ func (d *Deployer) addCertMounts(
 			}
 		}
 
-		if service.Spec.TLSCert != nil {
-			log.Info("Mounting TLS cert for service", "service", svc)
-			volMounts := storage.VolMounts{}
+		if service.Spec.TLSCerts != nil {
+			for certKey := range service.Spec.TLSCerts {
+				log.Info("Mounting TLS cert for service", "service", svc)
+				volMounts := storage.VolMounts{}
 
-			// add mount for certs and keys
-			secretName := GetServiceCertsSecretName(d.NodeSet, service.Name, 0) // Need to get the number of secrets
-			certSecret := &corev1.Secret{}
-			err := client.Get(d.Ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, certSecret)
-			if err != nil {
-				return d.AeeSpec, err
-			}
-			numberOfSecrets, _ := strconv.Atoi(certSecret.Labels["numberOfSecrets"])
-			projectedVolumeSource := corev1.ProjectedVolumeSource{
-				Sources: []corev1.VolumeProjection{},
-			}
-			for i := 0; i < numberOfSecrets; i++ {
-				secretName := GetServiceCertsSecretName(d.NodeSet, service.Name, i)
+				// add mount for certs and keys
+				secretName := GetServiceCertsSecretName(d.NodeSet, service.Name, certKey, 0) // Need to get the number of secrets
 				certSecret := &corev1.Secret{}
 				err := client.Get(d.Ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, certSecret)
 				if err != nil {
 					return d.AeeSpec, err
 				}
-				volumeProjection := corev1.VolumeProjection{
-					Secret: &corev1.SecretProjection{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: secretName,
+				numberOfSecrets, _ := strconv.Atoi(certSecret.Labels["numberOfSecrets"])
+				projectedVolumeSource := corev1.ProjectedVolumeSource{
+					Sources: []corev1.VolumeProjection{},
+				}
+				for i := 0; i < numberOfSecrets; i++ {
+					secretName := GetServiceCertsSecretName(d.NodeSet, service.Name, certKey, i)
+					certSecret := &corev1.Secret{}
+					err := client.Get(d.Ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, certSecret)
+					if err != nil {
+						return d.AeeSpec, err
+					}
+					volumeProjection := corev1.VolumeProjection{
+						Secret: &corev1.SecretProjection{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: secretName,
+							},
 						},
+					}
+					projectedVolumeSource.Sources = append(projectedVolumeSource.Sources, volumeProjection)
+				}
+				certVolume := corev1.Volume{
+					Name: GetServiceCertsSecretName(d.NodeSet, service.Name, certKey, 0),
+					VolumeSource: corev1.VolumeSource{
+						Projected: &projectedVolumeSource,
 					},
 				}
-				projectedVolumeSource.Sources = append(projectedVolumeSource.Sources, volumeProjection)
-			}
-			certVolume := corev1.Volume{
-				Name: GetServiceCertsSecretName(d.NodeSet, service.Name, 0),
-				VolumeSource: corev1.VolumeSource{
-					Projected: &projectedVolumeSource,
-				},
-			}
-			certMountDir := service.Spec.TLSCert.EDPMRoleServiceName
-			if certMountDir == "" {
-				certMountDir = service.Spec.EDPMServiceType
-			}
-			certVolumeMount := corev1.VolumeMount{
-				Name:      GetServiceCertsSecretName(d.NodeSet, service.Name, 0),
-				MountPath: path.Join(CertPaths, certMountDir),
-			}
-			volMounts.Volumes = append(volMounts.Volumes, certVolume)
-			volMounts.Mounts = append(volMounts.Mounts, certVolumeMount)
-			d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
 
+				certMountDir := service.Spec.TLSCerts[certKey].EDPMRoleServiceName
+				if certMountDir == "" {
+					certMountDir = service.Spec.EDPMServiceType
+				}
+
+				certVolumeMount := corev1.VolumeMount{
+					Name:      GetServiceCertsSecretName(d.NodeSet, service.Name, certKey, 0),
+					MountPath: path.Join(CertPaths, certMountDir, certKey),
+				}
+				volMounts.Volumes = append(volMounts.Volumes, certVolume)
+				volMounts.Mounts = append(volMounts.Mounts, certVolumeMount)
+				d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
+			}
 		}
 
 		// add mount for cacert bundle

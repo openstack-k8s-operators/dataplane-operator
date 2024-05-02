@@ -66,6 +66,9 @@ const (
 	//ServiceLabel label for marking secrets to be watched for changes
 	ServiceLabel = "osdp-service"
 
+	//ServiceKeyLabel label for marking secrets to be watched for changes
+	ServiceKeyLabel = "osdp-service-cert-key"
+
 	//HostnameLabel label for marking secrets to be watched for changes
 	HostnameLabel = "hostname"
 )
