@@ -51,17 +51,17 @@ metadata:
   name: custom-service
 spec:
   label: dataplane-deployment-custom-service
-  play: |
-    hosts: all
-    tasks:
-      - name: Hello World!
-        shell: "echo Hello World!"
-        register: output
-      - name: Show output
-        debug:
-          msg: "{{ output.stdout }}"
-      - name: Hello World role
-        import_role: hello_world
+  inlinePlaybook: |
+    - hosts: all
+      tasks:
+        - name: Hello World!
+          shell: "echo Hello World!"
+          register: output
+        - name: Show output
+          debug:
+            msg: "{{ output.stdout }}"
+        - name: Hello World role
+          import_role: hello_world
 ----
 
 . Optional: To override the default container image used by the `ansible-runner` execution environment with a custom image that uses additional Ansible content for a custom service, build and include a custom `ansible-runner` image. For information, see xref:proc_building-a-custom-ansible-runner-image_{context}[Building a custom `ansible-runner` image].
@@ -77,7 +77,7 @@ metadata:
   name: custom-service
 spec:
   ...
-  play: |
+  inlinePlaybook: |
     ...
   secrets:
     - hello-world-secret-0
@@ -95,7 +95,7 @@ metadata:
   name: custom-global-service
 spec:
   label: custom-global-service
-  play: |
+  inlinePlaybook: |
     - hosts: localhost
       gather_facts: no
       name: global play
