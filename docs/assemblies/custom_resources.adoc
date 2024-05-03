@@ -314,8 +314,8 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | []<<datasource,DataSource>>
 | false
 
-| tlsCert
-| TLSCert tls certs to be generated
+| tlsCerts
+| TLSCerts tls certs to be generated
 | *<<openstackdataplaneservicecert,OpenstackDataPlaneServiceCert>>
 | false
 
@@ -340,7 +340,7 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | false
 
 | certsFrom
-| CertsFrom - Service name used to obtain TLSCert and CACerts data. If both CertsFrom and either TLSCert or CACerts is set, then those fields take precedence.
+| CertsFrom - Service name used to obtain TLSCerts and CACerts data. If both CertsFrom and either TLSCerts or CACerts is set, then those fields take precedence.
 | string
 | false
 
