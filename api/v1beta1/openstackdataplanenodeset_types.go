@@ -174,12 +174,12 @@ func (instance *OpenStackDataPlaneNodeSet) InitConditions() {
 	instance.Status.DeploymentStatuses = make(map[string]condition.Conditions)
 
 	cl := condition.CreateList(
-		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(condition.InputReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.DeploymentReadyInitMessage),
+		condition.UnknownCondition(condition.InputReadyCondition, condition.InitReason, condition.InputReadyInitMessage),
 		condition.UnknownCondition(SetupReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(NodeSetIPReservationReadyCondition, condition.InitReason, condition.InitReason),
 		condition.UnknownCondition(NodeSetDNSDataReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(condition.ServiceAccountReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(condition.ServiceAccountReadyCondition, condition.InitReason, condition.ServiceAccountReadyInitMessage),
 	)
 
 	// Only set Baremetal related conditions if we have baremetal hosts included in the
