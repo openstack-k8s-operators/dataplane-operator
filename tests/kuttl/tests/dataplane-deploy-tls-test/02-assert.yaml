@@ -1,15 +1,16 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cert-tls-dnsnames-edpm-compute-0
+  name: cert-tls-dnsnames-default-edpm-compute-0
   annotations:
-    cert-manager.io/certificate-name: tls-dnsnames-edpm-compute-0
+    cert-manager.io/certificate-name: tls-dnsnames-default-edpm-compute-0
     cert-manager.io/issuer-group: cert-manager.io
     cert-manager.io/issuer-kind: Issuer
     cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-0
     osdp-service: tls-dnsnames
+    osdp-service-cert-key: default
     osdpns: openstack-edpm-tls
 type: kubernetes.io/tls
 ---
@@ -19,8 +20,9 @@ metadata:
   labels:
     hostname: edpm-compute-0
     osdp-service: tls-dnsnames
+    osdp-service-cert-key: default
     osdpns: openstack-edpm-tls
-  name: tls-dnsnames-edpm-compute-0
+  name: tls-dnsnames-default-edpm-compute-0
   namespace: openstack
   ownerReferences:
   - apiVersion: dataplane.openstack.org/v1beta1
@@ -31,7 +33,7 @@ spec:
     group: cert-manager.io
     kind: Issuer
     name: rootca-internal
-  secretName: cert-tls-dnsnames-edpm-compute-0
+  secretName: cert-tls-dnsnames-default-edpm-compute-0
   secretTemplate:
     labels:
       hostname: edpm-compute-0
@@ -44,7 +46,7 @@ kind: TestAssert
 commands:
   - script: |
       template='{{index .spec.dnsNames }}'
-      names=$(oc get certificate tls-dnsnames-edpm-compute-0 -n openstack -o go-template="$template")
+      names=$(oc get certificate tls-dnsnames-default-edpm-compute-0 -n openstack -o go-template="$template")
       echo $names > test123.data
       regex="(?=.*(edpm-compute-0\.internalapi\.example\.com))(?=.*(edpm-compute-0\.storage\.example\.com))(?=.*(edpm-compute-0\.tenant\.example\.com))(?=.*(edpm-compute-0\.ctlplane\.example\.com))"
       matches=$(grep -P "$regex" test123.data)
@@ -57,7 +59,7 @@ commands:
       fi
   - script: |
       template='{{index .spec.usages }}'
-      usages=$(oc get certificate tls-dnsnames-edpm-compute-0 -n openstack -o go-template="$template")
+      usages=$(oc get certificate tls-dnsnames-default-edpm-compute-0 -n openstack -o go-template="$template")
       echo $usages > test123.data
       regex="(?=.*(key encipherment))(?=.*(digital signature))(?=.*(server auth))"
       matches=$(grep -P "$regex" test123.data)
@@ -84,14 +86,14 @@ spec:
   backoffLimit: 6
   extraMounts:
   - mounts:
-    - mountPath: /var/lib/openstack/certs/tls-dnsnames
-      name: openstack-edpm-tls-tls-dnsnames-certs-0
+    - mountPath: /var/lib/openstack/certs/tls-dnsnames/default
+      name: openstack-edpm-tls-tls-dnsnames-default-certs-0
     volumes:
-    - name: openstack-edpm-tls-tls-dnsnames-certs-0
+    - name: openstack-edpm-tls-tls-dnsnames-default-certs-0
       projected:
         sources:
         - secret:
-            name: openstack-edpm-tls-tls-dnsnames-certs-0
+            name: openstack-edpm-tls-tls-dnsnames-default-certs-0
   - mounts:
     - mountPath: /var/lib/openstack/cacerts/tls-dnsnames
       name: tls-dnsnames-combined-ca-bundle

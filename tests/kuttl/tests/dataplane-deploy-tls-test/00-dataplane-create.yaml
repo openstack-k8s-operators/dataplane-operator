@@ -4,9 +4,10 @@ metadata:
   name: tls-dnsnames
 spec:
   caCerts: combined-ca-bundle
-  tlsCert:
-    contents:
-    - dnsnames
+  tlsCerts:
+    default:
+      contents:
+      - dnsnames
   play: |
     - hosts: localhost
       gather_facts: no
