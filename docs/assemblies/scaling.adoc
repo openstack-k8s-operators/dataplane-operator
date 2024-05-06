@@ -94,6 +94,26 @@ $ oc rsh openstackclient openstack hypervisor list
 +--------------------------------------+-------------------------------------+-----------------+-----------------+-------+
 ----
 
+== Scaling Out with different configuration
+
+If the deployment needs to be scaled out to nodes that require different
+configuration (e.g. different kernel args, network config, or openstack config)
+compared to the configuration in the current `OpenStackDataPlaneNodeSet`
+then the new nodes cannot be added to the existing `OpenStackDataPlaneNodeSet`
+but a new `OpenStackDataPlaneNodeSet` needs to be created that contains the
+new nodes and the new configuration for those nodes. Then a new
+`OpenStackDataPlaneDeployment` needs to be created that points to *both the
+existing and the new `OpenStackDataPlaneNodeSets`* to trigger the scale out.
+
+WARNING: The existing `OpenStackDataPlaneNodeSet` has the `ssh-known-hosts`
+service. That service is global for the whole deployment so it should not be
+listed on the new `OpenStackDataPlaneNodeSet`.
+
+WARNING: If only the new `OpenStackDataPlaneNodeSet` is included into the new
+`OpenStackDataPlaneDeployment` then the scale out seems to succeed but will
+be incomplete causing that VM move operations will fail between nodes
+in the different `OpenStackDataPlaneNodeSets`.
+
 == Scaling In
 
 The procedure for removing edpm nodes from dataplane involves some manual cleanup steps
@@ -200,3 +220,13 @@ compute-01   provisioned      openstack-edpm        true             2d21h
 compute-02   provisioned      openstack-edpm        true             2d21h
 compute-03   deprovisioning                         false            43h
 ----
+
+== Scaling In by removing a NodeSet
+
+If the scale in would remove the last node from a `OpenStackDataPlaneNodeSet`
+then the `OpenStackDataPlaneNodeSet` resource should deleted as well. If this
+was the one that listed the `ssh-known-hosts` service then that service needs
+to be added to exactly one of the remaining `OpenStackDataPlaneNodeSets`. To
+remove the ssh host keys of the removed nodes from the remaining nodes a new
+`OpenStackDataPlaneDeployment` needs to be created that points to all the
+remaining `OpenStackDataPlaneNodeSets`.
