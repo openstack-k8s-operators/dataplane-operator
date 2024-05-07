@@ -206,7 +206,7 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 var ContainerImageDefaults = openstackv1.ContainerImages{
 	ContainerTemplate: openstackv1.ContainerTemplate{
 		AgentImage:                    getStrPtr("quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:current-podified"),
-		ApacheImage:                   getStrPtr("registry.redhat.io/ubi9/httpd-24:current-podified"),
+		ApacheImage:                   getStrPtr("registry.redhat.io/ubi9/httpd-24:latest"),
 		EdpmFrrImage:                  getStrPtr("quay.io/podified-antelope-centos9/openstack-frr:current-podified"),
 		EdpmIscsidImage:               getStrPtr("quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"),
 		EdpmLogrotateCrondImage:       getStrPtr("quay.io/podified-antelope-centos9/openstack-cron:current-podified"),
