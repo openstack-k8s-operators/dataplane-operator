@@ -205,7 +205,7 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 // if no values are set elsewhere.
 var ContainerImageDefaults = openstackv1.ContainerImages{
 	ContainerTemplate: openstackv1.ContainerTemplate{
-		AgentImage:                    getStrPtr("quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:current-podfied"),
+		AgentImage:                    getStrPtr("quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:current-podified"),
 		ApacheImage:                   getStrPtr("registry.redhat.io/ubi9/httpd-24:current-podified"),
 		EdpmFrrImage:                  getStrPtr("quay.io/podified-antelope-centos9/openstack-frr:current-podified"),
 		EdpmIscsidImage:               getStrPtr("quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"),
