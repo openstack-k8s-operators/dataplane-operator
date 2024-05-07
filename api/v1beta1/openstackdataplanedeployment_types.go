@@ -131,8 +131,8 @@ func (instance *OpenStackDataPlaneDeployment) InitConditions() {
 	instance.Status.Conditions = condition.Conditions{}
 
 	cl := condition.CreateList(
-		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.InitReason),
-		condition.UnknownCondition(condition.InputReadyCondition, condition.InitReason, condition.InitReason),
+		condition.UnknownCondition(condition.DeploymentReadyCondition, condition.InitReason, condition.DeploymentReadyInitMessage),
+		condition.UnknownCondition(condition.InputReadyCondition, condition.InitReason, condition.InputReadyInitMessage),
 	)
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.NodeSetConditions = make(map[string]condition.Conditions)
@@ -140,7 +140,7 @@ func (instance *OpenStackDataPlaneDeployment) InitConditions() {
 		for _, nodeSet := range instance.Spec.NodeSets {
 			nsConds := condition.Conditions{}
 			nsConds.Set(condition.UnknownCondition(
-				NodeSetDeploymentReadyCondition, condition.InitReason, condition.InitReason))
+				NodeSetDeploymentReadyCondition, condition.InitReason, condition.DeploymentReadyInitMessage))
 			instance.Status.NodeSetConditions[nodeSet] = nsConds
 
 		}
