@@ -136,6 +136,7 @@ data:
         - name: tenant
           subnetName: subnet1
   deployment:
+    name: edpm-deployment-ipam-pre-ceph
     services:
     - bootstrap
     - configure-network

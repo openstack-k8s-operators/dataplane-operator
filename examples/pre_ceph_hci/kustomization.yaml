@@ -35,6 +35,7 @@ replacements:
     - spec.nodes
     options:
       create: true
+# OpenStackDataPlaneDeployment customizations
 - source:
     kind: DataPlaneConfig
     name: edpm-ceph-values
@@ -44,5 +45,16 @@ replacements:
       kind: OpenStackDataPlaneDeployment
     fieldPaths:
     - spec.servicesOverride
+    options:
+      create: true
+- source:
+    kind: DataPlaneConfig
+    name: edpm-ceph-values
+    fieldPath: data.deployment.name
+  targets:
+  - select:
+      kind: OpenStackDataPlaneDeployment
+    fieldPaths:
+    - metadata.name
     options:
       create: true
