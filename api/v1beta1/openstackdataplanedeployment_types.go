@@ -26,6 +26,7 @@ import (
 // OpenStackDataPlaneDeploymentSpec defines the desired state of OpenStackDataPlaneDeployment
 type OpenStackDataPlaneDeploymentSpec struct {
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinItems:=1
 	// NodeSets is the list of NodeSets deployed
 	NodeSets []string `json:"nodeSets"`
 

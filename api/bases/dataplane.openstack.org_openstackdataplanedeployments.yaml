@@ -59,6 +59,7 @@ spec:
               nodeSets:
                 items:
                   type: string
+                minItems: 1
                 type: array
               servicesOverride:
                 items:

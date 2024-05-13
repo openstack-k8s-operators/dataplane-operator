@@ -65,6 +65,7 @@ spec:
                   contents:
                     items:
                       type: string
+                    minItems: 1
                     type: array
                   issuer:
                     type: string
