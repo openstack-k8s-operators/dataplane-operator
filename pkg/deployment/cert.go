@@ -27,9 +27,7 @@ import (
 	"golang.org/x/exp/slices"
 
 	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -171,7 +169,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		}
 
 		certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, certName,
-			issuer.Name, labels, baseName, hosts, ips, service.Spec.TLSCert.KeyUsages)
+			issuer, labels, baseName, hosts, ips, service.Spec.TLSCert.KeyUsages)
 
 		// handle cert request errors
 		if (err != nil) || (result != ctrl.Result{}) {
@@ -219,44 +217,59 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 // GetTLSNodeCert creates or retrieves the cert for a node for a given service
 func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-	certName string, issuer string,
+	certName string, issuer *certmgrv1.Issuer,
 	labels map[string]string,
 	commonName string,
 	hostnames []string, ips []string, usages []certmgrv1.KeyUsage,
 ) (*corev1.Secret, ctrl.Result, error) {
-	secretName := "cert-" + certName
-	certSecret, _, err := secret.GetSecret(ctx, helper, secretName, instance.Namespace)
-	var result ctrl.Result
-	if err != nil {
-		if !k8serrors.IsNotFound(err) {
-			err = fmt.Errorf("error retrieving secret %s - %w", secretName, err)
-			return nil, ctrl.Result{}, err
-		}
-
-		duration := ptr.To(time.Hour * 24 * 365)
-		request := certmanager.CertificateRequest{
-			CommonName:  &commonName,
-			IssuerName:  issuer,
-			CertName:    certName,
-			Duration:    duration,
-			Hostnames:   hostnames,
-			Ips:         ips,
-			Annotations: nil,
-			Labels:      labels,
-			Usages:      usages,
-			Subject: &certmgrv1.X509Subject{
-				// NOTE(owalsh): For libvirt/QEMU this should match issuer CN
-				Organizations: []string{issuer},
-			},
-		}
-
-		certSecret, result, err = certmanager.EnsureCert(ctx, helper, request, instance)
-		if err != nil {
-			return nil, ctrl.Result{}, err
-		} else if (result != ctrl.Result{}) {
-			return nil, result, nil
-		}
+	// use cert duration and renewBefore from annotations set on issuer
+	// - if no duration annotation is set, use the default from certmanager lib-common module,
+	// - if no renewBefore annotation is set, the cert-manager default is used.
+	durationString := certmanager.CertDefaultDuration
+	if d, ok := issuer.Annotations[certmanager.CertDurationAnnotation]; ok && d != "" {
+		durationString = d
 	}
+	duration, err := time.ParseDuration(durationString)
+	if err != nil {
+		err = fmt.Errorf("error parsing duration annotation %s - %w", certmanager.CertDurationAnnotation, err)
+		return nil, ctrl.Result{}, err
+	}
+
+	var renewBefore *time.Duration
+	if r, ok := issuer.Annotations[certmanager.CertRenewBeforeAnnotation]; ok && r != "" {
+		rb, err := time.ParseDuration(r)
+		if err != nil {
+			err = fmt.Errorf("error parsing renewBefore annotation %s - %w", certmanager.CertRenewBeforeAnnotation, err)
+			return nil, ctrl.Result{}, err
+		}
+
+		renewBefore = &rb
+	}
+
+	request := certmanager.CertificateRequest{
+		CommonName:  &commonName,
+		IssuerName:  issuer.Name,
+		CertName:    certName,
+		Duration:    &duration,
+		RenewBefore: renewBefore,
+		Hostnames:   hostnames,
+		Ips:         ips,
+		Annotations: nil,
+		Labels:      labels,
+		Usages:      usages,
+		Subject: &certmgrv1.X509Subject{
+			// NOTE(owalsh): For libvirt/QEMU this should match issuer CN
+			Organizations: []string{issuer.Name},
+		},
+	}
+
+	certSecret, result, err := certmanager.EnsureCert(ctx, helper, request, instance)
+	if err != nil {
+		return nil, ctrl.Result{}, err
+	} else if (result != ctrl.Result{}) {
+		return nil, result, nil
+	}
+
 	return certSecret, ctrl.Result{}, nil
 }
 
