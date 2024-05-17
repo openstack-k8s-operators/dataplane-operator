@@ -66,6 +66,8 @@ spec:
                     items:
                       type: string
                     type: array
+                  edpmRoleServiceName:
+                    type: string
                   issuer:
                     type: string
                   keyUsages:
