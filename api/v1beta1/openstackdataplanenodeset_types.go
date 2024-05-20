@@ -49,6 +49,7 @@ type OpenStackDataPlaneNodeSetSpec struct {
 	Nodes map[string]NodeSection `json:"nodes"`
 
 	// Env is a list containing the environment variables to pass to the pod
+	// Variables modifying behavior of AnsibleEE can be specified here.
 	// +kubebuilder:validation:Optional
 	Env []corev1.EnvVar `json:"env,omitempty"`
 

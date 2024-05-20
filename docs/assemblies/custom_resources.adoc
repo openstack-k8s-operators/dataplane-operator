@@ -480,7 +480,7 @@ OpenStackDataPlaneNodeSetSpec defines the desired state of OpenStackDataPlaneNod
 | true
 
 | env
-| Env is a list containing the environment variables to pass to the pod
+| Env is a list containing the environment variables to pass to the pod Variables modifying behavior of AnsibleEE can be specified here.
 | []corev1.EnvVar
 | false
 
