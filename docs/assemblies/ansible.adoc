@@ -1,3 +1,13 @@
+= AnsibleEE runner variables
+
+Number of variables can be used to modify behavior of the AnsibleEE runner
+executing given job, such as timeouts and caching.
+These are expanded in the `env/settings` link:https://github.com/openstack-k8s-operators/edpm-ansible/blob/main/openstack_ansibleee/settings[file].
+And further documented in Ansible Runner link:https://ansible.readthedocs.io/projects/runner/en/stable/intro/#env-settings-settings-for-runner-itself[docs].
+
+All of these variables are left set to sensible defaults, nevertheless, some changes may be necessary,
+depending on particulars of individual deployments.
+
 = Ansible variables
 
 The list of ansible variables that can be set under `ansibleVars` is extensive.
