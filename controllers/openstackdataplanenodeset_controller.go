@@ -384,6 +384,24 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		}
 	}
 
+	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, err := checkDeployment(helper, instance)
+	if err != nil {
+		instance.Status.Conditions.MarkFalse(
+			condition.DeploymentReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityError,
+			condition.DeploymentReadyErrorMessage,
+			err.Error())
+		Log.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
+		return ctrl.Result{}, err
+	}
+
+	if isDeploymentRunning {
+		Log.Info("Deployment still running...", "instance", instance)
+		return ctrl.Result{}, nil
+
+	}
+
 	// Generate NodeSet Inventory
 	_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
 		allIPSets, dnsDetails.ServerAddresses, containerImages)
@@ -411,26 +429,21 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 			condition.DeploymentReadyInitMessage)
 	}
 
-	deploymentExists, isDeploymentReady, err := checkDeployment(helper, instance)
-	if err != nil {
-		instance.Status.Conditions.MarkFalse(
-			condition.DeploymentReadyCondition,
-			condition.ErrorReason,
-			condition.SeverityError,
-			condition.DeploymentReadyErrorMessage,
-			err.Error())
-		Log.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
-		return ctrl.Result{}, err
-	}
 	if isDeploymentReady {
 		Log.Info("Set NodeSet DeploymentReadyCondition true")
 		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
 			condition.DeploymentReadyMessage)
-	} else if deploymentExists {
+	} else if isDeploymentRunning {
 		Log.Info("Set NodeSet DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
 			condition.RequestedReason, condition.SeverityInfo,
 			condition.DeploymentReadyRunningMessage)
+	} else if isDeploymentFailed {
+		Log.Info("Set NodeSet DeploymentReadyCondition false")
+		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
+			condition.ErrorReason, condition.SeverityError,
+			condition.DeploymentReadyErrorMessage,
+			"check deploymentStatuses for more details")
 	} else {
 		Log.Info("Set NodeSet DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
@@ -442,7 +455,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 
 func checkDeployment(helper *helper.Helper,
 	instance *dataplanev1.OpenStackDataPlaneNodeSet,
-) (bool, bool, error) {
+) (bool, bool, bool, error) {
 	// Get all completed deployments
 	deployments := &dataplanev1.OpenStackDataPlaneDeploymentList{}
 	opts := []client.ListOption{
@@ -451,11 +464,12 @@ func checkDeployment(helper *helper.Helper,
 	err := helper.GetClient().List(context.Background(), deployments, opts...)
 	if err != nil {
 		helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneDeployment CRs %v")
-		return false, false, err
+		return false, false, false, err
 	}
 
 	isDeploymentReady := false
-	deploymentExists := false
+	isDeploymentRunning := false
+	isDeploymentFailed := false
 
 	// Sort deployments from oldest to newest by the LastTransitionTime of
 	// their DeploymentReadyCondition
@@ -476,7 +490,6 @@ func checkDeployment(helper *helper.Helper,
 		}
 		if slices.Contains(
 			deployment.Spec.NodeSets, instance.Name) {
-			deploymentExists = true
 			isDeploymentReady = false
 			if deployment.Status.Deployed {
 				isDeploymentReady = true
@@ -498,12 +511,15 @@ func checkDeployment(helper *helper.Helper,
 			}
 			instance.Status.DeploymentStatuses[deployment.Name] = deploymentConditions
 			if condition.IsError(deployment.Status.Conditions.Get(condition.ReadyCondition)) {
-				err = fmt.Errorf("check deploymentStatuses for more details")
+				isDeploymentFailed = true
+			} else if deployment.Status.Conditions.IsFalse(condition.ReadyCondition) {
+				isDeploymentRunning = true
+				isDeploymentReady = false
 			}
 		}
 	}
 
-	return deploymentExists, isDeploymentReady, err
+	return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
