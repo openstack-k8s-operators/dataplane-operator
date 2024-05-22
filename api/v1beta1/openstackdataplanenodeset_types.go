@@ -207,6 +207,7 @@ func (instance OpenStackDataPlaneNodeSet) GetAnsibleEESpec() AnsibleEESpec {
 var ContainerImageDefaults = openstackv1.ContainerImages{
 	ContainerTemplate: openstackv1.ContainerTemplate{
 		AgentImage:                    getStrPtr("quay.io/openstack-k8s-operators/openstack-baremetal-operator-agent:current-podified"),
+		AnsibleeeImage:                getStrPtr("quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"),
 		ApacheImage:                   getStrPtr("registry.redhat.io/ubi9/httpd-24:latest"),
 		EdpmFrrImage:                  getStrPtr("quay.io/podified-antelope-centos9/openstack-frr:current-podified"),
 		EdpmIscsidImage:               getStrPtr("quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"),
@@ -233,6 +234,7 @@ func SetupDefaults() {
 	ContainerImages = openstackv1.ContainerImages{
 		ContainerTemplate: openstackv1.ContainerTemplate{
 			AgentImage:                    getImageDefault("RELATED_IMAGE_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.AgentImage),
+			AnsibleeeImage:                getImageDefault("RELATED_IMAGE_ANSIBLEEE_IMAGE_URL_DEFAULT", ContainerImageDefaults.AnsibleeeImage),
 			ApacheImage:                   getImageDefault("RELATED_IMAGE_APACHE_IMAGE_URL_DEFAULT", ContainerImageDefaults.ApacheImage),
 			EdpmFrrImage:                  getImageDefault("RELATED_IMAGE_EDPM_FRR_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmFrrImage),
 			EdpmIscsidImage:               getImageDefault("RELATED_IMAGE_EDPM_ISCSID_IMAGE_URL_DEFAULT", ContainerImageDefaults.EdpmIscsidImage),

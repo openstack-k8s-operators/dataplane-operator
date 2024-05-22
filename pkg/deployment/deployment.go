@@ -80,7 +80,13 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 		readyWaitingMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyWaitingMessage, deployName)
 		readyMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyMessage, deployName)
 		readyErrorMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentErrorMessage, deployName)
-		d.AeeSpec.OpenStackAnsibleEERunnerImage = foundService.Spec.OpenStackAnsibleEERunnerImage
+		containerImages := dataplaneutil.GetContainerImages(d.Version)
+		if containerImages.AnsibleeeImage != nil {
+			d.AeeSpec.OpenStackAnsibleEERunnerImage = *containerImages.AnsibleeeImage
+		}
+		if len(foundService.Spec.OpenStackAnsibleEERunnerImage) > 0 {
+			d.AeeSpec.OpenStackAnsibleEERunnerImage = foundService.Spec.OpenStackAnsibleEERunnerImage
+		}
 
 		// Reset ExtraMounts to its original value, and then add in service
 		// specific mounts.
