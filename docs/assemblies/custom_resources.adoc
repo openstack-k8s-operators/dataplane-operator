@@ -405,6 +405,11 @@ OpenstackDataPlaneServiceCert defines the property of a TLS cert issued for a da
 | KeyUsages to be added to the issued cert
 | []certmgrv1.KeyUsage
 | false
+
+| edpmRoleServiceName
+| EDPMRoleServiceName is the value of the +++<role>+++_service_name variable from the edpm-ansible role where this certificate is used. For example if the certificate is for edpm_ovn from edpm-ansible, EDPMRoleServiceName must be ovn, which matches the edpm_ovn_service_name variable from the role. If not set, OpenStackDataPlaneService.Spec.EDPMServiceName is used. If OpenStackDataPlaneService.Spec.EDPMServiceName is not set, then OpenStackDataPlaneService.Name is used.+++</role>+++
+| string
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>

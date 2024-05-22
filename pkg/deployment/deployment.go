@@ -273,9 +273,15 @@ func (d *Deployer) addCertMounts(
 					Projected: &projectedVolumeSource,
 				},
 			}
+			certMountDir := service.Spec.TLSCert.EDPMRoleServiceName
+			if certMountDir == "" && service.Spec.EDPMServiceName != "" {
+				certMountDir = service.Spec.EDPMServiceName
+			} else {
+				certMountDir = service.Name
+			}
 			certVolumeMount := corev1.VolumeMount{
 				Name:      GetServiceCertsSecretName(d.NodeSet, service.Name, 0),
-				MountPath: path.Join(CertPaths, service.Name),
+				MountPath: path.Join(CertPaths, certMountDir),
 			}
 			volMounts.Volumes = append(volMounts.Volumes, certVolume)
 			volMounts.Mounts = append(volMounts.Mounts, certVolumeMount)

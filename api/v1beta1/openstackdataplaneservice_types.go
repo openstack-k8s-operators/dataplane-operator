@@ -45,6 +45,15 @@ type OpenstackDataPlaneServiceCert struct {
 	// KeyUsages to be added to the issued cert
 	// +kubebuilder:validation:Optional
 	KeyUsages []certmgrv1.KeyUsage `json:"keyUsages,omitempty" yaml:"keyUsages,omitempty"`
+
+	// EDPMRoleServiceName is the value of the <role>_service_name variable from
+	// the edpm-ansible role where this certificate is used. For example if the
+	// certificate is for edpm_ovn from edpm-ansible, EDPMRoleServiceName must be
+	// ovn, which matches the edpm_ovn_service_name variable from the role.  If
+	// not set, OpenStackDataPlaneService.Spec.EDPMServiceName is used. If
+	// OpenStackDataPlaneService.Spec.EDPMServiceName is not set, then
+	// OpenStackDataPlaneService.Name is used.
+	EDPMRoleServiceName string `json:"edpmRoleServiceName,omitempty"`
 }
 
 // OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneService
