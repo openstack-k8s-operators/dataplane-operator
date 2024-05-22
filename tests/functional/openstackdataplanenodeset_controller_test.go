@@ -22,7 +22,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
 	. "github.com/onsi/gomega"    //revive:disable:dot-imports
-	"github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 
@@ -672,14 +671,14 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		When("The individual node has a AnsibleUser override", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
-				nodeOverrideSpec := v1beta1.NodeSection{
+				nodeOverrideSpec := dataplanev1.NodeSection{
 					HostName: dataplaneNodeName.Name,
 					Networks: []infrav1.IPSetNetwork{{
 						Name:       "ctlplane",
 						SubnetName: "subnet1",
 					},
 					},
-					Ansible: v1beta1.AnsibleOpts{
+					Ansible: dataplanev1.AnsibleOpts{
 						AnsibleUser: "test-user",
 					},
 				}
@@ -692,7 +691,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				}
 
 				nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
-				nodeSetSpec["nodes"].(map[string]v1beta1.NodeSection)[dataplaneNodeName.Name] = nodeOverrideSpec
+				nodeSetSpec["nodes"].(map[string]dataplanev1.NodeSection)[dataplaneNodeName.Name] = nodeOverrideSpec
 				nodeSetSpec["nodeTemplate"] = nodeTemplateOverrideSpec
 
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
@@ -1114,14 +1113,14 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
 				DeferCleanup(th.DeleteInstance, CreateDNSMasq(dnsMasqName, DefaultDNSMasqSpec()))
-				nodeOverrideSpec := v1beta1.NodeSection{
+				nodeOverrideSpec := dataplanev1.NodeSection{
 					HostName: dataplaneNodeName.Name,
 					Networks: []infrav1.IPSetNetwork{{
 						Name:       "ctlplane",
 						SubnetName: "subnet1",
 					},
 					},
-					Ansible: v1beta1.AnsibleOpts{
+					Ansible: dataplanev1.AnsibleOpts{
 						AnsibleUser: "test-user",
 					},
 				}
@@ -1134,7 +1133,7 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 				}
 
 				nodeSetSpec := DefaultDataPlaneNoNodeSetSpec(tlsEnabled)
-				nodeSetSpec["nodes"].(map[string]v1beta1.NodeSection)[dataplaneNodeName.Name] = nodeOverrideSpec
+				nodeSetSpec["nodes"].(map[string]dataplanev1.NodeSection)[dataplaneNodeName.Name] = nodeOverrideSpec
 				nodeSetSpec["nodeTemplate"] = nodeTemplateOverrideSpec
 
 				DeferCleanup(th.DeleteInstance, CreateDataplaneNodeSet(dataplaneNodeSetName, nodeSetSpec))
