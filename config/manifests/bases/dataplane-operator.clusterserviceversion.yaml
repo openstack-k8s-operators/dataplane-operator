@@ -72,11 +72,6 @@ spec:
         path: conditions
         x-descriptors:
         - urn:alm:descriptor:io.kubernetes.conditions
-      - description: Deployed
-        displayName: Deployed
-        path: deployed
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       version: v1beta1
     - description: OpenStackDataPlaneService is the Schema for the openstackdataplaneservices
         API OpenStackDataPlaneService name must be a valid RFC1123 as it is used in

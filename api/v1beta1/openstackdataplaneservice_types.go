@@ -30,6 +30,7 @@ type OpenstackDataPlaneServiceCert struct {
 	// Contents of the certificate
 	// This is a list of strings for properties that are needed in the cert
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinItems:=1
 	Contents []string `json:"contents"`
 
 	// Networks to include in SNI for the cert
