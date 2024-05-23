@@ -48,7 +48,7 @@ spec:
                 type: array
               deployOnAllNodeSets:
                 type: boolean
-              edpmServiceName:
+              edpmServiceType:
                 type: string
               openStackAnsibleEERunnerImage:
                 type: string
