@@ -51,6 +51,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/onsi/gomega v1.33.1 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240429121904-17877ea85633 // indirect
 	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240429080317-62d86c6d7f84 // indirect
