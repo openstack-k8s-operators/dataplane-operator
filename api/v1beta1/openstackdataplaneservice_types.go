@@ -70,7 +70,9 @@ type OpenStackDataPlaneServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	TLSCert *OpenstackDataPlaneServiceCert `json:"tlsCert,omitempty" yaml:"tlsCert,omitempty"`
 
-	// Play is an inline playbook contents that ansible will run on execution.
+	// Play is inline Ansible Play contents that ansible will run on execution.
+	// An Ansible Play should be in Dictionary format as per:
+	// https://github.com/ansible/ansible/blob/10f9b8e6554e024e3561170153b8e7fde5e7e4fb/test/units/playbook/test_play.py#L48
 	Play string `json:"play,omitempty"`
 
 	// Playbook is a path to the playbook that ansible will run on this execution

@@ -315,7 +315,7 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | false
 
 | play
-| Play is an inline playbook contents that ansible will run on execution.
+| Play is inline Ansible Play contents that ansible will run on execution. An Ansible Play should be in Dictionary format as per: https://github.com/ansible/ansible/blob/10f9b8e6554e024e3561170153b8e7fde5e7e4fb/test/units/playbook/test_play.py#L48
 | string
 | false
 
