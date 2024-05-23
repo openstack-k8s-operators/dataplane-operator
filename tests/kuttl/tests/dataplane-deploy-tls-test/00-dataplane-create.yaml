@@ -8,6 +8,9 @@ spec:
     default:
       contents:
       - dnsnames
+    second:
+      contents:
+      - ips
   play: |
     - hosts: localhost
       gather_facts: no

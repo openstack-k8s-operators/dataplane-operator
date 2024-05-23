@@ -71,6 +71,68 @@ commands:
          exit 0
       fi
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cert-tls-dnsnames-second-edpm-compute-0
+  annotations:
+    cert-manager.io/certificate-name: tls-dnsnames-second-edpm-compute-0
+    cert-manager.io/issuer-group: cert-manager.io
+    cert-manager.io/issuer-kind: Issuer
+    cert-manager.io/issuer-name: rootca-internal
+  labels:
+    hostname: edpm-compute-0
+    osdp-service: tls-dnsnames
+    osdp-service-cert-key: second
+    osdpns: openstack-edpm-tls
+type: kubernetes.io/tls
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    hostname: edpm-compute-0
+    osdp-service: tls-dnsnames
+    osdp-service-cert-key: second
+    osdpns: openstack-edpm-tls
+  name: tls-dnsnames-second-edpm-compute-0
+  namespace: openstack
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm-tls
+spec:
+  issuerRef:
+    group: cert-manager.io
+    kind: Issuer
+    name: rootca-internal
+  secretName: cert-tls-dnsnames-second-edpm-compute-0
+  secretTemplate:
+    labels:
+      hostname: edpm-compute-0
+      osdp-service: tls-dnsnames
+      osdpns: openstack-edpm-tls
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack-edpm-tls-tls-dnsnames-default-certs-0
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm-tls
+type: Opaque
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack-edpm-tls-tls-dnsnames-second-certs-0
+  ownerReferences:
+  - apiVersion: dataplane.openstack.org/v1beta1
+    kind: OpenStackDataPlaneNodeSet
+    name: openstack-edpm-tls
+type: Opaque
+---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
@@ -94,6 +156,15 @@ spec:
         sources:
         - secret:
             name: openstack-edpm-tls-tls-dnsnames-default-certs-0
+  - mounts:
+    - mountPath: /var/lib/openstack/certs/tls-dnsnames/second
+      name: openstack-edpm-tls-tls-dnsnames-second-certs-0
+    volumes:
+    - name: openstack-edpm-tls-tls-dnsnames-second-certs-0
+      projected:
+        sources:
+        - secret:
+            name: openstack-edpm-tls-tls-dnsnames-second-certs-0
   - mounts:
     - mountPath: /var/lib/openstack/cacerts/tls-dnsnames
       name: tls-dnsnames-combined-ca-bundle
