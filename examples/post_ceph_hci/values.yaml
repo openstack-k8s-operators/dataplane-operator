@@ -156,6 +156,7 @@ data:
         - name: tenant
           subnetName: subnet1
   deployment:
+    name: edpm-deployment-ipam-post-ceph
     services:
     - ceph-client
     - ovn
