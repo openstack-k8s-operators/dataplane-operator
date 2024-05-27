@@ -29,12 +29,12 @@ spec:
 status:
   observedGeneration: 1
   conditions:
-  - message: Deployment error occurred check deploymentStatuses for more details
+  - message: Deployment error occurred OpenStackDataPlaneService.dataplane.openstack.org "this-service-does-not-exist" not found
     reason: Error
     severity: Error
     status: "False"
     type: Ready
-  - message: Deployment error occurred check deploymentStatuses for more details
+  - message: Deployment error occurred OpenStackDataPlaneService.dataplane.openstack.org "this-service-does-not-exist" not found
     reason: Error
     severity: Error
     status: "False"
