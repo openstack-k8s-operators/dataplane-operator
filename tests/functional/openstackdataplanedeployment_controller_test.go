@@ -148,6 +148,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleTags:           "",
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
+				BackoffLimit:          &DefaultBackoffLimit,
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      nil,
 			}
@@ -343,6 +344,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleTags:           "",
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
+				BackoffLimit:          &DefaultBackoffLimit,
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      nil,
 			}
@@ -548,6 +550,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleTags:           "",
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
+				BackoffLimit:          &DefaultBackoffLimit,
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      nil,
 			}
@@ -660,6 +663,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 				AnsibleTags:           "",
 				AnsibleLimit:          "",
 				AnsibleSkipTags:       "",
+				BackoffLimit:          &DefaultBackoffLimit,
 				DeploymentRequeueTime: 15,
 				ServicesOverride:      nil,
 			}

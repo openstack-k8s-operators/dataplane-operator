@@ -294,6 +294,11 @@ func (in *OpenStackDataPlaneDeploymentSpec) DeepCopyInto(out *OpenStackDataPlane
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.BackoffLimit != nil {
+		in, out := &in.BackoffLimit, &out.BackoffLimit
+		*out = new(int32)
+		**out = **in
+	}
 	if in.AnsibleExtraVars != nil {
 		in, out := &in.AnsibleExtraVars, &out.AnsibleExtraVars
 		*out = make(map[string]json.RawMessage, len(*in))

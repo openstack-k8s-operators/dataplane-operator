@@ -205,12 +205,17 @@ func (d *Deployer) ConditionalDeploy(
 		}
 
 		if ansibleEE.Status.JobStatus == ansibleeev1.JobStatusFailed {
+			errorMsg := fmt.Sprintf("execution.name %s execution.namespace %s execution.status.jobstatus: %s", ansibleEE.Name, ansibleEE.Namespace, ansibleEE.Status.JobStatus)
+			ansibleCondition := ansibleEE.Status.Conditions.Get(condition.JobReadyCondition)
+			if ansibleCondition.Reason == condition.JobReasonBackoffLimitExceeded {
+				errorMsg = fmt.Sprintf("backoff limit reached for execution.name %s execution.namespace %s execution.status.jobstatus: %s", ansibleEE.Name, ansibleEE.Namespace, ansibleEE.Status.JobStatus)
+			}
 			log.Info(fmt.Sprintf("Condition %s error", readyCondition))
-			err = fmt.Errorf("execution.name %s Execution.namespace %s Execution.status.jobstatus: %s", ansibleEE.Name, ansibleEE.Namespace, ansibleEE.Status.JobStatus)
+			err = fmt.Errorf(errorMsg)
 			nsConditions.Set(condition.FalseCondition(
 				readyCondition,
-				condition.ErrorReason,
-				condition.SeverityError,
+				ansibleCondition.Reason,
+				ansibleCondition.Severity,
 				readyErrorMessage,
 				err.Error()))
 		}
