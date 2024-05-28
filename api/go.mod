@@ -9,7 +9,7 @@ require (
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240523005930-c332745390c8
 	k8s.io/api v0.28.10
 	k8s.io/apimachinery v0.28.10
-	sigs.k8s.io/controller-runtime v0.16.5
+	sigs.k8s.io/controller-runtime v0.16.6
 )
 
 require (
