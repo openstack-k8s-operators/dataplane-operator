@@ -64,3 +64,5 @@ include::hashes.adoc[leveloffset=+1]
 include::ipam.adoc[leveloffset=+1]
 
 include::hotfixing-the-data-plane.adoc[leveloffset=+1]
+
+include::updating-the-data-plane.adoc[leveloffset=+1]
