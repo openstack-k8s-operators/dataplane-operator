@@ -4,5 +4,15 @@
     github-check:
       jobs:
         - dataplane-operator-docs-preview
+        - openstack-k8s-operators-content-provider
+        - cifmw-data-plane-adoption-osp-17-to-extracted-crc:
+            dependencies:
+              - openstack-k8s-operators-content-provider
+            files:
+              - ^api/*
+              - ^config/*
+              - ^controllers/*
+              - ^pkg/*
+
     templates:
       - podified-multinode-edpm-baremetal-pipeline
