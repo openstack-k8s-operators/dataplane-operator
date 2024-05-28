@@ -247,7 +247,7 @@ func SetupDefaults() {
 			CeilometerComputeImage:        getImageDefault("RELATED_IMAGE_CEILOMETER_COMPUTE_IMAGE_URL_DEFAULT", ContainerImageDefaults.CeilometerComputeImage),
 			CeilometerIpmiImage:           getImageDefault("RELATED_IMAGE_CEILOMETER_IPMI_IMAGE_URL_DEFAULT", ContainerImageDefaults.CeilometerIpmiImage),
 			NovaComputeImage:              getImageDefault("RELATED_IMAGE_NOVA_COMPUTE_IMAGE_URL_DEFAULT", ContainerImageDefaults.NovaComputeImage),
-			OvnControllerImage:            getImageDefault("RELATED_IMAGE_OVN_CONTROLLER_AGENT_IMAGE_URL_DEFAULT", ContainerImageDefaults.OvnControllerImage),
+			OvnControllerImage:            getImageDefault("RELATED_IMAGE_OVN_CONTROLLER_IMAGE_URL_DEFAULT", ContainerImageDefaults.OvnControllerImage),
 			OsContainerImage:              getImageDefault("RELATED_IMAGE_OS_CONTAINER_IMAGE_URL_DEFAULT", ContainerImageDefaults.OsContainerImage),
 		},
 	}
