@@ -126,9 +126,9 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneServiceName, false)
 			// marked for deployment on all nodesets
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
-			// with EDPMServiceName set
+			// with EDPMServiceType set
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"EDPMServiceName": "foo-service"})
+				"EDPMServiceType": "foo-service"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
@@ -213,10 +213,10 @@ var _ = Describe("Dataplane Deployment Test", func() {
 
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
 					g.Expect(ansibleEE.Spec.ExtraVars).To(HaveKey("edpm_override_hosts"))
-					if service.Spec.EDPMServiceName != "" {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_name"])).To(Equal(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceName)))
+					if service.Spec.EDPMServiceType != "" {
+						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_type"])).To(Equal(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceType)))
 					} else {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_name"])).To(Equal(fmt.Sprintf("\"%s\"", serviceName)))
+						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_type"])).To(Equal(fmt.Sprintf("\"%s\"", serviceName)))
 					}
 					if service.Spec.DeployOnAllNodeSets {
 						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_override_hosts"])).To(Equal("\"all\""))
@@ -274,7 +274,7 @@ var _ = Describe("Dataplane Deployment Test", func() {
 			CreateDataplaneService(dataplaneServiceName, false)
 			CreateDataplaneService(dataplaneGlobalServiceName, true)
 			CreateDataPlaneServiceFromSpec(dataplaneUpdateServiceName, map[string]interface{}{
-				"EDPMServiceName": "foo-service"})
+				"EDPMServiceType": "foo-service"})
 
 			DeferCleanup(th.DeleteService, dataplaneServiceName)
 			DeferCleanup(th.DeleteService, dataplaneGlobalServiceName)
@@ -428,10 +428,10 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					}
 					ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
-					if service.Spec.EDPMServiceName != "" {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_name"])).To(Equal(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceName)))
+					if service.Spec.EDPMServiceType != "" {
+						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_type"])).To(Equal(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceType)))
 					} else {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_name"])).To(Equal(fmt.Sprintf("\"%s\"", serviceName)))
+						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_type"])).To(Equal(fmt.Sprintf("\"%s\"", serviceName)))
 					}
 					if service.Spec.DeployOnAllNodeSets {
 						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_override_hosts"])).To(Equal("\"all\""))
@@ -465,10 +465,10 @@ var _ = Describe("Dataplane Deployment Test", func() {
 					}
 					ansibleEE.Status.JobStatus = ansibleeev1.JobStatusSucceeded
 					g.Expect(th.K8sClient.Status().Update(th.Ctx, ansibleEE)).To(Succeed())
-					if service.Spec.EDPMServiceName != "" {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_name"])).To(Equal(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceName)))
+					if service.Spec.EDPMServiceType != "" {
+						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_type"])).To(Equal(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceType)))
 					} else {
-						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_name"])).To(Equal(fmt.Sprintf("\"%s\"", serviceName)))
+						g.Expect(string(ansibleEE.Spec.ExtraVars["edpm_service_type"])).To(Equal(fmt.Sprintf("\"%s\"", serviceName)))
 					}
 				}, th.Timeout, th.Interval).Should(Succeed())
 			}

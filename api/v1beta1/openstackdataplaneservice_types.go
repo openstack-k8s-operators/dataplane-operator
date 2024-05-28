@@ -50,8 +50,8 @@ type OpenstackDataPlaneServiceCert struct {
 	// the edpm-ansible role where this certificate is used. For example if the
 	// certificate is for edpm_ovn from edpm-ansible, EDPMRoleServiceName must be
 	// ovn, which matches the edpm_ovn_service_name variable from the role.  If
-	// not set, OpenStackDataPlaneService.Spec.EDPMServiceName is used. If
-	// OpenStackDataPlaneService.Spec.EDPMServiceName is not set, then
+	// not set, OpenStackDataPlaneService.Spec.EDPMServiceType is used. If
+	// OpenStackDataPlaneService.Spec.EDPMServiceType is not set, then
 	// OpenStackDataPlaneService.Name is used.
 	EDPMRoleServiceName string `json:"edpmRoleServiceName,omitempty"`
 }
@@ -107,9 +107,12 @@ type OpenStackDataPlaneServiceSpec struct {
 	// github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1
 	ContainerImageFields []string `json:"containerImageFields,omitempty" yaml:"containerImageFields,omitempty"`
 
-	// EDPMServiceName - name to use for edpm_service_name ansible variable
-	// +kubebuilder:validation:Optional
-	EDPMServiceName string `json:"edpmServiceName,omitempty" yaml:"edpmServiceName,omitempty"`
+	// EDPMServiceType - service type, which typically corresponds to one of
+	// the default service names (such as nova, ovn, etc). Also typically
+	// corresponds to the ansible role name (without the "edpm_" prefix) used
+	// to manage the service. If not set, will default to the
+	// OpenStackDataPlaneService name.
+	EDPMServiceType string `json:"edpmServiceType,omitempty" yaml:"edpmServiceType,omitempty"`
 }
 
 // OpenStackDataPlaneServiceStatus defines the observed state of OpenStackDataPlaneService

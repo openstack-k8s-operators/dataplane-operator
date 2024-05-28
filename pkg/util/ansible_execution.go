@@ -122,10 +122,10 @@ func AnsibleExecution(
 			util.LogForObject(helper,
 				fmt.Sprintf("for service %s, substituting existing ansible play host with '%s'.", service.Name, nodeSet.GetName()), ansibleEE)
 		}
-		if service.Spec.EDPMServiceName != "" {
-			ansibleEE.Spec.ExtraVars["edpm_service_name"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceName)))
+		if service.Spec.EDPMServiceType != "" {
+			ansibleEE.Spec.ExtraVars["edpm_service_type"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Spec.EDPMServiceType)))
 		} else {
-			ansibleEE.Spec.ExtraVars["edpm_service_name"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Name)))
+			ansibleEE.Spec.ExtraVars["edpm_service_type"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", service.Name)))
 		}
 
 		if len(deployment.Spec.ServicesOverride) > 0 {

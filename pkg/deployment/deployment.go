@@ -280,10 +280,8 @@ func (d *Deployer) addCertMounts(
 				},
 			}
 			certMountDir := service.Spec.TLSCert.EDPMRoleServiceName
-			if certMountDir == "" && service.Spec.EDPMServiceName != "" {
-				certMountDir = service.Spec.EDPMServiceName
-			} else {
-				certMountDir = service.Name
+			if certMountDir == "" {
+				certMountDir = service.Spec.EDPMServiceType
 			}
 			certVolumeMount := corev1.VolumeMount{
 				Name:      GetServiceCertsSecretName(d.NodeSet, service.Name, 0),
@@ -315,7 +313,7 @@ func (d *Deployer) addCertMounts(
 
 			cacertVolumeMount := corev1.VolumeMount{
 				Name:      fmt.Sprintf("%s-%s", service.Name, service.Spec.CACerts),
-				MountPath: path.Join(CACertPaths, service.Name),
+				MountPath: path.Join(CACertPaths, service.Spec.EDPMServiceType),
 			}
 
 			volMounts.Volumes = append(volMounts.Volumes, cacertVolume)
