@@ -68,7 +68,9 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.EdpmIscsidImage = version.Status.ContainerImages.EdpmIscsidImage
 		containerImages.EdpmLogrotateCrondImage = version.Status.ContainerImages.EdpmLogrotateCrondImage
 		containerImages.EdpmMultipathdImage = version.Status.ContainerImages.EdpmMultipathdImage
+		containerImages.EdpmNeutronDhcpAgentImage = version.Status.ContainerImages.EdpmNeutronDhcpAgentImage
 		containerImages.EdpmNeutronMetadataAgentImage = version.Status.ContainerImages.EdpmNeutronMetadataAgentImage
+		containerImages.EdpmNeutronOvnAgentImage = version.Status.ContainerImages.EdpmNeutronOvnAgentImage
 		containerImages.EdpmNeutronSriovAgentImage = version.Status.ContainerImages.EdpmNeutronSriovAgentImage
 		containerImages.EdpmNodeExporterImage = version.Status.ContainerImages.EdpmNodeExporterImage
 		containerImages.EdpmOvnBgpAgentImage = version.Status.ContainerImages.EdpmOvnBgpAgentImage
@@ -85,7 +87,9 @@ func GetContainerImages(version *openstackv1.OpenStackVersion) openstackv1.Conta
 		containerImages.EdpmIscsidImage = dataplanev1.ContainerImages.EdpmIscsidImage
 		containerImages.EdpmLogrotateCrondImage = dataplanev1.ContainerImages.EdpmLogrotateCrondImage
 		containerImages.EdpmMultipathdImage = dataplanev1.ContainerImages.EdpmMultipathdImage
+		containerImages.EdpmNeutronDhcpAgentImage = dataplanev1.ContainerImages.EdpmNeutronDhcpAgentImage
 		containerImages.EdpmNeutronMetadataAgentImage = dataplanev1.ContainerImages.EdpmNeutronMetadataAgentImage
+		containerImages.EdpmNeutronOvnAgentImage = dataplanev1.ContainerImages.EdpmNeutronOvnAgentImage
 		containerImages.EdpmNeutronSriovAgentImage = dataplanev1.ContainerImages.EdpmNeutronSriovAgentImage
 		containerImages.EdpmNodeExporterImage = dataplanev1.ContainerImages.EdpmNodeExporterImage
 		containerImages.EdpmOvnBgpAgentImage = dataplanev1.ContainerImages.EdpmOvnBgpAgentImage
