@@ -385,7 +385,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 	}
 
 	isDeploymentReady, isDeploymentRunning, isDeploymentFailed, err := checkDeployment(helper, instance)
-	if err != nil {
+	if !isDeploymentFailed && err != nil {
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
 			condition.ErrorReason,
@@ -394,6 +394,10 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 			err.Error())
 		Log.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
 		return ctrl.Result{}, err
+	}
+	deployErrMsg := ""
+	if isDeploymentFailed {
+		deployErrMsg = err.Error()
 	}
 
 	if isDeploymentRunning {
@@ -443,14 +447,15 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
 			condition.DeploymentReadyErrorMessage,
-			"check deploymentStatuses for more details")
+			deployErrMsg)
+		err = fmt.Errorf(deployErrMsg)
 	} else {
 		Log.Info("Set NodeSet DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
 			condition.RequestedReason, condition.SeverityInfo,
 			condition.DeploymentReadyInitMessage)
 	}
-	return ctrl.Result{}, nil
+	return ctrl.Result{}, err
 }
 
 func checkDeployment(helper *helper.Helper,
@@ -510,7 +515,10 @@ func checkDeployment(helper *helper.Helper,
 				instance.Status.DeploymentStatuses = make(map[string]condition.Conditions)
 			}
 			instance.Status.DeploymentStatuses[deployment.Name] = deploymentConditions
-			if condition.IsError(deployment.Status.Conditions.Get(condition.ReadyCondition)) {
+			deploymentCondition := deploymentConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition)
+			if condition.IsError(deploymentCondition) {
+				msg := strings.Replace(deploymentCondition.Message, strings.Split(condition.DeploymentReadyErrorMessage, "%")[0], "", -1)
+				err = fmt.Errorf(msg)
 				isDeploymentFailed = true
 			} else if deployment.Status.Conditions.IsFalse(condition.ReadyCondition) {
 				isDeploymentRunning = true
@@ -519,7 +527,7 @@ func checkDeployment(helper *helper.Helper,
 		}
 	}
 
-	return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, nil
+	return isDeploymentReady, isDeploymentRunning, isDeploymentFailed, err
 }
 
 // SetupWithManager sets up the controller with the Manager.

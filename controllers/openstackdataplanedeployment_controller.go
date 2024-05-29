@@ -203,6 +203,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			} else {
 				services = nodeSet.Spec.Services
 			}
+			nsConditions := instance.Status.NodeSetConditions[nodeSet.Name]
 
 			for _, serviceName := range services {
 				service, err := deployment.GetService(ctx, helper, serviceName)
@@ -213,6 +214,14 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 						condition.SeverityError,
 						dataplanev1.ServiceErrorMessage,
 						err.Error())
+					if len(instance.Spec.ServicesOverride) == 0 {
+						nsConditions.MarkFalse(
+							dataplanev1.NodeSetDeploymentReadyCondition,
+							condition.ErrorReason,
+							condition.SeverityError,
+							dataplanev1.ServiceErrorMessage,
+							err.Error())
+					}
 					return ctrl.Result{}, err
 				}
 				if service.Spec.TLSCert != nil {
@@ -225,6 +234,14 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 							condition.SeverityError,
 							condition.TLSInputErrorMessage,
 							err.Error())
+						if len(instance.Spec.ServicesOverride) == 0 {
+							nsConditions.MarkFalse(
+								dataplanev1.NodeSetDeploymentReadyCondition,
+								condition.ErrorReason,
+								condition.SeverityError,
+								condition.TLSInputErrorMessage,
+								err.Error())
+						}
 						return ctrl.Result{}, err
 					} else if (*result != ctrl.Result{}) {
 						return *result, nil // requeue here
