@@ -20,6 +20,13 @@ spec:
       displayName: OpenStack Data Plane Deployments
       kind: OpenStackDataPlaneDeployment
       name: openstackdataplanedeployments.dataplane.openstack.org
+      specDescriptors:
+      - description: BackoffLimit allows to define the maximum number of retried executions
+          (defaults to 6).
+        displayName: Backoff Limit
+        path: backoffLimit
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:number
       statusDescriptors:
       - description: Conditions
         displayName: Conditions

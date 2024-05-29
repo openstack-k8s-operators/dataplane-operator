@@ -27,6 +27,7 @@ var DefaultEdpmServiceAnsibleVarList = []string{
 }
 
 var CustomEdpmServiceDomainTag = "test-image:latest"
+var DefaultBackoffLimit = int32(6)
 
 // Create OpenstackDataPlaneNodeSet in k8s and test that no errors occur
 func CreateDataplaneNodeSet(name types.NamespacedName, spec map[string]interface{}) *unstructured.Unstructured {

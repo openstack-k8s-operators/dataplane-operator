@@ -30,6 +30,11 @@ type OpenStackDataPlaneDeploymentSpec struct {
 	// NodeSets is the list of NodeSets deployed
 	NodeSets []string `json:"nodeSets"`
 
+	// BackoffLimit allows to define the maximum number of retried executions (defaults to 6).
+	// +kubebuilder:default:=6
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
+	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
+
 	// AnsibleTags for ansible execution
 	// +kubebuilder:validation:Optional
 	AnsibleTags string `json:"ansibleTags,omitempty"`

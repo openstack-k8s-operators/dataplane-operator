@@ -107,6 +107,7 @@ func AnsibleExecution(
 		if len(service.Spec.Playbook) > 0 {
 			ansibleEE.Spec.Playbook = service.Spec.Playbook
 		}
+		ansibleEE.Spec.BackoffLimit = deployment.Spec.BackoffLimit
 
 		// If we have a service that ought to be deployed everywhere
 		// substitute the existing play target with 'all'

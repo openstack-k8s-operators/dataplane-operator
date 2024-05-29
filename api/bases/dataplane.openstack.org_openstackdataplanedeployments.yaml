@@ -52,6 +52,10 @@ spec:
                 type: string
               ansibleTags:
                 type: string
+              backoffLimit:
+                default: 6
+                format: int32
+                type: integer
               deploymentRequeueTime:
                 default: 15
                 minimum: 1
