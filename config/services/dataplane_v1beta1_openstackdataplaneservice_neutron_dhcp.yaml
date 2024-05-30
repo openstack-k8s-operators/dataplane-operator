@@ -7,3 +7,5 @@ spec:
   secrets:
   - neutron-dhcp-agent-neutron-config
   caCerts: combined-ca-bundle
+  containerImageFields:
+  - EdpmNeutronDhcpAgentImage
