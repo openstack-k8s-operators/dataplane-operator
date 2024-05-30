@@ -22,7 +22,7 @@ require (
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240529115306-9068d1417ae9
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240529115838-0dfe70b6ee71
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240523005930-c332745390c8
-	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240529001123-0d27046f8644
+	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240530055332-aa91068ef71b
 	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.28.10

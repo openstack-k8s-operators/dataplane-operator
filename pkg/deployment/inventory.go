@@ -253,8 +253,14 @@ func resolveGroupAnsibleVars(template *dataplanev1.NodeTemplate, group *ansible.
 	if template.Ansible.AnsibleVars["edpm_multipathd_image"] == nil {
 		group.Vars["edpm_multipathd_image"] = containerImages.EdpmMultipathdImage
 	}
+	if template.Ansible.AnsibleVars["edpm_neutron_dhcp_image"] == nil {
+		group.Vars["edpm_neutron_dhcp_image"] = containerImages.EdpmNeutronDhcpAgentImage
+	}
 	if template.Ansible.AnsibleVars["edpm_neutron_metadata_agent_image"] == nil {
 		group.Vars["edpm_neutron_metadata_agent_image"] = containerImages.EdpmNeutronMetadataAgentImage
+	}
+	if template.Ansible.AnsibleVars["edpm_neutron_ovn_agent_image"] == nil {
+		group.Vars["edpm_neutron_ovn_agent_image"] = containerImages.EdpmNeutronOvnAgentImage
 	}
 	if template.Ansible.AnsibleVars["edpm_neutron_sriov_agent_image"] == nil {
 		group.Vars["edpm_neutron_sriov_image"] = containerImages.EdpmNeutronSriovAgentImage
