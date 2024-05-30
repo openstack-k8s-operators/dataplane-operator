@@ -24,8 +24,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// AnsibleVarsFromSource represents the source of a set of ConfigMaps/Secrets
-type AnsibleVarsFromSource struct {
+// DataSource represents the source of a set of ConfigMaps/Secrets
+type DataSource struct {
 	// An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.
 	// +optional
 	Prefix string `json:"prefix,omitempty" protobuf:"bytes,1,opt,name=prefix"`
@@ -55,7 +55,7 @@ type AnsibleOpts struct {
 	// AnsibleVarsFrom is a list of sources to populate ansible variables from.
 	// Values defined by an AnsibleVars with a duplicate key take precedence.
 	// +kubebuilder:validation:Optional
-	AnsibleVarsFrom []AnsibleVarsFromSource `json:"ansibleVarsFrom,omitempty"`
+	AnsibleVarsFrom []DataSource `json:"ansibleVarsFrom,omitempty"`
 
 	// AnsiblePort SSH port for Ansible connection
 	// +kubebuilder:validation:Optional

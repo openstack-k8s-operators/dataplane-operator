@@ -68,7 +68,7 @@ spec:
 
 . Optional: Designate and configure a node set for a Compute feature or workload. For more information, see xref:proc_configuring-a-node-set-for-a-Compute-feature-or-workload_dataplane[Configuring a node set for a Compute feature or workload].
 
-. Optional: Specify the names of `Secret` resources to use to pass secrets into the `OpenStackAnsibleEE` job:
+. Optional: Specify `Secret` resources to use to pass secrets into the `OpenStackAnsibleEE` job. Secrets are specified with a `name` and `required` field. When `required` is false, the service deployment will not fail if the secret doesn't exist.
 +
 ----
 apiVersion: dataplane.openstack.org/v1beta1
@@ -80,8 +80,10 @@ spec:
   play: |
     ...
   secrets:
-    - hello-world-secret-0
-    - hello-world-secret-1
+    - name: hello-world-secret-0
+      required: true
+    - name: hello-world-secret-1
+      required: false
 ----
 +
 A mount is created for each `secret` in the `OpenStackAnsibleEE` pod with a filename that matches the `secret` value. The mounts are created under `/var/lib/openstack/configs/<service name>`.

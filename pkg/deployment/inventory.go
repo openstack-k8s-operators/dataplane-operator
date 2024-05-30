@@ -25,11 +25,9 @@ import (
 	"strings"
 
 	yaml "gopkg.in/yaml.v3"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	"github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	infranetworkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/ansible"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -43,57 +41,34 @@ func getAnsibleVarsFrom(ctx context.Context, helper *helper.Helper, namespace st
 
 	var result = make(map[string]string)
 
-	client := helper.GetClient()
+	for _, dataSource := range ansible.AnsibleVarsFrom {
+		configMap, secret, err := util.GetDataSourceCmSecret(ctx, helper, namespace, dataSource)
+		if err != nil {
+			return result, err
+		}
 
-	// AnsibleVars will override AnsibleVarsFrom variables.
-	// Process AnsibleVarsFrom first then allow AnsibleVars to replace existing values.
-	for _, varFrom := range ansible.AnsibleVarsFrom {
-		switch {
-		case varFrom.ConfigMapRef != nil:
-			cm := varFrom.ConfigMapRef
-			optional := cm.Optional != nil && *cm.Optional
-			configMap := &v1.ConfigMap{}
-			err := client.Get(ctx, types.NamespacedName{Name: cm.Name, Namespace: namespace}, configMap)
-			if err != nil {
-				if errors.IsNotFound(err) && optional {
-					// ignore error when marked optional
-					utils.LogErrorForObject(helper, err, "could not get ansible vars, the configMap: "+cm.Name+"is missing", configMap)
-					continue
-				}
-				return result, err
-			}
-
+		// AnsibleVars will override AnsibleVarsFrom variables.
+		// Process AnsibleVarsFrom first then allow AnsibleVars to replace existing values.
+		if configMap != nil {
 			for k, v := range configMap.Data {
-				if len(varFrom.Prefix) > 0 {
-					k = varFrom.Prefix + k
+				if len(dataSource.Prefix) > 0 {
+					k = dataSource.Prefix + k
 				}
 
 				result[k] = v
 			}
+		}
 
-		case varFrom.SecretRef != nil:
-			s := varFrom.SecretRef
-			optional := s.Optional != nil && *s.Optional
-			secret := &v1.Secret{}
-			err := client.Get(ctx, types.NamespacedName{Name: s.Name, Namespace: namespace}, secret)
-			if err != nil {
-				if errors.IsNotFound(err) && optional {
-					// ignore error when marked optional
-					utils.LogErrorForObject(helper, err, "could not get ansible vars, the secret: "+s.Name+"is missing", secret)
-					continue
-				}
-				return result, err
-			}
-
+		if secret != nil {
 			for k, v := range secret.Data {
-				if len(varFrom.Prefix) > 0 {
-					k = varFrom.Prefix + k
+				if len(dataSource.Prefix) > 0 {
+					k = dataSource.Prefix + k
 				}
 				result[k] = string(v)
 			}
 		}
-	}
 
+	}
 	return result, nil
 }
 

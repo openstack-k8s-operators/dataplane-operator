@@ -39,6 +39,7 @@ import (
 	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 // Deployer defines a data structure with all of the relevant objects required for a full deployment.
@@ -361,14 +362,44 @@ func (d *Deployer) addServiceExtraMounts(
 	client := d.Helper.GetClient()
 	baseMountPath := path.Join(ConfigPaths, service.Name)
 
-	for _, cmName := range service.Spec.ConfigMaps {
+	var configMaps []*v1.ConfigMap
+	var secrets []*v1.Secret
 
-		volMounts := storage.VolMounts{}
+	for _, dataSource := range service.Spec.DataSources {
+		_cm, _secret, err := dataplaneutil.GetDataSourceCmSecret(d.Ctx, d.Helper, service.Namespace, dataSource)
+		if err != nil {
+			return nil, err
+		}
+
+		if _cm != nil {
+			configMaps = append(configMaps, _cm)
+		}
+		if _secret != nil {
+			secrets = append(secrets, _secret)
+		}
+	}
+
+	for _, cmName := range service.Spec.ConfigMaps {
 		cm := &corev1.ConfigMap{}
 		err := client.Get(d.Ctx, types.NamespacedName{Name: cmName, Namespace: service.Namespace}, cm)
 		if err != nil {
 			return d.AeeSpec, err
 		}
+		configMaps = append(configMaps, cm)
+	}
+
+	for _, secretName := range service.Spec.Secrets {
+		sec := &corev1.Secret{}
+		err := client.Get(d.Ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, sec)
+		if err != nil {
+			return d.AeeSpec, err
+		}
+		secrets = append(secrets, sec)
+	}
+
+	for _, cm := range configMaps {
+
+		volMounts := storage.VolMounts{}
 
 		keys := []string{}
 		for key := range cm.Data {
@@ -380,13 +411,13 @@ func (d *Deployer) addServiceExtraMounts(
 		sort.Strings(keys)
 
 		for idx, key := range keys {
-			name := fmt.Sprintf("%s-%s", cmName, strconv.Itoa(idx))
+			name := fmt.Sprintf("%s-%s", cm.Name, strconv.Itoa(idx))
 			volume := corev1.Volume{
 				Name: name,
 				VolumeSource: corev1.VolumeSource{
 					ConfigMap: &corev1.ConfigMapVolumeSource{
 						LocalObjectReference: corev1.LocalObjectReference{
-							Name: cmName,
+							Name: cm.Name,
 						},
 						Items: []corev1.KeyToPath{
 							{
@@ -412,15 +443,9 @@ func (d *Deployer) addServiceExtraMounts(
 		d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
 	}
 
-	for _, secretName := range service.Spec.Secrets {
+	for _, sec := range secrets {
 
 		volMounts := storage.VolMounts{}
-		sec := &corev1.Secret{}
-		err := client.Get(d.Ctx, types.NamespacedName{Name: secretName, Namespace: service.Namespace}, sec)
-		if err != nil {
-			return d.AeeSpec, err
-		}
-
 		keys := []string{}
 		for key := range sec.Data {
 			keys = append(keys, key)
@@ -428,12 +453,12 @@ func (d *Deployer) addServiceExtraMounts(
 		sort.Strings(keys)
 
 		for idx, key := range keys {
-			name := fmt.Sprintf("%s-%s", secretName, strconv.Itoa(idx))
+			name := fmt.Sprintf("%s-%s", sec.Name, strconv.Itoa(idx))
 			volume := corev1.Volume{
 				Name: name,
 				VolumeSource: corev1.VolumeSource{
 					Secret: &corev1.SecretVolumeSource{
-						SecretName: secretName,
+						SecretName: sec.Name,
 						Items: []corev1.KeyToPath{
 							{
 								Key:  key,
@@ -457,5 +482,6 @@ func (d *Deployer) addServiceExtraMounts(
 
 		d.AeeSpec.ExtraMounts = append(d.AeeSpec.ExtraMounts, volMounts)
 	}
+
 	return d.AeeSpec, nil
 }

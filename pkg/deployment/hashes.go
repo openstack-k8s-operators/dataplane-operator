@@ -20,6 +20,7 @@ import (
 	"context"
 
 	dataplanev1 "github.com/openstack-k8s-operators/dataplane-operator/api/v1beta1"
+	dataplaneutil "github.com/openstack-k8s-operators/dataplane-operator/pkg/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/secret"
@@ -48,6 +49,27 @@ func GetDeploymentHashesForService(
 		helper.GetLogger().Error(err, "Unable to retrieve OpenStackDataPlaneService %v")
 		return err
 	}
+
+	for _, dataSource := range service.Spec.DataSources {
+		cm, sec, err := dataplaneutil.GetDataSourceCmSecret(ctx, helper, namespace, dataSource)
+		if err != nil {
+			return err
+		}
+
+		if cm != nil {
+			configMapHashes[cm.Name], err = configmap.Hash(cm)
+			if err != nil {
+				helper.GetLogger().Error(err, "Unable to hash ConfigMap %v")
+			}
+		}
+		if sec != nil {
+			secretHashes[sec.Name], err = secret.Hash(sec)
+			if err != nil {
+				helper.GetLogger().Error(err, "Unable to hash Secret %v")
+			}
+		}
+	}
+
 	for _, cmName := range service.Spec.ConfigMaps {
 		namespacedName := types.NamespacedName{
 			Name:      cmName,

@@ -539,7 +539,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 			nodeSet := rawObj.(*dataplanev1.OpenStackDataPlaneNodeSet)
 			configMaps := make([]string, 0)
 
-			appendConfigMaps := func(varsFrom []dataplanev1.AnsibleVarsFromSource) {
+			appendConfigMaps := func(varsFrom []dataplanev1.DataSource) {
 				for _, ref := range varsFrom {
 					if ref.ConfigMapRef != nil {
 						configMaps = append(configMaps, ref.ConfigMapRef.Name)
@@ -566,7 +566,7 @@ func (r *OpenStackDataPlaneNodeSetReconciler) SetupWithManager(mgr ctrl.Manager)
 				secrets = append(secrets, nodeSet.Spec.NodeTemplate.AnsibleSSHPrivateKeySecret)
 			}
 
-			appendSecrets := func(varsFrom []dataplanev1.AnsibleVarsFromSource) {
+			appendSecrets := func(varsFrom []dataplanev1.DataSource) {
 				for _, ref := range varsFrom {
 					if ref.SecretRef != nil {
 						secrets = append(secrets, ref.SecretRef.Name)
