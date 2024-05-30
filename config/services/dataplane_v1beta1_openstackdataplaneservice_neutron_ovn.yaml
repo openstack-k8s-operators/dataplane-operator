@@ -18,3 +18,5 @@ spec:
       - key encipherment
       - client auth
   caCerts: combined-ca-bundle
+  containerImageFields:
+  - EdpmNeutronOvnAgentImage
