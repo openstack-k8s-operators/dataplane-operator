@@ -107,13 +107,13 @@ spec:
 status:
   JobStatus: Running
   conditions:
-  - message: AnsibleExecutionJob is running
+  - message: Job in progress
     reason: Requested
     severity: Info
     status: "False"
     type: Ready
-  - message: AnsibleExecutionJob is running
+  - message: Job in progress
     reason: Requested
     severity: Info
     status: "False"
-    type: AnsibleExecutionJobReady
+    type: JobReady

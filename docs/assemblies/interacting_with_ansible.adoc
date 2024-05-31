@@ -22,14 +22,14 @@ retrieved from the API.
 Sample output when the default list of services:
 
  NAME                                                  NETWORKATTACHMENTS   STATUS   MESSAGE
- configure-network-edpm-compute                        True     AnsibleExecutionJob complete
- configure-os-edpm-compute                             True     AnsibleExecutionJob complete
- install-os-edpm-compute                               True     AnsibleExecutionJob complete
- libvirt-edpm-compute                                  True     AnsibleExecutionJob complete
- nova-edpm-compute                                     True     AnsibleExecutionJob complete
- run-os-edpm-compute                                   True     AnsibleExecutionJob complete
- telemetry-edpm-compute                                True     AnsibleExecutionJob complete
- validate-network-edpm-compute                         True     AnsibleExecutionJob complete
+ configure-network-edpm-compute                        True     Job completed
+ configure-os-edpm-compute                             True     Job completed
+ install-os-edpm-compute                               True     Job completed
+ libvirt-edpm-compute                                  True     Job completed
+ nova-edpm-compute                                     True     Job completed
+ run-os-edpm-compute                                   True     Job completed
+ telemetry-edpm-compute                                True     Job completed
+ validate-network-edpm-compute                         True     Job completed
 
 Querying for pods with the OpenStackAnsibleEE label
 

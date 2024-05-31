@@ -115,7 +115,7 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady

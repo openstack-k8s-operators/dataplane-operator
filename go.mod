@@ -15,14 +15,14 @@ require (
 	github.com/onsi/gomega v1.33.1
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/infra-operator/apis v0.3.1-0.20240525122647-715f01bb2987
-	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240529115306-9068d1417ae9
-	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240529115306-9068d1417ae9
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240529115306-9068d1417ae9
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240529115306-9068d1417ae9
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240529115306-9068d1417ae9
-	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240529115838-0dfe70b6ee71
+	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.3.1-0.20240531085522-94fdcd5ff4fd
+	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.0.0-20240531085522-94fdcd5ff4fd
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240531085522-94fdcd5ff4fd
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240531085522-94fdcd5ff4fd
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.3.1-0.20240531085522-94fdcd5ff4fd
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.3.1-0.20240529220511-7cd4595fa2d7
 	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20240523005930-c332745390c8
-	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240530055332-aa91068ef71b
+	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240531084739-3b4c0451297c
 	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.28.10
@@ -66,21 +66,21 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
 	github.com/openstack-k8s-operators/barbican-operator/api v0.0.0-20240523081006-98dc23995369 // indirect
-	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240529131825-658ff9a9898e // indirect
+	github.com/openstack-k8s-operators/cinder-operator/api v0.3.1-0.20240529155246-4afc791bbb82 // indirect
 	github.com/openstack-k8s-operators/designate-operator/api v0.0.0-20240528100324-b8f58a72095b // indirect
-	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240528101956-6a01af17e955 // indirect
-	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240527082737-8ffa5de7845b // indirect
+	github.com/openstack-k8s-operators/glance-operator/api v0.3.1-0.20240530175444-19097a5a8658 // indirect
+	github.com/openstack-k8s-operators/heat-operator/api v0.3.1-0.20240529151706-47eb021b7876 // indirect
 	github.com/openstack-k8s-operators/horizon-operator/api v0.3.1-0.20240515093015-9d2609bb0015 // indirect
 	github.com/openstack-k8s-operators/ironic-operator/api v0.3.1-0.20240523093522-7a25580a799d // indirect
 	github.com/openstack-k8s-operators/keystone-operator/api v0.3.1-0.20240525111221-1e3ee314289c // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240529115306-9068d1417ae9 // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.3.1-0.20240531085522-94fdcd5ff4fd // indirect
 	github.com/openstack-k8s-operators/manila-operator/api v0.3.1-0.20240528082305-04b02cfe0c97 // indirect
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.3.1-0.20240514152407-b2bea62f05db // indirect
-	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240527091417-039b9d0f1704 // indirect
-	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240528143046-3f20f39561e1 // indirect
-	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240523092718-22ea0a3c5100 // indirect
-	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240528144729-0bb142a7d5cd // indirect
-	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240527110305-6cee824d1cd4 // indirect
+	github.com/openstack-k8s-operators/neutron-operator/api v0.3.1-0.20240531054845-7fa2b6b39520 // indirect
+	github.com/openstack-k8s-operators/nova-operator/api v0.3.1-0.20240530073125-ab95f150cbec // indirect
+	github.com/openstack-k8s-operators/octavia-operator/api v0.3.1-0.20240530121452-c1107b888dd4 // indirect
+	github.com/openstack-k8s-operators/ovn-operator/api v0.3.1-0.20240531062432-734161acf81e // indirect
+	github.com/openstack-k8s-operators/placement-operator/api v0.3.1-0.20240529171513-a5b0bf43b21f // indirect
 	github.com/openstack-k8s-operators/swift-operator/api v0.3.1-0.20240523121736-379011b2cfac // indirect
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.3.1-0.20240529090522-c780bd90b147 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
