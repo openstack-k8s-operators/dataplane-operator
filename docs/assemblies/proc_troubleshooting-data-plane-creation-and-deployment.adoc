@@ -34,10 +34,10 @@ The following example output shows all services and their job condition for all 
 $ oc get openstackansibleee
 
 NAME                             NETWORKATTACHMENTS   STATUS   MESSAGE
-bootstrap-openstack-edpm         ["ctlplane"]         True     AnsibleExecutionJob complete
-download-cache-openstack-edpm    ["ctlplane"]         False    AnsibleExecutionJob is running
-repo-setup-openstack-edpm        ["ctlplane"]         True     AnsibleExecutionJob complete
-validate-network-another-osdpd   ["ctlplane"]         False    AnsibleExecutionJob is running
+bootstrap-openstack-edpm         ["ctlplane"]         True     Job completed
+download-cache-openstack-edpm    ["ctlplane"]         False    Job in progress
+repo-setup-openstack-edpm        ["ctlplane"]         True     Job completed
+validate-network-another-osdpd   ["ctlplane"]         False    Job in progress
 ----
 
 . Filter for the name and service for a specific deployment:
@@ -54,20 +54,19 @@ The following example filters the list to only show services and their job condi
 $ oc get openstackansibleee -l openstackdataplanedeployment=openstack-edpm-ipam1
 
 NAME                            NETWORKATTACHMENTS   STATUS   MESSAGE
-bootstrap-openstack-edpm        ["ctlplane"]         True     AnsibleExecutionJob complete
-download-cache-openstack-edpm   ["ctlplane"]         False    AnsibleExecutionJob is running
-repo-setup-openstack-edpm       ["ctlplane"]         True     AnsibleExecutionJob complete
+bootstrap-openstack-edpm        ["ctlplane"]         True     Job completed
+download-cache-openstack-edpm   ["ctlplane"]         False    Job in progress
+repo-setup-openstack-edpm       ["ctlplane"]         True     Job completed
 ----
 
 .Job Condition Messages
 
 AnsibleEE jobs have an associated condition message that indicates the current state of the service job. This condition message is displayed in the `MESSAGE` field of the `oc get openstackansibleee` command output. Jobs return one of the following conditions when queried:
 
-* `AnsibleExecutionJob not started`: The job has not started.
-* `AnsibleExecutionJob not found`: The job could not be found.
-* `AnsibleExecutionJob is running`: The job is currently running.
-* `AnsibleExecutionJob complete`: The job execution is complete.
-* `AnsibleExecutionJob error occured <error_message>`: The job execution stopped unexpectedly. The `<error_message>` is replaced with a specific error message.
+* `Job not started`: The job has not started.
+* `Job in progress`: The job is currently running.
+* `Job completed`: The job execution is complete.
+* `Job error occured <error_message>`: The job execution stopped unexpectedly. The `<error_message>` is replaced with a specific error message.
 
 To further investigate a service displaying a particular job condition message, use the command `oc logs job/<service>` to display the logs associated with that service. For example, to display the logs for the `repo-setup-openstack-edpm` service, use the command `oc logs job/repo-setup-openstack-edpm`.
 

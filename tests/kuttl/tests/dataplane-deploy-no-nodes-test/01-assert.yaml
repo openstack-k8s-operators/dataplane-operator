@@ -103,10 +103,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
@@ -155,10 +155,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
@@ -206,10 +206,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
@@ -256,10 +256,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
@@ -306,10 +306,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
@@ -357,10 +357,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
@@ -407,10 +407,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
@@ -457,10 +457,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
@@ -519,10 +519,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
@@ -610,10 +610,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
@@ -672,10 +672,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
@@ -734,10 +734,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
@@ -796,10 +796,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
@@ -859,10 +859,10 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
@@ -945,7 +945,7 @@ status:
     reason: Ready
     status: "True"
     type: Ready
-  - message: AnsibleExecutionJob complete
+  - message: Job completed
     reason: Ready
     status: "True"
-    type: AnsibleExecutionJobReady
+    type: JobReady
