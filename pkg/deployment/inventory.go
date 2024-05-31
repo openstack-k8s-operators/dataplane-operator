@@ -172,6 +172,14 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 		"inventory": string(invData),
 	}
 	secretName := fmt.Sprintf("dataplanenodeset-%s", instance.Name)
+	labels := map[string]string{
+		"openstack.org/operator-name": "dataplane",
+		"openstackdataplanenodeset":   instance.Name,
+		"inventory":                   "true",
+	}
+	for key, val := range instance.ObjectMeta.Labels {
+		labels[key] = val
+	}
 	template := []utils.Template{
 		// Secret
 		{
@@ -180,7 +188,7 @@ func GenerateNodeSetInventory(ctx context.Context, helper *helper.Helper,
 			Type:         utils.TemplateTypeNone,
 			InstanceType: instance.Kind,
 			CustomData:   secretData,
-			Labels:       instance.ObjectMeta.Labels,
+			Labels:       labels,
 		},
 	}
 	err = secret.EnsureSecrets(ctx, helper, instance, template, nil)
