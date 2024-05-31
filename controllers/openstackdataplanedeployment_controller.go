@@ -214,14 +214,12 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 						condition.SeverityError,
 						dataplanev1.ServiceErrorMessage,
 						err.Error())
-					if len(instance.Spec.ServicesOverride) == 0 {
-						nsConditions.MarkFalse(
-							dataplanev1.NodeSetDeploymentReadyCondition,
-							condition.ErrorReason,
-							condition.SeverityError,
-							dataplanev1.ServiceErrorMessage,
-							err.Error())
-					}
+					nsConditions.MarkFalse(
+						dataplanev1.NodeSetDeploymentReadyCondition,
+						condition.ErrorReason,
+						condition.SeverityError,
+						dataplanev1.ServiceErrorMessage,
+						err.Error())
 					return ctrl.Result{}, err
 				}
 				if service.Spec.TLSCert != nil {
@@ -234,14 +232,12 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 							condition.SeverityError,
 							condition.TLSInputErrorMessage,
 							err.Error())
-						if len(instance.Spec.ServicesOverride) == 0 {
-							nsConditions.MarkFalse(
-								dataplanev1.NodeSetDeploymentReadyCondition,
-								condition.ErrorReason,
-								condition.SeverityError,
-								condition.TLSInputErrorMessage,
-								err.Error())
-						}
+						nsConditions.MarkFalse(
+							dataplanev1.NodeSetDeploymentReadyCondition,
+							condition.ErrorReason,
+							condition.SeverityError,
+							condition.TLSInputErrorMessage,
+							err.Error())
 						return ctrl.Result{}, err
 					} else if (*result != ctrl.Result{}) {
 						return *result, nil // requeue here
@@ -253,10 +249,11 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 
 	// All nodeSets successfully fetched.
 	// Mark InputReadyCondition=True
-	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.ReadyMessage)
+	instance.Status.Conditions.MarkTrue(condition.InputReadyCondition, condition.InputReadyMessage)
 	shouldRequeue := false
 	haveError := false
 	deploymentErrMsg := ""
+	backoffLimitReached := false
 
 	globalInventorySecrets := map[string]string{}
 	globalSSHKeySecrets := map[string]string{}
@@ -347,12 +344,9 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			} else {
 				deploymentErrMsg = fmt.Sprintf("%s & %s", deploymentErrMsg, errMsg)
 			}
-			nsConditions.MarkFalse(
-				dataplanev1.NodeSetDeploymentReadyCondition,
-				condition.ErrorReason,
-				condition.SeverityError,
-				condition.DeploymentReadyErrorMessage,
-				err.Error())
+			nsConditions.Set(nsConditions.Mirror(dataplanev1.NodeSetDeploymentReadyCondition))
+			errorReason := nsConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition).Reason
+			backoffLimitReached = errorReason == condition.JobReasonBackoffLimitExceeded
 		}
 
 		if deployResult != nil {
@@ -367,10 +361,17 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	}
 
 	if haveError {
+		var reason condition.Reason
+		reason = condition.ErrorReason
+		severity := condition.SeverityWarning
+		if backoffLimitReached {
+			reason = condition.JobReasonBackoffLimitExceeded
+			severity = condition.SeverityError
+		}
 		instance.Status.Conditions.MarkFalse(
 			condition.DeploymentReadyCondition,
-			condition.ErrorReason,
-			condition.SeverityError,
+			reason,
+			severity,
 			condition.DeploymentReadyErrorMessage,
 			deploymentErrMsg)
 		return ctrl.Result{}, fmt.Errorf(deploymentErrMsg)

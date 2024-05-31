@@ -99,11 +99,11 @@ const (
 	NodeSetDeploymentErrorMessage = "Deployment error occurred %s for NodeSet"
 
 	// NodeSetServiceDeploymentReadyMessage ready
-	NodeSetServiceDeploymentReadyMessage = "%s Deployment ready"
+	NodeSetServiceDeploymentReadyMessage = "Deployment ready for %s service"
 
 	// NodeSetServiceDeploymentReadyWaitingMessage not yet ready
-	NodeSetServiceDeploymentReadyWaitingMessage = "%s Deployment not yet ready"
+	NodeSetServiceDeploymentReadyWaitingMessage = "Deployment not yet ready for %s service"
 
 	// NodeSetServiceDeploymentErrorMessage error
-	NodeSetServiceDeploymentErrorMessage = "%s Deployment error occurred"
+	NodeSetServiceDeploymentErrorMessage = "Deployment error occurred in %s service"
 )

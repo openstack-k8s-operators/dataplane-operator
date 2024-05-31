@@ -70,16 +70,26 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 	copy(aeeSpecMounts, d.AeeSpec.ExtraMounts)
 	// Deploy the composable services
 	for _, service := range services {
-		log.Info("Deploying service", "service", service)
-		foundService, err := GetService(d.Ctx, d.Helper, service)
-		if err != nil {
-			return &ctrl.Result{}, err
-		}
-		deployName = foundService.Name
+		deployName = service
 		readyCondition = condition.Type(fmt.Sprintf("Service%sDeploymentReady", strcase.ToCamel(service)))
 		readyWaitingMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyWaitingMessage, deployName)
 		readyMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentReadyMessage, deployName)
-		readyErrorMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentErrorMessage, deployName)
+		readyErrorMessage = fmt.Sprintf(dataplanev1.NodeSetServiceDeploymentErrorMessage, deployName) + " error %s"
+
+		nsConditions := d.Status.NodeSetConditions[d.NodeSet.Name]
+		log.Info("Deploying service", "service", service)
+		foundService, err := GetService(d.Ctx, d.Helper, service)
+		if err != nil {
+			nsConditions.Set(condition.FalseCondition(
+				readyCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				readyErrorMessage,
+				err.Error()))
+			d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
+			return &ctrl.Result{}, err
+		}
+
 		containerImages := dataplaneutil.GetContainerImages(d.Version)
 		if containerImages.AnsibleeeImage != nil {
 			d.AeeSpec.OpenStackAnsibleEERunnerImage = *containerImages.AnsibleeeImage
@@ -94,6 +104,13 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 		copy(d.AeeSpec.ExtraMounts, aeeSpecMounts)
 		d.AeeSpec, err = d.addServiceExtraMounts(foundService)
 		if err != nil {
+			nsConditions.Set(condition.FalseCondition(
+				readyCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				readyErrorMessage,
+				err.Error()))
+			d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
 			return &ctrl.Result{}, err
 		}
 
@@ -103,6 +120,13 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 				d.AeeSpec, err = d.addCertMounts(services)
 			}
 			if err != nil {
+				nsConditions.Set(condition.FalseCondition(
+					readyCondition,
+					condition.ErrorReason,
+					condition.SeverityError,
+					readyErrorMessage,
+					err.Error()))
+				d.Status.NodeSetConditions[d.NodeSet.Name] = nsConditions
 				return &ctrl.Result{}, err
 			}
 		}
@@ -116,7 +140,7 @@ func (d *Deployer) Deploy(services []string) (*ctrl.Result, error) {
 			foundService,
 		)
 
-		nsConditions := d.Status.NodeSetConditions[d.NodeSet.Name]
+		nsConditions = d.Status.NodeSetConditions[d.NodeSet.Name]
 		if err != nil || !nsConditions.IsTrue(readyCondition) {
 			log.Info(fmt.Sprintf("Condition %s not ready", readyCondition))
 			return &ctrl.Result{}, err
