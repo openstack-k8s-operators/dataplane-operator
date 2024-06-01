@@ -14,7 +14,7 @@ require (
 
 require (
 	github.com/cert-manager/cert-manager v1.13.6
-	github.com/go-playground/validator/v10 v10.20.0
+	github.com/go-playground/validator/v10 v10.21.0
 	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20240531084739-3b4c0451297c
 	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8
 )
