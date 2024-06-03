@@ -7,7 +7,7 @@ replace github.com/openstack-k8s-operators/dataplane-operator/api => ./api
 require (
 	github.com/cert-manager/cert-manager v1.13.6
 	github.com/go-logr/logr v1.4.2
-	github.com/go-playground/validator/v10 v10.20.0
+	github.com/go-playground/validator/v10 v10.21.0
 	github.com/google/uuid v1.6.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
