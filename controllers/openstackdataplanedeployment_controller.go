@@ -384,6 +384,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 
 	Log.Info("Set DeploymentReadyCondition true")
 	instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition, condition.DeploymentReadyMessage)
+	Log.Info("Set Status.Deployed to true", "instance", instance)
 	instance.Status.Deployed = true
 	if version != nil {
 		instance.Status.DeployedVersion = version.Spec.TargetVersion
@@ -392,7 +393,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 	if err != nil {
 		Log.Error(err, "Error setting service hashes")
 	}
-	Log.Info("Set status deploy true", "instance", instance)
 	return ctrl.Result{}, nil
 }
 
