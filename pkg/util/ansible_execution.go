@@ -133,7 +133,15 @@ func AnsibleExecution(
 			ansibleEE.Spec.ExtraVars["edpm_services_override"] = json.RawMessage([]byte(fmt.Sprintf("\"%s\"", deployment.Spec.ServicesOverride)))
 		}
 
-		for sshKeyNodeName, sshKeySecret := range sshKeySecrets {
+		// Sort keys of the ssh secret map
+		sshKeys := make([]string, 0)
+		for k := range sshKeySecrets {
+			sshKeys = append(sshKeys, k)
+		}
+		sort.Strings(sshKeys)
+
+		for _, sshKeyNodeName := range sshKeys {
+			sshKeySecret := sshKeySecrets[sshKeyNodeName]
 			if service.Spec.DeployOnAllNodeSets {
 				sshKeyName = fmt.Sprintf("ssh-key-%s", sshKeyNodeName)
 				sshKeyMountSubPath = fmt.Sprintf("ssh_key_%s", sshKeyNodeName)
