@@ -158,7 +158,10 @@ PROCS?=$(shell expr $(shell nproc --ignore 2) / 2)
 PROC_CMD = --procs ${PROCS}
 
 .PHONY: test
-test: manifests generate fmt vet envtest ginkgo ## Run tests.
+test: manifests generate fmt vet envtest ginkgo ginkgo-run ## Run ginkgo tests with dependencies.
+
+.PHONY: ginkgo-run
+ginkgo-run: ## Run ginkgo.
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" $(GINKGO) --trace --cover --coverpkg=../../pkg/...,../../controllers,../../api/v1beta1 --coverprofile cover.out --covermode=atomic ${PROC_CMD} $(GINKGO_ARGS) ./tests/...
 
 .PHONY: test-all
