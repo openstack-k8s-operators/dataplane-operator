@@ -177,6 +177,59 @@ var _ = Describe("Dataplane NodeSet Test", func() {
 		})
 	})
 
+	When("A Dataplane nodeset is created and more than one dnsmasq", func() {
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance,
+				CreateNetConfig(dataplaneNetConfigName, DefaultNetConfigSpec()))
+			firstDNSMasqName := types.NamespacedName{
+				Name:      "first-dnsmasq",
+				Namespace: namespace,
+			}
+			DeferCleanup(th.DeleteInstance,
+				CreateDNSMasq(firstDNSMasqName, DefaultDNSMasqSpec()))
+			secondDNSMasqName := types.NamespacedName{
+				Name:      "second-dnsmasq",
+				Namespace: namespace,
+			}
+			DeferCleanup(th.DeleteInstance,
+				CreateDNSMasq(secondDNSMasqName, DefaultDNSMasqSpec()))
+			DeferCleanup(th.DeleteInstance,
+				CreateDataplaneNodeSet(dataplaneNodeSetName,
+					DefaultDataPlaneNoNodeSetSpec(false)))
+			SimulateIPSetComplete(dataplaneNodeName)
+		})
+		It("should have multiple dnsdata error message and unknown Conditions initialized", func() {
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.ReadyCondition,
+				corev1.ConditionFalse,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				condition.InputReadyCondition,
+				corev1.ConditionUnknown,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				dataplanev1.NodeSetIPReservationReadyCondition,
+				corev1.ConditionTrue,
+			)
+			th.ExpectCondition(
+				dataplaneNodeSetName,
+				ConditionGetterFunc(DataplaneConditionGetter),
+				dataplanev1.NodeSetDNSDataReadyCondition,
+				corev1.ConditionFalse,
+			)
+			conditions := DataplaneConditionGetter(dataplaneNodeSetName)
+			message := &conditions.Get(dataplanev1.NodeSetDNSDataReadyCondition).Message
+			Expect(*message).Should(Equal(dataplanev1.NodeSetDNSDataMultipleDNSMasqErrorMessage))
+
+		})
+	})
+
 	When("TLS is enabled", func() {
 		tlsEnabled := true
 		When("A Dataplane resource is created with PreProvisioned nodes, no deployment", func() {

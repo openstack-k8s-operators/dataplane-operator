@@ -18,6 +18,7 @@ package deployment
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -59,6 +60,11 @@ func checkDNSService(ctx context.Context, helper *helper.Helper,
 	err := helper.GetClient().List(ctx, dnsmasqList, listOpts...)
 	if err != nil {
 		util.LogErrorForObject(helper, err, "Error listing dnsmasqs", instance)
+		return err
+	}
+	if len(dnsmasqList.Items) > 1 {
+		util.LogForObject(helper, "Only one DNS control plane service can exist", instance)
+		err = errors.New(dataplanev1.NodeSetDNSDataMultipleDNSMasqErrorMessage)
 		return err
 	}
 	if len(dnsmasqList.Items) == 0 {
@@ -163,7 +169,7 @@ func EnsureDNSData(ctx context.Context, helper *helper.Helper,
 		instance.Status.Conditions.MarkFalse(
 			dataplanev1.NodeSetDNSDataReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
-			dataplanev1.NodeSetDNSDataReadyErrorMessage)
+			err.Error())
 		return dnsDetails, err
 	}
 	if dnsDetails.ClusterAddresses == nil {
