@@ -10,7 +10,7 @@
 
 * <<ansibleeespec,AnsibleEESpec>>
 * <<ansibleopts,AnsibleOpts>>
-* <<ansiblevarsfromsource,AnsibleVarsFromSource>>
+* <<datasource,DataSource>>
 * <<nodesection,NodeSection>>
 * <<nodetemplate,NodeTemplate>>
 * <<openstackdataplaneservicelist,OpenStackDataPlaneServiceList>>
@@ -110,7 +110,7 @@ AnsibleOpts defines a logical grouping of Ansible related configuration options.
 
 | ansibleVarsFrom
 | AnsibleVarsFrom is a list of sources to populate ansible variables from. Values defined by an AnsibleVars with a duplicate key take precedence.
-| []<<ansiblevarsfromsource,AnsibleVarsFromSource>>
+| []<<datasource,DataSource>>
 | false
 
 | ansiblePort
@@ -121,10 +121,10 @@ AnsibleOpts defines a logical grouping of Ansible related configuration options.
 
 <<custom-resources,Back to Custom Resources>>
 
-[#ansiblevarsfromsource]
-==== AnsibleVarsFromSource
+[#datasource]
+==== DataSource
 
-AnsibleVarsFromSource represents the source of a set of ConfigMaps/Secrets
+DataSource represents the source of a set of ConfigMaps/Secrets
 
 |===
 | Field | Description | Scheme | Required
@@ -307,6 +307,11 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | secrets
 | Secrets list of Secret names to mount as ExtraMounts for the OpenStackAnsibleEE
 | []string
+| false
+
+| datasources
+| DataSources list of DataSource objects to mount as ExtraMounts for the OpenStackAnsibleEE
+| []<<datasource,DataSource>>
 | false
 
 | tlsCert
