@@ -68,7 +68,7 @@ spec:
 
 . Optional: Designate and configure a node set for a Compute feature or workload. For more information, see xref:proc_configuring-a-node-set-for-a-Compute-feature-or-workload_dataplane[Configuring a node set for a Compute feature or workload].
 
-. Optional: Specify `Secret` resources to use to pass secrets into the `OpenStackAnsibleEE` job. Secrets are specified with a `name` and `required` field. When `required` is false, the service deployment will not fail if the secret doesn't exist.
+. Optional: Specify <<datasource>> resources to use to pass `ConfigMaps` or `Secrets` into the `OpenStackAnsibleEE` job. When the `optional` field is true on a <<datasource>> `configMapRef` or `secretRef`, the resource is optional, and an error won't occur when it doesn't exist.
 +
 ----
 apiVersion: dataplane.openstack.org/v1beta1
@@ -79,14 +79,18 @@ spec:
   ...
   play: |
     ...
-  secrets:
-    - name: hello-world-secret-0
-      required: true
-    - name: hello-world-secret-1
-      required: false
+  dataSources:
+	- configMapRef:
+		name: hello-world-cm-0
+    - secretRef:
+	    name: hello-world-secret-0
+    - secretRef:
+        name: hello-world-secret-1
+		# This secret is optional, it does not need to exist.
+        optional: true
 ----
 +
-A mount is created for each `secret` in the `OpenStackAnsibleEE` pod with a filename that matches the `secret` value. The mounts are created under `/var/lib/openstack/configs/<service name>`.
+A mount is created for each `ConfigMap` and `Secret` in the `OpenStackAnsibleEE` pod with a filename that matches the resource value. The mounts are created under `/var/lib/openstack/configs/<service name>`.
 
 . Optional: It may be necessary to run some services on all nodesets at the same time. These services need to have their `deployOnAllNodeSets` field set to true.
 +
@@ -108,7 +112,7 @@ spec:
   deployOnAllNodeSets: true
 ----
 
-. Optional: Specify the `edpmServiceType` field for the service. Different custom services may use the same ansible content to manage the same EDPM service (such as `ovn` or `nova`). The `ConfigMaps`, `Secrets`, TLS certificates, and CA certificates need to be mounted at the same locations so they can be found by the ansible content even when using a custom service. `edpmServiceType` is used to create this association. The value is the name of the default service that uses the same ansible content as the custom service.
+. Optional: Specify the `edpmServiceType` field for the service. Different custom services may use the same ansible content to manage the same EDPM service (such as `ovn` or `nova`). The `DataSources`, TLS certificates, and CA certificates need to be mounted at the same locations so they can be found by the ansible content even when using a custom service. `edpmServiceType` is used to create this association. The value is the name of the default service that uses the same ansible content as the custom service.
 +
 For example, a custom service that uses the `edpm_ovn` ansible content from `edpm-ansible` would set `edpmServiceType` to `ovn`, which matches the default `ovn` service name provided by `dataplane-operator`.
 +
