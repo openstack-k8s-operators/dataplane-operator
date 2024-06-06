@@ -222,25 +222,27 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 						err.Error())
 					return ctrl.Result{}, err
 				}
-				if service.Spec.TLSCert != nil {
-					result, err := deployment.EnsureTLSCerts(ctx, helper, &nodeSet,
-						nodeSet.Status.AllHostnames, nodeSet.Status.AllIPs, service)
-					if err != nil {
-						instance.Status.Conditions.MarkFalse(
-							condition.InputReadyCondition,
-							condition.ErrorReason,
-							condition.SeverityError,
-							condition.TLSInputErrorMessage,
-							err.Error())
-						nsConditions.MarkFalse(
-							dataplanev1.NodeSetDeploymentReadyCondition,
-							condition.ErrorReason,
-							condition.SeverityError,
-							condition.TLSInputErrorMessage,
-							err.Error())
-						return ctrl.Result{}, err
-					} else if (*result != ctrl.Result{}) {
-						return *result, nil // requeue here
+				if service.Spec.TLSCerts != nil {
+					for certKey := range service.Spec.TLSCerts {
+						result, err := deployment.EnsureTLSCerts(ctx, helper, &nodeSet,
+							nodeSet.Status.AllHostnames, nodeSet.Status.AllIPs, service, certKey)
+						if err != nil {
+							instance.Status.Conditions.MarkFalse(
+								condition.InputReadyCondition,
+								condition.ErrorReason,
+								condition.SeverityError,
+								condition.TLSInputErrorMessage,
+								err.Error())
+							nsConditions.MarkFalse(
+								dataplanev1.NodeSetDeploymentReadyCondition,
+								condition.ErrorReason,
+								condition.SeverityError,
+								condition.TLSInputErrorMessage,
+								err.Error())
+							return ctrl.Result{}, err
+						} else if (*result != ctrl.Result{}) {
+							return *result, nil // requeue here
+						}
 					}
 				}
 			}

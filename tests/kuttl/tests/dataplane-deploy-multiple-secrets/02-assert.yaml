@@ -1,45 +1,48 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cert-generic-service1-edpm-compute-0
+  name: cert-generic-service1-default-edpm-compute-0
   annotations:
-    cert-manager.io/certificate-name: generic-service1-edpm-compute-0
+    cert-manager.io/certificate-name: generic-service1-default-edpm-compute-0
     cert-manager.io/issuer-group: cert-manager.io
     cert-manager.io/issuer-kind: Issuer
     cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-0
     osdp-service: generic-service1
+    osdp-service-cert-key: default
     osdpns: openstack-edpm-tls
 type: kubernetes.io/tls
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cert-generic-service1-edpm-compute-1
+  name: cert-generic-service1-default-edpm-compute-1
   annotations:
-    cert-manager.io/certificate-name: generic-service1-edpm-compute-1
+    cert-manager.io/certificate-name: generic-service1-default-edpm-compute-1
     cert-manager.io/issuer-group: cert-manager.io
     cert-manager.io/issuer-kind: Issuer
     cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-1
     osdp-service: generic-service1
+    osdp-service-cert-key: default
     osdpns: openstack-edpm-tls
 type: kubernetes.io/tls
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cert-generic-service1-edpm-compute-2
+  name: cert-generic-service1-default-edpm-compute-2
   annotations:
-    cert-manager.io/certificate-name: generic-service1-edpm-compute-2
+    cert-manager.io/certificate-name: generic-service1-default-edpm-compute-2
     cert-manager.io/issuer-group: cert-manager.io
     cert-manager.io/issuer-kind: Issuer
     cert-manager.io/issuer-name: rootca-internal
   labels:
     hostname: edpm-compute-2
     osdp-service: generic-service1
+    osdp-service-cert-key: default
     osdpns: openstack-edpm-tls
 type: kubernetes.io/tls
 ---
@@ -49,7 +52,7 @@ kind: TestAssert
 commands:
   - script: |
       template='{{index .metadata.annotations "cert-manager.io/alt-names" }}'
-      names=$(oc get secret cert-generic-service1-edpm-compute-0 -n openstack -o go-template="$template")
+      names=$(oc get secret cert-generic-service1-default-edpm-compute-0 -n openstack -o go-template="$template")
       echo $names > test123.data
       regex="(?=.*(edpm-compute-0\.internalapi\.example\.com))(?=.*(edpm-compute-0\.storage\.example\.com))(?=.*(edpm-compute-0\.tenant\.example\.com))(?=.*(edpm-compute-0\.ctlplane\.example\.com))"
       matches=$(grep -P "$regex" test123.data)
@@ -64,7 +67,7 @@ commands:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: openstack-edpm-tls-generic-service1-certs-0
+  name: openstack-edpm-tls-generic-service1-default-certs-0
   labels:
     numberOfSecrets: "3"
     secretNumber: "0"
@@ -77,7 +80,7 @@ type: Opaque
 apiVersion: v1
 kind: Secret
 metadata:
-  name: openstack-edpm-tls-generic-service1-certs-1
+  name: openstack-edpm-tls-generic-service1-default-certs-1
   labels:
     numberOfSecrets: "3"
     secretNumber: "1"
@@ -90,7 +93,7 @@ type: Opaque
 apiVersion: v1
 kind: Secret
 metadata:
-  name: openstack-edpm-tls-generic-service1-certs-2
+  name: openstack-edpm-tls-generic-service1-default-certs-2
   labels:
     numberOfSecrets: "3"
     secretNumber: "2"
@@ -115,18 +118,18 @@ spec:
   backoffLimit: 6
   extraMounts:
   - mounts:
-    - mountPath: /var/lib/openstack/certs/generic-service1
-      name: openstack-edpm-tls-generic-service1-certs-0
+    - mountPath: /var/lib/openstack/certs/generic-service1/default
+      name: openstack-edpm-tls-generic-service1-default-certs-0
     volumes:
-    - name: openstack-edpm-tls-generic-service1-certs-0
+    - name: openstack-edpm-tls-generic-service1-default-certs-0
       projected:
         sources:
         - secret:
-            name: openstack-edpm-tls-generic-service1-certs-0
+            name: openstack-edpm-tls-generic-service1-default-certs-0
         - secret:
-            name: openstack-edpm-tls-generic-service1-certs-1
+            name: openstack-edpm-tls-generic-service1-default-certs-1
         - secret:
-            name: openstack-edpm-tls-generic-service1-certs-2
+            name: openstack-edpm-tls-generic-service1-default-certs-2
   - mounts:
     - mountPath: /var/lib/openstack/cacerts/generic-service1
       name: generic-service1-combined-ca-bundle

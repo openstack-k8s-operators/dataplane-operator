@@ -314,9 +314,9 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | []<<datasource,DataSource>>
 | false
 
-| tlsCert
-| TLSCert tls certs to be generated
-| *<<openstackdataplaneservicecert,OpenstackDataPlaneServiceCert>>
+| tlsCerts
+| TLSCerts tls certs to be generated
+| map[string]<<openstackdataplaneservicecert,OpenstackDataPlaneServiceCert>>
 | false
 
 | play

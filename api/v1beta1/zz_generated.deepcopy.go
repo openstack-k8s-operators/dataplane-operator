@@ -681,10 +681,12 @@ func (in *OpenStackDataPlaneServiceSpec) DeepCopyInto(out *OpenStackDataPlaneSer
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
-	if in.TLSCert != nil {
-		in, out := &in.TLSCert, &out.TLSCert
-		*out = new(OpenstackDataPlaneServiceCert)
-		(*in).DeepCopyInto(*out)
+	if in.TLSCerts != nil {
+		in, out := &in.TLSCerts, &out.TLSCerts
+		*out = make(map[string]OpenstackDataPlaneServiceCert, len(*in))
+		for key, val := range *in {
+			(*out)[key] = *val.DeepCopy()
+		}
 	}
 	if in.ContainerImageFields != nil {
 		in, out := &in.ContainerImageFields, &out.ContainerImageFields

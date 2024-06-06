@@ -10,21 +10,21 @@ commands:
           exit 1
       fi
 
-      serial1=`oc get secret cert-custom-tls-dns-edpm-compute-0 -n openstack -o json|jq -r '.data."tls.crt"'|base64 -d |openssl x509 -noout -serial`
+      serial1=`oc get secret cert-custom-tls-dns-default-edpm-compute-0 -n openstack -o json|jq -r '.data."tls.crt"'|base64 -d |openssl x509 -noout -serial`
       echo "serial1:" $serial1
-      serial2=`oc debug $PNAME -n openstack  -- cat /var/lib/openstack/certs/custom-tls-dns/edpm-compute-0.ctlplane.example.com-tls.crt |openssl x509 -noout -serial`
+      serial2=`oc debug $PNAME -n openstack  -- cat /var/lib/openstack/certs/custom-tls-dns/default/edpm-compute-0.ctlplane.example.com-tls.crt |openssl x509 -noout -serial`
       echo "serial2:" $serial2
       if [ $serial1 != $serial2 ]; then
-          echo "serials for cert-custom-tls-dns-edpm-compute-0 not equal"
+          echo "serials for cert-custom-tls-dns-default-edpm-compute-0 not equal"
           exit 1
       fi
 
-      serial1=`oc get secret cert-tls-dns-ips-edpm-compute-0 -n openstack -o json|jq -r '.data."tls.crt"'|base64 -d |openssl x509 -noout -serial`
+      serial1=`oc get secret cert-tls-dns-ips-default-edpm-compute-0 -n openstack -o json|jq -r '.data."tls.crt"'|base64 -d |openssl x509 -noout -serial`
       echo "serial1:" $serial1
-      serial2=`oc debug $PNAME -n openstack -- cat /var/lib/openstack/certs/tls-dns-ips/edpm-compute-0.ctlplane.example.com-tls.crt |openssl x509 -noout -serial`
+      serial2=`oc debug $PNAME -n openstack -- cat /var/lib/openstack/certs/tls-dns-ips/default/edpm-compute-0.ctlplane.example.com-tls.crt |openssl x509 -noout -serial`
       echo "serial2:" $serial2
       if [ $serial1 != $serial2 ]; then
-          echo "serials for cert-tls-dns-ips-edpm-compute-0 not equal"
+          echo "serials for cert-tls-dns-ips-default-edpm-compute-0 not equal"
           exit 1
       fi
 

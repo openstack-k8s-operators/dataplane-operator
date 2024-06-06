@@ -81,6 +81,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 	allHostnames map[string]map[infranetworkv1.NetNameStr]string,
 	allIPs map[string]map[infranetworkv1.NetNameStr]string,
 	service dataplanev1.OpenStackDataPlaneService,
+	certKey string,
 ) (*ctrl.Result, error) {
 	certsData := map[string][]byte{}
 	secretMaxSize := instance.Spec.SecretMaxSize
@@ -103,53 +104,54 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		// For now we just add the hostname so we can select all the certs on one node
 		hostName := node.HostName
 		labels := map[string]string{
-			HostnameLabel: hostName,
-			ServiceLabel:  service.Name,
-			NodeSetLabel:  instance.Name,
+			HostnameLabel:   hostName,
+			ServiceLabel:    service.Name,
+			ServiceKeyLabel: certKey,
+			NodeSetLabel:    instance.Name,
 		}
-		certName = service.Name + "-" + hostName
+		certName = service.Name + "-" + certKey + "-" + hostName
 
 		dnsNames = allHostnames[hostName]
 		ipsMap = allIPs[hostName]
 
-		dnsNamesInCert := slices.Contains(service.Spec.TLSCert.Contents, DNSNamesStr)
-		ipValuesInCert := slices.Contains(service.Spec.TLSCert.Contents, IPValuesStr)
+		dnsNamesInCert := slices.Contains(service.Spec.TLSCerts[certKey].Contents, DNSNamesStr)
+		ipValuesInCert := slices.Contains(service.Spec.TLSCerts[certKey].Contents, IPValuesStr)
 
 		// Create the hosts and ips lists
 		if dnsNamesInCert {
-			if len(service.Spec.TLSCert.Networks) == 0 {
+			if len(service.Spec.TLSCerts[certKey].Networks) == 0 {
 				hosts = make([]string, 0, len(dnsNames))
 				for _, host := range dnsNames {
 					hosts = append(hosts, host)
 				}
 			} else {
-				hosts = make([]string, 0, len(service.Spec.TLSCert.Networks))
-				for _, network := range service.Spec.TLSCert.Networks {
+				hosts = make([]string, 0, len(service.Spec.TLSCerts[certKey].Networks))
+				for _, network := range service.Spec.TLSCerts[certKey].Networks {
 					certNetwork := strings.ToLower(string(network))
 					hosts = append(hosts, dnsNames[infranetworkv1.NetNameStr(certNetwork)])
 				}
 			}
 		}
 		if ipValuesInCert {
-			if len(service.Spec.TLSCert.Networks) == 0 {
+			if len(service.Spec.TLSCerts[certKey].Networks) == 0 {
 				ips = make([]string, 0, len(ipsMap))
 				for _, ip := range ipsMap {
 					ips = append(ips, ip)
 				}
 			} else {
-				ips = make([]string, 0, len(service.Spec.TLSCert.Networks))
-				for _, network := range service.Spec.TLSCert.Networks {
+				ips = make([]string, 0, len(service.Spec.TLSCerts[certKey].Networks))
+				for _, network := range service.Spec.TLSCerts[certKey].Networks {
 					certNetwork := strings.ToLower(string(network))
 					ips = append(ips, ipsMap[infranetworkv1.NetNameStr(certNetwork)])
 				}
 			}
 		}
 
-		if service.Spec.TLSCert.Issuer == "" {
+		if service.Spec.TLSCerts[certKey].Issuer == "" {
 			// by default, use the internal root CA
 			issuerLabelSelector = map[string]string{certmanager.RootCAIssuerInternalLabel: ""}
 		} else {
-			issuerLabelSelector = map[string]string{service.Spec.TLSCert.Issuer: ""}
+			issuerLabelSelector = map[string]string{service.Spec.TLSCerts[certKey].Issuer: ""}
 		}
 
 		issuer, err = certmanager.GetIssuerByLabels(ctx, helper, instance.Namespace, issuerLabelSelector)
@@ -169,7 +171,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		}
 
 		certSecret, result, err = GetTLSNodeCert(ctx, helper, instance, certName,
-			issuer, labels, baseName, hosts, ips, service.Spec.TLSCert.KeyUsages)
+			issuer, labels, baseName, hosts, ips, service.Spec.TLSCerts[certKey].KeyUsages)
 
 		// handle cert request errors
 		if (err != nil) || (result != ctrl.Result{}) {
@@ -196,7 +198,7 @@ func EnsureTLSCerts(ctx context.Context, helper *helper.Helper,
 		labels["secretNumber"] = strconv.Itoa(i)
 		serviceCertsSecret := &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      GetServiceCertsSecretName(instance, service.Name, i),
+				Name:      GetServiceCertsSecretName(instance, service.Name, certKey, i),
 				Namespace: instance.Namespace,
 				Labels:    labels,
 			},
@@ -276,8 +278,9 @@ func GetTLSNodeCert(ctx context.Context, helper *helper.Helper,
 // GetServiceCertsSecretName - return name of secret to be mounted in ansibleEE which contains
 // all the TLS certs that fit in a secret for the relevant service. The index variable is used
 // to make the secret name unique.
-// The convention we use here is "<nodeset.name>-<service>-certs-<index>", so for example,
-// openstack-epdm-nova-certs-0.
-func GetServiceCertsSecretName(instance *dataplanev1.OpenStackDataPlaneNodeSet, serviceName string, index int) string {
-	return fmt.Sprintf("%s-%s-certs-%s", instance.Name, serviceName, strconv.Itoa(index))
+// The convention we use here is "<nodeset.name>-<service>-<certkey>-certs-<index>", for example,
+// openstack-epdm-nova-default-certs-0.
+func GetServiceCertsSecretName(instance *dataplanev1.OpenStackDataPlaneNodeSet, serviceName string,
+	certKey string, index int) string {
+	return fmt.Sprintf("%s-%s-%s-certs-%s", instance.Name, serviceName, certKey, strconv.Itoa(index))
 }

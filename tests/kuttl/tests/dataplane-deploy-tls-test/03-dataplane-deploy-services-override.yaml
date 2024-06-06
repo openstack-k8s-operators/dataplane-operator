@@ -5,13 +5,14 @@ metadata:
   name: tls-dns-ips
 spec:
   caCerts: combined-ca-bundle
-  tlsCert:
-    contents:
-    - dnsnames
-    - ips
-    issuer: osp-rootca-issuer-internal
-    networks:
-    - ctlplane
+  tlsCerts:
+    default:
+      contents:
+      - dnsnames
+      - ips
+      issuer: osp-rootca-issuer-internal
+      networks:
+      - ctlplane
   play: |
     - hosts: localhost
       gather_facts: no
@@ -27,14 +28,15 @@ metadata:
   name: custom-tls-dns
 spec:
   caCerts: combined-ca-bundle
-  tlsCert:
-    contents:
-    - dnsnames
-    keyUsages:
-    - key encipherment
-    - digital signature
-    - server auth
-    - client auth
+  tlsCerts:
+    default:
+      contents:
+      - dnsnames
+      keyUsages:
+      - key encipherment
+      - digital signature
+      - server auth
+      - client auth
   play: |
     - hosts: localhost
       gather_facts: no

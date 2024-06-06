@@ -8,16 +8,17 @@ spec:
     # NOTE: this Secret needs to be created before deploying the data plane.
     # It should contain the libvirt sasl auth password using the key LibvirtPassword
     - libvirt-secret
-  tlsCert:
-    contents:
-      - dnsnames
-      - ips
-    networks:
-      - ctlplane
-    keyUsages:
-      - digital signature
-      - key encipherment
-      - server auth
-      - client auth
-    issuer: osp-rootca-issuer-libvirt
+  tlsCerts:
+    default:
+      contents:
+        - dnsnames
+        - ips
+      networks:
+        - ctlplane
+      keyUsages:
+        - digital signature
+        - key encipherment
+        - server auth
+        - client auth
+      issuer: osp-rootca-issuer-libvirt
   caCerts: combined-ca-bundle

@@ -70,9 +70,9 @@ type OpenStackDataPlaneServiceSpec struct {
 	// OpenStackAnsibleEE
 	DataSources []DataSource `json:"datasources,omitempty"`
 
-	// TLSCert tls certs to be generated
+	// TLSCerts tls certs to be generated
 	// +kubebuilder:validation:Optional
-	TLSCert *OpenstackDataPlaneServiceCert `json:"tlsCert,omitempty" yaml:"tlsCert,omitempty"`
+	TLSCerts map[string]OpenstackDataPlaneServiceCert `json:"tlsCerts,omitempty" yaml:"tlsCerts,omitempty"`
 
 	// Play is an inline playbook contents that ansible will run on execution.
 	Play string `json:"play,omitempty"`
