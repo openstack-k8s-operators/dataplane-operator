@@ -68,7 +68,7 @@ type OpenStackDataPlaneServiceSpec struct {
 
 	// DataSources list of DataSource objects to mount as ExtraMounts for the
 	// OpenStackAnsibleEE
-	DataSources []DataSource `json:"datasources,omitempty"`
+	DataSources []DataSource `json:"dataSources,omitempty"`
 
 	// TLSCerts tls certs to be generated
 	// +kubebuilder:validation:Optional

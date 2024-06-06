@@ -309,7 +309,7 @@ OpenStackDataPlaneServiceSpec defines the desired state of OpenStackDataPlaneSer
 | []string
 | false
 
-| datasources
+| dataSources
 | DataSources list of DataSource objects to mount as ExtraMounts for the OpenStackAnsibleEE
 | []<<datasource,DataSource>>
 | false

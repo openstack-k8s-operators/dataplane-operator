@@ -46,7 +46,7 @@ spec:
                 items:
                   type: string
                 type: array
-              datasources:
+              dataSources:
                 items:
                   properties:
                     configMapRef:
