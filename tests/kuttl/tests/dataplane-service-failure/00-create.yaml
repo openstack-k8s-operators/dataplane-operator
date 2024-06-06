@@ -3,7 +3,7 @@ kind: OpenStackDataPlaneService
 metadata:
   name: failed-service
 spec:
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: kuttl play

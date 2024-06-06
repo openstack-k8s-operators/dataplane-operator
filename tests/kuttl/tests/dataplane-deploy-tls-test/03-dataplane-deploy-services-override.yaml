@@ -13,7 +13,7 @@ spec:
       issuer: osp-rootca-issuer-internal
       networks:
       - ctlplane
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: kuttl play
@@ -37,7 +37,7 @@ spec:
       - digital signature
       - server auth
       - client auth
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: kuttl play
@@ -52,7 +52,7 @@ metadata:
   name: install-certs-ovrd
 spec:
   addCertMounts: True
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: kuttl play
