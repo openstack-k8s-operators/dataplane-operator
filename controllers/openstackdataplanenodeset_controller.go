@@ -327,8 +327,9 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 				},
 			},
 			RoleRef: rbacv1.RoleRef{
-				Kind: "ClusterRole",
-				Name: "registry-viewer",
+				APIGroup: "rbac.authorization.k8s.io",
+				Kind:     "ClusterRole",
+				Name:     "registry-viewer",
 			},
 		},
 		time.Duration(10),
