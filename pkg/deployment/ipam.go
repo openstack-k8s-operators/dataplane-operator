@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -91,7 +92,17 @@ func createOrPatchDNSData(ctx context.Context, helper *helper.Helper,
 	dnsDetails.AllIPs = map[string]map[infranetworkv1.NetNameStr]string{}
 
 	// Build DNSData CR
-	for _, node := range instance.Spec.Nodes {
+	// We need to sort the nodes here, else DNSData.Spec.Hosts would change
+	// For every reconcile and it could create reconcile loops.
+	nodes := instance.Spec.Nodes
+	sortedNodeNames := make([]string, 0)
+	for name := range instance.Spec.Nodes {
+		sortedNodeNames = append(sortedNodeNames, name)
+	}
+	sort.Strings(sortedNodeNames)
+
+	for _, nodeName := range sortedNodeNames {
+		node := nodes[nodeName]
 		var shortName string
 		nets := node.Networks
 		hostName := node.HostName
