@@ -10,7 +10,7 @@ Once OVN has been updated on the control plane and data plane, and the rest of t
 . Validate that the rest of the minor update has completed on the control plane.
 +
 ----
-$ oc wait openstackversion <openstack_ctlplane_name> --for=condition=OpenStackVersionMinorUpdateControlplane
+$ oc wait openstackversion <openstack_ctlplane_name> --for=condition=MinorUpdateControlplane
 ----
 +
 * Replace `<openstack_ctlplane_name>` with the name of the OpenStack control plane resource.

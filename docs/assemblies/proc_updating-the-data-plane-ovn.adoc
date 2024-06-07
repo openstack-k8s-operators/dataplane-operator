@@ -11,7 +11,7 @@ plane has been updated.
 . Validate that OVN has been updated on the control plane.
 +
 ----
-$ oc wait openstackversion <openstack_ctlplane_name> --for=condition=OpenStackVersionMinorUpdateOVNControlplane
+$ oc wait openstackversion <openstack_ctlplane_name> --for=condition=MinorUpdateOVNControlplane
 ----
 +
 * Replace `<openstack_ctlplane_name>` with the name of the OpenStack control plane resource.
