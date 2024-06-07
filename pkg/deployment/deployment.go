@@ -273,7 +273,14 @@ func (d *Deployer) addCertMounts(
 		}
 
 		if service.Spec.TLSCerts != nil {
-			for certKey := range service.Spec.TLSCerts {
+			// sort cert list to ensure mount list is consistent
+			certKeyList := make([]string, 0, len(service.Spec.TLSCerts))
+			for ckey := range service.Spec.TLSCerts {
+				certKeyList = append(certKeyList, ckey)
+			}
+			sort.Strings(certKeyList)
+
+			for _, certKey := range certKeyList {
 				log.Info("Mounting TLS cert for service", "service", svc)
 				volMounts := storage.VolMounts{}
 
