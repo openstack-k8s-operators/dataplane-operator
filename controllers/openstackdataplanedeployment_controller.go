@@ -335,6 +335,7 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 		}
 
 		nsConditions := instance.Status.NodeSetConditions[nodeSet.Name]
+		nsConditions.Set(nsConditions.Mirror(dataplanev1.NodeSetDeploymentReadyCondition))
 
 		if err != nil {
 			util.LogErrorForObject(helper, err, fmt.Sprintf("OpenStackDeployment error for NodeSet %s", nodeSet.Name), instance)
@@ -346,7 +347,6 @@ func (r *OpenStackDataPlaneDeploymentReconciler) Reconcile(ctx context.Context, 
 			} else {
 				deploymentErrMsg = fmt.Sprintf("%s & %s", deploymentErrMsg, errMsg)
 			}
-			nsConditions.Set(nsConditions.Mirror(dataplanev1.NodeSetDeploymentReadyCondition))
 			errorReason := nsConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition).Reason
 			backoffLimitReached = errorReason == condition.JobReasonBackoffLimitExceeded
 		}
