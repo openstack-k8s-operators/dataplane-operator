@@ -396,41 +396,32 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		Log.Error(err, "Unable to get deployed OpenStackDataPlaneDeployments.")
 		return ctrl.Result{}, err
 	}
-	deployErrMsg := ""
-	if isDeploymentFailed {
-		deployErrMsg = err.Error()
+
+	if !isDeploymentRunning && !isDeploymentFailed {
+		// Generate NodeSet Inventory
+		_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
+			allIPSets, dnsDetails.ServerAddresses, containerImages)
+		if err != nil {
+			errorMsg := fmt.Sprintf("Unable to generate inventory for %s", instance.Name)
+			util.LogErrorForObject(helper, err, errorMsg, instance)
+			instance.Status.Conditions.MarkFalse(
+				dataplanev1.SetupReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityError,
+				dataplanev1.DataPlaneNodeSetErrorMessage,
+				errorMsg)
+			return ctrl.Result{}, err
+		}
 	}
-
-	if isDeploymentRunning {
-		Log.Info("Deployment still running...", "instance", instance)
-		return ctrl.Result{}, nil
-
-	}
-
-	// Generate NodeSet Inventory
-	_, err = deployment.GenerateNodeSetInventory(ctx, helper, instance,
-		allIPSets, dnsDetails.ServerAddresses, containerImages)
-	if err != nil {
-		errorMsg := fmt.Sprintf("Unable to generate inventory for %s", instance.Name)
-		util.LogErrorForObject(helper, err, errorMsg, instance)
-		instance.Status.Conditions.MarkFalse(
-			dataplanev1.SetupReadyCondition,
-			condition.ErrorReason,
-			condition.SeverityError,
-			dataplanev1.DataPlaneNodeSetErrorMessage,
-			errorMsg)
-		return ctrl.Result{}, err
-	}
-
 	// all setup tasks complete, mark SetupReadyCondition True
 	instance.Status.Conditions.MarkTrue(dataplanev1.SetupReadyCondition, condition.ReadyMessage)
 
 	// Set DeploymentReadyCondition to False if it was unknown.
 	// Handles the case where the NodeSet is created, but not yet deployed.
 	if instance.Status.Conditions.IsUnknown(condition.DeploymentReadyCondition) {
-		Log.Info("Set DeploymentReadyCondition false")
+		Log.Info("Set NodeSet DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
-			condition.NotRequestedReason, condition.SeverityInfo,
+			condition.RequestedReason, condition.SeverityInfo,
 			condition.DeploymentReadyInitMessage)
 	}
 
@@ -439,23 +430,23 @@ func (r *OpenStackDataPlaneNodeSetReconciler) Reconcile(ctx context.Context, req
 		instance.Status.Conditions.MarkTrue(condition.DeploymentReadyCondition,
 			condition.DeploymentReadyMessage)
 	} else if isDeploymentRunning {
+		Log.Info("Deployment still running...", "instance", instance)
 		Log.Info("Set NodeSet DeploymentReadyCondition false")
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
 			condition.RequestedReason, condition.SeverityInfo,
 			condition.DeploymentReadyRunningMessage)
 	} else if isDeploymentFailed {
 		Log.Info("Set NodeSet DeploymentReadyCondition false")
+		deployErrorMsg := ""
+		if err != nil {
+			deployErrorMsg = err.Error()
+		}
 		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
 			condition.ErrorReason, condition.SeverityError,
 			condition.DeploymentReadyErrorMessage,
-			deployErrMsg)
-		err = fmt.Errorf(deployErrMsg)
-	} else {
-		Log.Info("Set NodeSet DeploymentReadyCondition false")
-		instance.Status.Conditions.MarkFalse(condition.DeploymentReadyCondition,
-			condition.RequestedReason, condition.SeverityInfo,
-			condition.DeploymentReadyInitMessage)
+			deployErrorMsg)
 	}
+
 	return ctrl.Result{}, err
 }
 
@@ -473,9 +464,9 @@ func checkDeployment(helper *helper.Helper,
 		return false, false, false, err
 	}
 
-	isDeploymentReady := false
-	isDeploymentRunning := false
-	isDeploymentFailed := false
+	var isDeploymentReady bool
+	var isDeploymentRunning bool
+	var isDeploymentFailed bool
 
 	// Sort deployments from oldest to newest by the LastTransitionTime of
 	// their DeploymentReadyCondition
@@ -496,9 +487,28 @@ func checkDeployment(helper *helper.Helper,
 		}
 		if slices.Contains(
 			deployment.Spec.NodeSets, instance.Name) {
+
+			// Reset the vars for every deployment
 			isDeploymentReady = false
-			if deployment.Status.Deployed {
+			isDeploymentRunning = false
+			deploymentConditions := deployment.Status.NodeSetConditions[instance.Name]
+			if instance.Status.DeploymentStatuses == nil {
+				instance.Status.DeploymentStatuses = make(map[string]condition.Conditions)
+			}
+			instance.Status.DeploymentStatuses[deployment.Name] = deploymentConditions
+			deploymentCondition := deploymentConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition)
+			if condition.IsError(deploymentCondition) {
+				msg := strings.Replace(deploymentCondition.Message, strings.Split(condition.DeploymentReadyErrorMessage, "%")[0], "", -1)
+				err = fmt.Errorf(msg)
+				isDeploymentFailed = true
+				break
+			} else if deploymentConditions.IsFalse(dataplanev1.NodeSetDeploymentReadyCondition) {
+				isDeploymentRunning = true
+			} else if deploymentConditions.IsTrue(dataplanev1.NodeSetDeploymentReadyCondition) {
 				isDeploymentReady = true
+			}
+
+			if isDeploymentReady {
 				for k, v := range deployment.Status.ConfigMapHashes {
 					instance.Status.ConfigMapHashes[k] = v
 				}
@@ -511,20 +521,7 @@ func checkDeployment(helper *helper.Helper,
 				instance.Status.DeployedConfigHash = deployment.Status.NodeSetHashes[instance.Name]
 				instance.Status.DeployedVersion = deployment.Status.DeployedVersion
 			}
-			deploymentConditions := deployment.Status.NodeSetConditions[instance.Name]
-			if instance.Status.DeploymentStatuses == nil {
-				instance.Status.DeploymentStatuses = make(map[string]condition.Conditions)
-			}
-			instance.Status.DeploymentStatuses[deployment.Name] = deploymentConditions
-			deploymentCondition := deploymentConditions.Get(dataplanev1.NodeSetDeploymentReadyCondition)
-			if condition.IsError(deploymentCondition) {
-				msg := strings.Replace(deploymentCondition.Message, strings.Split(condition.DeploymentReadyErrorMessage, "%")[0], "", -1)
-				err = fmt.Errorf(msg)
-				isDeploymentFailed = true
-			} else if deployment.Status.Conditions.IsFalse(condition.ReadyCondition) {
-				isDeploymentRunning = true
-				isDeploymentReady = false
-			}
+
 		}
 	}
 
