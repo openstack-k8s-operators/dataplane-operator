@@ -40,7 +40,7 @@ endif::[]
 ifeval::["{build}" == "downstream"]
   openStackAnsibleEERunnerImage: registry.redhat.io/rhosp-dev-preview/ee-openstack-ansible-ee-rhel9:0.1.3-5 <1>
 endif::[]
-  play: |
+  playbookContents: |
 ----
 +
 <1> Your container image that the `ansible-runner` execution environment uses to execute Ansible.

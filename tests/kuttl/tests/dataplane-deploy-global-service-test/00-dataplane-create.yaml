@@ -71,7 +71,7 @@ metadata:
   name: custom-global-service
 spec:
   label: custom-global-service
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: global kuttl play

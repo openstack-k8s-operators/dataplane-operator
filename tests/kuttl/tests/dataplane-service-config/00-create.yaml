@@ -39,7 +39,7 @@ kind: OpenStackDataPlaneService
 metadata:
   name: kuttl-service
 spec:
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: kuttl play

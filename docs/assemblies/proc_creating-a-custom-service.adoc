@@ -51,7 +51,7 @@ metadata:
   name: custom-service
 spec:
   label: dataplane-deployment-custom-service
-  play: |
+  playbookContents: |
     hosts: all
     tasks:
       - name: Hello World!
@@ -77,7 +77,7 @@ metadata:
   name: custom-service
 spec:
   ...
-  play: |
+  playbookContents: |
     ...
   secrets:
     - name: hello-world-secret-0
@@ -97,7 +97,7 @@ metadata:
   name: custom-global-service
 spec:
   label: custom-global-service
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: global play

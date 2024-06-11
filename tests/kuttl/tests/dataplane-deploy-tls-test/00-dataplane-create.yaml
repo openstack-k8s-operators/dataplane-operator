@@ -11,7 +11,7 @@ spec:
     second:
       contents:
       - ips
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: kuttl play
@@ -26,7 +26,7 @@ metadata:
   name: install-certs-ovrd
 spec:
   addCertMounts: True
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: kuttl play

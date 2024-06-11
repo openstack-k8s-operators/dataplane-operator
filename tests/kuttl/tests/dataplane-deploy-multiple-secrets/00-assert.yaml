@@ -8,7 +8,7 @@ spec:
     default:
       contents:
       - dnsnames
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: kuttl play
@@ -23,7 +23,7 @@ metadata:
   name: install-certs-ovr
 spec:
   addCertMounts: True
-  play: |
+  playbookContents: |
     - hosts: localhost
       gather_facts: no
       name: kuttl play
