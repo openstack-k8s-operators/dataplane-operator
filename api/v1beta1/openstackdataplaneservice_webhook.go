@@ -17,6 +17,9 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+
+	"golang.org/x/exp/slices"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -78,9 +81,15 @@ func (r *OpenStackDataPlaneService) ValidateCreate() (admission.Warnings, error)
 }
 
 func (r *OpenStackDataPlaneServiceSpec) ValidateCreate() field.ErrorList {
-	// TODO(user): fill in your validation logic upon object creation.
+	var errs field.ErrorList
 
-	return field.ErrorList{}
+	if r.TLSCerts != nil {
+		for _, v := range r.TLSCerts {
+			errs = append(errs, v.ValidateContents()...)
+		}
+	}
+
+	return errs
 }
 
 func (r *OpenStackDataPlaneService) ValidateUpdate(original runtime.Object) (admission.Warnings, error) {
@@ -99,9 +108,15 @@ func (r *OpenStackDataPlaneService) ValidateUpdate(original runtime.Object) (adm
 }
 
 func (r *OpenStackDataPlaneServiceSpec) ValidateUpdate() field.ErrorList {
-	// TODO(user): fill in your validation logic upon object creation.
+	var errs field.ErrorList
 
-	return field.ErrorList{}
+	if r.TLSCerts != nil {
+		for _, v := range r.TLSCerts {
+			errs = append(errs, v.ValidateContents()...)
+		}
+	}
+
+	return errs
 }
 
 func (r *OpenStackDataPlaneService) ValidateDelete() (admission.Warnings, error) {
@@ -124,4 +139,23 @@ func (r *OpenStackDataPlaneServiceSpec) ValidateDelete() field.ErrorList {
 	// TODO(user): fill in your validation logic upon object creation.
 
 	return field.ErrorList{}
+}
+
+func (r *OpenstackDataPlaneServiceCert) ValidateContents() field.ErrorList {
+
+	var errs field.ErrorList
+	// "dnsnames" and "ips" are only allowed usages
+	allowedContents := []string{
+		"dnsnames",
+		"ips",
+	}
+	for _, val := range r.Contents {
+
+		if !slices.Contains(allowedContents, val) {
+			errs = append(errs, field.Invalid(field.NewPath("spec.tlsCert.Contents"),
+				r.KeyUsages,
+				fmt.Sprintf("error validating contents of TLSCert, %s, only valid contents are %v ", val, allowedContents)))
+		}
+	}
+	return errs
 }

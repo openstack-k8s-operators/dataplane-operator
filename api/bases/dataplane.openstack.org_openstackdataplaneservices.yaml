@@ -96,6 +96,10 @@ spec:
                     issuer:
                       type: string
                     keyUsages:
+                      default:
+                      - key encipherment
+                      - digital signature
+                      - server auth
                       items:
                         enum:
                         - signing
